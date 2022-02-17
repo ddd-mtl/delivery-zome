@@ -1,11 +1,11 @@
 use hdk::prelude::*;
 
 use crate::{
-   MailMessage,
-   pub_enc_key::*,
-   utils::*,
+    MailMessage,
+    utils::*,
 };
 use crate::entries::{Mail, PendingMail};
+use crate::entries::pub_enc_key::*;
 
 
 /// Entry representing a received mail.

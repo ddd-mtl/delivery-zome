@@ -3,13 +3,13 @@ use hdk::prelude::element::ElementEntry;
 //use hdk::prelude::countersigning::CounterSigningSessionData;
 
 use crate::{
-   entry_kind::*,
-   file::*,
-   handle::*,
-   pub_enc_key::*,
-   utils::*,
+    entry_kind::*,
+    file::*,
+    handle::*,
+    utils::*,
 };
 use crate::entries::*;
+use crate::entries::pub_enc_key::*;
 
 
 /// Zome Callback

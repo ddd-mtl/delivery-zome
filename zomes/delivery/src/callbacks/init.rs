@@ -3,8 +3,9 @@ use hdk::prelude::*;
 use crate::{
    dm::*,
    path_kind,
-   pub_enc_key::*,
 };
+use crate::entries::pub_enc_key::*;
+
 
 #[hdk_extern]
 fn init_caps(_: ()) -> ExternResult<()> {

@@ -1,9 +1,11 @@
 use hdk::prelude::*;
 
 use crate::{
-    file::{FileManifest, dm::request_chunk_by_dm},
+    file::FileManifest,
     utils::*,
 };
+use crate::dm_file::request_chunk_by_dm;
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GetMissingChunksInput {

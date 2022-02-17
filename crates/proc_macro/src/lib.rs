@@ -71,7 +71,7 @@ pub fn zome_api(_metadata: TokenStream, item: TokenStream) -> TokenStream {
             let provenance = cell_ids[0].agent_pubkey().to_owned();
             let call_result = conductor.call_zome(holochain_conductor_api::ZomeCall {
                cell_id,
-               zome_name: crate::ZOME_NAME.into(),
+               zome_name: zome_info()?.name.into(),
                fn_name: fn_name.into(),
                payload,
                cap_secret: None,

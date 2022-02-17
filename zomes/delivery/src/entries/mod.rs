@@ -5,6 +5,10 @@ mod pending_ack;
 mod outack;
 mod manifest_confirmation;
 mod delivery_confirmation;
+pub mod manifest;
+pub mod chunk;
+pub mod pub_enc_key;
+
 
 use hdk::prelude::*;
 

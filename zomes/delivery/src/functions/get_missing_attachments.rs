@@ -1,10 +1,10 @@
 use hdk::prelude::*;
 
 use crate::{
-   file::dm::request_manifest_by_dm,
-   signal_protocol::*,
-   utils::*,
+    signal_protocol::*,
+    utils::*,
 };
+use crate::dm_file::request_manifest_by_dm;
 use crate::entries::InMail;
 
 

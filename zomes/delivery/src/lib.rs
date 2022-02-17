@@ -9,9 +9,10 @@ extern crate strum;
 extern crate strum_macros;
 #[macro_use] extern crate shrinkwraprs;
 
-
 #[macro_use]
 extern crate zome_proc_macro;
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod api_error;
@@ -29,16 +30,16 @@ pub mod signal_protocol;
 
 mod callbacks;
 
-pub mod handle;
-pub mod mail;
 pub mod file;
 
-pub mod pub_enc_key;
 pub mod entries;
 pub mod functions;
 mod receive;
 mod utils_parcel;
+pub(crate) mod dm_file;
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 pub use dm::*;
 pub use dm_protocol::*;

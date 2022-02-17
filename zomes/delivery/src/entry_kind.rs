@@ -9,10 +9,10 @@ use strum::EnumProperty;
 use crate::{
    file::*,
    handle::*,
-   pub_enc_key::*,
    utils::*,
 };
 use crate::entries::*;
+use crate::entries::pub_enc_key::*;
 
 /// !! Keep Order synced with EntryKind !!
 entry_defs![

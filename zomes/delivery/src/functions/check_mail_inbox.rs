@@ -1,12 +1,12 @@
 use hdk::prelude::*;
 
 use crate::{
-   file::dm::{request_chunk_by_dm, request_manifest_by_dm},
-   file::FileManifest,
-   link_kind::*,
-   signal_protocol::*,
-   utils::*,
+    file::FileManifest,
+    link_kind::*,
+    signal_protocol::*,
+    utils::*,
 };
+use crate::dm_file::{request_chunk_by_dm, request_manifest_by_dm};
 use crate::entries::{InMail, PendingMail};
 
 
