@@ -1,14 +1,41 @@
 # snapmail-rsm
 
-Holochain-rsm DNA for [SnapMail](https://github.com/glassbeadsoftware/snapmail-release) from [Glass Bead Software](http://www.glassbead.com/).
-To download and use it, go to [snapmail-release](https://github.com/glassbeadsoftware/snapmail-release) repo.
-
-Native application for Windows, Linux and MacOS is available [here](https://github.com/glassbeadsoftware/snapmail-release/releases).
+Holochain Zome for P2P custom data delivery service between agents.
 
 Some design documentation is available in the `/spec` folder.
 
 CI and NIX configs are not set up for the moment.
 
+
+## Design Goal
+
+Enable private sharing of custom data between P2P agents.
+Features:
+ - Sign and encrypt parcels
+ - Delivery Confirmation
+ - Send via DM
+ - Send via DHT
+ - Spliting / Chunking large parcels for delivery
+ - Failsafe and recovery (with post_commit())
+ - Acknowledgement system
+ - Define private Drop-Off points (cap-grants?)
+ - A default chunk entry is provided for arbitrary data
+
+Constraints:
+A sender can send any Entry to a list of recipients
+The Entry must be first committed to the sender's source chain.
+The Entry must implement a Parcel trait?
+The recipient has the option to refuse to retrieve Parcel.
+Parcel types can have the option to not be refusable (ex: acks, mails)
+
+
+Commit arbitrary entries to your source chain
+`send_entry(any_eh, [to])` to send a custom entry to a list of recipient. The entry will be analyzed
+`send_parcel(parce_eh)` to
+
+`un/set_drop_off_agent()` Announce publicly which are my allowed drop-off points
+`query_drop_off()` Ask drop-off agent if it has a parcel for me.
+`take_from_drop_off()` Request drop-off agent to hand over parcel.
 
 ## Building
 

@@ -1,0 +1,8 @@
+---
+manifest_version: "1"
+name: delivery-dna
+uuid: ~
+properties: ~
+zomes:
+  - name: delivery
+    bundled: ../target/wasm32-unknown-unknown/release/delivery.wasm

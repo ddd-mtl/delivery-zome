@@ -7,9 +7,9 @@ use quote::{quote, format_ident};
 
 /// Proc macro that generates an easy to use api function to use directly in rust out of
 /// a hdk_extern function.
-/// "snapmail_*" is prepended to the function name
+/// "zome_*" is prepended to the function name
 #[proc_macro_attribute]
-pub fn snapmail_api(_metadata: TokenStream, item: TokenStream) -> TokenStream {
+pub fn zome_api(_metadata: TokenStream, item: TokenStream) -> TokenStream {
    // -- Parse input and retrieve function signature
    let item_fn = syn::parse_macro_input!(item as syn::ItemFn);
    let external_fn_ident = item_fn.sig.ident.clone();
@@ -49,20 +49,8 @@ pub fn snapmail_api(_metadata: TokenStream, item: TokenStream) -> TokenStream {
    //println!("\n\n input.inner_type: \"{:?}\"\n\n", inner_type);
 
    // -- Output api function
-   let output_fn = format_ident!("snapmail_{}", external_fn_ident);
+   let output_fn = format_ident!("zome_{}", external_fn_ident);
    println!("Generated: {}()", output_fn);
-
-   // // Use snapmail! macro
-   // let output: TokenStream = (quote! {
-   //    #item_fn
-   //    use snapmail_api::api_error::*;
-   //    use snapmail_api::*;
-   //    use holochain::conductor::ConductorHandle;
-   //
-   //    pub fn #output_fn(conductor: ConductorHandle, arg: #input_type) -> SnapmailApiResult<#inner_type> {
-   //       snapmail!(conductor, #external_fn_ident, #inner_type, arg)
-   //    }
-   // }).into();
 
    // Output
    let output: TokenStream = (quote! {
@@ -90,8 +78,8 @@ pub fn snapmail_api(_metadata: TokenStream, item: TokenStream) -> TokenStream {
                provenance,
             })
             .await
-            .map_err(|e| crate::api_error::SnapmailApiError::ConductorApiError(e))?
-            .map_err(|e| crate::api_error::SnapmailApiError::RibosomeError(e))?;
+            .map_err(|e| holochain::conductor::api::error::ConductorApiError(e))?
+            .map_err(|e| holochain::core::ribosome::RibosomeError(e))?;
 
             // println!("  ZomeCall result = {:?}", call_result);
             // - Handle result
@@ -100,12 +88,12 @@ pub fn snapmail_api(_metadata: TokenStream, item: TokenStream) -> TokenStream {
                   let maybe_ret: #inner_type = io.decode().expect("Deserialization should never fail");
                   Ok(maybe_ret)
                },
-               ZomeCallResponse::Unauthorized(_, _, _, _) => Err(crate::api_error::SnapmailApiError::Unauthorized),
-               ZomeCallResponse::NetworkError(err) => Err(crate::api_error::SnapmailApiError::NetworkError(err)),
-               ZomeCallResponse::CountersigningSession(err) => Err(crate::api_error::SnapmailApiError::Unauthorized),
+               ZomeCallResponse::Unauthorized(_, _, _, _) => Err(holochain_zome_types::ZomeCallResponse::Unauthorized),
+               ZomeCallResponse::NetworkError(err) => Err(holochain_zome_types::ZomeCallResponse::NetworkError(err)),
+               ZomeCallResponse::CountersigningSession(err) => Err(holochain_zome_types::ZomeCallResponse::Unauthorized),
             };
             api_result
-         }, DEFAULT_TIMEOUT).map_err(|_e| crate::api_error::SnapmailApiError::Timeout)?;
+         }, DEFAULT_TIMEOUT).map_err(|_e| KitsuneTimeout)?;
          //println!(" block_on result = {:?}", result);
          result
       }
