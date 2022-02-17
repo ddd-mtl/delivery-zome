@@ -1,20 +1,21 @@
 use hdk::prelude::*;
 
 use crate::{
-    utils::*,
-    signal_protocol::*,
-    file::{FileChunk, FileManifest},
-    mail::{
-        self,
-        entries::{
-            InMail,
-            InMailState,
-            MailItem, MailState,
-        },
-    },
-    DirectMessageProtocol, MailMessage, AckMessage,
-    ReceivedAck, snapmail_now,
+   AckMessage,
+   DirectMessageProtocol,
+   file::{FileChunk, FileManifest},
+   mail::{
+      self,
+   },
+   MailMessage, ReceivedAck, signal_protocol::*,
+   snapmail_now, utils::*,
 };
+use crate::entries::{
+   InMail,
+   InMailState,
+   MailItem, MailState,
+};
+
 
 ///
 pub fn receive_dm(from: AgentPubKey, dm: DirectMessageProtocol) -> DirectMessageProtocol {

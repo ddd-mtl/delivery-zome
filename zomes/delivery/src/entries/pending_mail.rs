@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 
 use super::Mail;
-use crate::mail::entries::sign_mail;
+use crate::entries::sign_mail;
 use crate::{
    utils::*,
 };

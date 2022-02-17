@@ -3,12 +3,12 @@ use hdk::prelude::query::ChainQueryFilter;
 
 use crate::{
    entry_kind::*,
-   mail::entries::*,
-   utils::*,
-   mail::get_outmail_state,
-   mail::deliver_mail,
    file::get_manifest,
+   mail::deliver_mail,
+   mail::get_outmail_state,
+   utils::*,
 };
+use crate::entries::*;
 use crate::mail::get_inacks;
 
 

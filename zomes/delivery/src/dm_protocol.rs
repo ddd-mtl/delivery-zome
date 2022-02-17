@@ -1,9 +1,9 @@
 use hdk::prelude::*;
 
 use crate::{
-    mail::entries::Mail,
-    file::{FileChunk, FileManifest},
+   file::{FileChunk, FileManifest},
 };
+use crate::entries::Mail;
 
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, SerializedBytes)]

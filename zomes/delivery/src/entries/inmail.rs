@@ -1,11 +1,12 @@
 use hdk::prelude::*;
 
 use crate::{
-    MailMessage,
-    mail::entries::{Mail, PendingMail},
-    pub_enc_key::*,
-    utils::*,
+   MailMessage,
+   pub_enc_key::*,
+   utils::*,
 };
+use crate::entries::{Mail, PendingMail};
+
 
 /// Entry representing a received mail.
 #[hdk_entry(id = "inmail", visibility = "private")]

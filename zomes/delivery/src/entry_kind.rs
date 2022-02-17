@@ -7,12 +7,12 @@ use strum_macros::EnumIter;
 use strum::EnumProperty;
 
 use crate::{
-   handle::*,
-   mail::entries::*,
    file::*,
-   utils::*,
+   handle::*,
    pub_enc_key::*,
+   utils::*,
 };
+use crate::entries::*;
 
 /// !! Keep Order synced with EntryKind !!
 entry_defs![

@@ -2,9 +2,9 @@ use hdk::prelude::*;
 
 use crate::{
    //link_kind::*,
-   mail::entries::*,
    utils::*,
 };
+use crate::entries::*;
 use crate::mail::get_confirmations;
 
 

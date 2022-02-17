@@ -1,17 +1,17 @@
 use hdk::prelude::*;
 
 use crate::{
-    utils::*,
-    send_dm,
-    mail::entries::{PendingMail, Mail, OutMail, InMail, sign_mail},
-    dm_protocol::{
-        MailMessage, DirectMessageProtocol,
-    },
-    //mail::receive::*,
-    LinkKind,
-    file::{FileManifest, FileChunk, get_manifest},
+   dm_protocol::{
+      DirectMessageProtocol, MailMessage,
+   },
+   file::{FileChunk, FileManifest, get_manifest},
+   LinkKind,
+   //mail::receive::*,
+   send_dm,
+   utils::*,
 };
-use crate::mail::entries::DeliveryConfirmation;
+use crate::entries::{InMail, Mail, OutMail, PendingMail, sign_mail};
+use crate::entries::DeliveryConfirmation;
 
 
 #[allow(non_camel_case_types)]

@@ -1,11 +1,11 @@
 use hdk::prelude::*;
 
 use crate::{
-    link_kind::*,
     entry_kind::*,
-    mail::entries::*,
+    link_kind::*,
     utils::*,
 };
+use crate::entries::*;
 
 
 /// Get State of InMail

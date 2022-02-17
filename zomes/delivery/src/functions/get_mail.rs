@@ -1,11 +1,12 @@
 use hdk::prelude::*;
 
 use crate::{
-    utils::*,
-    mail::entries::{
-        InMail, OutMail,
-    },
+   utils::*,
 };
+use crate::entries::{
+   InMail, OutMail,
+};
+
 
 #[derive(Shrinkwrap, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GetMailOutput(pub Option<Result<InMail, OutMail>>);

@@ -1,14 +1,13 @@
 use hdk::prelude::*;
 
 use crate::{
-    mail::entries::PendingMail,
-    utils::*,
-    signal_protocol::*,
-    file::dm::{request_chunk_by_dm, request_manifest_by_dm},
-    link_kind::*,
-    mail::entries::InMail,
-    file::{FileManifest},
+   file::dm::{request_chunk_by_dm, request_manifest_by_dm},
+   file::FileManifest,
+   link_kind::*,
+   signal_protocol::*,
+   utils::*,
 };
+use crate::entries::{InMail, PendingMail};
 
 
 /// Zome Function

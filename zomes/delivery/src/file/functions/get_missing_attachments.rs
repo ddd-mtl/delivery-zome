@@ -1,11 +1,12 @@
 use hdk::prelude::*;
 
 use crate::{
-    mail::entries::InMail,
-    utils::*,
-    file::dm::request_manifest_by_dm,
-    signal_protocol::*,
+   file::dm::request_manifest_by_dm,
+   signal_protocol::*,
+   utils::*,
 };
+use crate::entries::InMail;
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GetMissingAttachmentsInput {

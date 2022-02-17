@@ -1,9 +1,11 @@
 use hdk::prelude::*;
 
 use crate::{
-    utils::*,
-    mail::{utils::get_confirmations, get_outacks, entries::InMail},
+   mail::get_outacks,
+   utils::*,
 };
+use crate::entries::InMail;
+use crate::utils_parcel::get_confirmations;
 
 
 /// Zome function

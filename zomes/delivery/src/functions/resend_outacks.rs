@@ -3,13 +3,13 @@ use hdk::prelude::query::ChainQueryFilter;
 
 use crate::{
    entry_kind::*,
-   mail::entries::*,
-   utils::*,
    mail::{
       get_delivery_state,
       send_committed_ack,
    },
+   utils::*,
 };
+use crate::entries::*;
 
 
 /// Zome Function

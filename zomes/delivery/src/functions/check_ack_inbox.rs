@@ -1,11 +1,12 @@
 use hdk::prelude::*;
 
 use crate::{
-    mail,
-    utils::*,
-    mail::entries::PendingAck,
-    link_kind::*,
+   link_kind::*,
+   mail,
+   utils::*,
 };
+use crate::entries::PendingAck;
+
 
 /// Zome Function
 /// Check for PendingAcks and convert to InAcks

@@ -3,8 +3,9 @@ use hdk::prelude::query::ChainQueryFilter;
 
 use crate::{
     entry_kind::*,
-    mail::utils::*,
 };
+use crate::utils_parcel::*;
+
 
 /// Zome Function
 /// Return list of all InMails that this agent did not acknowledge.

@@ -1,18 +1,17 @@
 use hdk::prelude::*;
 
 use crate::{
+    dm_protocol::{AckMessage, DirectMessageProtocol},
     link_kind::*,
-    dm_protocol::{DirectMessageProtocol, AckMessage},
-    mail::{
-        entries::{
-            InMail, PendingAck, OutAck, DeliveryConfirmation,
-        },
-        utils::*,
-        receive::receive_dm_ack,
-    },
     send_dm,
     utils::*,
 };
+use crate::entries::{
+    DeliveryConfirmation, InMail, OutAck, PendingAck,
+};
+use crate::receive::receive_dm_ack;
+use crate::utils_parcel::*;
+
 
 /// Zome function
 /// Return EntryHash of newly created OutAck

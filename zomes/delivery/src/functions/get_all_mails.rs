@@ -4,11 +4,11 @@ use hdk::prelude::query::ChainQueryFilter;
 use crate::{
     // link_kind,
     entry_kind::*,
-    mail::entries::*,
     mail::get_outmail_state,
-    mail::utils::get_inmail_state,
     utils::*,
 };
+use crate::entries::*;
+use crate::utils_parcel::get_inmail_state;
 
 
 /// Zome Function

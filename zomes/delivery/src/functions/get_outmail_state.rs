@@ -1,11 +1,14 @@
 use hdk::prelude::*;
 
 use crate::{
-   mail::{entries::*, utils::*}, utils::*
+   utils::*
 };
 
 use std::collections::HashMap;
+use crate::entries::*;
 use crate::mail::get_inacks;
+use crate::utils_parcel::*;
+
 
 /// Get State of an OutMail
 #[hdk_extern]
