@@ -46,36 +46,33 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
    let entry_kind = EntryKind::from_index(&app_type.id());
    debug!(" - {} ({})",  entry_kind.as_static(), eh);
    match entry_kind {
-      EntryKind::Handle => {},
       EntryKind::PubEncKey => {},
       EntryKind::Path => {},
-      EntryKind::DeliveryConfirmation => {},
-      EntryKind::InMail => {
-         let _inmail = get_typed_from_eh::<InMail>(eh)?;
+      EntryKind::DeliveryConfirmation => {
+         let _ = get_typed_from_eh::<DeliveryConfirmation>(eh)?;
       },
-      EntryKind::InAck => {
-         let _inack = get_typed_from_eh::<InAck>(eh)?;
+      EntryKind::DeliveryNotification => {
+         let _ = get_typed_from_eh::<DeliveryNotification>(eh)?;
       },
-      EntryKind::PendingMail => {
-         let _pending_mail = get_typed_from_eh::<PendingMail>(eh)?;
+      EntryKind::ReceptionConfirmation => {
+         let _ = get_typed_from_eh::<ReceptionConfirmation>(eh)?;
       },
-      EntryKind::PendingAck => {
-         let _pending_ack = get_typed_from_eh::<PendingAck>(eh)?;
+      EntryKind::ManifestConfirmation => {
+         let _ = get_typed_from_eh::<ManifestConfirmation>(eh)?;
       },
-      EntryKind::OutMail => {
-         let outmail = get_typed_from_eh::<OutMail>(eh.clone())?;
-         send_committed_mail(&eh, outmail, None)?;
+      EntryKind::PendingItem => {
+         let _ = get_typed_from_eh::<PendingItem>(eh)?;
       },
-      EntryKind::OutAck => {
-         let outack = get_typed_from_eh::<OutAck>(eh.clone())?;
-         send_committed_ack(&eh, outack)?;
+      EntryKind::Distribution => {
+         let distribution = get_typed_from_eh::<Distribution>(eh.clone())?;
+         post_commit_distribution(&eh, distribution)?;
       },
-      EntryKind::FileManifest => {
-         let _manifest = get_typed_from_eh::<FileManifest>(eh)?;
+      EntryKind::ParcelChunk => {
+         let _ = get_typed_from_eh::<ParcelChunk>(eh.clone())?;
       },
-      EntryKind::FileChunk => {
-         let _chunk = get_typed_from_eh::<FileChunk>(eh)?;
-      }
+      EntryKind::ParcelManifest => {
+         let _manifest = get_typed_from_eh::<ParcelManifest>(eh)?;
+      },
       // Add type handling here
       // ..
    }

@@ -1,10 +1,10 @@
 use hdk::prelude::*;
 
 use crate::{
-    file::{FileManifest, FileChunk},
-    DirectMessageProtocol, DirectMessageProtocol::*,
-    utils::*,
-    dm::*,
+   file::{FileManifest, FileChunk},
+   DeliveryProtocol, DeliveryProtocol::*,
+   utils::*,
+   dm::*,
 };
 
 ///
@@ -14,8 +14,8 @@ pub(crate) fn request_chunk_by_dm(destination: AgentPubKey, chunk_eh: EntryHash)
     debug!("request_manifest_by_dm(): {}", chunk_eh);
     /// Send DM
     let maybe_response = send_dm(
-        destination,
-        DirectMessageProtocol::RequestChunk(chunk_eh),
+       destination,
+       DeliveryProtocol::RequestChunk(chunk_eh),
     );
     debug!("RequestChunk result = {:?}", maybe_response);
     /// Check response
@@ -23,7 +23,7 @@ pub(crate) fn request_chunk_by_dm(destination: AgentPubKey, chunk_eh: EntryHash)
         return error(&format!("send_dm() of RequestChunk failed: {}", e));
     }
     match maybe_response.unwrap() {
-        DirectMessageProtocol::Chunk(chunk) => {
+        DeliveryProtocol::Chunk(chunk) => {
             /// Commit FileChunk
             let maybe_address = create_entry(&chunk);
             if let Err(err) = maybe_address {
@@ -35,7 +35,7 @@ pub(crate) fn request_chunk_by_dm(destination: AgentPubKey, chunk_eh: EntryHash)
             debug!("received chunk_address: {}", chunk_address);
             Ok(Some(chunk))
         },
-        DirectMessageProtocol::UnknownEntry => Ok(None),
+        DeliveryProtocol::UnknownEntry => Ok(None),
         _ => error("send_dm() of RequestChunk failed 3".into()),
     }
 }
@@ -48,8 +48,8 @@ pub(crate) fn request_manifest_by_dm(destination: AgentPubKey, manifest_eh: Entr
     debug!("request_manifest_by_dm(): {}", manifest_eh);
     /// Send DM
     let maybe_response = send_dm(
-        destination,
-        DirectMessageProtocol::RequestManifest(manifest_eh),
+       destination,
+       DeliveryProtocol::RequestManifest(manifest_eh),
     );
     debug!("RequestManifest result = {:?}", maybe_response);
     /// Check Response
@@ -57,7 +57,7 @@ pub(crate) fn request_manifest_by_dm(destination: AgentPubKey, manifest_eh: Entr
         return error(&format!("send_dm() of RequestManifest failed: {}", e));
     }
     match maybe_response.unwrap() {
-        DirectMessageProtocol::FileManifest(manifest) => {
+        DeliveryProtocol::FileManifest(manifest) => {
             /// Commit FileManifest
             let maybe_address = create_entry(&manifest);
             if let Err(err) = maybe_address {

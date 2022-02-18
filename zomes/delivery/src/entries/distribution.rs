@@ -1,87 +1,70 @@
 use hdk::prelude::*;
 
-use crate::get_typed_from_eh;
+use crate::{
+    self::*,
+    get_typed_from_eh,
+    entries::*,
+    request_reception::*,
+};
 
-/// Entry representing an authored mail. It is private.
-#[hdk_entry(id = "distribution", visibility = "private")]
+
+
+#[allow(non_camel_case_types)]
+pub enum DistributionStrategy {
+    /// DM first, DHT otherwise
+    NORMAL,
+    /// Publish to DHT unencrypted,
+    PUBLIC,
+    /// Encrypt to recipients on DHT
+    DHT_ONLY,
+    /// Only via DM
+    DM_ONLY,
+}
+
+/// Entry representing a request to send a Parcel to one or multiple recipients
+#[hdk_entry(id = "Distribution", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct Distribution {
     pub recipients: Vec<AgentPubKey>,
-    pub manifest: Manifest,
-    pub sender_manifest_signature: Signature,
-    //pub can_use_dht: bool,
+    pub parcel_description: ParcelDescription,
+    pub strategy: DistributionStrategy,
+    pub sender_description_signature: Signature,
     //pub can_share_between_recipients: bool, // Make recipient list "public" to recipients
 }
 
+///
+pub fn validate_distribution(input: Distribution) -> Result<(), String> {
+    if recipients.is_empty() {
+        return Err("Missing a recipient or parcel".to_owned());
+    }
 
-fn get_app_entry_size(eh: EntryHash) -> ExternResult<u64> {
-    let maybe_element = get(payload[0], GetOptions::content())?;
-    let element = match maybe_element {
-        Some(el) => el,
-        None => return error("No element found at given payload address"),
-    };
+    /// FIXME: validate parcel
+    //validate_parcel(input.parcel_description)?;
 
-    let size: u64 = element
-       .entry()
-       .to_app_option()?
-       .ok_or(WasmError::Guest(String::from("No AppEntry found at given payload address")))?
-       .into_sb()
-       .len();
-
-    // let size = match element.entry() {
-    //     Present(entry) => {
-    //         match entry {
-    //             App(app_bytes) => app_bytes.into_sb().len(),
-    //             _ => return error("No AppEntry found at given payload address"),
-    //         },
-    //         _ => return error("No Entry found at given payload address"),
-    //     }
-    // }
-    Ok(size)
+    Ok(())
 }
 
-
 ///
-impl Distribution {
+pub(crate) fn post_commit_distribution(eh: &EntryHash, distribution: Distribution) -> ExternResult<()> {
+    debug!("post_commit_distribution() {:?}", eh);
 
-    ///
-    pub fn create(
-        recipient_list: Vec<AgentPubKey>,
-        parcel_type: String,
-        payload: Vec<EntryHash>,
-    ) -> ExternResult<Self> {
-        if recipients.is_empty() || payload.is_empty() {
-            return error("Missing a recipient or payload");
-        }
-        /// Remove duplicate recipients
-        let mut recipients = recipient_list.clone();
-        let set: HashSet<_> = recipients.drain(..).collect(); // dedup
-        recipients.extend(set.into_iter());
+    /// FIXME match distribution.strategy
 
-        /// No Chunks
-        let mut total_parcel_size = 0;
-        if payload.len() == 1 {
-            total_parcel_size = get_app_entry_size(payload[0])?;
-        } else {
-            /// Get Chunks
-            for chunk_eh in payload.iter() {
-                total_parcel_size += get_app_entry_size(chunk_eh)?;
+    /// Send to each recipient
+    for recipient in distribution.recipients {
+        let res = send_parcel_description(
+            recipient,
+            eh.clone(),
+            distribution.parcel_description.clone(),
+            distribution.sender_description_signature.clone());
+        match res {
+            Ok(_) => {/* FIXME? */},
+            Err(e) => {
+                /// FIXME: accumulate failed recipients to final error return value
+                debug!("send_reception_request() failed: {}", e);
             }
         }
-        /// Create Manifest
-        let manifest = Manifest {
-            parcel_type,
-            total_parcel_size,
-            payload,
-        };
-        /// Sign
-        let sender_manifest_signature = sign(agent_info()?.agent_latest_pubkey, manifest.clone())?;
-        /// Done
-        let distribution = Distribution {
-            recipients,
-            manifest,
-            sender_manifest_signature
-        };
-        Ok(distribution)
     }
+    /// Done
+    Ok(())
 }

@@ -1,30 +1,40 @@
-mod inmail;
-mod distribution;
-mod pending_mail;
-mod pending_ack;
-mod outack;
-mod manifest_confirmation;
-mod delivery_confirmation;
-pub mod manifest;
-pub mod chunk;
+pub mod delivery_notification;
+pub mod distribution;
+pub mod pending_item;
+pub mod manifest_confirmation;
+pub mod delivery_confirmation;
+pub mod parcel_chunk;
 pub mod pub_enc_key;
+pub mod reception_confirmation;
+pub mod parcel_manifest;
+
+pub use delivery_notification::*;
+pub use distribution::*;
+pub use pending_item::*;
+pub use manifest_confirmation::*;
+pub use delivery_confirmation::*;
+pub use parcel_chunk::*;
+pub use pub_enc_key::*;
+pub use reception_confirmation::*;
+pub use parcel_manifest::*;
 
 
 use hdk::prelude::*;
 
+pub type AppType = (ZomeName, EntryDefId);
 
 /// Possible states of an InMail entry
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum InMailState {
-    /// InMail committed, no OutAck
-    Unacknowledged,
-    /// OutAck committed, no confirmation, no pending
-    AckUnsent,
-    /// OutAck committed, PendingAck available
-    AckPending,
-    /// OutAck committed, confirmation commited
-    AckDelivered,
-    /// Delete entry commited
+pub enum IncomingDeliveryState {
+    /// DeliveryNotification committed
+    ManifestReceived,
+    /// ReceptionConfirmation(yes) committed
+    Accepted,
+    /// ReceptionConfirmation(no) committed
+    Refused,
+    /// Parcel committed
+    Received,
+    /// Parcel deleted ???
     Deleted,
 }
 
@@ -62,11 +72,25 @@ pub enum DistributionState {
 
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct Manifest {
-    parcel_type: String,
-    total_parcel_size: u64,
-    payload: Vec<EntryHash>,
+pub enum ParcelKind {
+    AppEntry(AppType),
+    Manifest,
+    //Acknowledgement,
+    //Notification,
 }
+
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct ParcelDescription {
+    pub size: usize,
+    pub parcel: Parcel,
+}
+
+pub enum Parcel {
+    AppEntry((AppType, EntryHash)),
+    Package(EntryHash),
+}
+
 
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]

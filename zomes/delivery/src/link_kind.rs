@@ -16,28 +16,14 @@ pub const LinkSeparator: &'static str = "___";
 /// List of all Link kinds handled by this Zome
 #[derive(AsStaticStr, EnumIter, EnumProperty, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum LinkKind {
-   #[strum(props(BaseType = "Path", TargetType = "Handle"))]
+   #[strum(props(BaseType = "Path", TargetType = "AgentPubKey"))]
    Members,
-   #[strum(props(BaseType = "AgentPubKey", TargetType = "PendingAck"))]
-   AckInbox,
-   #[strum(props(BaseType = "AgentPubKey", TargetType = "PendingMail"))]
-   MailInbox,
-   #[strum(props(BaseType = "AgentPubKey", TargetType = "Handle"))]
-   Handle,
-   #[strum(props(BaseType = "OutAck", TargetType = "PendingAck"))]
-   Pending,
-   #[strum(props(BaseType = "OutMail", TargetType = "PendingMail"))]
-   Pendings,
    #[strum(props(BaseType = "AgentPubKey", TargetType = "PubEncKey"))]
    EncKey,
-   // #[strum(props(BaseType = "InMail", TargetType = "OutAck"))]
-   // Acknowledgment,
-   // #[strum(props(BaseType = "OutMail", TargetType = "InAck"))]
-   // Receipt,
-   // #[strum(props(BaseType = "OutAck", TargetType = "OutAck"))]
-   // Sent,
-   // #[strum(props(BaseType = "OutMail", TargetType = "OutMail"))]
-   // Sents,
+   #[strum(props(BaseType = "AgentPubKey", TargetType = "PendingMail"))]
+   Inbox,
+   #[strum(props(BaseType = "OutMail", TargetType = "PendingMail"))]
+   Pendings,
 }
 
 /// Public
@@ -77,7 +63,7 @@ impl LinkKind {
       if let Ok(kind) = maybe_kind {
          return kind.as_type();
       }
-      error!("!!! LinkKind::prop_to_type() Failed : {} !!!", kind_str);
+      error!("Fatal error: LinkKind::prop_to_type() failed : {}", kind_str);
       unreachable!()
    }
 

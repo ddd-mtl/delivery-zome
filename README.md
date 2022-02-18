@@ -13,12 +13,15 @@ Enable private sharing of custom data between P2P agents.
 Features:
  - Sign and encrypt parcels
  - Delivery Confirmation
- - Send via DM
- - Send via DHT
+ - Multiple distribution strategies:
+   - Send via DM
+   - Send via DHT
+   - Define private Drop-Off points (cap-grants?)
+   - recipient 2 recipient sharing
+   - public
  - Spliting / Chunking large parcels for delivery
  - Failsafe and recovery (with post_commit())
  - Acknowledgement system
- - Define private Drop-Off points (cap-grants?)
  - A default chunk entry is provided for arbitrary data
 
 Constraints:

@@ -8,8 +8,27 @@ use crate::{
 use crate::entries::*;
 
 
+/// Return size of an AppEntry
+pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
+    /// Get Element
+    let maybe_element = get(eh, GetOptions::content())?;
+    let element = match maybe_element {
+        Some(el) => el,
+        None => return error("No element found at given payload address"),
+    };
+    /// Get length of SerializedBytes
+    let size: usize = element
+       .entry()
+       .to_app_option()?
+       .ok_or(WasmError::Guest(String::from("No AppEntry found at given payload address")))?
+       .into_sb()
+       .len();
+    /// Done
+    Ok(size)
+}
+
 /// Get State of InMail
-pub(crate) fn get_inmail_state(inmail_hh: HeaderHash) -> ExternResult<InMailState> {
+pub(crate) fn get_inmail_state(inmail_hh: HeaderHash) -> ExternResult<IncomingDeliveryState> {
     /// Get inMail Details
     let maybe_details = get_details(inmail_hh.clone(), GetOptions::latest())?;
     if maybe_details.is_none() {
@@ -21,13 +40,13 @@ pub(crate) fn get_inmail_state(inmail_hh: HeaderHash) -> ExternResult<InMailStat
     };
     /// Check if deleted
     if el_details.deletes.len() > 0 {
-        return Ok(InMailState::Deleted);
+        return Ok(IncomingDeliveryState::Deleted);
     }
     let inmail: InMail = get_typed_from_el(el_details.element.clone())?;
     /// Get OutAck
     let outacks = get_outacks(Some(inmail_hh.to_owned()))?;
     if outacks.len() < 1 {
-        return Ok(InMailState::Unacknowledged);
+        return Ok(IncomingDeliveryState::ManifestReceived);
     }
     /// Determine OutAck delivery state
     let outack = outacks[0].to_owned();
@@ -40,9 +59,9 @@ pub(crate) fn get_inmail_state(inmail_hh: HeaderHash) -> ExternResult<InMailStat
     };
     /// Map to inmail state
     let inmail_state = match outack_state {
-        DeliveryState::Unsent => InMailState::AckUnsent,
-        DeliveryState::Pending => InMailState::AckPending,
-        DeliveryState::Delivered => InMailState::AckDelivered,
+        DeliveryState::Unsent => IncomingDeliveryState::Accepted,
+        DeliveryState::Pending => IncomingDeliveryState::Refused,
+        DeliveryState::Delivered => IncomingDeliveryState::Received,
     };
     Ok(inmail_state)
 }

@@ -25,13 +25,13 @@ pub fn now() -> u64 {
 }
 
 /// Get Element at address using query()
-pub fn get_entry_type(eh: EntryHash) -> ExternResult<EntryType> {
+pub fn get_entry_type_from_eh(eh: EntryHash) -> ExternResult<EntryType> {
     let maybe_element = get(eh, GetOptions::latest())?;
     if maybe_element.is_none() {
         return error("no element found for entry_hash");
     }
     let element = maybe_element.unwrap();
-    let entry_type = element.header().entry_type().expect("should have entry type").clone();
+    let entry_type = element.header().entry_type()?.clone();
     Ok(entry_type)
 }
 

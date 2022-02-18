@@ -1,49 +1,47 @@
 use hdk::prelude::*;
 
 use crate::{
-   AckMessage,
-   DirectMessageProtocol,
-   file::{FileChunk, FileManifest},
-   mail::{
+    AckMessage,
+    DeliveryProtocol,
+    file::{FileChunk, FileManifest},
+    mail::{
       self,
    },
-   MailMessage, ReceivedAck, signal_protocol::*,
-   snapmail_now, utils::*,
-};
-use crate::entries::{
-   InMail,
-   InMailState,
-   MailItem, MailState,
+    ReceptionRequestMessage, ReceivedAck, signal_protocol::*,
+    snapmail_now,
+    utils::*,
+    entries::*,
 };
 
-
-///
-pub fn receive_dm(from: AgentPubKey, dm: DirectMessageProtocol) -> DirectMessageProtocol {
+/// Start point for any remote call in this zome
+/// WARN: Name of function must match REMOTE_ENDPOINT const value
+#[hdk_extern]
+pub fn receive_delivery_dm(from: AgentPubKey, dm: DeliveryProtocol) -> DeliveryProtocol {
     debug!("Received from: {}", from);
     match dm {
-        DirectMessageProtocol::Chunk(chunk) => {
+        DeliveryProtocol::Chunk(chunk) => {
             mail::receive_direct_chunk(from, chunk)
         },
-        DirectMessageProtocol::FileManifest(manifest) => {
+        DeliveryProtocol::FileManifest(manifest) => {
             mail::receive_direct_manifest(from, manifest)
         },
-        DirectMessageProtocol::Mail(mail) => {
-            mail::receive_dm_mail(from, mail)
+        DeliveryProtocol::ReceptionRequest(msg) => {
+            mail::receive_dm_reception_request(from, msg)
         },
-        DirectMessageProtocol::Ack(ack) => {
+        DeliveryProtocol::Ack(ack) => {
             mail::receive_dm_ack(from, ack)
         },
-        DirectMessageProtocol::RequestChunk(address) => {
+        DeliveryProtocol::RequestChunk(address) => {
             mail::receive_direct_request_chunk(from, address)
         },
-        DirectMessageProtocol::RequestManifest(address) => {
+        DeliveryProtocol::RequestManifest(address) => {
             mail::receive_direct_request_manifest(from, address)
         },
-        DirectMessageProtocol::Ping => {
-            DirectMessageProtocol::Success(String::new())
+        DeliveryProtocol::Ping => {
+            DeliveryProtocol::Success(String::new())
         },
         _ => {
-             DirectMessageProtocol::Failure("Unexpected protocol".to_owned())
+             DeliveryProtocol::Failure("Unexpected protocol".to_owned())
         },
     }
 }
@@ -51,61 +49,50 @@ pub fn receive_dm(from: AgentPubKey, dm: DirectMessageProtocol) -> DirectMessage
 /// Handle a MailMessage.
 /// Emits `ReceivedMail` signal.
 /// Returns Success or Failure.
-pub fn receive_dm_mail(from: AgentPubKey, mail_msg: MailMessage) -> DirectMessageProtocol {
+pub fn receive_dm_reception_request(from: AgentPubKey, msg: ReceptionRequestMessage) -> DeliveryProtocol {
     /// Check signature
-    let maybe_verified = verify_signature(from.clone(), mail_msg.mail_signature.clone(), mail_msg.mail.clone());
+    let maybe_verified = verify_signature(
+        from.clone(),
+        msg.sender_description_signature.clone(),
+        msg.description.clone());
     match maybe_verified {
         Err(err) => {
-            let response_str = "Verifying MailMessage failed";
+            let response_str = "Verifying ReceptionRequestMessage failed";
             debug!("{}: {}", response_str, err);
-            return DirectMessageProtocol::Failure(response_str.to_string());
+            return DeliveryProtocol::Failure(response_str.to_string());
         }
         Ok(false) => {
-            let response_str = "Failed verifying MailMessage signature";
+            let response_str = "Failed verifying ReceptionRequestMessage signature";
             debug!("{}", response_str);
-            return DirectMessageProtocol::Failure(response_str.to_string());
+            return DeliveryProtocol::Failure(response_str.to_string());
         }
-        Ok(true) => debug!("Valid MailMessage signature"),
+        Ok(true) => debug!("Valid ReceptionRequestMessage signature"),
     }
-    /// Create InMail
-    let inmail = InMail::from_direct(from.clone(), mail_msg.clone());
-    /// Commit InMail
-    let maybe_inmail_hh = create_entry(&inmail);
-    if let Err(err) = maybe_inmail_hh {
-        let response_str = "Failed committing InMail";
+    /// Create DeliveryNotification
+    let notification = DeliveryNotification::from_direct(msg.clone(), from.clone());
+    /// Commit DeliveryNotification
+    let maybe_hh = create_entry(&notification);
+    if let Err(err) = maybe_hh {
+        let response_str = "Failed committing DeliveryNotification";
         debug!("{}: {}", response_str, err);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
-    let inmail_hh =  maybe_inmail_hh.unwrap();
-    debug!("inmail_address: {:?}", inmail_hh);
-    /// Emit signal
-    let item = MailItem {
-        address: inmail_hh,
-        author: from.clone(),
-        mail: mail_msg.mail.clone(),
-        state: MailState::In(InMailState::Unacknowledged),
-        bcc: Vec::new(),
-        date: snapmail_now() as i64, // FIXME
-    };
-    let res = emit_signal(&SignalProtocol::ReceivedMail(item));
-    if let Err(err) = res {
-        error!("Emit signal failed: {}", err);
-    }
+
     /// Return Success response
-    return DirectMessageProtocol::Success("Mail received".to_string());
+    return DeliveryProtocol::Success("ReceptionRequest received".to_string());
 }
 
 /// Handle a AckMessage.
 /// Emits `ReceivedAck` signal.
 /// Returns Success or Failure.
-pub fn receive_dm_ack(from: AgentPubKey, ack_msg: AckMessage) -> DirectMessageProtocol {
+pub fn receive_dm_ack(from: AgentPubKey, ack_msg: AckMessage) -> DeliveryProtocol {
     debug!("receive_dm_ack() from: {:?} ; for {:?}", from, ack_msg.outmail_eh);
     /// Check if we have acked outmail
     let maybe_outmail = get_local_from_eh(ack_msg.outmail_eh.clone());
     if let Err(err) = maybe_outmail {
         let response_str = "Failed to find OutMail from Ack";
         warn!("{}: {}", response_str, err);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     let outmail_hh = maybe_outmail.unwrap().header_address().clone();
     /// Check ack signature
@@ -114,12 +101,12 @@ pub fn receive_dm_ack(from: AgentPubKey, ack_msg: AckMessage) -> DirectMessagePr
         Err(err) => {
             let response_str = "Verifying AckMessage failed";
             debug!("{}: {}", response_str, err);
-            return DirectMessageProtocol::Failure(response_str.to_string());
+            return DeliveryProtocol::Failure(response_str.to_string());
         }
         Ok(false) => {
             let response_str = "Failed verifying AckMessage signature";
             debug!("{}", response_str);
-            return DirectMessageProtocol::Failure(response_str.to_string());
+            return DeliveryProtocol::Failure(response_str.to_string());
         }
         Ok(true) => debug!("Valid AckMessage signature"),
     }
@@ -130,7 +117,7 @@ pub fn receive_dm_ack(from: AgentPubKey, ack_msg: AckMessage) -> DirectMessagePr
     if let Err(err) = res {
         let response_str = "Failed committing InAck";
         error!("{}: {}", response_str, err);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     /// Emit Signal
     let signal = SignalProtocol::ReceivedAck(ReceivedAck {
@@ -143,40 +130,40 @@ pub fn receive_dm_ack(from: AgentPubKey, ack_msg: AckMessage) -> DirectMessagePr
     }
     /// Return Success response
     debug!("receive_direct_ack() success!");
-    return DirectMessageProtocol::Success("Ack received".to_string());
+    return DeliveryProtocol::Success("Ack received".to_string());
 }
 
 
 /// Handle a RequestFileManifestMessage
 /// TODO: Emits `received_request_manifest` signal.
 /// Returns FileManifest, UnknownEntry or Failure.
-pub fn receive_direct_request_manifest(from: AgentPubKey, manifest_eh: EntryHash) -> DirectMessageProtocol {
+pub fn receive_direct_request_manifest(from: AgentPubKey, manifest_eh: EntryHash) -> DeliveryProtocol {
     debug!("received request manifest from: {}", from);
     let maybe_maybe_el = get(manifest_eh.clone(), GetOptions::content());
     if let Err(err) = maybe_maybe_el {
         let response_str = "Failed on get_entry()";
         warn!("{}: {}", response_str, err);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     let maybe_el = maybe_maybe_el.unwrap();
     if let None = maybe_el {
-        return DirectMessageProtocol::UnknownEntry;
+        return DeliveryProtocol::UnknownEntry;
     }
     debug!("Sending manifest: {}", manifest_eh);
     let maybe_manifest = get_typed_from_el::<FileManifest>(maybe_el.unwrap());
     if let Err(_err) = maybe_manifest {
         let response_str = "Requested entry is not a FileManifest";
         error!("{}", response_str);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     // Return Success response
-    return DirectMessageProtocol::FileManifest(maybe_manifest.unwrap());
+    return DeliveryProtocol::FileManifest(maybe_manifest.unwrap());
 }
 
 /// Handle a FileManifestMessage.
 /// Emits `received_manifest` signal.
 /// Returns Success or Failure.
-pub fn receive_direct_manifest(from: AgentPubKey, manifest: FileManifest) -> DirectMessageProtocol {
+pub fn receive_direct_manifest(from: AgentPubKey, manifest: FileManifest) -> DeliveryProtocol {
     debug!("received manifest from: {}", from);
     // FIXME: Check if already have file?
     /// Commit FileManifest
@@ -184,57 +171,57 @@ pub fn receive_direct_manifest(from: AgentPubKey, manifest: FileManifest) -> Dir
     if let Err(err) = maybe_hh {
         let response_str = "Failed committing FileManifest";
         warn!("{}: {}", response_str, err);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     let manifest_hh = maybe_hh.unwrap();
     debug!("received manifest_address: {}", manifest_hh);
     // FIXME: emit signal
     /// Return Success response
-    return DirectMessageProtocol::Success(manifest_hh.to_string());
+    return DeliveryProtocol::Success(manifest_hh.to_string());
 }
 
 /// Handle a RequestFileChunkMessage.
 /// Emits `received_request_chunk` signal.
 /// Returns FileChunk, UnknownEntry or Failure.
-pub fn receive_direct_request_chunk(from: AgentPubKey, chunk_eh: EntryHash) -> DirectMessageProtocol {
+pub fn receive_direct_request_chunk(from: AgentPubKey, chunk_eh: EntryHash) -> DeliveryProtocol {
     debug!("received request chunk from: {}", from);
     // FIXME: emit signal
     let maybe_maybe_el = get(chunk_eh.clone(), GetOptions::content());
     if let Err(err) = maybe_maybe_el {
         let response_str = "Failed on get_entry()";
         error!("{}: {}", response_str, err);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     let maybe_el = maybe_maybe_el.unwrap();
     if let None = maybe_el {
-        return DirectMessageProtocol::UnknownEntry;
+        return DeliveryProtocol::UnknownEntry;
     }
     debug!("Sending chunk: {}", chunk_eh);
     let maybe_chunk = get_typed_from_el::<FileChunk>(maybe_el.unwrap());
     if let Err(_err) = maybe_chunk {
         let response_str = "Requested entry is not a FileChunk";
         error!("{}", response_str);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     /// Return Success response
-    return DirectMessageProtocol::Chunk(maybe_chunk.unwrap());
+    return DeliveryProtocol::Chunk(maybe_chunk.unwrap());
 }
 
 /// Handle a ChunkMessage.
 /// Emits `received_chunk` signal.
 /// Returns Success or Failure.
-pub fn receive_direct_chunk(_from: AgentPubKey, chunk: FileChunk) -> DirectMessageProtocol {
+pub fn receive_direct_chunk(_from: AgentPubKey, chunk: FileChunk) -> DeliveryProtocol {
     // FIXME: Check if already have chunk?
     /// Commit FileChunk
     let maybe_address = create_entry(&chunk);
     if let Err(err) = maybe_address {
         let response_str = "Failed committing FileChunk";
         error!("{}: {}", response_str, err);
-        return DirectMessageProtocol::Failure(response_str.to_string());
+        return DeliveryProtocol::Failure(response_str.to_string());
     }
     let chunk_address = maybe_address.unwrap();
     debug!("received chunk_address: {}",  chunk_address);
     // FIXME: emit signal
     /// Return Success response
-    return DirectMessageProtocol::Success(chunk_address.to_string());
+    return DeliveryProtocol::Success(chunk_address.to_string());
 }

@@ -5,18 +5,17 @@ use crate::{
    utils::*,
 };
 
-pub const REMOTE_ENDPOINT: &'static str = "receive_dm";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DmPacket {
    pub from: AgentPubKey,
-   pub dm: DirectMessageProtocol,
+   pub dm: DeliveryProtocol,
 }
 
 /// Start point for any remote call
 /// WARN: Name of function must match REMOTE_ENDPOINT const value
 #[hdk_extern]
-pub fn receive_dm(dm_packet: DmPacket) -> ExternResult<DirectMessageProtocol> {
+pub fn receive_dm(dm_packet: DmPacket) -> ExternResult<DeliveryProtocol> {
    // let (from, dm): (AgentPubKey, DirectMessageProtocol) = dm_packet.into();
    debug!("*** receive_dm() called from {:?}", dm_packet.from);
    let response = mail::receive_dm(dm_packet.from, dm_packet.dm);
@@ -25,7 +24,7 @@ pub fn receive_dm(dm_packet: DmPacket) -> ExternResult<DirectMessageProtocol> {
 }
 
 ///
-pub(crate) fn send_dm(destination: AgentPubKey, dm: DirectMessageProtocol) -> ExternResult<DirectMessageProtocol> {
+pub(crate) fn send_dm(destination: AgentPubKey, dm: DeliveryProtocol) -> ExternResult<DeliveryProtocol> {
    /// Pre-conditions: Don't call yourself (otherwise we get concurrency issues)
    let me = agent_info().unwrap().agent_latest_pubkey;
    if destination == me {
@@ -46,8 +45,8 @@ pub(crate) fn send_dm(destination: AgentPubKey, dm: DirectMessageProtocol) -> Ex
    debug!("calling remote receive_dm() DONE ; dm = {:?}", dm);
    return match response {
        ZomeCallResponse::Ok(output) => Ok(output.decode()?),
-       ZomeCallResponse::Unauthorized(_, _, _, _) => Ok(DirectMessageProtocol::Failure("Unauthorized".to_string())),
-       ZomeCallResponse::NetworkError(e) => Ok(DirectMessageProtocol::Failure(format!("NetworkError: {:?}", e))),
-       ZomeCallResponse::CountersigningSession(e) => Ok(DirectMessageProtocol::Failure(format!("CountersigningSession: {:?}", e))),
+       ZomeCallResponse::Unauthorized(_, _, _, _) => Ok(DeliveryProtocol::Failure("Unauthorized".to_string())),
+       ZomeCallResponse::NetworkError(e) => Ok(DeliveryProtocol::Failure(format!("NetworkError: {:?}", e))),
+       ZomeCallResponse::CountersigningSession(e) => Ok(DeliveryProtocol::Failure(format!("CountersigningSession: {:?}", e))),
    };
 }

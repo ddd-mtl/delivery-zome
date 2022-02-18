@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 
 /// Entry for confirming a delivery has been well received by a recipient
-#[hdk_entry(id = "delivery_confirmation", visibility = "private")]
+#[hdk_entry(id = "DeliveryConfirmation", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct DeliveryConfirmation {
     pub distribution_eh: EntryHash,

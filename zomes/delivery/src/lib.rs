@@ -30,13 +30,12 @@ pub mod signal_protocol;
 
 mod callbacks;
 
-pub mod file;
-
 pub mod entries;
 pub mod functions;
 mod receive;
 mod utils_parcel;
 pub(crate) mod dm_file;
+mod request_reception;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
