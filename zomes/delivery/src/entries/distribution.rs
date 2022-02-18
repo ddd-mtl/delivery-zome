@@ -4,7 +4,8 @@ use crate::{
     self::*,
     get_typed_from_eh,
     entries::*,
-    request_reception::*,
+    send_item::*,
+    parcel::*,
 };
 
 
@@ -45,20 +46,27 @@ pub fn validate_distribution(input: Distribution) -> Result<(), String> {
 }
 
 ///
-pub(crate) fn post_commit_distribution(eh: &EntryHash, distribution: Distribution) -> ExternResult<()> {
-    debug!("post_commit_distribution() {:?}", eh);
+pub(crate) fn post_commit_distribution(distribution_eh: &EntryHash, distribution: Distribution) -> ExternResult<()> {
+    debug!("post_commit_distribution() {:?}", distribution_eh);
 
     /// FIXME match distribution.strategy
 
     /// Send to each recipient
     for recipient in distribution.recipients {
-        let res = send_parcel_description(
-            recipient,
-            eh.clone(),
+        /// Create PendingItem
+        let pending_item = PendingItem::from_description(
             distribution.parcel_description.clone(),
+            distribution_eh.clone(),
+            recipient.clone(),
+        )?;
+        /// Send it to recipient
+        let res = send_item(
+            recipient,
+            distribution_eh.clone(),
+            pending_item,
             distribution.sender_description_signature.clone());
         match res {
-            Ok(_) => {/* FIXME? */},
+            Ok(_) => {},
             Err(e) => {
                 /// FIXME: accumulate failed recipients to final error return value
                 debug!("send_reception_request() failed: {}", e);

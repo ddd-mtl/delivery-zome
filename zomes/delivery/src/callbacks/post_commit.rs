@@ -55,10 +55,11 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
          let _ = get_typed_from_eh::<DeliveryNotification>(eh)?;
       },
       EntryKind::ReceptionConfirmation => {
-         let _ = get_typed_from_eh::<ReceptionConfirmation>(eh)?;
+         let reception = get_typed_from_eh::<ReceptionConfirmation>(eh)?;
+         post_commit_reception(&eh, reception)?;
       },
       EntryKind::ManifestConfirmation => {
-         let _ = get_typed_from_eh::<ManifestConfirmation>(eh)?;
+         let _ = get_typed_from_eh::<DescriptionConfirmation>(eh)?;
       },
       EntryKind::PendingItem => {
          let _ = get_typed_from_eh::<PendingItem>(eh)?;

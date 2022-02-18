@@ -23,7 +23,7 @@ entry_defs![
    DeliveryNotification::entry_def(),
    Distribution::entry_def(),
    ReceptionConfirmation::entry_def(),
-   ManifestConfirmation::entry_def(),
+   DescriptionConfirmation::entry_def(),
    PendingItem::entry_def(),
    ParcelChunk::entry_def(),
    /// -- Other
@@ -44,7 +44,7 @@ fn can_deserialize_into_type(entry_type_index: EntryDefIndex, entry_bytes: AppEn
       EntryKind::DeliveryNotification => DeliveryNotification::try_from(sb.clone()).is_ok(),
       EntryKind::Distribution => Distribution::try_from(sb.clone()).is_ok(),
       EntryKind::ReceptionConfirmation => ReceptionConfirmation::try_from(sb.clone()).is_ok(),
-      EntryKind::ManifestConfirmation => ManifestConfirmation::try_from(sb.clone()).is_ok(),
+      EntryKind::ManifestConfirmation => DescriptionConfirmation::try_from(sb.clone()).is_ok(),
       EntryKind::PendingItem => PendingItem::try_from(sb.clone()).is_ok(),
       EntryKind::ParcelChunk => ParcelChunk::try_from(sb.clone()).is_ok(),
    }

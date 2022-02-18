@@ -3,6 +3,7 @@ use crate::{
    get_typed_from_eh,
    entries::*,
    utils_parcel::*,
+   parcel::*,
 };
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

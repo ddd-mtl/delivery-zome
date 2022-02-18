@@ -5,6 +5,7 @@ use crate::entries::*;
 use crate::{
    utils::*,
    LinkKind,
+   parcel::*,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -25,8 +26,8 @@ pub enum PendingKind {
 pub struct PendingItem {
     pub kind: PendingKind,
     pub encrypted_data: XSalsa20Poly1305EncryptedData,
-    pub sender_distribution_eh: EntryHash,
-    pub sender_signature: Signature,
+    pub author_signature: Signature,
+    pub distribution_eh: EntryHash,
 }
 
 impl PendingItem {
@@ -34,7 +35,7 @@ impl PendingItem {
    /// Create PendingItem
    /// This will encrypt the content with my encryption key and the recipient's public encryption key
    /// called from post_commit()
-   fn create<T: Sized>(kind: PendingKind, content: T, sender_distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self>
+   fn create<T: Sized>(kind: PendingKind, content: T, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self>
       where
          T: serde::Serialize
    {
@@ -70,7 +71,7 @@ impl PendingItem {
       };
       debug!("PendingItem: recipient_key = {:?}", recipient_key);
       /// Sign content
-      let sender_signature = sign(me, &content)
+      let author_signature = sign(me, &content)
          .expect("Should be able to sign with my key");
       /// Serialize
       let serialized = bincode::serialize(&content).unwrap();
@@ -86,8 +87,8 @@ impl PendingItem {
       let item = PendingItem {
          kind,
          encrypted_data,
-         sender_distribution_eh,
-         sender_signature,
+         distribution_eh,
+         author_signature,
       };
       Ok(item)
    }
@@ -98,9 +99,22 @@ impl PendingItem {
       Self::create::<ParcelDescription>(PendingKind::Description, description, distribution_eh, recipient)
    }
 
+   /// called from post_commit()
+   pub fn from_notification(notification: DeliveryNotification, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
+      Self::create::<DeliveryNotification>(PendingKind::Description, notification, distribution_eh, recipient)
+   }
 
+   /// called from post_commit()
+   pub fn from_reception(reception: ReceptionConfirmation, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
+      Self::create::<ReceptionConfirmation>(PendingKind::Description, reception, distribution_eh, recipient)
+   }
 
-   /// Attempt to decrypt pendingMail with provided keys
+   ///
+   pub fn from_parcel(parcel: Parcel, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
+      Self::create::<Parcel>(PendingKind::Parcel, parcel, distribution_eh, recipient)
+   }
+
+   /// Attempt to decrypt PendingItem with provided keys
    pub fn attempt_decrypt<T: Sized>(&self, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T> {
       trace!("attempt_decrypt of: {:?}", self.encrypted_data.clone());
       trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender.clone(), recipient.clone());
@@ -118,6 +132,43 @@ impl PendingItem {
       /// Done
       Some(item)
    }
+
+
+   pub fn try_into<T>(self, from: AgentPubKey) -> ExternResult<Option<T>> {
+      /// Get my key
+      let me = agent_info()?.agent_latest_pubkey;
+      let recipient_key = get_enc_key(me.clone())?;
+      debug!("try_into() recipient_key: {:?}", recipient_key);
+      /// Get sender's key
+      let sender_key = get_enc_key(from.clone())?;
+      debug!("try_into() sender_key: {:?}", sender_key);
+      /// Decrypt
+      let maybe_thing: Option<T> = self.attempt_decrypt(sender_key, recipient_key);
+      //debug!("try_into() maybe_thing: {:?}", maybe_thing);
+      /// Into DeliveryNotification
+      if maybe_thing.is_none() {
+         return Ok(None);
+      }
+      let thing = maybe_thing.unwrap();
+      /// Check signature
+      let maybe_verified = verify_signature(from, self.author_signature, thing.clone());
+      match maybe_verified {
+         Err(err) => {
+            let response_str = "Verifying PendingItem failed";
+            debug!("{}: {}", response_str, err);
+            return error(response_str);
+         }
+         Ok(false) => {
+            let response_str = "Failed verifying PendingItem signature";
+            debug!("{}", response_str);
+            return error(response_str);
+         }
+         Ok(true) => debug!("Valid PendingItem signature"),
+      }
+      /// Done
+      Ok(Some(thing))
+   }
+
 }
 
 
@@ -145,7 +196,7 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash
    /// Commit Pendings Link
    let tag = LinkKind::Pendings.concat_hash(&input.recipient);
    trace!("pendings tag = {:?}", tag);
-   let maybe_link1_hh = create_link(input.item.sender_distribution_eh.clone(), pending_item_eh.clone(), tag);
+   let maybe_link1_hh = create_link(input.item.distribution_eh.clone(), pending_item_eh.clone(), tag);
    if let Err(err) = maybe_link1_hh.clone() {
       trace!("link1 failed = {:?}", err);
       return Err(maybe_link1_hh.err().unwrap());

@@ -35,7 +35,8 @@ pub mod functions;
 mod receive;
 mod utils_parcel;
 pub(crate) mod dm_file;
-mod request_reception;
+pub mod send_item;
+mod parcel;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

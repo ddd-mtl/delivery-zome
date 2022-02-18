@@ -7,16 +7,14 @@ use crate::{
    dm::*,
 };
 
-
 ///
-pub(crate) fn send_parcel_description(
+pub(crate) fn send_item(
    recipient: AgentPubKey,
    distribution_eh: EntryHash,
-   parcel_description: ParcelDescription,
-   sender_description_signature: Signature,
+   pending_item: PendingItem,
+   signed_item: Signature,
 ) -> ExternResult<SendSuccessKind> {
-   debug!("request_reception() START - {:?}", recipient);
-
+   debug!("send_item() START - {:?}", recipient);
 
    // /// Shortcut to self
    // let me = agent_info()?.agent_latest_pubkey;
@@ -41,30 +39,31 @@ pub(crate) fn send_parcel_description(
    //    return Ok(SendSuccessKind::OK_SELF);
    // }
 
+   //     if let DeliveryProtocol::Success(_) = response_dm {
+//         return Ok(());
+//     }
+
 
    /// Try sending directly to other Agent if Online
-   let result = send_parcel_description_by_dm(recipient, distribution_eh, parcel_description, sender_description_signature);
-   if result.is_ok() {
+   // let result = send_item_by_dm(recipient, distribution_eh, pending_item.clone(), signed_item);
+   let response_dm = send_dm(recipient, DeliveryProtocol::Item(pending_item.clone()))?;
+   debug!("send_item_by_dm() response_dm = {:?}", response_dm);
+   if let DeliveryProtocol::Success(_) = response_dm {
       return Ok(SendSuccessKind::OK_DIRECT);
    } else {
       let err = result.err().unwrap();
-      debug!("request_reception() failed: {:?}", err);
+      debug!("send_item() failed: {:?}", err);
    }
 
-
-   debug!("request_reception() - Creating PendingItem...");
+   debug!("send_item() - Commit PendingItem...");
    /// DM failed, send to DHT instead by creating a PendingMail
    /// Create and commit PendingMail with remote call to self
-   let pending_item = PendingItem::from_description(
-      parcel_description.clone(),
-      distribution_eh.clone(),
-      recipient.clone(),
-   )?;
+
    let input = CommitPendingItemInput {
       item: pending_item,
       recipient: recipient.clone(),
    };
-   debug!("request_reception() - calling commit_pending_mail()");
+   debug!("send_item() - calling commit_pending_mail()");
    let response = call_remote(
       me,
       zome_info()?.name,
@@ -72,36 +71,9 @@ pub(crate) fn send_parcel_description(
       None,
       input,
    )?;
-   debug!("request_reception() - commit_pending_mail() response: {:?}", response);
+   debug!("send_confirmation() - commit_pending_mail() response: {:?}", response);
    return match response {
       ZomeCallResponse::Ok(_) => Ok(SendSuccessKind::OK_PENDING),
       _ => error("call_remote() to commit_pending_item() failed")
    };
-}
-
-
-
-/// Attempt sending reception request via DM
-fn send_parcel_description_by_dm(
-   recipient: AgentPubKey,
-   sender_distribution_eh: EntryHash,
-   description: ParcelDescription,
-   sender_description_signature: Signature,
-) -> ExternResult<()> {
-   /// --  Send Mail
-   debug!("request_reception_by_dm() to {}", recipient);
-   /// Create DM
-   let msg = ReceptionRequestMessage {
-      description,
-      sender_description_signature,
-      sender_distribution_eh,
-   };
-   /// Send DM
-   let response_dm = send_dm(recipient, DeliveryProtocol::ReceptionRequest(msg))?;
-   debug!("request_reception_by_dm() response_dm = {:?}", response_dm);
-   /// Check Response
-   if let DeliveryProtocol::Success(_) = response_dm {
-      return Ok(());
-   }
-   return error(&format!("request_reception_by_dm() failed: {:?}", response_dm));
 }
