@@ -27,6 +27,8 @@ zome_proc_macro = {path = "../../crates/proc_macro", default-features = false }
 # online
 hdk = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "hdk", default-features = false }
 holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holo_hash", default-features = false }
+hc_utils = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "hc_utils", default-features = false }
+
 
 # local
 #hdk = { path = "../../../holochain-develop/crates/hdk" }

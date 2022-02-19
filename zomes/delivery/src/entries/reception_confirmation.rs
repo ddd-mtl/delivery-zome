@@ -6,16 +6,17 @@ use crate::{
 };
 
 pub enum ReceptionResponse {
-   Accepted(EntryHash), // Hash of Parcel?
+   // HeaderHash of Parcel stored on recipeint's chain
+   // Recipient's signature of parcel entry
+   Accepted((HeaderHash, Signature)),
    Refused,
 }
 
 #[hdk_entry(id = "ReceptionConfirmation")]
 #[derive(Clone, PartialEq)]
 pub struct ReceptionConfirmation {
+   pub notification_eh: EntryHash,
    pub reception_response: ReceptionResponse,
-   //pub recipient_signature: Signature, // FIXME sign response or parcel?
-   pub notification_eh: EntryHash, // Hash of DeliveryNotification
 }
 
 

@@ -20,9 +20,9 @@ pub enum LinkKind {
    Members,
    #[strum(props(BaseType = "AgentPubKey", TargetType = "PubEncKey"))]
    EncKey,
-   #[strum(props(BaseType = "AgentPubKey", TargetType = "PendingMail"))]
+   #[strum(props(BaseType = "AgentPubKey", TargetType = "PendingItem"))]
    Inbox,
-   #[strum(props(BaseType = "OutMail", TargetType = "PendingMail"))]
+   #[strum(props(BaseType = "Distribution", TargetType = "PendingItem"))]
    Pendings,
 }
 
