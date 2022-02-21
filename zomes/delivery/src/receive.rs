@@ -17,10 +17,10 @@ pub fn receive_delivery_dm(from: AgentPubKey, dm: DeliveryProtocol) -> DeliveryP
         DeliveryProtocol::ParcelRequest(distribution_eh) => receive_dm_parcel_request(from, distribution_eh),
         DeliveryProtocol::Item(item) => {
             match item.app_type {
-                PendingKind::ParcelDescription => receive_dm_description(from, item),
-                PendingKind::DeliveryNotification  => receive_dm_notification(from, item),
+                PendingKind::DeliveryNotice => receive_dm_notice(from, item),
+                PendingKind::DeliveryReply  => receive_dm_reply(from, item),
                 PendingKind::Entry => {/* FIXME */},
-                PendingKind::ReceptionConfirmation => receive_dm_reception(from, item),
+                //PendingKind::ReceptionConfirmation => receive_dm_reception(from, item),
             }
         },
         DeliveryProtocol::Ping => DeliveryProtocol::Pong,
@@ -70,34 +70,33 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) 
 
 
 /// Returns Success or Failure
-pub fn receive_dm_description(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
-    let maybe_description: ExternResult<Option<ParcelDescription>> = item.try_into(from.clone());
-    if let Err(err) = maybe_description {
-        let response_str = "Failed deserializing ParcelDescription";
+pub fn receive_dm_notice(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
+    let maybe_maybe_notice: ExternResult<Option<DeliveryNotice>> = item.try_into(from.clone());
+    if let Err(err) = maybe_maybe_notice {
+        let response_str = "Failed deserializing DeliveryNotice";
         debug!("{}: {}", response_str, err);
         return DeliveryProtocol::Failure(response_str.to_string());
     }
-    /// Create DeliveryNotification
-    let notification = DeliveryNotification {
-        description: maybe_description.unwrap().unwrap(), // Should be ParcelDescription since we filtered before calling this function
-        sender: from,
-        sender_description_signature: item.author_signature,
-        sender_distribution_eh: item.distribution_eh,
-    };
-    /// Commit DeliveryNotification
-    let maybe_hh = create_entry(&notification);
+    let maybe_notice = maybe_maybe_notice.unwrap();
+    if maybe_notice.is_none() {
+        let response_str = "Failed deserializing DeliveryNotice 2";
+        debug!("{}: {}", response_str, err);
+        return DeliveryProtocol::Failure(response_str.to_string());
+    }
+    /// Commit DeliveryNotice
+    let maybe_hh = create_entry(&maybe_notice.unwrap());
     if let Err(err) = maybe_hh {
-        let response_str = "Failed committing DeliveryNotification";
+        let response_str = "Failed committing DeliveryNotice";
         debug!("{}: {}", response_str, err);
         return DeliveryProtocol::Failure(response_str.to_string());
     }
     /// Return Success
-    return DeliveryProtocol::Success("ParcelDescription received".to_string());
+    return DeliveryProtocol::Success("DeliveryNotice received".to_string());
 }
 
 
 /// Returns Success or Failure
-pub fn receive_dm_notification(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
+pub fn receive_dm_reply(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
     let maybe_notification: ExternResult<Option<DeliveryNotification>> = item.try_into(from.clone());
     if let Err(err) = maybe_notification {
         let response_str = "Failed deserializing DeliveryNotification";

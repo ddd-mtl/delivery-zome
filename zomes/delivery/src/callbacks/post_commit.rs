@@ -47,25 +47,32 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
    match entry_kind {
       EntryKind::PubEncKey => {},
       EntryKind::Path => {},
-      EntryKind::DeliveryConfirmation => {
-         let _ = get_typed_from_eh::<DeliveryConfirmation>(eh)?;
+      EntryKind::DeliveryNotice => {
+         let _ = get_typed_from_eh::<DeliveryNotice>(eh)?;
       },
-      EntryKind::DeliveryNotification => {
-         let _ = get_typed_from_eh::<DeliveryNotification>(eh)?;
+      EntryKind::DeliveryReceipt => {
+         let _ = get_typed_from_eh::<DeliveryReceipt>(eh)?;
       },
-      EntryKind::ReceptionConfirmation => {
-         let reception = get_typed_from_eh::<ReceptionConfirmation>(eh)?;
-         post_commit_reception(&eh, reception)?;
-      },
-      EntryKind::ManifestConfirmation => {
-         let _ = get_typed_from_eh::<DescriptionConfirmation>(eh)?;
-      },
-      EntryKind::PendingItem => {
-         let _ = get_typed_from_eh::<PendingItem>(eh)?;
+      EntryKind::DeliveryReply => {
+         let reply = get_typed_from_eh::<DeliveryReply>(eh)?;
+         post_commit_DeliveryReply(&eh, reply)?;
       },
       EntryKind::Distribution => {
          let distribution = get_typed_from_eh::<Distribution>(eh.clone())?;
          post_commit_distribution(&eh, distribution)?;
+      },
+      EntryKind::NoticeReceived => {
+         let _ = get_typed_from_eh::<NoticeReceived>(eh)?;
+      },
+      EntryKind::ParcelReceived => {
+         let reception = get_typed_from_eh::<ParcelReceived>(eh)?;
+         post_commit_reception(&eh, reception)?;
+      },
+      EntryKind::ReplyReceived => {
+         let _ = get_typed_from_eh::<ReplyReceived>(eh)?;
+      },
+      EntryKind::PendingItem => {
+         let _ = get_typed_from_eh::<PendingItem>(eh)?;
       },
       EntryKind::ParcelChunk => {
          let _ = get_typed_from_eh::<ParcelChunk>(eh.clone())?;

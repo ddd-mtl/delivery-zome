@@ -27,29 +27,29 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
       ParcelKind::AppEntry(app_type) => {
          ParcelSummary {
             size: get_app_entry_size(parcel_eh)?,
-            parcel: Parcel::AppEntry((app_type, parcel_eh))
+            reference: ParcelReference::AppEntry((app_type, parcel_eh))
          }
       }
       ParcelKind::Manifest => {
          let manifest: ParcelManifest = get_typed_from_eh(input.parcel)?;
          ParcelSummary {
             size: manifest.size,
-            parcel: Parcel::Package(input.parcel_eh),
+            reference: ParcelReference::Manifest(input.parcel_eh),
          }
       }
    };
-   /// Sign description
-   let me = agent_info()?.agent_latest_pubkey;
-   let sender_description_signature = sign(me, desc)?;
+   /// Sign summary
+   let summary_signature = sign(agent_info()?.agent_latest_pubkey, parcel_summary.clone())?;
    /// Create Distribution
    let distribution = Distribution {
       recipients,
-      parcel_description: parcel_summary,
+      parcel_summary,
+      summary_signature,
       strategy: input.strategy,
-      sender_description_signature,
    };
    /// Commit Distribution
    let eh = hash_entry(distribution.clone())?;
    let _hh = create_entry(distribution)?;
+   /// Done
    Ok(eh)
 }

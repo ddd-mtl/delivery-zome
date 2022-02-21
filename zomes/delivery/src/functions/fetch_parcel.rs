@@ -1,19 +1,20 @@
-use std::future::Pending;
 use hdk::prelude::*;
+
 use crate::{
+   entries::*,
    utils::*,
-   entries::*, utils_parcel::*, LinkKind, utils::*,
-   parcel::*, dm::*, DeliveryProtocol,
-   EntryKind::DeliveryNotice,
+   send_dm,
+   dm_protocol::*,
+   link_kind::*,
 };
 
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
-pub fn receive_parcel(notification_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
+pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    /// Get DeliveryNotification
-   let notice: DeliveryNotice = get_typed_from_eh(notification_eh.clone())?;
-   /// Look for parcel
+   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
+   /// Look for Parcel
    let maybe_parcel = pull_parcel(notice)?;
    if maybe_parcel.is_none() {
       return Ok(None);
@@ -26,14 +27,13 @@ pub fn receive_parcel(notification_eh: EntryHash) -> ExternResult<Option<EntryHa
    let signature = sign(agent_info()?.agent_latest_pubkey, parcel_entry)?;
    /// Create ReceptionConfirmation
    let confirmation = ReceptionConfirmation {
-      notification_eh,
+      notification_eh: notice_eh,
       reception_response: ReceptionResponse::Accepted((hh, signature)),
    };
    let _hh = create_entry(confirmation)?;
    /// Done
    Ok(Some(eh))
 }
-
 
 /// Try to retrieve the parcel entry
 pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {

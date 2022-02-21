@@ -51,12 +51,20 @@ pub fn post_commit_Distribution(distribution_eh: &EntryHash, distribution: Distr
 
     /// FIXME match distribution.strategy
 
+    /// Create DeliveryNotice
+    let notice = DeliveryNotice {
+        distribution_eh: distribution_eh.clone(),
+        sender: agent_info()?.agent_latest_pubkey,
+        parcel_summary: distribution.parcel_summary,
+        sender_summary_signature: distribution.summary_signature,
+    };
+    /// Sign notice
+    let signature = sign(agent_info()?.agent_latest_pubkey, notice.clone())?;
     /// Send to each recipient
     for recipient in distribution.recipients {
         /// Create PendingItem
-        let pending_item = PendingItem::from_description(
-            distribution.parcel_summary.clone(),
-            distribution_eh.clone(),
+        let pending_item = PendingItem::from_notice(
+            notice.clone(),
             recipient.clone(),
         )?;
         /// Send it to recipient
@@ -64,7 +72,8 @@ pub fn post_commit_Distribution(distribution_eh: &EntryHash, distribution: Distr
             recipient,
             distribution_eh.clone(),
             pending_item,
-            distribution.summary_signature.clone());
+            signature.clone(),
+        );
         match res {
             Ok(_) => {},
             Err(e) => {

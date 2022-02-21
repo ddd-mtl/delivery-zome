@@ -8,6 +8,7 @@ use crate::{
    LinkKind,
    parcel::*,
 };
+use crate::entries::PendingKind::DeliveryNotice;
 
 
 /// List of structs that PendingItem can embed
@@ -107,16 +108,16 @@ impl PendingItem {
 
 
    /// called from post_commit()
-   pub fn from_description(description: ParcelDescription, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<ParcelDescription>(PendingKind::ParcelDescription, description, distribution_eh, recipient)
+   pub fn from_notice(notice: DeliveryNotice, recipient: AgentPubKey) -> ExternResult<Self> {
+      Self::create::<DeliveryNotice>(PendingKind::DeliveryNotice, notice, notice.distribution_eh.clone(), recipient)
    }
    /// called from post_commit()
-   pub fn from_notification(notification: DeliveryNotification, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<DeliveryNotification>(PendingKind::ParcelDescription, notification, distribution_eh, recipient)
+   pub fn from_reply(reply: DeliveryReply, recipient: AgentPubKey) -> ExternResult<Self> {
+      Self::create::<DeliveryReply>(PendingKind::DeliveryReply, reply, reply.notice_eh.clone(), recipient)
    }
    /// called from post_commit()
    pub fn from_reception(reception: ReceptionConfirmation, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<ReceptionConfirmation>(PendingKind::ParcelDescription, reception, distribution_eh, recipient)
+      Self::create::<ReceptionConfirmation>(PendingKind::ReceptionConfirmation, reception, distribution_eh, recipient)
    }
    ///
    pub fn from_parcel(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {

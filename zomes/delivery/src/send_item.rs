@@ -7,7 +7,8 @@ use crate::{
    dm::*,
 };
 
-///
+
+/// called from post_commit()
 pub(crate) fn send_item(
    recipient: AgentPubKey,
    distribution_eh: EntryHash,

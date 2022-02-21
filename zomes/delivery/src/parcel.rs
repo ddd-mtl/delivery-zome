@@ -18,19 +18,19 @@ pub enum ParcelKind {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ParcelSummary {
-   pub parcel_size: usize,
-   pub parcel_reference: ParcelReference,
+   pub size: usize,
+   pub reference: ParcelReference,
 }
 
 pub enum ParcelReference {
    AppEntry((AppType, EntryHash)),
-   Package(EntryHash),
+   Manifest(EntryHash),
 }
 
 impl ParcelReference {
    pub fn entry_address(&self) -> EntryHash {
       match self {
-         ParcelReference::Package(eh) => eh.clone(),
+         ParcelReference::Manifest(eh) => eh.clone(),
          ParcelReference::AppEntry((_, eh)) => eh.clone(),
       }
    }

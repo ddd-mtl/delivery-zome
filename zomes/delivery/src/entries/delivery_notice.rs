@@ -21,8 +21,8 @@ pub struct DeliveryNotice {
 
 
 ///
-pub(crate) fn post_commit_DeliveryNotice(eh: &EntryHash, notice: DeliveryNotice) -> ExternResult<()> {
-    debug!("post_commit_delivery_notice() {:?}", eh);
+pub(crate) fn post_commit_DeliveryNotice(notice_eh: &EntryHash, _notice: DeliveryNotice) -> ExternResult<()> {
+    debug!("post_commit_delivery_notice() {:?}", notice_eh);
 
     // /// Emit signal
     // let item = MailItem {
@@ -38,22 +38,8 @@ pub(crate) fn post_commit_DeliveryNotice(eh: &EntryHash, notice: DeliveryNotice)
     //     error!("Emit signal failed: {}", err);
     // }
 
-    let signature = sign(agent_info()?.agent_latest_pubkey, notice)?;
+    // FIXME delete pending item link
 
-    /// Create PendingItem
-    let pending_item = PendingItem::from_notification(
-        notice.clone(),
-        distribution_eh.clone(),
-        recipient.clone(),
-    )?;
-
-    /// Send confirmation to sender
-    send_item(
-        notice.sender.clone(),
-        notice.distribution_eh.clone(),
-        pending_item,
-        signature,
-    )?;
 
     /// Done
     Ok(())
