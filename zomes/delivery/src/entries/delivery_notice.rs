@@ -11,19 +11,19 @@ use crate::entries::pub_enc_key::*;
 
 
 /// Entry representing a received Manifest
-#[hdk_entry(id = "DeliveryNotification", visibility = "private")]
+#[hdk_entry(id = "DeliveryNotice", visibility = "private")]
 #[derive(Clone, PartialEq)]
-pub struct DeliveryNotification {
-    pub description: ParcelDescription,
+pub struct DeliveryNotice {
+    pub parcel_summary: ParcelSummary,
+    pub distribution_eh: EntryHash,
     pub sender: AgentPubKey,
-    pub sender_description_signature: Signature,
-    pub sender_distribution_eh: EntryHash,
+    pub sender_summary_signature: Signature,
 }
 
 
 ///
-pub(crate) fn post_commit_delivery_notification(eh: &EntryHash, notification: DeliveryNotification) -> ExternResult<()> {
-    debug!("post_commit_delivery_notification() {:?}", eh);
+pub(crate) fn post_commit_DeliveryNotice(eh: &EntryHash, notice: DeliveryNotice) -> ExternResult<()> {
+    debug!("post_commit_delivery_notice() {:?}", eh);
 
     // /// Emit signal
     // let item = MailItem {
@@ -39,19 +39,19 @@ pub(crate) fn post_commit_delivery_notification(eh: &EntryHash, notification: De
     //     error!("Emit signal failed: {}", err);
     // }
 
-    let signature = sign(agent_info()?.agent_latest_pubkey, notification)?;
+    let signature = sign(agent_info()?.agent_latest_pubkey, notice)?;
 
     /// Create PendingItem
     let pending_item = PendingItem::from_notification(
-        notification.clone(),
+        notice.clone(),
         distribution_eh.clone(),
         recipient.clone(),
     )?;
 
     /// Send confirmation to sender
     send_item(
-        notification.sender.clone(),
-        notification.sender_distribution_eh.clone(),
+        notice.sender.clone(),
+        notice.distribution_eh.clone(),
         pending_item,
         signature,
     )?;

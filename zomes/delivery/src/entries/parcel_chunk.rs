@@ -13,7 +13,7 @@ pub struct ParcelChunk {
 
 
 ///
-pub(crate) fn validate_chunk(chunk: ParcelChunk, _maybe_validation_package: Option<ValidationPackage>)
+pub(crate) fn validate_ParcelChunk(chunk: ParcelChunk, _maybe_validation_package: Option<ValidationPackage>)
     -> ExternResult<ValidateCallbackResult>
 {
     /// Check size

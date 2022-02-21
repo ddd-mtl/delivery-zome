@@ -1,11 +1,11 @@
-pub mod delivery_notification;
+pub mod delivery_notice;
 pub mod distribution;
 pub mod pending_item;
-pub mod description_confirmation;
-pub mod delivery_confirmation;
+pub mod notice_received;
+pub mod delivery_receipt;
 pub mod parcel_chunk;
 pub mod pub_enc_key;
-pub mod reception_confirmation;
+pub mod delivery_reply;
 pub mod parcel_manifest;
 
 pub use delivery_notification::*;

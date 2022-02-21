@@ -1,9 +1,9 @@
 use hdk::prelude::*;
 
 /// Entry for confirming a manifest has been well received by a recipient
-#[hdk_entry(id = "DescriptionConfirmation", visibility = "private")]
+#[hdk_entry(id = "NoticeReceived", visibility = "private")]
 #[derive(Clone, PartialEq)]
-pub struct DescriptionConfirmation {
+pub struct NoticeReceived {
     pub distribution_eh: EntryHash,
     pub recipient: AgentPubKey,
     pub recipient_manifest_signature: Signature,

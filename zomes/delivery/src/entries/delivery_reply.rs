@@ -12,19 +12,21 @@ pub enum ReceptionResponse {
    Refused,
 }
 
-#[hdk_entry(id = "ReceptionConfirmation")]
+#[hdk_entry(id = "DeliveryReply")]
 #[derive(Clone, PartialEq)]
-pub struct ReceptionConfirmation {
-   pub notification_eh: EntryHash,
+pub struct DeliveryReply {
+   pub notice_eh: EntryHash,
    pub reception_response: ReceptionResponse,
 }
 
 
-
 ///
-pub(crate) fn post_commit_reception(distribution_eh: &EntryHash, recepetion: ReceptionConfirmation) -> ExternResult<()> {
+pub(crate) fn post_commit_DeliveryReply(
+   distribution_eh: &EntryHash,
+   recepetion: DeliveryReply,
+) -> ExternResult<()>
+{
    debug!("post_commit_reception() {:?}", distribution_eh);
-
    /// Create PendingItem
    let pending_item = PendingItem::from_reception(
       recepetion.clone(),
@@ -44,7 +46,6 @@ pub(crate) fn post_commit_reception(distribution_eh: &EntryHash, recepetion: Rec
          debug!("send_reception_request() failed: {}", e);
       }
    }
-
    /// Done
    Ok(())
 }

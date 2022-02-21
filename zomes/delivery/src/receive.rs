@@ -17,10 +17,10 @@ pub fn receive_delivery_dm(from: AgentPubKey, dm: DeliveryProtocol) -> DeliveryP
     match dm {
         DeliveryProtocol::ParcelRequest(distribution_eh) => receive_dm_parcel_request(from, distribution_eh),
         DeliveryProtocol::Item(item) => {
-            match item.kind {
-                PendingKind::Description => receive_dm_description(from, item),
-                PendingKind::DeliveryNotification => receive_dm_notification(from, item),
-                PendingKind::Parcel =>/* FIXME */,
+            match item.app_type {
+                PendingKind::ParcelDescription => receive_dm_description(from, item),
+                PendingKind::DeliveryNotification  => receive_dm_notification(from, item),
+                PendingKind::Entry => {/* FIXME */},
                 PendingKind::ReceptionConfirmation => receive_dm_reception(from, item),
             }
         },

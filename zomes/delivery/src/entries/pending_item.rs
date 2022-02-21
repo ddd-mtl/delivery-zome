@@ -1,41 +1,50 @@
 use hdk::prelude::*;
 
-use super::Mail;
-use crate::entries::*;
+use std::convert::TryFrom;
+
 use crate::{
    utils::*,
+   entries::*,
    LinkKind,
    parcel::*,
 };
 
+
+/// List of structs that PendingItem can embed
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum PendingKind {
-   Description,
+   DeliveryNotice,
    DeliveryNotification,
    ReceptionConfirmation,
-   Parcel,
-   // Chunk,
+   Entry,
+   // ParcelManifest
+   // ParcelChunk,
 }
 
 
-/// Entry representing a mail on the DHT waiting to be received by recipient.
+/// A Public Entry representing an encrypted private Entry on the DHT waiting to be received by recipient.
 /// The recipient is the agentId where the entry is linked from.
-/// The mail is encrypted with the recipient's public encryption key.
+/// The Entry is encrypted with the recipient's public encryption key.
 #[hdk_entry(id = "PendingItem")]
 #[derive(Clone, PartialEq)]
 pub struct PendingItem {
-    pub kind: PendingKind,
+    //pub kind: PendingKind,
+    pub app_type: &'static str,
     pub encrypted_data: XSalsa20Poly1305EncryptedData,
     pub author_signature: Signature,
     pub distribution_eh: EntryHash,
 }
 
 impl PendingItem {
-
    /// Create PendingItem
    /// This will encrypt the content with my encryption key and the recipient's public encryption key
    /// called from post_commit()
-   fn create<T: Sized>(kind: PendingKind, content: T, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self>
+   fn create<T: Sized>(
+      kind: PendingKind,
+      content: T,
+      distribution_eh: EntryHash,
+      recipient: AgentPubKey,
+   ) -> ExternResult<Self>
       where
          T: serde::Serialize
    {
@@ -85,7 +94,8 @@ impl PendingItem {
       trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender_key.clone(), recipient_key.clone());
       /// Done
       let item = PendingItem {
-         kind,
+         //kind,
+         app_type: type_name::<T>(),
          encrypted_data,
          distribution_eh,
          author_signature,
@@ -96,26 +106,23 @@ impl PendingItem {
 
    /// called from post_commit()
    pub fn from_description(description: ParcelDescription, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<ParcelDescription>(PendingKind::Description, description, distribution_eh, recipient)
+      Self::create::<ParcelDescription>(PendingKind::ParcelDescription, description, distribution_eh, recipient)
    }
-
    /// called from post_commit()
    pub fn from_notification(notification: DeliveryNotification, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<DeliveryNotification>(PendingKind::Description, notification, distribution_eh, recipient)
+      Self::create::<DeliveryNotification>(PendingKind::ParcelDescription, notification, distribution_eh, recipient)
    }
-
    /// called from post_commit()
    pub fn from_reception(reception: ReceptionConfirmation, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<ReceptionConfirmation>(PendingKind::Description, reception, distribution_eh, recipient)
+      Self::create::<ReceptionConfirmation>(PendingKind::ParcelDescription, reception, distribution_eh, recipient)
    }
-
    ///
-   pub fn from_parcel(parcel: Parcel, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<Parcel>(PendingKind::Parcel, parcel, distribution_eh, recipient)
+   pub fn from_parcel(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
+      Self::create::<Parcel>(PendingKind::Entry, parcel_entry, distribution_eh, recipient)
    }
 
    /// Attempt to decrypt PendingItem with provided keys
-   pub fn attempt_decrypt<T: Sized>(&self, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T> {
+   pub fn attempt_decrypt<T>(&self, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T> {
       trace!("attempt_decrypt of: {:?}", self.encrypted_data.clone());
       trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender.clone(), recipient.clone());
       /// Decrypt
@@ -181,7 +188,7 @@ struct CommitPendingItemInput {
 
 
 #[hdk_extern]
-fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash> {
+fn commit_PendingItem(input: CommitPendingItemInput) -> ExternResult<HeaderHash> {
    debug!("commit_pending_item() START **********");
    let me = agent_info()?.agent_latest_pubkey;
    /// Commit Pending Item

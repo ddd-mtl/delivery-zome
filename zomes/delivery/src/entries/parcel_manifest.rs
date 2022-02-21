@@ -15,7 +15,7 @@ pub struct ParcelManifest {
    pub chunks: Vec<EntryHash>,
 }
 
-pub fn validate_parcel_manifest(input: ParcelManifest) -> Result<(), String> {
+pub fn validate_ParcelManifest(input: ParcelManifest) -> Result<(), String> {
    /// Must have chunks
    if input.chunks.is_empty() {
       return Err("Missing chunks".to_owned());

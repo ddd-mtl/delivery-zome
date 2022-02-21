@@ -27,9 +27,9 @@ pub enum DistributionStrategy {
 #[derive(Clone, PartialEq)]
 pub struct Distribution {
     pub recipients: Vec<AgentPubKey>,
-    pub parcel_description: ParcelDescription,
+    pub parcel_summary: ParcelSummary,
     pub strategy: DistributionStrategy,
-    pub sender_description_signature: Signature,
+    pub summary_signature: Signature,
     //pub can_share_between_recipients: bool, // Make recipient list "public" to recipients
 }
 
@@ -46,7 +46,7 @@ pub fn validate_distribution(input: Distribution) -> Result<(), String> {
 }
 
 ///
-pub(crate) fn post_commit_distribution(distribution_eh: &EntryHash, distribution: Distribution) -> ExternResult<()> {
+pub fn post_commit_Distribution(distribution_eh: &EntryHash, distribution: Distribution) -> ExternResult<()> {
     debug!("post_commit_distribution() {:?}", distribution_eh);
 
     /// FIXME match distribution.strategy
@@ -55,7 +55,7 @@ pub(crate) fn post_commit_distribution(distribution_eh: &EntryHash, distribution
     for recipient in distribution.recipients {
         /// Create PendingItem
         let pending_item = PendingItem::from_description(
-            distribution.parcel_description.clone(),
+            distribution.parcel_summary.clone(),
             distribution_eh.clone(),
             recipient.clone(),
         )?;
@@ -64,7 +64,7 @@ pub(crate) fn post_commit_distribution(distribution_eh: &EntryHash, distribution
             recipient,
             distribution_eh.clone(),
             pending_item,
-            distribution.sender_description_signature.clone());
+            distribution.summary_signature.clone());
         match res {
             Ok(_) => {},
             Err(e) => {

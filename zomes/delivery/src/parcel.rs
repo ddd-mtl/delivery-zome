@@ -17,21 +17,21 @@ pub enum ParcelKind {
 
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct ParcelDescription {
-   pub size: usize,
-   pub parcel: Parcel,
+pub struct ParcelSummary {
+   pub parcel_size: usize,
+   pub parcel_reference: ParcelReference,
 }
 
-pub enum Parcel {
+pub enum ParcelReference {
    AppEntry((AppType, EntryHash)),
    Package(EntryHash),
 }
 
-impl Parcel {
+impl ParcelReference {
    pub fn entry_address(&self) -> EntryHash {
       match self {
-         Parcel::Package(eh) => eh.clone(),
-         Parcel::AppEntry((_, eh)) => eh.clone(),
+         ParcelReference::Package(eh) => eh.clone(),
+         ParcelReference::AppEntry((_, eh)) => eh.clone(),
       }
    }
 }
