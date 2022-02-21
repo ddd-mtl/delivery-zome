@@ -7,28 +7,26 @@ use strum_macros::EnumIter;
 use strum::EnumProperty;
 
 use crate::{
-   file::*,
-   handle::*,
    utils::*,
 };
 use crate::entries::*;
 use crate::entries::parcel_chunk::ParcelChunk;
 use crate::entries::pub_enc_key::*;
 
-entry_defs![
-   /// -- PubEncKey
-   PubEncKey::entry_def(),
-   /// -- Delivery
-   DeliveryConfirmation::entry_def(),
-   DeliveryNotification::entry_def(),
-   Distribution::entry_def(),
-   ReceptionConfirmation::entry_def(),
-   DescriptionConfirmation::entry_def(),
-   PendingItem::entry_def(),
-   ParcelChunk::entry_def(),
-   /// -- Other
-   PathEntry::entry_def()
-];
+// entry_defs![
+//    /// -- PubEncKey
+//    PubEncKey::entry_def(),
+//    /// -- Delivery
+//    DeliveryNotice::entry_def(),
+//    DeliveryReceipt::entry_def(),
+//    Distribution::entry_def(),
+//    ReceptionConfirmation::entry_def(),
+//    DescriptionConfirmation::entry_def(),
+//    PendingItem::entry_def(),
+//    ParcelChunk::entry_def(),
+//    /// -- Other
+//    PathEntry::entry_def()
+// ];
 
 
 ///
@@ -40,12 +38,15 @@ fn can_deserialize_into_type(entry_type_index: EntryDefIndex, entry_bytes: AppEn
    match entry_kind {
       EntryKind::PubEncKey => PubEncKey::try_from(sb.clone()).is_ok(),
       EntryKind::Path => PathEntry::try_from(sb.clone()).is_ok(),
-      EntryKind::DeliveryConfirmation => DeliveryConfirmation::try_from(sb.clone()).is_ok(),
-      EntryKind::DeliveryNotification => DeliveryNotification::try_from(sb.clone()).is_ok(),
+      EntryKind::DeliveryNotice => DeliveryNotice::try_from(sb.clone()).is_ok(),
+      EntryKind::DeliveryReceipt => DeliveryReceipt::try_from(sb.clone()).is_ok(),
+      EntryKind::DeliveryReply => DeliveryReply::try_from(sb.clone()).is_ok(),
       EntryKind::Distribution => Distribution::try_from(sb.clone()).is_ok(),
-      EntryKind::ReceptionConfirmation => ReceptionConfirmation::try_from(sb.clone()).is_ok(),
-      EntryKind::ManifestConfirmation => DescriptionConfirmation::try_from(sb.clone()).is_ok(),
+      EntryKind::NoticeReceived => NoticeReceived::try_from(sb.clone()).is_ok(),
+      EntryKind::ParcelReceived => ParcelReceived::try_from(sb.clone()).is_ok(),
+      EntryKind::ReplyReceived => ReplyReceived::try_from(sb.clone()).is_ok(),
       EntryKind::PendingItem => PendingItem::try_from(sb.clone()).is_ok(),
+      EntryKind::ParcelManifest => ParcelManifest::try_from(sb.clone()).is_ok(),
       EntryKind::ParcelChunk => ParcelChunk::try_from(sb.clone()).is_ok(),
    }
 }
@@ -56,25 +57,29 @@ fn can_deserialize_into_type(entry_type_index: EntryDefIndex, entry_bytes: AppEn
 #[derive(AsStaticStr, EnumIter, Ordinalize, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum EntryKind {
    #[strum]
+   Path,
+   #[strum]
    PubEncKey,
    #[strum]
-   DeliveryConfirmation,
+   DeliveryNotice,
    #[strum]
-   DeliveryNotification,
+   DeliveryReceipt,
+   #[strum]
+   DeliveryReply,
    #[strum]
    Distribution,
    #[strum]
-   ReceptionConfirmation,
+   NoticeReceived,
    #[strum]
-   ManifestConfirmation,
+   ParcelReceived,
+   #[strum]
+   ReplyReceived,
    #[strum]
    PendingItem,
    #[strum]
    ParcelManifest,
    #[strum]
    ParcelChunk,
-   #[strum]
-   Path,
 }
 
 impl FromStr for EntryKind {

@@ -21,13 +21,15 @@ strum_macros = "=0.19"
 derive_more = "=0.99.16"
 bincode = "=1.3.3"
 base64 = {version = "0.13"}
-
+enum-ordinalize =  "3.1.10"
 zome_proc_macro = {path = "../../crates/proc_macro", default-features = false }
 
+
 # online
+#hc_utils = { git = "https://github.com/holochain/hc-utils.git", rev = "dbca5cb6fee45fa53e0f330add49a26421f9e035", default-features = false }
+
 hdk = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "hdk", default-features = false }
 holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holo_hash", default-features = false }
-hc_utils = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "hc_utils", default-features = false }
 
 
 # local

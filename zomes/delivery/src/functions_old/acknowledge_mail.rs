@@ -16,7 +16,6 @@ use crate::utils_parcel::*;
 /// Zome function
 /// Return EntryHash of newly created OutAck
 #[hdk_extern]
-#[snapmail_api]
 pub fn acknowledge_mail(inmail_hh: HeaderHash) -> ExternResult<EntryHash> {
     /// Make sure its an InMail ...
     let (inmail_eh, inmail) = get_typed_from_hh::<InMail>(inmail_hh.clone())?;

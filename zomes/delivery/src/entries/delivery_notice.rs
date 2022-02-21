@@ -1,7 +1,6 @@
 use hdk::prelude::*;
 
 use crate::{
-    ItemMessage,
     utils::*,
     send_item::*,
     parcel::*,
@@ -14,10 +13,10 @@ use crate::entries::pub_enc_key::*;
 #[hdk_entry(id = "DeliveryNotice", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct DeliveryNotice {
-    pub parcel_summary: ParcelSummary,
     pub distribution_eh: EntryHash,
     pub sender: AgentPubKey,
     pub sender_summary_signature: Signature,
+    pub parcel_summary: ParcelSummary,
 }
 
 

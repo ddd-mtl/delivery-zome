@@ -2,7 +2,6 @@ use hdk::prelude::*;
 
 /// Zome Function
 #[hdk_extern]
-#[snapmail_api]
 pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    /// Get all inbox links
 

@@ -1,20 +1,20 @@
 use std::future::Pending;
 use hdk::prelude::*;
 use crate::{
-   get_typed_from_eh, entries::*, utils_parcel::*, LinkKind, utils::*, parcel::*, dm::*, DeliveryProtocol,
+   utils::*,
+   entries::*, utils_parcel::*, LinkKind, utils::*,
+   parcel::*, dm::*, DeliveryProtocol,
+   EntryKind::DeliveryNotice,
 };
-use crate::EntryKind::ReceptionConfirmation;
-use hc_utils::*;
 
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
-#[snapmail_api]
 pub fn receive_parcel(notification_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    /// Get DeliveryNotification
-   let notification: DeliveryNotification = get_typed_from_eh(notification_eh.clone())?;
+   let notice: DeliveryNotice = get_typed_from_eh(notification_eh.clone())?;
    /// Look for parcel
-   let maybe_parcel = pull_parcel(notification)?;
+   let maybe_parcel = pull_parcel(notice)?;
    if maybe_parcel.is_none() {
       return Ok(None);
    };
@@ -36,7 +36,7 @@ pub fn receive_parcel(notification_eh: EntryHash) -> ExternResult<Option<EntryHa
 
 
 /// Try to retrieve the parcel entry
-pub fn pull_parcel(notification: DeliveryNotification) -> ExternResult<Option<Entry>> {
+pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
    /// Request Parcel
    /// Check Inbox first:
    /// Get all Parcels inbox and see if its there
@@ -47,11 +47,11 @@ pub fn pull_parcel(notification: DeliveryNotification) -> ExternResult<Option<En
    for pending_item in &pending_items {
       match pending_item.kind {
          PendingKind::Parcel => {
-            if pending_item.distribution_eh != notification.sender_distribution_eh {
+            if pending_item.distribution_eh != notice.sender_distribution_eh {
                continue;
             }
             /// We have the parcel we just need to deserialize it
-            let parcel_entry: Entry = pending_item.try_into(notification.sender.clone())?
+            let parcel_entry: Entry = pending_item.try_into(notice.sender.clone())?
                .expect("PendingItem should hold an Entry");
             return Ok(Some(parcel_entry));
          }
@@ -60,8 +60,8 @@ pub fn pull_parcel(notification: DeliveryNotification) -> ExternResult<Option<En
    }
    /// Not found in Inbox
    /// Try via DM second
-   let dm =  DirectMessageProtocol::ParcelRequest(notification.description.parcel.entry_address());
-   let response = send_dm(notification.sender, dm)?;
+   let dm =  DirectMessageProtocol::ParcelRequest(notice.description.parcel.entry_address());
+   let response = send_dm(notice.sender, dm)?;
    if let DeliveryProtocol::ParcelResponse(entry) = response {
       return Ok(Some(entry));
    }

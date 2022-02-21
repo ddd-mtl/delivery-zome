@@ -39,7 +39,6 @@ impl PubEncKey {
 }
 
 #[hdk_extern]
-#[snapmail_api]
 pub fn get_enc_key(from: AgentPubKey) -> ExternResult<X25519PubKey> {
    debug !("*** get_enc_key() CALLED by {}", call_info()?.function_name);
 
@@ -62,7 +61,6 @@ pub fn get_enc_key(from: AgentPubKey) -> ExternResult<X25519PubKey> {
 
 
 #[hdk_extern]
-#[snapmail_api]
 pub fn get_my_enc_key(_: ()) -> ExternResult<X25519PubKey> {
    /// Get my agent address
    let latest_pubkey = agent_info()?.agent_latest_pubkey;

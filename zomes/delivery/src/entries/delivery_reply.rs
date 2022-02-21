@@ -1,51 +1,14 @@
-
 use hdk::prelude::*;
-use crate::{
-   send_item::*,
-   entries::*,
-};
 
 pub enum ReceptionResponse {
-   // HeaderHash of Parcel stored on recipeint's chain
-   // Recipient's signature of parcel entry
-   Accepted((HeaderHash, Signature)),
-   Refused,
+    Accepted((HeaderHash, Signature)),
+    Refused,
 }
 
-#[hdk_entry(id = "DeliveryReply")]
+/// Entry for confirming a delivery has been well received or refused by a recipient
+#[hdk_entry(id = "DeliveryReply", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct DeliveryReply {
-   pub notice_eh: EntryHash,
-   pub reception_response: ReceptionResponse,
-}
-
-
-///
-pub(crate) fn post_commit_DeliveryReply(
-   distribution_eh: &EntryHash,
-   recepetion: DeliveryReply,
-) -> ExternResult<()>
-{
-   debug!("post_commit_reception() {:?}", distribution_eh);
-   /// Create PendingItem
-   let pending_item = PendingItem::from_reception(
-      recepetion.clone(),
-      distribution_eh.clone(),
-      recipient.clone(),
-   )?;
-   /// Send it to recipient
-   let res = send_item(
-      recipient,
-      distribution_eh.clone(),
-      pending_item,
-      recepetion.sender_description_signature.clone());
-   match res {
-      Ok(_) => {},
-      Err(e) => {
-         /// FIXME: accumulate failed recipients to final error return value
-         debug!("send_reception_request() failed: {}", e);
-      }
-   }
-   /// Done
-   Ok(())
+    pub distribution_eh: EntryHash,
+    pub has_accepted: bool,
 }

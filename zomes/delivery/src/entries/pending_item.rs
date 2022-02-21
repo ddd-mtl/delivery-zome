@@ -14,6 +14,7 @@ use crate::{
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum PendingKind {
    DeliveryNotice,
+   DeliveryReply,
    DeliveryNotification,
    ReceptionConfirmation,
    Entry,
@@ -22,16 +23,17 @@ pub enum PendingKind {
 }
 
 
-/// A Public Entry representing an encrypted private Entry on the DHT waiting to be received by recipient.
+/// A Public Entry representing an encrypted private Entry on the DHT
+/// waiting to be received by some recipient.
 /// The recipient is the agentId where the entry is linked from.
 /// The Entry is encrypted with the recipient's public encryption key.
 #[hdk_entry(id = "PendingItem")]
 #[derive(Clone, PartialEq)]
 pub struct PendingItem {
-    //pub kind: PendingKind,
-    pub app_type: &'static str,
+    pub kind: PendingKind,
+    //pub app_type: &'static str,
+    pub author_signature: Signature, // Signature of the Entry's author
     pub encrypted_data: XSalsa20Poly1305EncryptedData,
-    pub author_signature: Signature,
     pub distribution_eh: EntryHash,
 }
 
@@ -94,8 +96,8 @@ impl PendingItem {
       trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender_key.clone(), recipient_key.clone());
       /// Done
       let item = PendingItem {
-         //kind,
-         app_type: type_name::<T>(),
+         kind,
+         //app_type: type_name::<T>(),
          encrypted_data,
          distribution_eh,
          author_signature,

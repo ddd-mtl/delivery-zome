@@ -8,6 +8,6 @@ use crate::entries::ReceptionResponse;
 pub struct DeliveryReceipt {
     pub distribution_eh: EntryHash,
     pub recipient: AgentPubKey,
-    pub recipient_response: ReceptionResponse,
-    pub date_of_reply: u64,
+    pub recipient_signature: Signature,
+    //pub date_of_reception: u64,
 }

@@ -1,8 +1,5 @@
 use hdk::prelude::*;
 
-use crate::file::FileManifest;
-use crate::entries::MailItem;
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {

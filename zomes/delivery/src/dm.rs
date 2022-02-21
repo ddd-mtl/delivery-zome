@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 use crate::{
-   mail,
    dm_protocol::*,
    utils::*,
 };

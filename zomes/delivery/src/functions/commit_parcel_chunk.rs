@@ -7,7 +7,6 @@ use crate::EntryKind::ParcelChunk;
 /// Write base64 file as string to source chain
 /// Return EntryHash of newly created ParcelChunk
 #[hdk_extern]
-#[snapmail_api]
 pub fn commit_parcel_chunk(data: String) -> ExternResult<EntryHash> {
    trace!(" commit_parcel_chunk() {} bytes", data.len());
    /// Check size

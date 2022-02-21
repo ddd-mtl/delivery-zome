@@ -1,8 +1,8 @@
 use hdk::prelude::*;
 
 use crate::{
-    self::*,
-    get_typed_from_eh,
+    //self::*,
+    utils::get_typed_from_eh,
     entries::*,
     send_item::*,
     parcel::*,

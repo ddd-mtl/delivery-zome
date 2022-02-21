@@ -12,10 +12,12 @@ extern crate strum_macros;
 #[macro_use]
 extern crate zome_proc_macro;
 
+#[macro_use] extern crate enum_ordinalize;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
-#[cfg(not(target_arch = "wasm32"))]
-pub mod api_error;
+//#[cfg(not(target_arch = "wasm32"))]
+//pub mod api_error;
 
 mod utils;
 mod constants;
@@ -26,27 +28,33 @@ mod path_kind;
 mod dm;
 mod dm_protocol;
 
-pub mod signal_protocol;
-
-mod callbacks;
-
-pub mod entries;
-pub mod functions;
 mod receive;
 mod utils_parcel;
-pub(crate) mod dm_file;
-pub mod send_item;
+mod send_item;
 mod parcel;
+
+//pub mod signal_protocol;
+
+pub mod callbacks;
+pub mod entries;
+pub mod functions;
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-pub use dm::*;
-pub use dm_protocol::*;
 pub use utils::*;
 pub use constants::*;
 pub use link_kind::*;
 pub use entry_kind::*;
 pub use path_kind::*;
-pub use signal_protocol::*;
+
+pub use dm::*;
+pub use dm_protocol::*;
+
+pub use receive::*;
+pub use utils_parcel::*;
+pub use send_item::*;
+pub use parcel::*;
+//pub use signal_protocol::*;
 

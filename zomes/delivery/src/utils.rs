@@ -1,6 +1,6 @@
-use std::convert::TryFrom;
-
 use hdk::prelude::*;
+
+use std::convert::TryFrom;
 
 pub type TypedEntryAndHash<T> = (T, HeaderHash, EntryHash);
 pub type OptionTypedEntryAndHash<T> = Option<TypedEntryAndHash<T>>;
@@ -217,4 +217,41 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
     let eh =  element.header().entry_hash().unwrap().to_owned();
     /// Done
     Ok(Some((entry, hh, eh)))
+}
+
+
+/// Gets the entries that are linked to a base with LinkTag by matching with the declared TryFrom Entry.
+/// include_latest_updated_entry is used when an entry is updated in the zome
+/// and if you need the latest update of those entries
+pub fn get_links_and_load_type<R: TryFrom<Entry>>(
+    base: EntryHash,
+    tag: Option<LinkTag>,
+    include_latest_updated_entry: bool,
+) -> ExternResult<Vec<R>> {
+    let link_info = get_links(base.into(), tag)?;
+    if include_latest_updated_entry {
+        let entries: Vec<Entry> = super::get_latest_entries(link_info, GetOptions::default())?;
+        let res = entries
+           .iter()
+           .flat_map(|entry| match R::try_from(entry.clone()) {
+               Ok(e) => Ok(e),
+               Err(_) => error("Could not convert get_links result to requested type"),
+           })
+           .collect();
+        Ok(res)
+    } else {
+        let all_results_elements = super::get_details(link_info, GetOptions::default())?;
+        Ok(all_results_elements
+           .iter()
+           .flat_map(|link| match link {
+               Some(Details::Entry(EntryDetails { entry, .. })) => {
+                   match R::try_from(entry.clone()) {
+                       Ok(e) => Ok(e),
+                       Err(_) => error("Could not convert get_links result to requested type"),
+                   }
+               }
+               _ => error("get_links did not return an app entry"),
+           })
+           .collect())
+    }
 }

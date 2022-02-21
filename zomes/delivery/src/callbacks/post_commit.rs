@@ -2,7 +2,6 @@ use hdk::prelude::*;
 
 use crate::{
    entry_kind::*,
-   file::*,
    utils::*,
 };
 use crate::entries::*;

@@ -18,7 +18,6 @@ pub struct CommitParcelManifestInput {
 /// Write base64 file as string to source chain
 /// Return EntryHash of newly created ParcelChunk
 #[hdk_extern]
-#[snapmail_api]
 pub fn commit_parcel_manifest(input: CommitParcelManifestInput) -> ExternResult<EntryHash> {
    trace!(" commit_parcel_manifest({}) -  {}", input.parcel_type, input.name);
    /// Create entry
