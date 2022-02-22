@@ -40,8 +40,8 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
    /// Check each Inbox link
    for pending_item in &pending_items {
       match pending_item.kind {
-         PendingKind::Parcel => {
-            if pending_item.distribution_eh != notice.sender_distribution_eh {
+         PendingKind::Entry => {
+            if pending_item.distribution_eh != notice.distribution_eh {
                continue;
             }
             /// We have the parcel we just need to deserialize it
@@ -54,9 +54,16 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
    }
    /// Not found in Inbox
    /// Try via DM second
-   let dm =  DeliveryProtocol::ParcelRequest(notice.description.parcel.entry_address());
+   let dm = DeliveryProtocol::ParcelRequest(notice.parcel_summary.reference.entry_address());
    let response = send_dm(notice.sender, dm)?;
    if let DeliveryProtocol::ParcelResponse(entry) = response {
+      /// Check entry
+      let received_eh = hash_entry(entry.clone())?;
+      if received_eh != notice.parcel_summary.reference.entry_address() {
+         warn!("The entry the sender sent does not match notice's Parcel EntryHash");
+         return Ok(None);
+      }
+      ///
       return Ok(Some(entry));
    }
    /// TODO: Ask Recipient peers?

@@ -5,8 +5,8 @@ use crate::{
    utils::*,
 };
 use crate::entries::*;
-use crate::functions::*;
-use crate::strum::AsStaticRef;
+//use crate::functions::*;
+//use crate::strum::AsStaticRef;
 
 /// Zome Callback
 #[hdk_extern(infallible)]
@@ -48,25 +48,26 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
       EntryKind::PubEncKey => {},
       EntryKind::Path => {},
       EntryKind::DeliveryNotice => {
-         let _ = get_typed_from_eh::<DeliveryNotice>(eh)?;
+         let notice = get_typed_from_eh::<DeliveryNotice>(eh)?;
+         DeliveryNotice::post_commit(&eh, notice)?;
       },
       EntryKind::DeliveryReceipt => {
          let _ = get_typed_from_eh::<DeliveryReceipt>(eh)?;
       },
       EntryKind::DeliveryReply => {
          let reply = get_typed_from_eh::<DeliveryReply>(eh)?;
-         post_commit_DeliveryReply(&eh, reply)?;
+         DeliveryReply::post_commit(&eh, reply)?;
       },
       EntryKind::Distribution => {
          let distribution = get_typed_from_eh::<Distribution>(eh.clone())?;
-         post_commit_distribution(&eh, distribution)?;
+         Distribution::post_commit(&eh, distribution)?;
       },
       EntryKind::NoticeReceived => {
          let _ = get_typed_from_eh::<NoticeReceived>(eh)?;
       },
       EntryKind::ParcelReceived => {
          let reception = get_typed_from_eh::<ParcelReceived>(eh)?;
-         post_commit_reception(&eh, reception)?;
+         ParcelReceived::post_commit(&eh, reception)?;
       },
       EntryKind::ReplyReceived => {
          let _ = get_typed_from_eh::<ReplyReceived>(eh)?;
@@ -75,10 +76,13 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
          let _ = get_typed_from_eh::<PendingItem>(eh)?;
       },
       EntryKind::ParcelChunk => {
-         let _ = get_typed_from_eh::<ParcelChunk>(eh.clone())?;
+         let chunk = get_typed_from_eh::<ParcelChunk>(eh.clone())?;
+         ParcelChunk::post_commit(&eh, chunk)?;
       },
       EntryKind::ParcelManifest => {
-         let _manifest = get_typed_from_eh::<ParcelManifest>(eh)?;
+         let manifest = get_typed_from_eh::<ParcelManifest>(eh)?;
+         ParcelManifest::post_commit(&eh, manifest)?;
+
       },
       // Add type handling here
       // ..

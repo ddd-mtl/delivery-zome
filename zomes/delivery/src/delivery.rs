@@ -12,7 +12,7 @@ pub struct OutgoingDeliveryItem {
 pub struct IncomingDeliveryItem {
    pub hh: HeaderHash,
    pub author: AgentPubKey,
-   pub parcel: Parcel,
+   //pub parcel: Parcel,
    pub state: NoticeState,
    // pub delivery_states: Map<AgentPubKey, DeliveryState>
    pub recipients: Vec<AgentPubKey>,

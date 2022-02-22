@@ -4,9 +4,16 @@ use crate::{
    //self::*,
    entries::*,
    dm_protocol::*,
-   dm::*,
+   send_dm::*,
+   utils::*,
 };
 
+#[allow(non_camel_case_types)]
+pub enum SendSuccessKind {
+   OK_SELF,
+   OK_DIRECT,
+   OK_PENDING,
+}
 
 /// called from post_commit()
 pub(crate) fn send_item(
@@ -52,8 +59,7 @@ pub(crate) fn send_item(
    if let DeliveryProtocol::Success(_) = response_dm {
       return Ok(SendSuccessKind::OK_DIRECT);
    } else {
-      let err = result.err().unwrap();
-      debug!("send_item() failed: {:?}", err);
+      debug!("send_item() failed: {:?}", response_dm);
    }
 
    debug!("send_item() - Commit PendingItem...");
@@ -65,16 +71,10 @@ pub(crate) fn send_item(
       recipient: recipient.clone(),
    };
    debug!("send_item() - calling commit_pending_mail()");
-   let response = call_remote(
-      me,
-      zome_info()?.name,
-      "commit_pending_item".to_string().into(),
-      None,
-      input,
-   )?;
+   let response = call_self("commit_pending_item", input)?;
    debug!("send_confirmation() - commit_pending_mail() response: {:?}", response);
    return match response {
       ZomeCallResponse::Ok(_) => Ok(SendSuccessKind::OK_PENDING),
-      _ => error("call_remote() to commit_pending_item() failed")
+      _ => error("call_self() to commit_pending_item() failed"),
    };
 }

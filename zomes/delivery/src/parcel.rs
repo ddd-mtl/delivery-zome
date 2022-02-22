@@ -1,11 +1,6 @@
 use hdk::prelude::*;
 
-use crate::{
-   entries::*,
-};
-
 pub type AppType = (ZomeName, EntryDefId);
-
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ParcelKind {
@@ -22,6 +17,7 @@ pub struct ParcelSummary {
    pub reference: ParcelReference,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ParcelReference {
    AppEntry((AppType, EntryHash)),
    Manifest(EntryHash),

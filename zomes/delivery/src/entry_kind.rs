@@ -4,7 +4,7 @@ use std::str::FromStr;
 
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
-use strum::EnumProperty;
+//use strum::EnumProperty;
 
 use crate::{
    utils::*,
@@ -13,20 +13,23 @@ use crate::entries::*;
 use crate::entries::parcel_chunk::ParcelChunk;
 use crate::entries::pub_enc_key::*;
 
-// entry_defs![
-//    /// -- PubEncKey
-//    PubEncKey::entry_def(),
-//    /// -- Delivery
-//    DeliveryNotice::entry_def(),
-//    DeliveryReceipt::entry_def(),
-//    Distribution::entry_def(),
-//    ReceptionConfirmation::entry_def(),
-//    DescriptionConfirmation::entry_def(),
-//    PendingItem::entry_def(),
-//    ParcelChunk::entry_def(),
-//    /// -- Other
-//    PathEntry::entry_def()
-// ];
+entry_defs![
+   /// -- PubEncKey
+   PubEncKey::entry_def(),
+   /// -- Delivery
+   DeliveryNotice::entry_def(),
+   DeliveryReceipt::entry_def(),
+   DeliveryReply::entry_def(),
+   Distribution::entry_def(),
+   NoticeReceived::entry_def(),
+   ParcelReceived::entry_def(),
+   ReplyReceived::entry_def(),
+   PendingItem::entry_def(),
+   ParcelManifest::entry_def(),
+   ParcelChunk::entry_def(),
+   /// -- Other
+   PathEntry::entry_def()
+];
 
 
 ///
@@ -86,7 +89,7 @@ impl FromStr for EntryKind {
    type Err = ();
    fn from_str(input: &str) -> Result<EntryKind, Self::Err> {
       for entry_kind in EntryKind::iter() {
-         if input == entry_kind {
+         if input == entry_kind.into() {
             return Ok(entry_kind);
          }
       }

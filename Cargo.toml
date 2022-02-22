@@ -3,7 +3,7 @@ resolver = "2"
 members = [
   "zomes/delivery",
   "sweettest",
-  "test_dna/zomes/secret_code",
+  "test_dna/zomes/secret",
   #"crates/proc_macro",
 ]
 

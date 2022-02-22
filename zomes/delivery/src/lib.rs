@@ -25,10 +25,10 @@ mod link_kind;
 mod entry_kind;
 mod path_kind;
 
-mod dm;
+mod send_dm;
 mod dm_protocol;
 
-mod receive;
+mod receive_dm;
 mod utils_parcel;
 mod send_item;
 mod parcel;
@@ -51,10 +51,10 @@ pub use link_kind::*;
 pub use entry_kind::*;
 pub use path_kind::*;
 
-pub use dm::*;
+pub use send_dm::*;
 pub use dm_protocol::*;
 
-pub use receive::*;
+pub use receive_dm::*;
 pub use utils_parcel::*;
 pub use send_item::*;
 pub use parcel::*;

@@ -26,8 +26,8 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    let parcel_summary = match input.parcel_kind {
       ParcelKind::AppEntry(app_type) => {
          ParcelSummary {
-            size: get_app_entry_size(parcel_eh)?,
-            reference: ParcelReference::AppEntry((app_type, parcel_eh))
+            size: get_app_entry_size(input.parcel_eh.clone())?,
+            reference: ParcelReference::AppEntry((app_type, input.parcel_eh))
          }
       }
       ParcelKind::Manifest => {

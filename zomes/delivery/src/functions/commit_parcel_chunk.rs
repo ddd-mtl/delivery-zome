@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use crate::constants::CHUNK_MAX_SIZE;
 use crate::EntryKind::ParcelChunk;
-
+use crate::utils::*;
 
 /// Zome function
 /// Write base64 file as string to source chain

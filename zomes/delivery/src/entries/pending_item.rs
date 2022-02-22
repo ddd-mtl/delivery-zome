@@ -6,9 +6,9 @@ use crate::{
    utils::*,
    entries::*,
    LinkKind,
-   parcel::*,
+   //parcel::*,
 };
-use crate::entries::PendingKind::DeliveryNotice;
+use crate::entries::DeliveryNotice;
 
 
 /// List of structs that PendingItem can embed
@@ -19,7 +19,7 @@ pub enum PendingKind {
    ParcelReceived,
    Entry,
    // ParcelManifest
-   // ParcelChunk,
+   ParcelChunk,
 }
 
 
@@ -53,13 +53,7 @@ impl PendingItem {
       /// Get my key
       let me = agent_info()?.agent_latest_pubkey;
       debug!("get_enc_key() for sender {:?}", me);
-      let maybe_sender_key = call_remote(
-         me.clone(),
-         zome_info()?.name,
-         "get_enc_key".to_string().into(),
-         None,
-         me.clone(),
-      )?;
+      let maybe_sender_key = call_self("get_enc_key", me.clone())?;
       debug!("get_enc_key() for sender result: {:?}", maybe_sender_key);
       let sender_key = match maybe_sender_key {
          ZomeCallResponse::Ok(output) => output.decode()?,
@@ -68,11 +62,8 @@ impl PendingItem {
       debug!("PendingItem: sender_key = {:?}", sender_key);
       /// Get recipient's key
       debug!("get_enc_key() for recipient {:?}", recipient);
-      let maybe_recipient_key = call_remote(
-         me.clone(),
-         zome_info()?.name,
-         "get_enc_key".to_string().into(),
-         None,
+      let maybe_recipient_key = call_self(
+         "get_enc_key",
          recipient.clone(),
       )?;
       debug!("get_enc_key() for recipient result: {:?}", maybe_recipient_key);
@@ -82,7 +73,7 @@ impl PendingItem {
       };
       debug!("PendingItem: recipient_key = {:?}", recipient_key);
       /// Sign content
-      let author_signature = sign(me, &content)
+      let author_signature = sign(me, content.clone())
          .expect("Should be able to sign with my key");
       /// Serialize
       let serialized = bincode::serialize(&content).unwrap();
@@ -120,7 +111,7 @@ impl PendingItem {
    }
    ///
    pub fn from_parcel(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<Parcel>(PendingKind::Entry, parcel_entry, distribution_eh, recipient)
+      Self::create::<Entry>(PendingKind::Entry, parcel_entry, distribution_eh, recipient)
    }
 
    /// Attempt to decrypt PendingItem with provided keys
@@ -183,9 +174,9 @@ impl PendingItem {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-struct CommitPendingItemInput {
-   item: PendingItem,
-   recipient: AgentPubKey,
+pub struct CommitPendingItemInput {
+   pub item: PendingItem,
+   pub recipient: AgentPubKey,
 }
 
 

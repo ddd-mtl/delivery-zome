@@ -2,6 +2,7 @@ use hdk::prelude::*;
 
 use crate::{
     CHUNK_MAX_SIZE,
+    utils::*,
 };
 
 /// Entry representing a file chunk.
@@ -11,31 +12,27 @@ pub struct ParcelChunk {
     pub data: String,
 }
 
-
-///
-pub(crate) fn validate_ParcelChunk(chunk: ParcelChunk, _maybe_validation_package: Option<ValidationPackage>)
-    -> ExternResult<ValidateCallbackResult>
-{
-    /// Check size
-    if chunk.data.len() > CHUNK_MAX_SIZE {
-        return Ok(ValidateCallbackResult::Invalid(
-            format!("A chunk can't be bigger than {} KiB", CHUNK_MAX_SIZE / 1024)));
+impl ParcelChunk {
+    ///
+    pub fn validate(&self, _maybe_validation_package: Option<ValidationPackage>)
+        -> ExternResult<ValidateCallbackResult>
+    {
+        /// Check size
+        if self.data.len() > CHUNK_MAX_SIZE {
+            return Ok(ValidateCallbackResult::Invalid(
+                format!("A chunk can't be bigger than {} KiB", CHUNK_MAX_SIZE / 1024)));
+        }
+        /// Done
+        Ok(ValidateCallbackResult::Valid)
     }
-    Ok(ValidateCallbackResult::Valid)
-}
 
 
-///
-pub fn post_commit_ParcelChunk(chunk_eh: &EntryHash, _chunk: ParcelChunk) -> ExternResult<()> {
-    /// Create ParcelReceived if we fetched all chunks
-    let response = call_remote(
-        me,
-        zome_info()?.name,
-        "check_manifest".to_string().into(),
-        None,
-        chunk_eh,
-    )?;
-    debug!("check_manifest() response: {:?}", response);
-    assert!(matches!(response, ZomeCallResponse::Ok { .. }));
-    Ok(())
+    ///
+    pub fn post_commit(chunk_eh: &EntryHash, _chunk: Self) -> ExternResult<()> {
+        /// Create ParcelReceived if we fetched all chunks
+        let response = call_self("check_manifest", chunk_eh)?;
+        debug!("check_manifest() response: {:?}", response);
+        assert!(matches!(response, ZomeCallResponse::Ok { .. }));
+        Ok(())
+    }
 }

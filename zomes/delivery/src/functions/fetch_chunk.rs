@@ -1,7 +1,8 @@
 use hdk::prelude::*;
 
-use crate::{entries::*, utils::*, send_dm, dm_protocol::*, link_kind::*, ParcelReference};
+use crate::{entries::*, utils::*, send_dm, dm_protocol::*, link_kind::*};
 
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FetchChunkInput {
    chunk_eh: EntryHash,
    notice_eh: EntryHash,
@@ -12,7 +13,7 @@ pub struct FetchChunkInput {
 #[hdk_extern]
 pub fn fetch_chunk(input: FetchChunkInput) -> ExternResult<Option<EntryHash>> {
    /// Get DeliveryNotice
-   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
+   let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Look for Chunk
    let maybe_chunk = pull_chunk(input.chunk_eh, notice)?;
    if maybe_chunk.is_none() {
@@ -40,7 +41,7 @@ pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<O
    /// Check each Inbox link
    for pending_item in &pending_items {
       match pending_item.kind {
-         PendingKind::Chunk => {
+         PendingKind::ParcelChunk => {
             if pending_item.distribution_eh != notice.distribution_eh {
                continue;
             }

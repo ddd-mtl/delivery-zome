@@ -29,7 +29,7 @@ impl ParcelReceived {
       let receipts = query(query_args)?;
 
       match field {
-         ParcelReceivedField::Notice((eh)) => {
+         ParcelReceivedField::Notice(eh) => {
             for receipt_el in receipts {
                let receipt: ParcelReceived = get_typed_from_el(receipt_el)?;
                if receipt.notice_eh == eh {
@@ -37,7 +37,7 @@ impl ParcelReceived {
                }
             }
          },
-         ParcelReceivedField::Parcel((eh)) => {
+         ParcelReceivedField::Parcel(eh) => {
             for receipt_el in receipts {
                let receipt: ParcelReceived = get_typed_from_el(receipt_el)?;
                if receipt.parcel_eh == eh {
@@ -51,9 +51,9 @@ impl ParcelReceived {
    }
 
    ///
-   pub fn post_commit(_receipt_eh: &EntryHash, reception: Self) -> ExternResult<()>
+   pub fn post_commit(receipt_eh: &EntryHash, reception: Self) -> ExternResult<()>
    {
-      debug!("post_commit_ParcelReceived() {:?}", distribution_eh);
+      debug!("post_commit_ParcelReceived() {:?}", receipt_eh);
       /// Get DeliveryNotice
       let notice: DeliveryNotice = get_typed_from_eh(reception.notice_eh.clone())?;
       /// Sign Item

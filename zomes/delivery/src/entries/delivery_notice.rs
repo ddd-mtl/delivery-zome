@@ -1,8 +1,12 @@
 use hdk::prelude::*;
 
-use crate::{utils::*, send_item::*, parcel::*, EntryKind};
-use crate::entries::*;
-use crate::entries::pub_enc_key::*;
+use crate::{
+    utils::*,
+            //send_item::*,
+            parcel::*, EntryKind,
+};
+//use crate::entries::*;
+//use crate::entries::pub_enc_key::*;
 
 
 /// Entry representing a received Manifest

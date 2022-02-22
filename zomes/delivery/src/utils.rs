@@ -10,18 +10,25 @@ pub fn error<T>(reason: &str) -> ExternResult<T> {
     Err(WasmError::Guest(String::from(reason)))
 }
 
-/*
-use timestamp::Timestamp;
-
-pub(crate) fn to_timestamp(duration: Duration) -> Timestamp {
-    Timestamp(duration.as_secs() as i64, duration.subsec_nanos())
-}
-*/
 
 /// Returns number of seconds since UNIX_EPOCH
 pub fn now() -> u64 {
     let now = sys_time().expect("sys_time() should always work");
     now.as_seconds_and_nanos().0 as u64
+}
+
+/// Remote call to self
+pub fn call_self<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCallResponse>
+where
+    I: serde::Serialize + std::fmt::Debug
+{
+    call_remote(
+        agent_info()?.agent_latest_pubkey,
+        zome_info()?.name,
+        fn_name.to_string().into(),
+        None,
+        payload,
+    )
 }
 
 /// Get Element at address using query()
@@ -31,7 +38,7 @@ pub fn get_entry_type_from_eh(eh: EntryHash) -> ExternResult<EntryType> {
         return error("no element found for entry_hash");
     }
     let element = maybe_element.unwrap();
-    let entry_type = element.header().entry_type()?.clone();
+    let entry_type = element.header().entry_type().unwrap().clone();
     Ok(entry_type)
 }
 
@@ -220,38 +227,15 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
 }
 
 
-/// Gets the entries that are linked to a base with LinkTag by matching with the declared TryFrom Entry.
-/// include_latest_updated_entry is used when an entry is updated in the zome
-/// and if you need the latest update of those entries
+//----------------------------------------------------------------------------------------
+// Copied from hc-utils
+//----------------------------------------------------------------------------------------
+
+///
 pub fn get_links_and_load_type<R: TryFrom<Entry>>(
-    base: EntryHash,
-    tag: Option<LinkTag>,
-    include_latest_updated_entry: bool,
+    _base: EntryHash,
+    _tag: Option<LinkTag>,
+    _include_latest_updated_entry: bool,
 ) -> ExternResult<Vec<R>> {
-    let link_info = get_links(base.into(), tag)?;
-    if include_latest_updated_entry {
-        let entries: Vec<Entry> = super::get_latest_entries(link_info, GetOptions::default())?;
-        let res = entries
-           .iter()
-           .flat_map(|entry| match R::try_from(entry.clone()) {
-               Ok(e) => Ok(e),
-               Err(_) => error("Could not convert get_links result to requested type"),
-           })
-           .collect();
-        Ok(res)
-    } else {
-        let all_results_elements = super::get_details(link_info, GetOptions::default())?;
-        Ok(all_results_elements
-           .iter()
-           .flat_map(|link| match link {
-               Some(Details::Entry(EntryDetails { entry, .. })) => {
-                   match R::try_from(entry.clone()) {
-                       Ok(e) => Ok(e),
-                       Err(_) => error("Could not convert get_links result to requested type"),
-                   }
-               }
-               _ => error("get_links did not return an app entry"),
-           })
-           .collect())
-    }
+    error("FIXME use hc-utils dependency")
 }
