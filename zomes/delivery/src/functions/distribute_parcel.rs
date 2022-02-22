@@ -31,7 +31,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
          }
       }
       ParcelKind::Manifest => {
-         let manifest: ParcelManifest = get_typed_from_eh(input.parcel)?;
+         let manifest: ParcelManifest = get_typed_from_eh(input.parcel_eh.clone())?;
          ParcelSummary {
             size: manifest.size,
             reference: ParcelReference::Manifest(input.parcel_eh),

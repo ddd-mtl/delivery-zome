@@ -16,7 +16,7 @@ fn validate_create_link(candidat: ValidateCreateLinkData)
 
    for link_kind in LinkKind::iter() {
       /// Try validating static link kind
-      if tag_str == link_kind.into() {
+      if tag_str == link_kind.as_ref() {
          return link_kind.validate_types(candidat, None);
       }
       /// Or try validating dynamic link kind

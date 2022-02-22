@@ -46,7 +46,7 @@ pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<O
                continue;
             }
             /// We have the chunk we just need to deserialize it
-            let item: Entry = pending_item.try_into(notice.sender.clone())?
+            let item: Entry = pending_item.into_item(notice.sender.clone())?
                .expect("PendingItem should hold an Entry");
             let chunk = get_typed_from_entry(item)?;
             return Ok(Some(chunk));

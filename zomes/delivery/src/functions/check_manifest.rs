@@ -1,5 +1,8 @@
 use hdk::prelude::*;
 
+use std::collections::HashSet;
+use std::iter::FromIterator;
+
 use crate::{entries::*, utils::*, EntryKind, ParcelReference};
 
 
@@ -83,10 +86,11 @@ pub fn find_DeliveryNotice(parcel_eh: EntryHash) -> ExternResult<Option<Delivery
 pub fn has_all_chunks(manifest_eh: EntryHash) -> ExternResult<bool> {
    /// Get ParcelManifest
    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
+   let chunks_set: HashSet<EntryHash> = HashSet::from_iter(manifest.chunks);
    /// Get all Create ParcelChunk Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(false)
-      .entry_hashes(manifest.chunks.into());
+      .entry_hashes(chunks_set);
    let chunk_els = query(query_args)?;
    /// Check if all found
    return Ok(chunk_els.len() == manifest.chunks.len())

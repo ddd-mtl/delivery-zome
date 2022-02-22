@@ -41,14 +41,14 @@ impl PendingItem {
    /// Create PendingItem
    /// This will encrypt the content with my encryption key and the recipient's public encryption key
    /// called from post_commit()
-   fn create<T: Sized>(
+   fn create<T>(
       kind: PendingKind,
       content: T,
       distribution_eh: EntryHash,
       recipient: AgentPubKey,
    ) -> ExternResult<Self>
       where
-         T: serde::Serialize
+         T: serde::Serialize + Clone + Sized + std::fmt::Debug
    {
       /// Get my key
       let me = agent_info()?.agent_latest_pubkey;
@@ -115,7 +115,10 @@ impl PendingItem {
    }
 
    /// Attempt to decrypt PendingItem with provided keys
-   pub fn attempt_decrypt<T>(&self, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T> {
+   pub fn attempt_decrypt<'a, T>(&self, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T>
+      where
+         T: serde::de::Deserialize<'a>
+   {
       trace!("attempt_decrypt of: {:?}", self.encrypted_data.clone());
       trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender.clone(), recipient.clone());
       /// Decrypt
@@ -134,7 +137,10 @@ impl PendingItem {
    }
 
 
-   pub fn try_into<T>(self, from: AgentPubKey) -> ExternResult<Option<T>> {
+   pub fn into_item<'a, T>(self, from: AgentPubKey) -> ExternResult<Option<T>>
+      where
+         T: serde::de::Deserialize<'a> + Clone + serde::Serialize + std::fmt::Debug //+ Sized
+   {
       /// Get my key
       let me = agent_info()?.agent_latest_pubkey;
       let recipient_key = get_enc_key(me.clone())?;
@@ -204,7 +210,7 @@ fn commit_PendingItem(input: CommitPendingItemInput) -> ExternResult<HeaderHash>
    let link1_hh = maybe_link1_hh.unwrap();
    trace!("link1_hh = {}", link1_hh);
    /// Commit MailInbox Link
-   let tag = LinkKind::MailInbox.concat_hash(&me);
+   let tag = LinkKind::Inbox.concat_hash(&me);
    let maybe_link2_hh = create_link(EntryHash::from(input.recipient.clone()), pending_item_eh, tag);
    if let Err(err) = maybe_link2_hh.clone() {
       trace!("link2 failed = {:?}", err);

@@ -29,7 +29,7 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
             match item.kind {
                 PendingKind::DeliveryNotice => receive_dm_notice(dm.from, item),
                 PendingKind::DeliveryReply  => receive_dm_reply(dm.from, item),
-                PendingKind::Entry => {/* FIXME */},
+                //PendingKind::Entry => {/* FIXME */},
                 //PendingKind::ReceptionConfirmation => receive_dm_reception(from, item),
                 _ => panic!("FIXME kind not supported yet"),
             }
@@ -90,7 +90,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) 
 /// Commit received DeliveryNotice from sender
 /// Returns Success or Failure
 pub fn receive_dm_notice(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
-    let maybe_maybe_notice: ExternResult<Option<DeliveryNotice>> = item.try_into(from.clone());
+    let maybe_maybe_notice: ExternResult<Option<DeliveryNotice>> = item.into_item(from.clone());
     if let Err(err) = maybe_maybe_notice {
         let response_str = "Failed deserializing DeliveryNotice";
         debug!("{}: {}", response_str, err);
@@ -116,7 +116,7 @@ pub fn receive_dm_notice(from: AgentPubKey, item: PendingItem) -> DeliveryProtoc
 /// Create and commit a ReplyReceived from a DeliveryReply
 /// Returns Success or Failure
 pub fn receive_dm_reply(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
-    let maybe_maybe_reply: ExternResult<Option<DeliveryReply>> = item.try_into(from.clone());
+    let maybe_maybe_reply: ExternResult<Option<DeliveryReply>> = item.into_item(from.clone());
     if let Err(err) = maybe_maybe_reply {
         let response_str = "Failed deserializing DeliveryReply";
         debug!("{}: {}", response_str, err);

@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use crate::constants::CHUNK_MAX_SIZE;
-use crate::EntryKind::ParcelChunk;
+use crate::entries::*;
 use crate::utils::*;
 
 /// Zome function

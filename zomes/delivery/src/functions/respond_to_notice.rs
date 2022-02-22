@@ -5,6 +5,7 @@ use crate::{
 };
 
 
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RespondToNoticeInput {
    notice_eh: EntryHash,
    has_accepted: bool,

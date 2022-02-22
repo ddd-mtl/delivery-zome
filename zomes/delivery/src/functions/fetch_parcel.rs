@@ -45,7 +45,7 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
                continue;
             }
             /// We have the parcel we just need to deserialize it
-            let parcel_entry: Entry = pending_item.try_into(notice.sender.clone())?
+            let parcel_entry: Entry = pending_item.into_item(notice.sender.clone())?
                .expect("PendingItem should hold an Entry");
             return Ok(Some(parcel_entry));
          }
