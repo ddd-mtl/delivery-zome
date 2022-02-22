@@ -17,14 +17,20 @@ pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
         None => return error("No element found at given payload address"),
     };
     /// Get length of SerializedBytes
-    let size: usize = element
+    let entry = element
        .entry()
        .to_app_option::<Entry>()?
        .ok_or(WasmError::Guest(String::from("No AppEntry found at given payload address")))?
-       .into_sb()
-       .len();
-    /// Done
-    Ok(size)
+       ;
+    if let Entry::App(app_bytes) = entry {
+        let size: usize = app_bytes
+           .into_sb()
+           .bytes()
+           .len();
+        /// Done
+        return Ok(size);
+    }
+    error("Entry not of type App()")
 }
 
 //

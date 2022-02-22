@@ -43,7 +43,7 @@ fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
 
 fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
    let entry_kind = EntryKind::from_index(&app_type.id());
-   debug!(" - {} ({})",  entry_kind.as_static(), eh);
+   debug!(" - {} ({})",  entry_kind.as_ref(), eh);
    match entry_kind {
       EntryKind::PubEncKey => {},
       EntryKind::Path => {},

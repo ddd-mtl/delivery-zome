@@ -2,6 +2,8 @@ use hdk::prelude::*;
 
 use std::str::FromStr;
 
+use std::convert::AsRef;
+use strum_macros::AsRefStr;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 //use strum::EnumProperty;
@@ -34,7 +36,7 @@ entry_defs![
 
 ///
 fn can_deserialize_into_type(entry_type_index: EntryDefIndex, entry_bytes: AppEntryBytes) -> bool {
-   trace!("*** can_deserialize() called! ({:?})", entry_type_index);
+   trace!("*** can_deserialize_into_type() called! ({:?})", entry_type_index);
    let sb = entry_bytes.into_sb();
    let entry_kind = EntryKind::from_index(&entry_type_index);
 
@@ -57,31 +59,19 @@ fn can_deserialize_into_type(entry_type_index: EntryDefIndex, entry_bytes: AppEn
 
 /// Listing all Entry kinds for this DNA
 /// !! Visibility prop value must match hdk_entry visibility !!
-#[derive(AsStaticStr, EnumIter, Ordinalize, Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(AsRefStr, EnumIter, Ordinalize, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum EntryKind {
-   #[strum]
    Path,
-   #[strum]
    PubEncKey,
-   #[strum]
    DeliveryNotice,
-   #[strum]
    DeliveryReceipt,
-   #[strum]
    DeliveryReply,
-   #[strum]
    Distribution,
-   #[strum]
    NoticeReceived,
-   #[strum]
    ParcelReceived,
-   #[strum]
    ReplyReceived,
-   #[strum]
    PendingItem,
-   #[strum]
    ParcelManifest,
-   #[strum]
    ParcelChunk,
 }
 
@@ -89,7 +79,8 @@ impl FromStr for EntryKind {
    type Err = ();
    fn from_str(input: &str) -> Result<EntryKind, Self::Err> {
       for entry_kind in EntryKind::iter() {
-         if input == entry_kind.into() {
+         //let entry_kind = EntryKind::from_ordinal(ordinal);
+         if input == entry_kind.as_ref() {
             return Ok(entry_kind);
          }
       }
@@ -104,11 +95,26 @@ impl EntryKind {
       let entre_defs = zome_info()
          .expect("Zome should be operational")
          .entry_defs;
-      let maybe_index = entre_defs.entry_def_index_from_id(EntryDefId::App(self.into()));
+      let id = EntryDefId::App(self.as_ref().to_string());
+      let maybe_index = entre_defs.entry_def_index_from_id(id);
       if let Some(index) = maybe_index {
          return index;
       }
       error!("Fatal error EntryKind::index() not found.");
+      unreachable!()
+   }
+
+   ///
+   pub fn from_index(index: &EntryDefIndex) -> Self {
+      let entre_defs = zome_info()
+         .expect("Zome should be operational")
+         .entry_defs;
+      let i: usize = index.0 as usize;
+      let entry_def_id = entre_defs[i].id.clone();
+      if let EntryDefId::App(id) = entry_def_id {
+         return Self::from_str(&id)
+            .expect("Should have Entry with that name");
+      }
       unreachable!()
    }
 
@@ -118,7 +124,7 @@ impl EntryKind {
          .expect("Zome should be operational")
          .entry_defs;
       let index = self.index();
-      return entre_defs[index.into()].clone();
+      return entre_defs[index.0 as usize].clone();
    }
 
    ///

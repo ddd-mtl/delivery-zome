@@ -1,7 +1,6 @@
 use hdk::prelude::*;
 
 use strum::IntoEnumIterator;
-use strum::AsStaticRef;
 
 use crate::{
    link_kind::*,
@@ -17,7 +16,7 @@ fn validate_create_link(candidat: ValidateCreateLinkData)
 
    for link_kind in LinkKind::iter() {
       /// Try validating static link kind
-      if tag_str == link_kind.as_static() {
+      if tag_str == link_kind.into() {
          return link_kind.validate_types(candidat, None);
       }
       /// Or try validating dynamic link kind

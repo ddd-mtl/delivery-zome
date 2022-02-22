@@ -2,8 +2,8 @@ use hdk::prelude::*;
 use holo_hash::hash_type::HashType;
 
 use std::str::FromStr;
-
-use strum::AsStaticRef;
+use std::convert::AsRef;
+use strum_macros::AsRefStr;
 use strum_macros::EnumIter;
 use strum::EnumProperty;
 
@@ -14,7 +14,7 @@ use crate::{
 pub const LinkSeparator: &'static str = "___";
 
 /// List of all Link kinds handled by this Zome
-#[derive(AsStaticStr, EnumIter, EnumProperty, Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(AsRefStr, EnumIter, EnumProperty, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum LinkKind {
    #[strum(props(BaseType = "Path", TargetType = "AgentPubKey"))]
    Members,
@@ -31,8 +31,7 @@ impl LinkKind {
 
    /// Convert to LinkTag
    pub fn as_tag(&self) -> LinkTag {
-      let str = self.as_static();
-      LinkTag::new(str.as_bytes().clone())
+      LinkTag::new(self.as_ref().as_bytes().clone())
    }
 
    /// Convert to Option<LinkTag>
@@ -74,11 +73,11 @@ impl LinkKind {
       _maybe_hash: Option<AgentPubKey>,
    ) -> ExternResult<ValidateLinkCallbackResult> {
       if !is_type(candidat.base, self.allowed_base_type()) {
-         let msg = format!("Invalid base type for link kind `{}`", self.as_static()).into();
+         let msg = format!("Invalid base type for link kind `{}`", self.as_ref()).into();
          return Ok(ValidateLinkCallbackResult::Invalid(msg));
       }
       if !is_type(candidat.target, self.allowed_target_type()) {
-         let msg = format!("Invalid target type for link kind `{}`", self.as_static()).into();
+         let msg = format!("Invalid target type for link kind `{}`", self.as_ref()).into();
          return Ok(ValidateLinkCallbackResult::Invalid(msg));
       }
       Ok(ValidateLinkCallbackResult::Valid)
@@ -89,7 +88,7 @@ impl LinkKind {
 impl LinkKind {
    /// Create LinkTag with concatenated raw data
    pub fn concat(&self, suffix: &[u8]) -> LinkTag {
-      let mut vec = self.as_static().as_bytes().to_vec();
+      let mut vec = self.as_ref().as_bytes().to_vec();
       vec.extend(LinkSeparator.as_bytes());
       vec.extend(suffix);
       LinkTag(vec)
@@ -98,7 +97,7 @@ impl LinkKind {
    /// Retrieve raw data from LinkTag
    pub fn unconcat(&self, tag: &LinkTag) -> ExternResult<Vec<u8>> {
       let raw_tag = tag.as_ref();
-      let mut prefix = self.as_static().as_bytes().to_vec();
+      let mut prefix = self.as_ref().as_bytes().to_vec();
       prefix.extend(LinkSeparator.as_bytes());
       if raw_tag.len() <= prefix.len() {
          return error("Unconcat of link failed");
