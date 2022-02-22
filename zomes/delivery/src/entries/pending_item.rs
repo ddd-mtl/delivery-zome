@@ -16,8 +16,7 @@ use crate::entries::PendingKind::DeliveryNotice;
 pub enum PendingKind {
    DeliveryNotice,
    DeliveryReply,
-   DeliveryNotification,
-   ReceptionConfirmation,
+   ParcelReceived,
    Entry,
    // ParcelManifest
    // ParcelChunk,
@@ -116,8 +115,8 @@ impl PendingItem {
       Self::create::<DeliveryReply>(PendingKind::DeliveryReply, reply, reply.notice_eh.clone(), recipient)
    }
    /// called from post_commit()
-   pub fn from_reception(reception: ReceptionConfirmation, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<ReceptionConfirmation>(PendingKind::ReceptionConfirmation, reception, distribution_eh, recipient)
+   pub fn from_reception(reception: ParcelReceived, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {
+      Self::create::<ParcelReceived>(PendingKind::ParcelReceived, reception, distribution_eh, recipient)
    }
    ///
    pub fn from_parcel(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {

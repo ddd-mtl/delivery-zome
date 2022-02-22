@@ -23,3 +23,19 @@ pub(crate) fn validate_ParcelChunk(chunk: ParcelChunk, _maybe_validation_package
     }
     Ok(ValidateCallbackResult::Valid)
 }
+
+
+///
+pub fn post_commit_ParcelChunk(chunk_eh: &EntryHash, _chunk: ParcelChunk) -> ExternResult<()> {
+    /// Create ParcelReceived if we fetched all chunks
+    let response = call_remote(
+        me,
+        zome_info()?.name,
+        "check_manifest".to_string().into(),
+        None,
+        chunk_eh,
+    )?;
+    debug!("check_manifest() response: {:?}", response);
+    assert!(matches!(response, ZomeCallResponse::Ok { .. }));
+    Ok(())
+}

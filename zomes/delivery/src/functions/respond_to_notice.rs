@@ -12,7 +12,7 @@ use crate::{
 /// Zone Function
 /// Return EntryHash of DeliveryReply
 #[hdk_extern]
-pub fn respond_to_notice(notice_eh: EntryHash, has_accepted: bool) -> ExternResult<Option<EntryHash>> {
+pub fn respond_to_notice(notice_eh: EntryHash, has_accepted: bool) -> ExternResult<EntryHash> {
    /// Get DeliveryNotification
    let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
    /// Create DeliveryReply
@@ -24,6 +24,6 @@ pub fn respond_to_notice(notice_eh: EntryHash, has_accepted: bool) -> ExternResu
    /// Commit DeliveryReply
    let _hh = create_entry(reply)?;
    /// Done
-   Ok(Some(eh))
+   Ok(eh)
 }
 

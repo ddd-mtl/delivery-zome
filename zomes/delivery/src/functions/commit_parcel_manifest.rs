@@ -3,13 +3,14 @@ use crate::{
    constants::PARCEL_MAX_SIZE,
    EntryKind::ParcelChunk,
    entries::*,
+   utils_parcel::*,
 };
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CommitParcelManifestInput {
    pub name: String,
-   pub app_type: AppType,
+   pub app_type: String,
    pub chunks: Vec<EntryHash>,
 }
 

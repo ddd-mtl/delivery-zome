@@ -10,6 +10,8 @@ pub enum DeliveryProtocol {
     Item(PendingItem),
     ParcelRequest(EntryHash),
     ParcelResponse(Entry),
+    ChunkRequest(EntryHash),
+    ChunkResponse(ParcelChunk),
     UnknownEntry,
     Ping,
     Pong,

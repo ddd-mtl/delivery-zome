@@ -3,6 +3,7 @@ use hdk::prelude::*;
 use crate::{
    send_item::*,
    entries::*,
+   utils::*,
 };
 
 
@@ -11,37 +12,34 @@ use crate::{
 #[hdk_entry(id = "ParcelReceived", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct ParcelReceived {
-   pub reply_eh: EntryHash,
+   pub notice_eh: EntryHash,
    pub parcel_eh: EntryHash,
    //pub signed_parcel: SignedHeaderHashed, // signed header of parcel's Element
 }
 
 ///
 pub(crate) fn post_commit_ParcelReceived(
-   distribution_eh: &EntryHash,
-   recepetion: DeliveryReply,
+   _reception_eh: &EntryHash,
+   reception: ParcelReceived,
 ) -> ExternResult<()>
 {
    debug!("post_commit_ParcelReceived() {:?}", distribution_eh);
+   /// Get DeliveryNotice
+   let notice: DeliveryNotice = get_typed_from_eh(reception.notice_eh.clone())?;
+   /// Sign Item
+   let signature = sign(agent_info()?.agent_latest_pubkey, reception.clone())?;
    /// Create PendingItem
    let pending_item = PendingItem::from_reception(
-      recepetion.clone(),
-      distribution_eh.clone(),
-      recipient.clone(),
+      reception.clone(),
+      notice.distribution_eh.clone(),
+      notice.sender.clone(),
    )?;
    /// Send it to recipient
-   let res = send_item(
-      recipient,
-      distribution_eh.clone(),
+   let _ = send_item(
+      notice.sender,
+      notice.distribution_eh.clone(),
       pending_item,
-      recepetion.sender_description_signature.clone());
-   match res {
-      Ok(_) => {},
-      Err(e) => {
-         /// FIXME: accumulate failed recipients to final error return value
-         debug!("send_reception_request() failed: {}", e);
-      }
-   }
+      signature)?;
    /// Done
    Ok(())
 }

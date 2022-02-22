@@ -32,12 +32,15 @@ mod receive;
 mod utils_parcel;
 mod send_item;
 mod parcel;
+mod states;
+mod delivery;
 
 //pub mod signal_protocol;
 
 pub mod callbacks;
 pub mod entries;
 pub mod functions;
+
 
 
 //----------------------------------------------------------------------------------------
@@ -55,5 +58,7 @@ pub use receive::*;
 pub use utils_parcel::*;
 pub use send_item::*;
 pub use parcel::*;
+pub use states::*;
+pub use delivery::*;
 //pub use signal_protocol::*;
 
