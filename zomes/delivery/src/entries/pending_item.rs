@@ -115,9 +115,9 @@ impl PendingItem {
    }
 
    /// Attempt to decrypt PendingItem with provided keys
-   pub fn attempt_decrypt<'a, T>(&self, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T>
+   pub fn attempt_decrypt<T>(&self, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T>
       where
-         T: serde::de::Deserialize<'a>
+         T: for<'de> serde::Deserialize<'de>
    {
       trace!("attempt_decrypt of: {:?}", self.encrypted_data.clone());
       trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender.clone(), recipient.clone());
@@ -129,17 +129,18 @@ impl PendingItem {
          Some(data) => data,
          None => return None,
       };
+      let decrypted_ref/*: &'a [u8]*/ = decrypted.as_ref();
       /// Deserialize
-      let item: T = bincode::deserialize(decrypted.as_ref())
+      let item: T = bincode::deserialize(decrypted_ref)
          .expect("Deserialization should work");
       /// Done
       Some(item)
    }
 
 
-   pub fn into_item<'a, T>(self, from: AgentPubKey) -> ExternResult<Option<T>>
+   pub fn into_item<T>(self, from: AgentPubKey) -> ExternResult<Option<T>>
       where
-         T: serde::de::Deserialize<'a> + Clone + serde::Serialize + std::fmt::Debug //+ Sized
+         T: for<'de> serde::Deserialize<'de> + Clone + serde::Serialize + std::fmt::Debug //+ Sized
    {
       /// Get my key
       let me = agent_info()?.agent_latest_pubkey;

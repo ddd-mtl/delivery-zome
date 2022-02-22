@@ -7,7 +7,6 @@
 extern crate strum;
 #[macro_use]
 extern crate strum_macros;
-#[macro_use] extern crate shrinkwraprs;
 
 #[macro_use]
 extern crate zome_proc_macro;
