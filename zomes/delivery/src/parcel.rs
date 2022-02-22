@@ -30,5 +30,12 @@ impl ParcelReference {
          ParcelReference::AppEntry((_, eh)) => eh.clone(),
       }
    }
+
+   pub fn entry_def_id(&self) -> EntryDefId {
+      match self {
+         ParcelReference::Manifest(_) => EntryDefId::App("ParcelManifest".to_string()),
+         ParcelReference::AppEntry((app_type, _)) => app_type.1.clone(),
+      }
+   }
 }
 

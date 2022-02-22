@@ -9,14 +9,20 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
    /// Look for Parcel
-   let maybe_parcel = pull_parcel(notice)?;
+   let maybe_parcel = pull_parcel(notice.clone())?;
    if maybe_parcel.is_none() {
       return Ok(None);
    };
-   /// Commit Parcel
+   /// Create CreateInput
    let parcel_entry = maybe_parcel.unwrap();
    let parcel_eh = hash_entry(parcel_entry.clone())?;
-   let _parcel_hh = create_entry(parcel_entry.clone())?;
+   let input = CreateInput {
+     entry_def_id: notice.parcel_summary.reference.entry_def_id(),
+     entry: parcel_entry,
+     chain_top_ordering: ChainTopOrdering::Strict,
+   };
+   /// Commit Parcel
+   let _parcel_hh = create_entry(input)?;
    /// Create ParcelReceived if not a manifest
    if let ParcelReference::AppEntry(_) = notice.parcel_summary.reference {
       let received = ParcelReceived {
@@ -45,7 +51,7 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
                continue;
             }
             /// We have the parcel we just need to deserialize it
-            let parcel_entry: Entry = pending_item.into_item(notice.sender.clone())?
+            let parcel_entry: Entry = pending_item.clone().into_item(notice.sender.clone())?
                .expect("PendingItem should hold an Entry");
             return Ok(Some(parcel_entry));
          }

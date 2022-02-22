@@ -10,7 +10,7 @@ use crate::{
 pub fn commit_parcel_manifest(input: ParcelManifest) -> ExternResult<EntryHash> {
    trace!(" commit_parcel_manifest({}) -  {}", input.entry_id, input.name);
    /// Commit entry
-   let manifest_eh = hash_entry(input)?;
+   let manifest_eh = hash_entry(input.clone())?;
    let _ = create_entry(&input)?;
    /// Done
    Ok(manifest_eh)

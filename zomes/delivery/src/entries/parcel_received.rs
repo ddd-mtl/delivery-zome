@@ -57,7 +57,7 @@ impl ParcelReceived {
       /// Get DeliveryNotice
       let notice: DeliveryNotice = get_typed_from_eh(reception.notice_eh.clone())?;
       /// Sign Item
-      let signature = sign(agent_info()?.agent_latest_pubkey, reception.clone())?;
+      //let signature = sign(agent_info()?.agent_latest_pubkey, reception.clone())?;
       /// Create PendingItem
       let pending_item = PendingItem::from_reception(
          reception.clone(),
@@ -67,9 +67,10 @@ impl ParcelReceived {
       /// Send it to recipient
       let _ = send_item(
          notice.sender,
-         notice.distribution_eh.clone(),
+         //notice.distribution_eh.clone(),
          pending_item,
-         signature)?;
+         //signature,
+      )?;
       /// Done
       Ok(())
    }

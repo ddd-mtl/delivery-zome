@@ -48,14 +48,14 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
       EntryKind::PubEncKey => {},
       EntryKind::Path => {},
       EntryKind::DeliveryNotice => {
-         let notice = get_typed_from_eh::<DeliveryNotice>(eh)?;
+         let notice = get_typed_from_eh::<DeliveryNotice>(eh.clone())?;
          DeliveryNotice::post_commit(&eh, notice)?;
       },
       EntryKind::DeliveryReceipt => {
-         let _ = get_typed_from_eh::<DeliveryReceipt>(eh)?;
+         let _ = get_typed_from_eh::<DeliveryReceipt>(eh.clone())?;
       },
       EntryKind::DeliveryReply => {
-         let reply = get_typed_from_eh::<DeliveryReply>(eh)?;
+         let reply = get_typed_from_eh::<DeliveryReply>(eh.clone())?;
          DeliveryReply::post_commit(&eh, reply)?;
       },
       EntryKind::Distribution => {
@@ -63,24 +63,24 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
          Distribution::post_commit(&eh, distribution)?;
       },
       EntryKind::NoticeReceived => {
-         let _ = get_typed_from_eh::<NoticeReceived>(eh)?;
+         let _ = get_typed_from_eh::<NoticeReceived>(eh.clone())?;
       },
       EntryKind::ParcelReceived => {
-         let reception = get_typed_from_eh::<ParcelReceived>(eh)?;
+         let reception = get_typed_from_eh::<ParcelReceived>(eh.clone())?;
          ParcelReceived::post_commit(&eh, reception)?;
       },
       EntryKind::ReplyReceived => {
-         let _ = get_typed_from_eh::<ReplyReceived>(eh)?;
+         let _ = get_typed_from_eh::<ReplyReceived>(eh.clone())?;
       },
       EntryKind::PendingItem => {
-         let _ = get_typed_from_eh::<PendingItem>(eh)?;
+         let _ = get_typed_from_eh::<PendingItem>(eh.clone())?;
       },
       EntryKind::ParcelChunk => {
          let chunk = get_typed_from_eh::<ParcelChunk>(eh.clone())?;
          ParcelChunk::post_commit(&eh, chunk)?;
       },
       EntryKind::ParcelManifest => {
-         let manifest = get_typed_from_eh::<ParcelManifest>(eh)?;
+         let manifest = get_typed_from_eh::<ParcelManifest>(eh.clone())?;
          ParcelManifest::post_commit(&eh, manifest)?;
 
       },

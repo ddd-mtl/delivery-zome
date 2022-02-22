@@ -115,8 +115,8 @@ pub fn receive_dm_notice(from: AgentPubKey, item: PendingItem) -> DeliveryProtoc
 
 /// Create and commit a ReplyReceived from a DeliveryReply
 /// Returns Success or Failure
-pub fn receive_dm_reply(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
-    let maybe_maybe_reply: ExternResult<Option<DeliveryReply>> = item.into_item(from.clone());
+pub fn receive_dm_reply(from: AgentPubKey, pending_item: PendingItem) -> DeliveryProtocol {
+    let maybe_maybe_reply: ExternResult<Option<DeliveryReply>> = pending_item.clone().into_item(from.clone());
     if let Err(err) = maybe_maybe_reply {
         let response_str = "Failed deserializing DeliveryReply";
         debug!("{}: {}", response_str, err);
@@ -130,9 +130,9 @@ pub fn receive_dm_reply(from: AgentPubKey, item: PendingItem) -> DeliveryProtoco
     }
     /// Create ReplyReceived
     let receipt = ReplyReceived {
-        distribution_eh: item.distribution_eh,
+        distribution_eh: pending_item.distribution_eh,
         recipient: from,
-        recipient_signature: item.author_signature,
+        recipient_signature: pending_item.author_signature,
         has_accepted: maybe_reply.unwrap().has_accepted,
         //date: now(),
     };

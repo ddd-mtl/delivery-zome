@@ -45,12 +45,12 @@ fn validate(input: ValidateData) -> ExternResult<ValidateCallbackResult> {
 #[allow(unreachable_patterns)]
 fn validate_app_entry(
     entry_type_id: EntryDefIndex,
-    entry_bytes: AppEntryBytes,
-    maybe_validation_package: Option<ValidationPackage>,
+    _entry_bytes: AppEntryBytes,
+    _maybe_validation_package: Option<ValidationPackage>,
 ) -> ExternResult<ValidateCallbackResult>
 {
     trace!("*** validate_app_entry() callback called!");
-    let sb = entry_bytes.into_sb();
+    //let sb = entry_bytes.into_sb();
     let entry_kind = EntryKind::from_index(&entry_type_id);
 
     match entry_kind {

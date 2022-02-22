@@ -99,11 +99,11 @@ impl PendingItem {
 
    /// called from post_commit()
    pub fn from_notice(notice: DeliveryNotice, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<DeliveryNotice>(PendingKind::DeliveryNotice, notice, notice.distribution_eh.clone(), recipient)
+      Self::create::<DeliveryNotice>(PendingKind::DeliveryNotice, notice.clone(), notice.distribution_eh.clone(), recipient)
    }
    /// called from post_commit()
    pub fn from_reply(reply: DeliveryReply, recipient: AgentPubKey) -> ExternResult<Self> {
-      Self::create::<DeliveryReply>(PendingKind::DeliveryReply, reply, reply.notice_eh.clone(), recipient)
+      Self::create::<DeliveryReply>(PendingKind::DeliveryReply, reply.clone(), reply.notice_eh.clone(), recipient)
    }
    /// called from post_commit()
    pub fn from_reception(reception: ParcelReceived, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<Self> {

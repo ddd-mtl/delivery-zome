@@ -61,7 +61,7 @@ impl Distribution {
             sender_summary_signature: distribution.summary_signature,
         };
         /// Sign notice
-        let signature = sign(agent_info()?.agent_latest_pubkey, notice.clone())?;
+        //let signature = sign(agent_info()?.agent_latest_pubkey, notice.clone())?;
         /// Send to each recipient
         for recipient in distribution.recipients {
             /// Create PendingItem
@@ -72,9 +72,9 @@ impl Distribution {
             /// Send it to recipient
             let res = send_item(
                 recipient,
-                distribution_eh.clone(),
+                //distribution_eh.clone(),
                 pending_item,
-                signature.clone(),
+               // signature.clone(),
             );
             match res {
                 Ok(_) => {},

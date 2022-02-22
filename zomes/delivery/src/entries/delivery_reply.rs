@@ -29,14 +29,13 @@ impl DeliveryReply {
             notice.sender.clone(),
         )?;
         /// Sign DeliveryReply
-        let me = agent_info()?.agent_latest_pubkey;
-        let signature = sign(me.clone(), reply.clone())?;
+        //let signature = sign(agent_info()?.agent_latest_pubkey, reply.clone())?;
         /// Send item to recipient
         let _res = send_item(
             notice.sender,
-            notice.distribution_eh.clone(),
+            //notice.distribution_eh.clone(),
             pending_item,
-            signature,
+            //signature,
         );
         /// Try to retrieve parcel if it has been accepted
         if reply.has_accepted {
