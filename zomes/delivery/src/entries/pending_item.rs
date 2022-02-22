@@ -129,9 +129,8 @@ impl PendingItem {
          Some(data) => data,
          None => return None,
       };
-      let decrypted_ref/*: &'a [u8]*/ = decrypted.as_ref();
       /// Deserialize
-      let item: T = bincode::deserialize(decrypted_ref)
+      let item: T = bincode::deserialize(decrypted.as_ref())
          .expect("Deserialization should work");
       /// Done
       Some(item)
