@@ -9,16 +9,21 @@ use crate::{
 };
 
 
+pub struct RespondToNoticeInput {
+   notice_eh: EntryHash,
+   has_accepted: bool,
+}
+
 /// Zone Function
 /// Return EntryHash of DeliveryReply
 #[hdk_extern]
-pub fn respond_to_notice(notice_eh: EntryHash, has_accepted: bool) -> ExternResult<EntryHash> {
+pub fn respond_to_notice(input: RespondToNoticeInput) -> ExternResult<EntryHash> {
    /// Get DeliveryNotification
-   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
+   let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Create DeliveryReply
    let reply = DeliveryReply {
       notice_eh: notice.distribution_eh,
-      has_accepted,
+      has_accepted: input.has_accepted,
    };
    let eh = hash_entry(reply.clone())?;
    /// Commit DeliveryReply

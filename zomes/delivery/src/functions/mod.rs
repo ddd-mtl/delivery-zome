@@ -6,6 +6,7 @@ mod pull_inbox;
 mod fetch_parcel;
 mod fetch_chunk;
 mod check_manifest;
+mod get_notice;
 
 
 pub use self::{
@@ -17,4 +18,5 @@ pub use self::{
    fetch_parcel::*,
    fetch_chunk::*,
    check_manifest::*,
+   get_notice::*,
 };

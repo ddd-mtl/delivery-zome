@@ -81,67 +81,62 @@ use crate::setup::*;
 
 ///
 pub async fn test_delivery_dm() {
-   // Setup
+   /// Setup
    let (conductors, agents, apps) = setup_3_conductors().await;
    let cells = apps.cells_flattened();
-
-   // A sends to B
-   let mail = SendMailInput {
-      subject: "test-outmail".to_string(),
-      payload: "blablabla".to_string(),
-      to: vec![agents[1].clone()],
-      cc: vec![],
-      bcc: vec![],
-      manifest_address_list: vec![],
+   /// A Store secret
+   let secret_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "create_secret", "secret_message").await;
+   println!("secret_eh: {:?}", secret_eh);
+   /// A Check secret is stored
+   let secret: Secret = conductors[0].call(&cells[0].zome("secret"), "get_secret", secret_eh.clone()).await;
+   println!("Secret: {}", secret.value);
+   /// A sends secret to B
+   let input = SendSecretInput {
+      secret_eh: secret_eh.clone(),
+      recipient: agents[1].clone(),
    };
-   let outmail_hh: HeaderHash = conductors[0].call(&cells[0].zome("snapmail"), "send_mail", mail).await;
+   let distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
 
-   //sleep(Duration::from_millis(500)).await;
-   //print_chain(&conductors[0], &agents[0], &cells[0]).await;
+   sleep(Duration::from_millis(2 * 1000)).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
 
-   /// B checks if arrived
-   let unacknowledged_inmails: Vec<HeaderHash> = try_zome_call(&conductors[1], cells[1], "get_all_unacknowledged_inmails", (),
-                 |unacknowledged_inmails: &Vec<HeaderHash>| {unacknowledged_inmails.len() == 1})
+   /// B checks if request received
+   let waiting_parcels: Vec<EntryHash> = try_zome_call(&conductors[1], cells[1], "get_secrets_from", agents[0].clone(),
+                                                       |result: &Vec<EntryHash>| {result.len() == 1})
       .await
-      .expect("Should have an unacknowledged inmail");
+      .expect("Should have a waiting parcel");
+   println!("parcel requests received: {}", waiting_parcels.len());
+
+   /// B accepts A's secret
+   let _eh: EntryHash = conductors[1].call(&cells[1].zome("secret"), "accept_secret", waiting_parcels[0].clone()).await;
+
+   /// Wait for parcel to be received
+   sleep(Duration::from_millis(2 * 1000)).await;
+   print_chain(&conductors[1], &agents[1], &cells[1]).await;
+
+   // /// A acks msg
+   // let outmail_state: OutMailState = conductors[0].call(&cells[0].zome("snapmail"), "get_outmail_state", outmail_hh.clone()).await;
+   // println!("outmail_state: {:?}", outmail_state);
+   // assert!(outmail_state == OutMailState::AllReceived);
+   // let ack_eh: EntryHash = conductors[1].call(&cells[1].zome("snapmail"), "acknowledge_mail", unacknowledged_inmails[0].clone()).await;
+   // println!("ack_eh: {:?}", ack_eh);
+   //
+   // //sleep(Duration::from_millis(500)).await;
+   // //print_chain(&conductors[1], &agents[1], &cells[1]).await;
 
 
-   let received_mail: GetMailOutput = conductors[1].call(&cells[1].zome("snapmail"), "get_mail", unacknowledged_inmails[0].clone()).await;
-   println!("received_mail: {:?}", received_mail);
-   assert!(received_mail.0.is_some());
-   let rec_mail = received_mail.0.unwrap();
-   assert!(rec_mail.is_ok());
-   assert_eq!("blablabla", rec_mail.unwrap().mail.payload);
-
-   //print_chain(&conductors[1], &agents[1], &cells[1]).await;
-
-   /// A acks msg
-   let outmail_state: OutMailState = conductors[0].call(&cells[0].zome("snapmail"), "get_outmail_state", outmail_hh.clone()).await;
-   println!("outmail_state: {:?}", outmail_state);
-   assert!(outmail_state == OutMailState::AllReceived);
-   let ack_eh: EntryHash = conductors[1].call(&cells[1].zome("snapmail"), "acknowledge_mail", unacknowledged_inmails[0].clone()).await;
-   println!("ack_eh: {:?}", ack_eh);
-
-   sleep(Duration::from_millis(500)).await;
-   //print_chain(&conductors[1], &agents[1], &cells[1]).await;
-
-   // /// A checks if msg has been acknowledged
-   // println!("*** Calling has_mail_been_fully_acknowledged()");
-   // try_zome_call(&conductors[0], cells[0], "has_mail_been_fully_acknowledged", outmail_hh.clone(),
-   //               |maybe_received: &HasMailBeenFullyAcknowledgedOutput| {maybe_received.is_ok()})
-   //    .await
-   //    .expect("Should have received ack");
-
-   /// B checks if ack has been received
-   let has_acked: bool = conductors[1].call(&cells[1].zome("snapmail"), "has_ack_been_delivered", unacknowledged_inmails[0].clone()).await;
-   println!("has_acked: {:?}", has_acked);
-   assert!(has_acked);
+   /// B gets secret
+   let secret: String = conductors[1].call(&cells[1].zome("secret"), "get_secret", waiting_parcels[0].clone()).await;
+   println!("secret received: {:?}", secret);
 
    // let outmail_state: OutMailState = conductors[0].call(&cells[0].zome("snapmail"), "get_outmail_state", outmail_hh.clone()).await;
    // println!("outmail_state: {:?}", outmail_state);
    // assert!(outmail_state == OutMailState::AllAcknowledged);
 
+   /// Check A's chain for a DeliveryReceipt
    sleep(Duration::from_millis(500)).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
+
 }
 
 

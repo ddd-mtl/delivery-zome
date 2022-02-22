@@ -30,18 +30,18 @@ pub async fn test(arg: String) {
    if arg == "all" || arg == "enc" {
       test_encryption().await;
    }
-   // Deliver to self
-   if arg == "all" || arg == "self" {
-      test_delivery_self().await;
-   }
+   // // Deliver to self
+   // if arg == "all" || arg == "self" {
+   //    test_delivery_self().await;
+   // }
    // Deliver via DM
    if arg == "all" || arg == "dm" {
       test_delivery_dm().await;
    }
-   // Deliver via DHT
-   if arg == "all" || arg == "pending" {
-      test_delivery_pending().await;
-   }
+   // // Deliver via DHT
+   // if arg == "all" || arg == "pending" {
+   //    test_delivery_pending().await;
+   // }
    // // Deliver via DM
    // if arg == "all" || arg == "dm_chunks" {
    //    test_delivery_dm_chunks().await;

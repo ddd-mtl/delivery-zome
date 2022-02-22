@@ -248,13 +248,19 @@ pub async fn print_chain(conductor: &SweetConductor, agent: &AgentPubKey, cell: 
 
 
 /// Call a zome function several times, waiting for a certainr result
-pub async fn try_zome_call<T,P>(conductor: &SweetConductor, cell: &SweetCell, fn_name: &str, payload: P, predicat: fn(res: &T) -> bool) -> Result<T, ()>
+pub async fn try_zome_call<T,P>(
+   conductor: &SweetConductor,
+   cell: &SweetCell,
+   fn_name: &str,
+   payload: P,
+   predicat: fn(res: &T) -> bool,
+) -> Result<T, ()>
    where
       T: serde::de::DeserializeOwned + std::fmt::Debug,
       P: Clone + serde::Serialize + std::fmt::Debug,
 {
    for _ in 0..10u32 {
-      let res: T = conductor.call(&cell.zome("snapmail"), fn_name, payload.clone())
+      let res: T = conductor.call(&cell.zome("secret"), fn_name, payload.clone())
                             .await;
       if predicat(&res) {
          return Ok(res);

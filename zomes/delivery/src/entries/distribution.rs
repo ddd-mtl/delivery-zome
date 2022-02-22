@@ -39,7 +39,7 @@ pub fn validate_distribution(input: Distribution) -> Result<(), String> {
         return Err("Missing a recipient or parcel".to_owned());
     }
 
-    /// FIXME: validate parcel
+    /// FIXME: validate parcel ; make sure Parcel entry has been committed
     //validate_parcel(input.parcel_description)?;
 
     Ok(())

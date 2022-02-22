@@ -1,0 +1,10 @@
+---
+manifest_version: "1"
+name: secret
+uuid: 00000000-0000-0000-0000-000000000000
+properties: ~
+zomes:
+  - name: secret
+    bundled: ../../target/wasm32-unknown-unknown/release/secret.wasm
+  - name: delivery
+    bundled: ../../../target/wasm32-unknown-unknown/release/profiles.wasm

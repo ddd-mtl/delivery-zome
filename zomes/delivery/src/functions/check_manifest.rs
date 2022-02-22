@@ -22,7 +22,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    let notice = maybe_notice.unwrap();
    let notice_eh = hash_entry(notice)?;
    /// Must not already have a ParcelReceived
-   let maybe_receipt = find_ParcelReceived(notice_eh.clone())?;
+   let maybe_receipt = ParcelReceived::query(ParcelReceivedField::Notice(notice_eh.clone()))?;
    if let Some(receipt) = maybe_receipt {
       return Ok(Some(receipt.parcel_eh));
    }
@@ -93,21 +93,3 @@ pub fn has_all_chunks(manifest_eh: EntryHash) -> ExternResult<bool> {
    return Ok(chunk_els.len() == manifest.chunks.len())
 }
 
-
-///Find ParcelReceived for given notice
-pub fn find_ParcelReceived(notice_eh: EntryHash) -> ExternResult<Option<ParcelReceived>> {
-   /// Get all Create ParcelReceived Elements with query
-   let query_args = ChainQueryFilter::default()
-      .include_entries(true)
-      .header_type(HeaderType::Create)
-      .entry_type(EntryKind::ParcelReceived.as_type());
-   let receipts = query(query_args)?;
-   for receipt_el in receipts {
-      let receipt: ParcelReceived = get_typed_from_el(receipt_el)?;
-         if receipt.notice_eh == notice_eh {
-            return Ok(Some(receipt));
-         }
-   }
-   /// Done
-   Ok(None)
-}

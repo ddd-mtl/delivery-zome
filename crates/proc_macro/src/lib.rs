@@ -49,6 +49,7 @@ pub fn zome_api(_metadata: TokenStream, item: TokenStream) -> TokenStream {
    //println!("\n\n input.inner_type: \"{:?}\"\n\n", inner_type);
 
    // -- Output api function
+   // TODO: Should use zome-name as prefix to generated function name
    let output_fn = format_ident!("zome_{}", external_fn_ident);
    println!("Generated: {}()", output_fn);
 
