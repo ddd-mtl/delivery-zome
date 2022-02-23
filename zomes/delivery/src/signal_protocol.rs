@@ -3,9 +3,9 @@ use hdk::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
-    ReceivedMail(MailItem),
-    ReceivedAck(ReceivedAck),
-    ReceivedFile(FileManifest),
+    ReceivedNotice(NoticeItem),
+    ReceivedReply(ReplyItem),
+    ReceivedParcel(EntryHash),
 }
 
 // #[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
@@ -13,8 +13,8 @@ pub enum SignalProtocol {
 //     pub item: MailItem,
 // }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ReceivedAck {
-    pub from: AgentPubKey,
-    pub for_mail: HeaderHash,
-}
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// pub struct ReceivedAck {
+//     pub from: AgentPubKey,
+//     pub for_mail: HeaderHash,
+// }

@@ -33,8 +33,8 @@ pub(crate) fn send_item(
       debug!("send_item() failed: {:?}", response_dm);
    }
    debug!("send_item() - Commit PendingItem...");
-   /// DM failed, send to DHT instead by creating a PendingMail
-   /// Create and commit PendingMail with remote call to self
+   /// DM failed, send to DHT instead by creating a PendingItem
+   /// Create and commit PendingItem with remote call to self
    let input = CommitPendingItemInput {
       item: pending_item,
       recipient: recipient.clone(),

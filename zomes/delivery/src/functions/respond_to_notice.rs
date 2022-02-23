@@ -7,8 +7,8 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RespondToNoticeInput {
-   notice_eh: EntryHash,
-   has_accepted: bool,
+   pub notice_eh: EntryHash,
+   pub has_accepted: bool,
 }
 
 /// Zone Function

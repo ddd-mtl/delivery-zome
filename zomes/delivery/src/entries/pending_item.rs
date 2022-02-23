@@ -53,24 +53,15 @@ impl PendingItem {
       /// Get my key
       let me = agent_info()?.agent_latest_pubkey;
       debug!("get_enc_key() for sender {:?}", me);
-      let maybe_sender_key = call_self("get_enc_key", me.clone())?;
-      debug!("get_enc_key() for sender result: {:?}", maybe_sender_key);
-      let sender_key = match maybe_sender_key {
-         ZomeCallResponse::Ok(output) => output.decode()?,
-         _ => return error("Self call to get_enc_key(sender) failed")
-      };
+      let response = call_self("get_enc_key", me.clone())?;
+      debug!("get_enc_key() for sender result: {:?}", response);
+      let sender_key: X25519PubKey = decode_response(response)?;
       debug!("PendingItem: sender_key = {:?}", sender_key);
       /// Get recipient's key
       debug!("get_enc_key() for recipient {:?}", recipient);
-      let maybe_recipient_key = call_self(
-         "get_enc_key",
-         recipient.clone(),
-      )?;
-      debug!("get_enc_key() for recipient result: {:?}", maybe_recipient_key);
-      let recipient_key = match maybe_recipient_key {
-         ZomeCallResponse::Ok(output) => output.decode()?,
-         _ => return error("Self call to get_enc_key(recipient) failed")
-      };
+      let response = call_self("get_enc_key", recipient.clone())?;
+      debug!("get_enc_key() for recipient result: {:?}", response);
+      let recipient_key: X25519PubKey = decode_response(response)?;
       debug!("PendingItem: recipient_key = {:?}", recipient_key);
       /// Sign content
       let author_signature = sign(me, content.clone())
@@ -194,11 +185,11 @@ fn commit_PendingItem(input: CommitPendingItemInput) -> ExternResult<HeaderHash>
    let pending_item_eh = hash_entry(&input.item)?;
    let maybe_pending_item_hh = create_entry(&input.item);
    if let Err(err) = maybe_pending_item_hh.clone() {
-      debug!("PendingMail create_entry() failed = {:?}", err);
+      debug!("PendingItem create_entry() failed = {:?}", err);
       return Err(maybe_pending_item_hh.err().unwrap());
    };
-   let pending_mail_hh = maybe_pending_item_hh.unwrap();
-   trace!("pending_mail_hh = {:?}", pending_mail_hh);
+   let pending_item_hh = maybe_pending_item_hh.unwrap();
+   trace!("pending_item_hh = {:?}", pending_item_hh);
    /// Commit Pendings Link
    let tag = LinkKind::Pendings.concat_hash(&input.recipient);
    trace!("pendings tag = {:?}", tag);
@@ -209,7 +200,7 @@ fn commit_PendingItem(input: CommitPendingItemInput) -> ExternResult<HeaderHash>
    };
    let link1_hh = maybe_link1_hh.unwrap();
    trace!("link1_hh = {}", link1_hh);
-   /// Commit MailInbox Link
+   /// Commit Inbox Link
    let tag = LinkKind::Inbox.concat_hash(&me);
    let maybe_link2_hh = create_link(EntryHash::from(input.recipient.clone()), pending_item_eh, tag);
    if let Err(err) = maybe_link2_hh.clone() {
@@ -219,5 +210,5 @@ fn commit_PendingItem(input: CommitPendingItemInput) -> ExternResult<HeaderHash>
    let link2_hh = maybe_link2_hh.unwrap();
    trace!("link2_hh = {}", link2_hh);
    /// Done
-   return Ok(pending_mail_hh)
+   return Ok(pending_item_hh)
 }

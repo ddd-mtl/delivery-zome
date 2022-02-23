@@ -5,13 +5,12 @@
 #![allow(unused_attributes)]
 
 
-#[macro_use]
-extern crate zome_proc_macro;
-
 use hdk::prelude::*;
 use delivery::*;
+use delivery::functions::*;
+use delivery::entries::*;
 
-/// Entry representing a secret
+/// Entry representing a secret message
 #[hdk_entry(id = "Secret", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct Secret {
@@ -31,14 +30,15 @@ pub fn create_secret(value: String) -> ExternResult<EntryHash> {
 /// Zome Function
 #[hdk_extern]
 pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
+   let set: HashSet<_> = vec![eh].drain(..).collect(); // dedup
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
-      .entry_hashes([eh]);
+      .entry_hashes(set);
    let entries = query(query_args)?;
    if entries.len() != 1 {
       return Err(WasmError::Guest(String::from("No Secret found at given EntryHash")));
    }
-   let secret = get_typed_from_el(entries[0])?;
+   let secret: Secret = get_typed_from_el(entries[0].clone())?;
    return Ok(secret.value);
 }
 
@@ -56,19 +56,28 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
    let _: Secret = get_typed_from_eh(input.secret_eh.clone())?;
    /// Distribute
    let distribution = DistributeParcelInput {
-      recipients: [input.recipient],
+      recipients: vec![input.recipient],
       strategy: DistributionStrategy::NORMAL,
-      parcel_kind: ParcelKind::AppEntry((zome_info()?.name, App("Secret"))),
+      parcel_kind: ParcelKind::AppEntry((zome_info()?.name, EntryDefId::App("Secret".into()))),
       parcel_eh: input.secret_eh,
    };
-   return distribute_parcel(distribution)?;
+   let response = call(
+      CallTargetCell::Local,
+      "delivery".into(),
+      "distribute_parcel".into(),
+      None,
+      distribution,
+   )?;
+   // distribute_parcel(distribution)?;
+   let eh: EntryHash = decode_response(response)?;
+   Ok(eh)
 }
 
 /// Zome Function
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
    let notices = DeliveryNotice::query(DeliveryNoticeQueryField::Sender(sender))?;
-   let parcels = notices.iter().map(|x| x.parcel_summary.entry_address()).collect;
+   let parcels = notices.iter().map(|x| x.parcel_summary.reference.entry_address()).collect();
    Ok(parcels)
 }
 
@@ -80,9 +89,19 @@ pub fn accept_secret(parcel_eh: EntryHash) -> ExternResult<EntryHash> {
    if notices.len() != 1 {
       return Err(WasmError::Guest(String::from("No Secret found at given EntryHash")));
    }
+   let notice_eh = hash_entry(notices[0].clone())?;
    let input = RespondToNoticeInput {
       notice_eh,
       has_accepted: true,
    };
-   return respond_to_notice(input)?;
+   let response = call(
+      CallTargetCell::Local,
+      "delivery".into(),
+      "respond_to_notice".into(),
+      None,
+      input,
+   )?;
+   // return respond_to_notice(input)?;
+   let eh: EntryHash = decode_response(response)?;
+   Ok(eh)
 }

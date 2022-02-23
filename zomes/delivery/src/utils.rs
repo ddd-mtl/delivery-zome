@@ -31,6 +31,22 @@ where
     )
 }
 
+
+///
+pub fn decode_response<T>(response: ZomeCallResponse) -> ExternResult<T>
+    where
+       T: for<'de> serde::Deserialize<'de> + std::fmt::Debug
+{
+    return match response {
+        ZomeCallResponse::Ok(output) => Ok(output.decode()?),
+        ZomeCallResponse::Unauthorized(_, _, _, _) => error("Unauthorized call"),
+        ZomeCallResponse::NetworkError(e) => error(&format!("NetworkError: {:?}", e)),
+        ZomeCallResponse::CountersigningSession(e) => error(&format!("CountersigningSession: {:?}", e)),
+    };
+}
+
+
+
 /// Get Element at address using query()
 pub fn get_entry_type_from_eh(eh: EntryHash) -> ExternResult<EntryType> {
     let maybe_element = get(eh, GetOptions::latest())?;
