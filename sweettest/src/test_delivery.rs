@@ -1,10 +1,8 @@
-use snapmail::{
-   handle::*,
-   mail::*,
-   //pub_enc_key::*,
-   mail::entries::*,
-};
+// use delivery::{
+//    entries::*,
+// };
 
+use secret::*;
 use holo_hash::*;
 use tokio::time::{sleep, Duration};
 
@@ -85,20 +83,21 @@ pub async fn test_delivery_dm() {
    let (conductors, agents, apps) = setup_3_conductors().await;
    let cells = apps.cells_flattened();
    /// A Store secret
-   let secret_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "create_secret", "secret_message").await;
+   let secret_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "create_secret", "I like bananas").await;
    println!("secret_eh: {:?}", secret_eh);
    /// A Check secret is stored
-   let secret: Secret = conductors[0].call(&cells[0].zome("secret"), "get_secret", secret_eh.clone()).await;
-   println!("Secret: {}", secret.value);
+   let secret_msg: String = conductors[0].call(&cells[0].zome("secret"), "get_secret", secret_eh.clone()).await;
+   println!("secret_msg: {}", secret_msg);
    /// A sends secret to B
    let input = SendSecretInput {
       secret_eh: secret_eh.clone(),
       recipient: agents[1].clone(),
    };
-   let distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
+   let _distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
 
    sleep(Duration::from_millis(2 * 1000)).await;
    print_chain(&conductors[0], &agents[0], &cells[0]).await;
+   sleep(Duration::from_millis(200)).await;
 
    /// B checks if request received
    let waiting_parcels: Vec<EntryHash> = try_zome_call(&conductors[1], cells[1], "get_secrets_from", agents[0].clone(),

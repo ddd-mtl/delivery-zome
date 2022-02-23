@@ -1,6 +1,10 @@
 use hdk::prelude::*;
+use crate::link_kind::*;
+use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
 
-use crate::{entries::*, utils::*, send_dm, dm_protocol::*, link_kind::*};
+use crate::send_dm::*;
+use crate::dm_protocol::*;
+use crate::functions::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FetchChunkInput {
@@ -41,12 +45,12 @@ pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<O
    /// Check each Inbox link
    for pending_item in &pending_items {
       match pending_item.kind {
-         PendingKind::ParcelChunk => {
+         ItemKind::ParcelChunk => {
             if pending_item.distribution_eh != notice.distribution_eh {
                continue;
             }
             /// We have the chunk we just need to deserialize it
-            let item: Entry = pending_item.clone().into_item(notice.sender.clone())?
+            let item: Entry = unpack_item(pending_item.clone(), notice.sender.clone())?
                .expect("PendingItem should hold an Entry");
             let chunk = get_typed_from_entry(item)?;
             return Ok(Some(chunk));

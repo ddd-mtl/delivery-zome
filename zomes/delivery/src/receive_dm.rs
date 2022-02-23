@@ -1,12 +1,9 @@
 use hdk::prelude::*;
+use delivery_zome_api::utils::*;
 
-use crate::{
-    DeliveryProtocol,
-    //signal_protocol::*,
-    utils::*,
-    entries::*,
-    //parcel::*,
-};
+use crate::DeliveryProtocol;
+use delivery_zome_api::*;
+use crate::functions::*;
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -27,8 +24,8 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         },
         DeliveryProtocol::Item(item) => {
             match item.kind {
-                PendingKind::DeliveryNotice => receive_dm_notice(dm.from, item),
-                PendingKind::DeliveryReply  => receive_dm_reply(dm.from, item),
+                ItemKind::DeliveryNotice => receive_dm_notice(dm.from, item),
+                ItemKind::DeliveryReply  => receive_dm_reply(dm.from, item),
                 //PendingKind::Entry => {/* FIXME */},
                 //PendingKind::ReceptionConfirmation => receive_dm_reception(from, item),
                 _ => panic!("FIXME kind not supported yet"),
@@ -90,7 +87,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) 
 /// Commit received DeliveryNotice from sender
 /// Returns Success or Failure
 pub fn receive_dm_notice(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
-    let maybe_maybe_notice: ExternResult<Option<DeliveryNotice>> = item.into_item(from.clone());
+    let maybe_maybe_notice: ExternResult<Option<DeliveryNotice>> = unpack_item(item, from.clone());
     if let Err(err) = maybe_maybe_notice {
         let response_str = "Failed deserializing DeliveryNotice";
         debug!("{}: {}", response_str, err);
@@ -116,7 +113,7 @@ pub fn receive_dm_notice(from: AgentPubKey, item: PendingItem) -> DeliveryProtoc
 /// Create and commit a ReplyReceived from a DeliveryReply
 /// Returns Success or Failure
 pub fn receive_dm_reply(from: AgentPubKey, pending_item: PendingItem) -> DeliveryProtocol {
-    let maybe_maybe_reply: ExternResult<Option<DeliveryReply>> = pending_item.clone().into_item(from.clone());
+    let maybe_maybe_reply: ExternResult<Option<DeliveryReply>> = unpack_item(pending_item.clone(), from.clone());
     if let Err(err) = maybe_maybe_reply {
         let response_str = "Failed deserializing DeliveryReply";
         debug!("{}: {}", response_str, err);

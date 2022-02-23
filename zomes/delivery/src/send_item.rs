@@ -1,11 +1,11 @@
 use hdk::prelude::*;
 
+use delivery_zome_api::utils::*;
+use delivery_zome_api::*;
+
 use crate::{
-   //self::*,
-   entries::*,
-   dm_protocol::*,
-   send_dm::*,
-   utils::*,
+   send_dm, DeliveryProtocol,
+   functions::CommitPendingItemInput,
 };
 
 #[allow(non_camel_case_types)]
@@ -16,7 +16,7 @@ pub enum SendSuccessKind {
 }
 
 /// called from post_commit()
-pub(crate) fn send_item(
+pub fn send_item(
    recipient: AgentPubKey,
    //distribution_eh: EntryHash,
    pending_item: PendingItem,

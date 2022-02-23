@@ -46,6 +46,16 @@ pub fn decode_response<T>(response: ZomeCallResponse) -> ExternResult<T>
 }
 
 
+/// Get EntryType out of an Entry & EntryHash
+pub fn determine_entry_type(eh: EntryHash, entry: &Entry) -> ExternResult<EntryType> {
+    Ok(match entry {
+        Entry::Agent(_agent_hash) => EntryType::AgentPubKey,
+        Entry::CapClaim(_claim) => EntryType::CapClaim,
+        Entry::CapGrant(_grant) => EntryType::CapGrant,
+        Entry::App(_entry_bytes) => get_entry_type_from_eh(eh)?,
+        Entry::CounterSign(_data, _bytes) => unreachable!(),
+    })
+}
 
 /// Get Element at address using query()
 pub fn get_entry_type_from_eh(eh: EntryHash) -> ExternResult<EntryType> {
@@ -125,7 +135,7 @@ pub fn get_typed_from_hh<T: TryFrom<Entry>>(hash: HeaderHash)
             let eh = element.header().entry_hash().expect("Converting HeaderHash which does not have an Entry");
             Ok((eh.clone(), get_typed_from_el(element)?))
         },
-        None => crate::error("Entry not found"),
+        None => error("Entry not found"),
     }
 }
 
@@ -134,7 +144,7 @@ pub fn get_typed_from_hh<T: TryFrom<Entry>>(hash: HeaderHash)
 pub fn get_typed_from_eh<T: TryFrom<Entry>>(eh: EntryHash) -> ExternResult<T> {
     match get(eh, GetOptions::content())? {
         Some(element) => Ok(get_typed_from_el(element)?),
-        None => crate::error("Entry not found"),
+        None => error("Entry not found"),
     }
 }
 
@@ -142,7 +152,7 @@ pub fn get_typed_from_eh<T: TryFrom<Entry>>(eh: EntryHash) -> ExternResult<T> {
 pub fn get_typed_from_el<T: TryFrom<Entry>>(element: Element) -> ExternResult<T> {
     match element.entry() {
         element::ElementEntry::Present(entry) => get_typed_from_entry::<T>(entry.clone()),
-        _ => crate::error("Could not convert element"),
+        _ => error("Could not convert element"),
     }
 }
 
@@ -156,7 +166,7 @@ pub fn get_typed_from_entry<T: TryFrom<Entry>>(entry: Entry) -> ExternResult<T> 
 
 /// Obtain latest AppEntry at EntryHash and get its author
 /// Conditions: Must be a single author entry type
-pub(crate) fn get_typed_and_author<T: TryFrom<Entry>>(eh: &EntryHash)
+pub fn get_typed_and_author<T: TryFrom<Entry>>(eh: &EntryHash)
     -> ExternResult<(AgentPubKey, T)>
 {
     let maybe_maybe_element = get(eh.clone(), GetOptions::latest());

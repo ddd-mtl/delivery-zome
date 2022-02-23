@@ -1,10 +1,8 @@
 use hdk::prelude::*;
 
 use strum::IntoEnumIterator;
+use crate::link_kind::*;
 
-use crate::{
-   link_kind::*,
-};
 
 /// Zome Callback
 #[hdk_extern]

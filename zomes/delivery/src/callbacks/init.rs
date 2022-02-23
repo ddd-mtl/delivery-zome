@@ -4,8 +4,9 @@ use crate::{
    //send_dm::*,
    path_kind,
    constants::*,
+   functions::*,
 };
-use crate::entries::pub_enc_key::*;
+use delivery_zome_api::pub_enc_key::*;
 
 
 #[hdk_extern]
@@ -33,7 +34,7 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    /// Setup initial capabilities
    init_caps(())?;
    /// Create public encryption key and broadcast it
-   PubEncKey::create_and_share()?;
+   create_enc_key()?;
    /// Done
    debug!("*** init() callback DONE");
    Ok(InitCallbackResult::Pass)

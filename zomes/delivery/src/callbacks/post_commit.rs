@@ -1,10 +1,11 @@
 use hdk::prelude::*;
+use delivery_zome_api::entry_kind::*;
 
-use crate::{
-   entry_kind::*,
-   utils::*,
-};
-use crate::entries::*;
+//use crate::{};
+use delivery_zome_api::*;
+use delivery_zome_api::utils::*;
+use crate::zome_entry_kind::*;
+
 //use crate::functions::*;
 //use crate::strum::AsStaticRef;
 
@@ -12,7 +13,7 @@ use crate::entries::*;
 #[hdk_extern(infallible)]
 fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
    //debug!("post_commit() called: {:?}", hhList);
-   debug!("post_commit() called");
+   debug!("post_commit() called for {} entries", signedHeaderList.len());
    for signedHeader in signedHeaderList {
       //debug!(" - {:?}", signedHeader.header().entry_type());
       let header = signedHeader.header();
@@ -31,6 +32,7 @@ fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
          EntryType::CapClaim => {},
          EntryType::CapGrant => {},
          EntryType::App(app_type) => {
+            debug!("post_commit() called on {:?}", app_type);
             let res = post_commit_app(entry_hash.clone(), app_type.clone());
             if let Err(e) = res {
                error!("post_commit() error: {:?}", e);
@@ -49,25 +51,25 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
       EntryKind::Path => {},
       EntryKind::DeliveryNotice => {
          let notice = get_typed_from_eh::<DeliveryNotice>(eh.clone())?;
-         DeliveryNotice::post_commit(&eh, notice)?;
+         //DeliveryNotice::post_commit(&eh, notice)?;
       },
       EntryKind::DeliveryReceipt => {
          let _ = get_typed_from_eh::<DeliveryReceipt>(eh.clone())?;
       },
       EntryKind::DeliveryReply => {
          let reply = get_typed_from_eh::<DeliveryReply>(eh.clone())?;
-         DeliveryReply::post_commit(&eh, reply)?;
+         //DeliveryReply::post_commit(&eh, reply)?;
       },
       EntryKind::Distribution => {
          let distribution = get_typed_from_eh::<Distribution>(eh.clone())?;
-         Distribution::post_commit(&eh, distribution)?;
+         //Distribution::post_commit(&eh, distribution)?;
       },
       EntryKind::NoticeReceived => {
          let _ = get_typed_from_eh::<NoticeReceived>(eh.clone())?;
       },
       EntryKind::ParcelReceived => {
          let reception = get_typed_from_eh::<ParcelReceived>(eh.clone())?;
-         ParcelReceived::post_commit(&eh, reception)?;
+         //ParcelReceived::post_commit(&eh, reception)?;
       },
       EntryKind::ReplyReceived => {
          let _ = get_typed_from_eh::<ReplyReceived>(eh.clone())?;
@@ -77,11 +79,11 @@ fn post_commit_app(eh: EntryHash, app_type: AppEntryType) -> ExternResult<()>{
       },
       EntryKind::ParcelChunk => {
          let chunk = get_typed_from_eh::<ParcelChunk>(eh.clone())?;
-         ParcelChunk::post_commit(&eh, chunk)?;
+         //ParcelChunk::post_commit(&eh, chunk)?;
       },
       EntryKind::ParcelManifest => {
          let manifest = get_typed_from_eh::<ParcelManifest>(eh.clone())?;
-         ParcelManifest::post_commit(&eh, manifest)?;
+         //ParcelManifest::post_commit(&eh, manifest)?;
 
       },
       // Add type handling here

@@ -1,12 +1,6 @@
 use hdk::prelude::*;
 
-use crate::{
-    //entry_kind::*,
-    //link_kind::*,
-    utils::*,
-    //states::*,
-    //entries::*,
-};
+use crate::utils::*;
 
 /// Return size of an AppEntry
 pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
@@ -19,9 +13,10 @@ pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
     /// Get length of SerializedBytes
     let entry = element
        .entry()
-       .to_app_option::<Entry>()?
-       .ok_or(WasmError::Guest(String::from("No AppEntry found at given payload address")))?
-       ;
+       .as_option()
+       .ok_or(WasmError::Guest(String::from("No AppEntry found at given payload address")))
+       ?
+       .to_owned();
     if let Entry::App(app_bytes) = entry {
         let size: usize = app_bytes
            .into_sb()

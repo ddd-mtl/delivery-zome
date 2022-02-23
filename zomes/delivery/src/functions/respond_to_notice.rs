@@ -1,15 +1,6 @@
 use hdk::prelude::*;
-use crate::{
-   utils::*,
-   entries::*,
-};
-
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct RespondToNoticeInput {
-   pub notice_eh: EntryHash,
-   pub has_accepted: bool,
-}
+use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
+use delivery_zome_api::*;
 
 /// Zone Function
 /// Return EntryHash of DeliveryReply

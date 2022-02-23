@@ -1,7 +1,6 @@
 use hdk::prelude::*;
-use crate::{
-   entries::*,
-};
+use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
+
 
 /// Zome function
 /// Write base64 file as string to source chain

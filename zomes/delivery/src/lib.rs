@@ -8,9 +8,6 @@ extern crate strum;
 #[macro_use]
 extern crate strum_macros;
 
-#[macro_use]
-extern crate zome_proc_macro;
-
 #[macro_use] extern crate enum_ordinalize;
 
 //----------------------------------------------------------------------------------------
@@ -18,46 +15,54 @@ extern crate zome_proc_macro;
 //#[cfg(not(target_arch = "wasm32"))]
 //pub mod api_error;
 
-mod utils;
 mod constants;
-mod link_kind;
-mod entry_kind;
 mod path_kind;
 
 mod send_dm;
 mod dm_protocol;
 
 mod receive_dm;
-mod utils_parcel;
 mod send_item;
-mod parcel;
-mod states;
 mod delivery;
 
 //pub mod signal_protocol;
 
 pub mod callbacks;
-pub mod entries;
 pub mod functions;
-
+pub(crate) mod zome_entry_kind;
+pub mod link_kind;
 
 
 //----------------------------------------------------------------------------------------
 
-pub use utils::*;
 pub use constants::*;
-pub use link_kind::*;
-pub use entry_kind::*;
 pub use path_kind::*;
-
 pub use send_dm::*;
 pub use dm_protocol::*;
-
 pub use receive_dm::*;
-pub use utils_parcel::*;
 pub use send_item::*;
-pub use parcel::*;
-pub use states::*;
 pub use delivery::*;
+
 //pub use signal_protocol::*;
 
+//----------------------------------------------------------------------------------------
+use hdk::prelude::*;
+use delivery_zome_api::*;
+
+entry_defs![
+   /// -- PubEncKey
+   PubEncKey::entry_def(),
+   /// -- Delivery
+   DeliveryNotice::entry_def(),
+   DeliveryReceipt::entry_def(),
+   DeliveryReply::entry_def(),
+   Distribution::entry_def(),
+   NoticeReceived::entry_def(),
+   ParcelReceived::entry_def(),
+   ReplyReceived::entry_def(),
+   PendingItem::entry_def(),
+   ParcelManifest::entry_def(),
+   ParcelChunk::entry_def(),
+   /// -- Other
+   PathEntry::entry_def()
+];

@@ -8,13 +8,12 @@ use holo_hash::*;
 use holochain_p2p::*;
 use colored::*;
 use futures::future;
-use snapmail::{
-   handle::*,
-   EntryKind,
-};
 use strum::AsStaticRef;
 
-pub const DNA_FILEPATH: &str = "./snapmail.dna";
+use delivery_zome_api::*;
+use delivery_zome_api::entry_kind::*;
+
+pub const DNA_FILEPATH: &str = "./secret.dna";
 pub const ALEX_NICK: &str = "alex";
 pub const BILLY_NICK: &str = "billy";
 pub const CAMILLE_NICK: &str = "camille";
@@ -100,14 +99,14 @@ pub async fn setup_conductors(n: usize) -> (SweetConductorBatch, Vec<AgentPubKey
 ///
 pub async fn setup_3_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, SweetAppBatch) {
    let (conductors, agents, apps) = setup_conductors(3).await;
-   let cells = apps.cells_flattened();
+   let _cells = apps.cells_flattened();
 
-   let _: HeaderHash = conductors[0].call(&cells[0].zome("snapmail"), "set_handle", ALEX_NICK).await;
-   let _: HeaderHash = conductors[1].call(&cells[1].zome("snapmail"), "set_handle", BILLY_NICK).await;
-   let _: HeaderHash = conductors[2].call(&cells[2].zome("snapmail"), "set_handle", CAMILLE_NICK).await;
-
-   let _ = try_zome_call(&conductors[0], cells[0], "get_all_handles", (),
-                                                    |handle_list: &Vec<HandleItem>| handle_list.len() == 3).await;
+   // let _: HeaderHash = conductors[0].call(&cells[0].zome("snapmail"), "set_handle", ALEX_NICK).await;
+   // let _: HeaderHash = conductors[1].call(&cells[1].zome("snapmail"), "set_handle", BILLY_NICK).await;
+   // let _: HeaderHash = conductors[2].call(&cells[2].zome("snapmail"), "set_handle", CAMILLE_NICK).await;
+   //
+   // let _ = try_zome_call(&conductors[0], cells[0], "get_all_handles", (),
+   //                                                  |handle_list: &Vec<HandleItem>| handle_list.len() == 3).await;
 
    println!("\n\n\n AGENTS SETUP DONE\n\n");
 
@@ -134,9 +133,10 @@ fn print_element(element: &SourceChainJsonElement) -> String {
             let mut s = String::new();
             match &create_entry.entry_type {
             EntryType::App(app_entry_type) => {
-               let entry_kind: &'static str = EntryKind::from_index(&app_entry_type.id()).as_static();
                s += "AppEntry ";
-               s += &format!("'{}'", entry_kind);
+               //let entry_kind = EntryKind::from_index(&app_entry_type.id()).as_ref().to_owned();
+               //s += &format!("'{}'", entry_kind);
+               s += &format!("z{} e{}", u8::from(app_entry_type.zome_id()), u8::from(app_entry_type.id()));
                if app_entry_type.visibility() == &EntryVisibility::Public {
                   s = s.green().to_string();
                } else {
@@ -154,9 +154,10 @@ fn print_element(element: &SourceChainJsonElement) -> String {
          let mut s = String::new();
          match &update_entry.entry_type {
             EntryType::App(app_entry_type) => {
-               let entry_kind: &'static str = EntryKind::from_index(&app_entry_type.id()).as_static();
                s += "AppEntry ";
-               s += &format!("'{}'", entry_kind).green();
+               //let entry_kind = EntryKind::from_index(&app_entry_type.id()).as_ref().to_owned();
+               //s += &format!("'{}'", entry_kind).green();
+               s += &format!("z{} e{}", u8::from(app_entry_type.zome_id()), u8::from(app_entry_type.id()));
             },
             _ => {
                s += &format!("{:?}", update_entry.entry_type);

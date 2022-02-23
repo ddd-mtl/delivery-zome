@@ -1,27 +1,21 @@
 use hdk::prelude::*;
-use crate::{
-   get_typed_from_eh,
-   entries::*,
-   utils_parcel::*,
-   parcel::*,
+use delivery_zome_api::parcel::*;
+use delivery_zome_api::utils_parcel::*;
+use delivery_zome_api::{
+   DistributeParcelInput,
+   entries::*, entry_kind::*, parcel::*, utils::*,
 };
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct DistributeParcelInput {
-   pub recipients: Vec<AgentPubKey>,
-   pub strategy: DistributionStrategy,
-   pub parcel_kind: ParcelKind,
-   pub parcel_eh: EntryHash,
-}
 
 /// Zone Function
 #[hdk_extern]
 pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash> {
-   debug!("distribute_parcel(): {}", input.parcel_eh);
+   debug!("distribute_parcel() START: {:?}", input);
    /// Remove duplicate recipients
    let mut recipients = input.recipients.clone();
    let set: HashSet<_> = recipients.drain(..).collect(); // dedup
    recipients.extend(set.into_iter());
+   debug!("distribute_parcel() recipients: {}", recipients.len());
    /// Create ParcelSummary
    let parcel_summary = match input.parcel_kind {
       ParcelKind::AppEntry(app_type) => {
@@ -38,6 +32,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
          }
       }
    };
+   debug!("distribute_parcel() parcel_summary: {:?}", parcel_summary);
    /// Sign summary
    let summary_signature = sign(agent_info()?.agent_latest_pubkey, parcel_summary.clone())?;
    /// Create Distribution
@@ -49,6 +44,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    };
    /// Commit Distribution
    let eh = hash_entry(distribution.clone())?;
+   debug!("distribute_parcel() eh: {}", eh);
    let _hh = create_entry(distribution)?;
    /// Done
    Ok(eh)

@@ -1,10 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/delivery_zome_api",
   "zomes/delivery",
-  "sweettest",
   "test_dna/zomes/secret",
-  #"crates/proc_macro",
+  "sweettest",
 ]
 
 [profile.dev]

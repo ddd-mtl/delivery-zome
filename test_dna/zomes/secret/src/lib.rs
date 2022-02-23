@@ -6,9 +6,27 @@
 
 
 use hdk::prelude::*;
-use delivery::*;
-use delivery::functions::*;
-use delivery::entries::*;
+use delivery_zome_api::*;
+use delivery_zome_api::utils::*;
+use delivery_zome_api::parcel::*;
+
+entry_defs![
+   Secret::entry_def()
+];
+
+
+fn call_delivery_zome<T>(fn_name: &str, payload: T) -> ExternResult<ZomeCallResponse>
+   where
+      T: serde::Serialize + std::fmt::Debug,
+{
+   call(
+      CallTargetCell::Local,
+      "delivery".into(),
+      fn_name.to_string().into(),
+      None,
+      payload,
+   )
+}
 
 /// Entry representing a secret message
 #[hdk_entry(id = "Secret", visibility = "private")]
@@ -45,13 +63,14 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SendSecretInput {
-   secret_eh: EntryHash,
-   recipient: AgentPubKey,
+   pub secret_eh: EntryHash,
+   pub recipient: AgentPubKey,
 }
 
 /// Zome Function
 #[hdk_extern]
 pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
+   debug!("send_secret() START");
    /// Make sure secret is committed
    let _: Secret = get_typed_from_eh(input.secret_eh.clone())?;
    /// Distribute
@@ -61,23 +80,25 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
       parcel_kind: ParcelKind::AppEntry((zome_info()?.name, EntryDefId::App("Secret".into()))),
       parcel_eh: input.secret_eh,
    };
-   let response = call(
-      CallTargetCell::Local,
-      "delivery".into(),
-      "distribute_parcel".into(),
-      None,
-      distribution,
-   )?;
+   debug!("send_secret() call distribute_parcel...");
+   let response = call_delivery_zome("distribute_parcel", distribution)?;
    // distribute_parcel(distribution)?;
    let eh: EntryHash = decode_response(response)?;
+   debug!("send_secret() END");
    Ok(eh)
 }
 
 /// Zome Function
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
-   let notices = DeliveryNotice::query(DeliveryNoticeQueryField::Sender(sender))?;
+   debug!("get_secrets_from() START");
+   let response = call_delivery_zome(
+      "query_DeliveryNotice",
+      DeliveryNoticeQueryField::Sender(sender),
+   )?;
+   let notices: Vec<DeliveryNotice> = decode_response(response)?;
    let parcels = notices.iter().map(|x| x.parcel_summary.reference.entry_address()).collect();
+   debug!("get_secrets_from() END");
    Ok(parcels)
 }
 
@@ -85,7 +106,11 @@ pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
 /// Zome Function
 #[hdk_extern]
 pub fn accept_secret(parcel_eh: EntryHash) -> ExternResult<EntryHash> {
-   let notices = DeliveryNotice::query(DeliveryNoticeQueryField::Parcel(parcel_eh))?;
+   let response = call_delivery_zome(
+      "query_DeliveryNotice",
+      DeliveryNoticeQueryField::Parcel(parcel_eh),
+   )?;
+   let notices: Vec<DeliveryNotice> = decode_response(response)?;
    if notices.len() != 1 {
       return Err(WasmError::Guest(String::from("No Secret found at given EntryHash")));
    }
@@ -94,13 +119,7 @@ pub fn accept_secret(parcel_eh: EntryHash) -> ExternResult<EntryHash> {
       notice_eh,
       has_accepted: true,
    };
-   let response = call(
-      CallTargetCell::Local,
-      "delivery".into(),
-      "respond_to_notice".into(),
-      None,
-      input,
-   )?;
+   let response = call_delivery_zome("respond_to_notice", input)?;
    // return respond_to_notice(input)?;
    let eh: EntryHash = decode_response(response)?;
    Ok(eh)

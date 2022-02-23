@@ -2,9 +2,11 @@ use hdk::prelude::*;
 
 use std::collections::HashSet;
 use std::iter::FromIterator;
+use delivery_zome_api::utils::*;
 
-use crate::{entries::*, utils::*, EntryKind, ParcelReference};
-
+use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
+use crate::functions::*;
+use crate::zome_entry_kind::*;
 
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
@@ -24,7 +26,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    let notice = maybe_notice.unwrap();
    let notice_eh = hash_entry(notice)?;
    /// Must not already have a ParcelReceived
-   let maybe_receipt = ParcelReceived::query(ParcelReceivedField::Notice(notice_eh.clone()))?;
+   let maybe_receipt = query_ParcelReceived(ParcelReceivedField::Notice(notice_eh.clone()))?;
    if let Some(receipt) = maybe_receipt {
       return Ok(Some(receipt.parcel_eh));
    }

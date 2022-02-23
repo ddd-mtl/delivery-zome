@@ -1,14 +1,15 @@
 use hdk::prelude::*;
+use delivery_zome_api::utils::*;
 
-use crate::{entries::*, utils::*};
-
+use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
+use crate::functions::query::*;
 
 /// Zone Function
 /// Return DeliveryNotice from which we received a Parcel
 #[hdk_extern]
 pub fn get_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
    let field = ParcelReceivedField::Parcel(parcel_eh.clone());
-   let maybe_receipt = ParcelReceived::query(field)?;
+   let maybe_receipt = query_ParcelReceived(field)?;
    if maybe_receipt.is_none() {
       return Ok(None)
    }

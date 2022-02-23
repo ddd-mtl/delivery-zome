@@ -7,6 +7,11 @@ mod fetch_parcel;
 mod fetch_chunk;
 mod check_manifest;
 mod get_notice;
+mod commit_pending_item;
+mod commit_pub_enc_key;
+mod query;
+mod pack_item;
+mod unpack_item;
 
 
 pub use self::{
@@ -19,4 +24,9 @@ pub use self::{
    fetch_chunk::*,
    check_manifest::*,
    get_notice::*,
+   commit_pending_item::*,
+   commit_pub_enc_key::*,
+   pack_item::*,
+   unpack_item::*,
+   query::*,
 };

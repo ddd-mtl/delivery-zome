@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 
-use crate::entries::*;
+use delivery_zome_api::*;
 
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, SerializedBytes)]

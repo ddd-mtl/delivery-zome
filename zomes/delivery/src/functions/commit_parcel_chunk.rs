@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use crate::constants::CHUNK_MAX_SIZE;
-use crate::entries::*;
-use crate::utils::*;
+
+use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
 
 /// Zome function
 /// Write base64 file as string to source chain

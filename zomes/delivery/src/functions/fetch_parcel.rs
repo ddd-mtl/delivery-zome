@@ -1,6 +1,12 @@
 use hdk::prelude::*;
 
-use crate::{entries::*, utils::*, send_dm, dm_protocol::*, link_kind::*, ParcelReference};
+use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
+
+use crate::send_dm::*;
+use crate::dm_protocol::*;
+use crate::link_kind::*;
+use crate::functions::*;
+
 
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
@@ -42,16 +48,20 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
    /// Get all Parcels inbox and see if its there
    let me = agent_info()?.agent_latest_pubkey;
    let my_agent_eh = EntryHash::from(me.clone());
-   let pending_items = get_links_and_load_type::<PendingItem>(my_agent_eh.clone(), LinkKind::Inbox.as_tag_opt(), false)?;
+   let pending_items = get_links_and_load_type::<PendingItem>(
+      my_agent_eh.clone(),
+      LinkKind::Inbox.as_tag_opt(),
+      false,
+   )?;
    /// Check each Inbox link
    for pending_item in &pending_items {
       match pending_item.kind {
-         PendingKind::Entry => {
+         ItemKind::Entry => {
             if pending_item.distribution_eh != notice.distribution_eh {
                continue;
             }
             /// We have the parcel we just need to deserialize it
-            let parcel_entry: Entry = pending_item.clone().into_item(notice.sender.clone())?
+            let parcel_entry: Entry = unpack_item(pending_item.clone(), notice.sender.clone())?
                .expect("PendingItem should hold an Entry");
             return Ok(Some(parcel_entry));
          }
