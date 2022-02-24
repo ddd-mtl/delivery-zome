@@ -18,7 +18,6 @@ extern crate strum_macros;
 mod constants;
 mod send_dm;
 mod dm_protocol;
-
 mod receive_dm;
 mod send_item;
 
@@ -41,7 +40,6 @@ pub use send_dm::*;
 pub use dm_protocol::*;
 pub use receive_dm::*;
 pub use send_item::*;
-pub use zome_delivery_types::delivery::*;
 pub use utils::*;
 
 //pub use signal_protocol::*;

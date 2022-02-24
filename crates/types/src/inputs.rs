@@ -17,3 +17,16 @@ pub struct RespondToNoticeInput {
    pub notice_eh: EntryHash,
    pub has_accepted: bool,
 }
+
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum DeliveryNoticeQueryField {
+   Sender(AgentPubKey),
+   Parcel(EntryHash)
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum ParcelReceivedQueryField {
+   Notice(EntryHash),
+   Parcel(EntryHash)
+}

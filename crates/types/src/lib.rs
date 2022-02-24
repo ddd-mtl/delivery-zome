@@ -4,20 +4,14 @@
 #![allow(non_snake_case)]
 #![allow(unused_attributes)]
 
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
-#[macro_use] extern crate enum_ordinalize;
-
-//----------------------------------------------------------------------------------------
 
 mod entries;
 mod parcel;
 mod inputs;
-pub mod delivery;
+mod delivery;
 
 
 pub use entries::*;
 pub use inputs::*;
 pub use parcel::*;
+pub use delivery::*;

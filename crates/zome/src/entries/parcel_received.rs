@@ -2,7 +2,6 @@ use hdk::prelude::*;
 use zome_delivery_types::*;
 use crate::zome_entry_trait::*;
 use crate::utils::*;
-use crate::constants::*;
 use crate::send_item::*;
 use crate::functions::*;
 

@@ -8,9 +8,6 @@ use holo_hash::*;
 use holochain_p2p::*;
 use colored::*;
 use futures::future;
-use strum::AsStaticRef;
-
-use zome_delivery_types::*;
 
 pub const DNA_FILEPATH: &str = "./secret.dna";
 pub const ALEX_NICK: &str = "alex";

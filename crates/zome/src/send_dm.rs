@@ -6,7 +6,7 @@ use crate::{dm_protocol::*, constants::*, DirectMessage};
 
 
 ///
-pub(crate) fn send_dm(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<DeliveryProtocol> {
+pub fn send_dm(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<DeliveryProtocol> {
    /// Pre-conditions: Don't call yourself (otherwise we get concurrency issues)
    let me = agent_info().unwrap().agent_latest_pubkey;
    if destination == me {
