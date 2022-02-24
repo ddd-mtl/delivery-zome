@@ -40,6 +40,12 @@ impl FromStr for EntryKind {
 }
 
 impl EntryKind {
+
+   // ///
+   // pub fn into_typed<T>(index: &EntryDefIndex, entry_bytes: AppEntryBytes) -> T {
+   //
+   // }
+
    ///
    pub fn index(&self) -> EntryDefIndex {
       let entre_defs = zome_info()

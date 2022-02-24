@@ -21,7 +21,6 @@ mod dm_protocol;
 
 mod receive_dm;
 mod send_item;
-mod delivery;
 
 //pub mod signal_protocol;
 
@@ -32,6 +31,7 @@ pub mod link_kind;
 pub mod utils_parcel;
 pub mod utils;
 pub mod entry_kind;
+mod entries;
 
 
 //----------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ pub use send_dm::*;
 pub use dm_protocol::*;
 pub use receive_dm::*;
 pub use send_item::*;
-pub use delivery::*;
+pub use zome_delivery_types::delivery::*;
 
 //pub use signal_protocol::*;
 

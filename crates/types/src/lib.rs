@@ -15,6 +15,8 @@ extern crate strum_macros;
 mod entries;
 mod parcel;
 mod inputs;
+pub mod delivery;
+
 
 pub use entries::*;
 pub use inputs::*;
