@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 
-use crate::entry_kind::*;
 use crate::parcel::*;
 
 /// Entry representing a received Manifest

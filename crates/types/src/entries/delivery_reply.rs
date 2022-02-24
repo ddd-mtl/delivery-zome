@@ -1,7 +1,5 @@
 use hdk::prelude::*;
 
-use crate::entries::*;
-use crate::entry_kind::*;
 
 // pub enum ReceptionResponse {
 //     Accepted((HeaderHash, Signature)),

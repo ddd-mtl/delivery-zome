@@ -3,8 +3,6 @@ use crate::utils::*;
 
 use zome_delivery_types::*;
 use crate::functions::query::*;
-use crate::utils::*;
-
 
 /// Zone Function
 /// Return DeliveryNotice from which we received a Parcel

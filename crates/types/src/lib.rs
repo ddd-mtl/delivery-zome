@@ -12,7 +12,6 @@ extern crate strum_macros;
 
 //----------------------------------------------------------------------------------------
 
-mod entry_kind;
 mod entries;
 mod parcel;
 mod inputs;
@@ -20,4 +19,3 @@ mod inputs;
 pub use entries::*;
 pub use inputs::*;
 pub use parcel::*;
-pub use entry_kind::*;

@@ -5,7 +5,6 @@ use crate::{
    constants::*,
    functions::*,
 };
-use zome_delivery_types::pub_enc_key::*;
 
 
 #[hdk_extern]

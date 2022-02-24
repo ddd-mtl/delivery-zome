@@ -6,7 +6,7 @@ use std::iter::FromIterator;
 use zome_delivery_types::*;
 use crate::functions::*;
 use crate::utils::*;
-use crate::zome_entry_kind::*;
+use crate::entry_kind::*;
 
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded

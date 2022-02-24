@@ -8,6 +8,7 @@ use strum_macros::EnumIter;
 use strum::EnumProperty;
 use zome_delivery_types::*;
 use crate::utils::*;
+use crate::entry_kind::*;
 use crate::zome_entry_kind::*;
 
 pub const LinkSeparator: &'static str = "___";

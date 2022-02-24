@@ -1,7 +1,5 @@
 use hdk::prelude::*;
 
-use crate::entries::*;
-use crate::entry_kind::*;
 use crate::parcel::*;
 
 #[allow(non_camel_case_types)]

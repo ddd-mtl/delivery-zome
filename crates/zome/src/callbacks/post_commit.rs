@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
 use crate::utils::*;
-use crate::zome_entry_kind::*;
+use crate::entry_kind::*;
 
 //use crate::functions::*;
 //use crate::strum::AsStaticRef;

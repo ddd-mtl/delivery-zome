@@ -1,8 +1,4 @@
-
 use hdk::prelude::*;
-
-use crate::entries::*;
-use crate::entry_kind::*;
 
 /// Entry for confirming a delivery has been well received or refused by a recipient
 /// TODO: This should be a private link instead of an entry
