@@ -8,11 +8,13 @@ use holo_hash::*;
 use holochain_p2p::*;
 use colored::*;
 use futures::future;
+use crate::print::*;
 
 pub const DNA_FILEPATH: &str = "./secret.dna";
 pub const ALEX_NICK: &str = "alex";
 pub const BILLY_NICK: &str = "billy";
 pub const CAMILLE_NICK: &str = "camille";
+
 
 
 ///
@@ -26,8 +28,9 @@ pub fn create_network_config() -> ConductorConfig {
 }
 
 
+
 ///
-pub async fn setup_1_conductor() -> (SweetConductor, AgentPubKey, SweetCell) {
+pub async fn setup_1_conductor() -> (SweetConductor, AgentPubKey, SweetCell, Vec<Vec<String>>) {
    let dna = SweetDnaFile::from_bundle(std::path::Path::new(DNA_FILEPATH))
       .await
       .unwrap();
@@ -50,28 +53,14 @@ pub async fn setup_1_conductor() -> (SweetConductor, AgentPubKey, SweetCell) {
 
    let cell1 = app1.into_cells()[0].clone();
 
+   let all_entry_names = get_dna_entry_names(&conductor, &cell1).await;
+
+
    println!("\n\n\n SETUP DONE\n\n");
 
-   (conductor, alex, cell1)
+   (conductor, alex, cell1, all_entry_names)
 }
 
-//
-pub async fn get_entry_names(conductor: SweetConductor, cell: SweetCell, zome_name: &str) -> Vec<String> {
-   let mut entry_names = Vec::new();
-   let entry_defs: EntryDefsCallbackResult = conductor.call(&cell.zome(zome_name), "entry_defs", ()).await;
-   if let EntryDefsCallbackResult::Defs(defs) = entry_defs {
-      for entry_def in defs.clone() {
-         //println!("entry_def: {:?}", entry_def);
-         let name = match entry_def.id {
-            EntryDefId::App(name) => name,
-            EntryDefId::CapClaim => "CapClaim".to_string(),
-            EntryDefId::CapGrant => "CapGrant".to_string(),
-         };
-         entry_names.push(name);
-      }
-   }
-   entry_names
-}
 
 
 ///
@@ -113,10 +102,10 @@ pub async fn setup_conductors(n: usize) -> (SweetConductorBatch, Vec<AgentPubKey
 ///
 pub async fn setup_3_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, SweetAppBatch) {
    let (conductors, agents, apps) = setup_conductors(3).await;
-   let _cells = apps.cells_flattened();
+   let cells = apps.cells_flattened();
 
-   // let _: HeaderHash = conductors[0].call(&cells[0].zome("snapmail"), "set_handle", ALEX_NICK).await;
-   // let _: HeaderHash = conductors[1].call(&cells[1].zome("snapmail"), "set_handle", BILLY_NICK).await;
+   let _: X25519PubKey = conductors[0].call(&cells[0].zome("delivery"), "get_enc_key", &agents[1]).await;
+   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[0]).await;
    // let _: HeaderHash = conductors[2].call(&cells[2].zome("snapmail"), "set_handle", CAMILLE_NICK).await;
    //
    // let _ = try_zome_call(&conductors[0], cells[0], "get_all_handles", (),
@@ -128,138 +117,6 @@ pub async fn setup_3_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, Swe
 }
 
 
-///
-fn print_element(element: &SourceChainJsonElement) -> String {
-   let mut str = format!("{:?} ", element.header.header_type());
-  // let mut str = format!("({}) ", element.header_address);
-
-   // if (element.header.header_type() == HeaderType::CreateLink) {
-   //    str += &format!(" '{:?}'", element.header.tag());
-   // }
-
-   match &element.header {
-      Header::CreateLink(create_link) => {
-         // let s = std::str::from_utf8(&create_link.tag.0).unwrap();
-         let s = String::from_utf8_lossy(&create_link.tag.0).to_string();
-         str += &format!("'{:.20}'", s).yellow().to_string();
-      },
-      Header::Create(create_entry) => {
-            let mut s = String::new();
-            match &create_entry.entry_type {
-            EntryType::App(app_entry_type) => {
-               s += "AppEntry ";
-               //let entry_kind = EntryKind::from_index(&app_entry_type.id()).as_ref().to_owned();
-               //s += &format!("'{}'", entry_kind);
-               s += &format!("z{} e{}", u8::from(app_entry_type.zome_id()), u8::from(app_entry_type.id()));
-               if app_entry_type.visibility() == &EntryVisibility::Public {
-                  s = s.green().to_string();
-               } else {
-                  s = s.red().to_string();
-               }
-            },
-            _ => {
-               s += &format!("{:?}", create_entry.entry_type);
-               s = s.green().to_string();
-            }
-         };
-         str += &s;
-      },
-      Header::Update(update_entry) => {
-         let mut s = String::new();
-         match &update_entry.entry_type {
-            EntryType::App(app_entry_type) => {
-               s += "AppEntry ";
-               //let entry_kind = EntryKind::from_index(&app_entry_type.id()).as_ref().to_owned();
-               //s += &format!("'{}'", entry_kind).green();
-               s += &format!("z{} e{}", u8::from(app_entry_type.zome_id()), u8::from(app_entry_type.id()));
-            },
-            _ => {
-               s += &format!("{:?}", update_entry.entry_type);
-            }
-         };
-         str += &s.yellow().to_string();
-      },
-      Header::DeleteLink(delete_link) => {
-         let s = format!("{}", delete_link.link_add_address);
-         str += &format!("'{:.25}'", s).yellow().to_string();
-      },
-      Header::Delete(delete_entry) => {
-         let s = format!("{}", delete_entry.deletes_address);
-         str += &format!("'{:.25}'", s).green().to_string();
-      }
-      _ => {},
-   }
-
-   //       else {
-   //    if (element.header.entry_type) {
-   //       if (typeof element.header.entry_type === 'object') {
-   //          str += ' - AppEntry ; id = ' + element.header.entry_type.App.id
-   //       } else {
-   //          str += ' - ' + element.header.entry_type
-   //       }
-   //    }
-   // }
-
-   let mut line = format!("{:<40} ({})", str, element.header_address);
-
-   if element.header.is_genesis() {
-      line = line.blue().to_string();
-   }
-   line
-}
-
-
-///
-pub async fn print_peers(conductor: &SweetConductor, cell: &SweetCell) {
-   let cell_id = cell.cell_id();
-   let space = cell_id.dna_hash().to_kitsune();
-   let env = conductor.get_p2p_env(space);
-   let peer_dump = p2p_agent_store::dump_state(
-      env.into(),
-      Some(cell_id.clone()),
-   ).await.expect("p2p_store should not fail");
-   println!(" *** peer_dump: {:?}",peer_dump.peers);
-}
-
-
-///
-pub async fn print_chain(conductor: &SweetConductor, agent: &AgentPubKey, cell: &SweetCell) {
-   let cell_id = cell.cell_id();
-   let vault = conductor.get_authored_env(cell_id.dna_hash()).unwrap();
-
-   let space = cell_id.dna_hash().to_kitsune();
-
-   let env = conductor.get_p2p_env(space);
-   let _peer_dump = p2p_agent_store::dump_state(
-      env.into(),
-      Some(cell_id.clone()),
-   ).await.expect("p2p_store should not fail");
-
-   // let p2p_env = conductor
-   //    .p2p_env
-   //    .lock()
-   //    .get(&space)
-   //    .cloned()
-   //    .expect("invalid cell space");
-   // let peer_dump = p2p_agent_store::dump_state(p2p_env.into(), Some(cell_id.clone()))?;
-
-   //println!(" *** peer_dump: {:?}",peer_dump.peers);
-
-   let json_dump = dump_state(vault.clone().into(), agent.clone()).await.unwrap();
-   //let json = serde_json::to_string_pretty(&json_dump).unwrap();
-
-   println!(" ====== SOURCE-CHAIN STATE DUMP START ===== {}", json_dump.elements.len());
-   //println!("source_chain_dump({}) of {:?}", json_dump.elements.len(), agent);
-
-   let mut count = 0;
-   for element in &json_dump.elements {
-      let str = print_element(&element);
-      println!(" {:2}. {}", count, str);
-      count += 1;
-   }
-
-   println!(" ====== SOURCE-CHAIN STATE DUMP END  ===== {}", json_dump.elements.len());
-}
 
 
 /// Call a zome function several times, waiting for a certainr result

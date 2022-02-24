@@ -7,6 +7,7 @@ use holo_hash::*;
 use tokio::time::{sleep, Duration};
 
 use crate::setup::*;
+use crate::print::*;
 
 //
 // ///
@@ -82,6 +83,9 @@ pub async fn test_delivery_dm() {
    /// Setup
    let (conductors, agents, apps) = setup_3_conductors().await;
    let cells = apps.cells_flattened();
+   let all_entry_names = get_dna_entry_names(&conductors[0], &cells[0]).await;
+
+
    /// A Store secret
    let secret_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "create_secret", "I like bananas").await;
    println!("secret_eh: {:?}", secret_eh);
@@ -90,7 +94,7 @@ pub async fn test_delivery_dm() {
    println!("secret_msg: {}", secret_msg);
 
    sleep(Duration::from_millis(200)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0]).await;
+   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
    sleep(Duration::from_millis(200)).await;
 
    /// A sends secret to B
@@ -101,7 +105,7 @@ pub async fn test_delivery_dm() {
    let _distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
 
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0]).await;
+   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
    sleep(Duration::from_millis(200)).await;
 
    /// B checks if request received
@@ -116,7 +120,7 @@ pub async fn test_delivery_dm() {
 
    /// Wait for parcel to be received
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[1], &agents[1], &cells[1]).await;
+   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
 
    // /// A acks msg
    // let outmail_state: OutMailState = conductors[0].call(&cells[0].zome("snapmail"), "get_outmail_state", outmail_hh.clone()).await;
@@ -139,7 +143,7 @@ pub async fn test_delivery_dm() {
 
    /// Check A's chain for a DeliveryReceipt
    sleep(Duration::from_millis(500)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0]).await;
+   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
 
 }
 

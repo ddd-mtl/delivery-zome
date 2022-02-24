@@ -12,7 +12,7 @@ use holo_hash::*;
 
 use crate::setup::*;
 use crate::test_delivery::*;
-
+use crate::print::*;
 
 ///
 pub async fn test(arg: String) {
@@ -108,14 +108,14 @@ pub async fn test_list_apps() {
 
 ///
 pub async fn test_pub_enc_key() {
-   let (conductor, alex, cell1) = setup_1_conductor().await;
+   let (conductor, alex, cell1, entry_names) = setup_1_conductor().await;
 
    println!("Calling get_my_enc_key()");
    let enc_key: holochain_zome_types::X25519PubKey = conductor.call(&cell1.zome("delivery"), "get_my_enc_key", ()).await;
    println!("enc_key: {:?}", enc_key);
    //assert_eq!("<noname>", handle);
 
-   print_chain(&conductor, &alex, &cell1).await;
+   print_chain(&conductor, &alex, &cell1, entry_names).await;
 
    //let _ :() = conductor.call(&cell1.zome("snapmail"), "init_caps", ()).await;
 

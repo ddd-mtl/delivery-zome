@@ -6,6 +6,9 @@ pub mod test;
 pub mod test_delivery;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod setup;
+#[cfg(not(target_arch = "wasm32"))]
+mod print;
+
 
 #[cfg(not(target_arch = "wasm32"))]
 #[tokio::main(flavor = "multi_thread")]
