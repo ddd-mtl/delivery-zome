@@ -19,7 +19,7 @@ tokio-stream = { version = "0.1", default-features = false }
 maplit = { version = "1", default-features = false }
 
 #delivery = { path = "../zomes/delivery", default-features = false }
-delivery_zome_api = { path = "../crates/delivery_zome_api", default-features = false }
+zome_delivery_types = { path = "../crates/types", default-features = false }
 secret = { path = "../test_dna/zomes/secret", default-features = false }
 
 

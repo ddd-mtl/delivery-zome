@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 
-use delivery_zome_api::*;
+use zome_delivery_types::*;
 
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, SerializedBytes)]

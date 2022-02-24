@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use crate::link_kind::*;
-use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
+use zome_delivery_types::{entries::*, entry_kind::*, parcel::*, utils::*};
 
 use crate::send_dm::*;
 use crate::dm_protocol::*;

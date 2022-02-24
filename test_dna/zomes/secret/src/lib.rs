@@ -6,9 +6,9 @@
 
 
 use hdk::prelude::*;
-use delivery_zome_api::*;
-use delivery_zome_api::utils::*;
-use delivery_zome_api::parcel::*;
+use zome_delivery_types::*;
+use zome_delivery_types::utils::*;
+use zome_delivery_types::parcel::*;
 
 entry_defs![
    Secret::entry_def()

@@ -1,7 +1,7 @@
 use hdk::prelude::*;
-use delivery_zome_api::parcel::*;
-use delivery_zome_api::utils_parcel::*;
-use delivery_zome_api::{
+use zome_delivery_types::parcel::*;
+use zome_delivery_types::utils_parcel::*;
+use zome_delivery_types::{
    DistributeParcelInput,
    entries::*, entry_kind::*, parcel::*, utils::*,
 };

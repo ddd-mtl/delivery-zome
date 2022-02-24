@@ -1,9 +1,9 @@
 use hdk::prelude::*;
-use delivery_zome_api::entry_kind::*;
+use zome_delivery_types::entry_kind::*;
 
 //use crate::{};
-use delivery_zome_api::*;
-use delivery_zome_api::utils::*;
+use zome_delivery_types::*;
+use zome_delivery_types::utils::*;
 use crate::zome_entry_kind::*;
 
 //use crate::functions::*;

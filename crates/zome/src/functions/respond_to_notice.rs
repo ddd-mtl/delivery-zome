@@ -1,6 +1,6 @@
 use hdk::prelude::*;
-use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
-use delivery_zome_api::*;
+use zome_delivery_types::{entries::*, entry_kind::*, parcel::*, utils::*};
+use zome_delivery_types::*;
 
 /// Zone Function
 /// Return EntryHash of DeliveryReply

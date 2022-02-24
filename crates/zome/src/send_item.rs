@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 
-use delivery_zome_api::utils::*;
-use delivery_zome_api::*;
+use zome_delivery_types::utils::*;
+use zome_delivery_types::*;
 
 use crate::{
    send_dm, DeliveryProtocol,

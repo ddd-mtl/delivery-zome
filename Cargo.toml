@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/delivery_zome_api",
-  "zomes/delivery",
+  "crates/types",
+  "crates/zome",
   "test_dna/zomes/secret",
   "sweettest",
 ]

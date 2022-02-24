@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 //use serde::de::Unexpected::Str;
-use delivery_zome_api::utils::*;
+use zome_delivery_types::utils::*;
 //use serde::de::Unexpected::Str;
 use crate::{dm_protocol::*, constants::*, DirectMessage};
 

@@ -1,5 +1,5 @@
 [package]
-name = "delivery"
+name = "zome_delivery"
 version = "0.0.1"
 edition = "2018"
 
@@ -9,7 +9,7 @@ edition = "2018"
 #[workspace]
 
 [lib]
-name = "delivery"
+name = "zome_delivery"
 crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
@@ -23,7 +23,7 @@ bincode = "=1.3.3"
 base64 = {version = "0.13"}
 enum-ordinalize =  "3.1.10"
 
-delivery_zome_api = {path = "../../crates/delivery_zome_api" }
+zome_delivery_types = { path = "../types" }
 
 
 # online

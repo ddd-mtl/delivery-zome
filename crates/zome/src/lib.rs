@@ -47,7 +47,7 @@ pub use delivery::*;
 
 //----------------------------------------------------------------------------------------
 use hdk::prelude::*;
-use delivery_zome_api::*;
+use zome_delivery_types::*;
 
 entry_defs![
    /// -- PubEncKey

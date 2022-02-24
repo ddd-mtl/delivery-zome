@@ -1,6 +1,6 @@
 use hdk::prelude::*;
-use delivery_zome_api::entry_kind::EntryKind;
-use delivery_zome_api::entries::*;
+use zome_delivery_types::entry_kind::EntryKind;
+use zome_delivery_types::entries::*;
 use std::str::FromStr;
 
 pub(crate) trait ZomeEntryKind {

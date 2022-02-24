@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use delivery_zome_api::{entries::*, entry_kind::*, parcel::*, utils::*};
+use zome_delivery_types::{entries::*, entry_kind::*, parcel::*, utils::*};
 
 
 /// Zome function

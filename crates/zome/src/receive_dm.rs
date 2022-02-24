@@ -1,8 +1,8 @@
 use hdk::prelude::*;
-use delivery_zome_api::utils::*;
+use zome_delivery_types::utils::*;
 
 use crate::DeliveryProtocol;
-use delivery_zome_api::*;
+use zome_delivery_types::*;
 use crate::functions::*;
 
 

@@ -1,6 +1,6 @@
 use hdk::prelude::*;
-use delivery_zome_api::utils::*;
-use delivery_zome_api::entries::PubEncKey;
+use zome_delivery_types::utils::*;
+use zome_delivery_types::entries::PubEncKey;
 use crate::link_kind::*;
 
 /// Create public encryption key and broadcast it

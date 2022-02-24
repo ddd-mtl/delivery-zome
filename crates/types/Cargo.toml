@@ -1,5 +1,5 @@
 [package]
-name = "delivery_zome_api"
+name = "zome_delivery_types"
 version = "0.0.1"
 edition = "2018"
 
@@ -9,7 +9,7 @@ edition = "2018"
 #[workspace]
 
 [lib]
-name = "delivery_zome_api"
+name = "zome_delivery_types"
 crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
