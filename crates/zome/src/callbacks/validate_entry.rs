@@ -83,26 +83,6 @@ fn validate_grant_entry(
     //Ok(ValidateCallbackResult::Invalid("Validation failed: Not authorized".into()))
 }
 
-//
-// ///
-// /// TODO: Check if data_hash not already stored in source chain
-// pub(crate) fn validate_file(manifest: FileManifest, _maybe_validation_package: Option<ValidationPackage>)
-//     -> ExternResult<ValidateCallbackResult>
-// {
-//     /// Check size
-//     if manifest.orig_filesize > FILE_MAX_SIZE {
-//         return Ok(ValidateCallbackResult::Invalid(
-//             format!("A file can't be bigger than {} MiB", FILE_MAX_SIZE / (1024 * 1024))));
-//     }
-//     if manifest.orig_filesize < 1 {
-//         return Ok(ValidateCallbackResult::Invalid("A file cannot be empty".into()));
-//     }
-//     if manifest.chunks.len() < 1 {
-//         return Ok(ValidateCallbackResult::Invalid("A file must have at least one chunk".into()));
-//     }
-//     Ok(ValidateCallbackResult::Valid)
-// }
-
 
 //
 //fn validate_counter_sign_entry(

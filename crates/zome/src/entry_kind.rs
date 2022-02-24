@@ -13,7 +13,6 @@ use zome_delivery_types::*;
 /// Listing all Entry kinds for this Zome
 #[derive(AsRefStr, EnumIter, Ordinalize, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum EntryKind {
-   Path,
    PubEncKey,
    DeliveryNotice,
    DeliveryReceipt,
@@ -25,11 +24,14 @@ pub enum EntryKind {
    PendingItem,
    ParcelManifest,
    ParcelChunk,
+   #[strum(serialize = "hdk.path_entry")]
+   Path,
 }
 
 impl FromStr for EntryKind {
    type Err = ();
    fn from_str(input: &str) -> Result<EntryKind, Self::Err> {
+      trace!("EntryKind::from_str({}) called...", input);
       for entry_kind in EntryKind::iter() {
          //let entry_kind = EntryKind::from_ordinal(ordinal);
          if input == entry_kind.as_ref() {
@@ -97,12 +99,12 @@ impl EntryKind {
          .expect("Zome should be operational")
          .entry_defs;
       let id = EntryDefId::App(self.as_ref().to_string());
-      debug!("EntryKind::index() def id = {:?}", id);
+      trace!("EntryKind::index() def id = {:?}", id);
       let mut i = 0;
       for entry_def in entre_defs.clone() {
-         debug!("entry def id: {:?} == {:?} ? {}", entry_def.id, id, entry_def.id == id);
+         trace!("entry def id: {:?} == {:?} ? {}", entry_def.id, id, entry_def.id == id);
          if entry_def.id == id {
-            debug!("entry def id match. Index = {}", i);
+            trace!("entry def id match. Index = {}", i);
          }
          i += 1;
       }

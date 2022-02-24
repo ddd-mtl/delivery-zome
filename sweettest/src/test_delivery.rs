@@ -88,6 +88,11 @@ pub async fn test_delivery_dm() {
    /// A Check secret is stored
    let secret_msg: String = conductors[0].call(&cells[0].zome("secret"), "get_secret", secret_eh.clone()).await;
    println!("secret_msg: {}", secret_msg);
+
+   sleep(Duration::from_millis(200)).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
+   sleep(Duration::from_millis(200)).await;
+
    /// A sends secret to B
    let input = SendSecretInput {
       secret_eh: secret_eh.clone(),

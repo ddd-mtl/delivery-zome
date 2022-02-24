@@ -12,7 +12,7 @@ lto = false
 opt-level = 0
 overflow-checks = false
 
-[profile.release.package.snapmail_sweettest]
+[profile.release.package.delivery_sweettest]
 opt-level = 0
 overflow-checks = false
 

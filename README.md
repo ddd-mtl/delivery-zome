@@ -1,6 +1,6 @@
 # snapmail-rsm
 
-Holochain Zome for P2P custom data delivery service between agents.
+Holochain Zome Module for sending private data between agents.
 
 Some design documentation is available in the `/spec` folder.
 
@@ -12,7 +12,7 @@ CI and NIX configs are not set up for the moment.
 Enable private sharing of custom data between P2P agents.
 Features:
  - Sign and encrypt parcels
- - Delivery Confirmation
+ - Delivery Receipt
  - Multiple distribution strategies:
    - Send via DM
    - Send via DHT
@@ -21,20 +21,21 @@ Features:
    - public
  - Spliting / Chunking large parcels for delivery
  - Failsafe and recovery (with post_commit())
- - Acknowledgement system
- - A default chunk entry is provided for arbitrary data
+ - A default chunk entry is provided for arbitrary data 
+ - Acknowledgement system?
 
 Constraints:
 A sender can send any Entry to a list of recipients
 The Entry must be first committed to the sender's source chain.
-The Entry must implement a Parcel trait?
-The recipient has the option to refuse to retrieve Parcel.
-Parcel types can have the option to not be refusable (ex: acks, mails)
+The recipient has the option to accept or refuse an incoming delivery.
+Parcel types can have the option to not be refusable (ex: acks, mails)? With parcel trait?
 
 
 Commit arbitrary entries to your source chain
-`send_entry(any_eh, [to])` to send a custom entry to a list of recipient. The entry will be analyzed
-`send_parcel(parce_eh)` to
+`distribute_parcel(parcel_eh, [recipients])` to send a custom entry to a list of recipient.
+`query_DeliveryNotice`
+`respond_to_notice(notice_eh, yes/no)` to accept/refuse an incoming parcel
+get() the entry
 
 `un/set_drop_off_agent()` Announce publicly which are my allowed drop-off points
 `query_drop_off()` Ask drop-off agent if it has a parcel for me.

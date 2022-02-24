@@ -1,4 +1,4 @@
-
+use std::collections::HashMap;
 use holochain::conductor::*;
 use holochain::sweettest::*;
 use holochain_state::source_chain::*;
@@ -53,6 +53,24 @@ pub async fn setup_1_conductor() -> (SweetConductor, AgentPubKey, SweetCell) {
    println!("\n\n\n SETUP DONE\n\n");
 
    (conductor, alex, cell1)
+}
+
+//
+pub async fn get_entry_names(conductor: SweetConductor, cell: SweetCell, zome_name: &str) -> Vec<String> {
+   let mut entry_names = Vec::new();
+   let entry_defs: EntryDefsCallbackResult = conductor.call(&cell.zome(zome_name), "entry_defs", ()).await;
+   if let EntryDefsCallbackResult::Defs(defs) = entry_defs {
+      for entry_def in defs.clone() {
+         //println!("entry_def: {:?}", entry_def);
+         let name = match entry_def.id {
+            EntryDefId::App(name) => name,
+            EntryDefId::CapClaim => "CapClaim".to_string(),
+            EntryDefId::CapGrant => "CapGrant".to_string(),
+         };
+         entry_names.push(name);
+      }
+   }
+   entry_names
 }
 
 
