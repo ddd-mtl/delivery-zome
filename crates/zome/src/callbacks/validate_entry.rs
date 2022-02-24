@@ -5,7 +5,7 @@ use hdk::prelude::element::ElementEntry;
 
 //use crate::entries::*;
 //use crate::entries::pub_enc_key::*;
-use crate::zome_entry_kind::*;
+use crate::entry_kind::*;
 
 
 /// Zome Callback
@@ -43,7 +43,7 @@ fn validate_app_entry(entry_bytes: AppEntryBytes, input: ValidateData) -> Extern
         debug!("validation failure: Non App types should have already been filtered out");
         unreachable!()
     };
-    let delivery_entry = deserialize_into_type(entry_index, entry_bytes)?;
+    let delivery_entry = deserialize_into_zome_entry(&entry_index, entry_bytes)?;
     let validation = delivery_entry.validate(input.validation_package);
     validation
 }
