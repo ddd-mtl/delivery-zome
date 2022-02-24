@@ -2,7 +2,6 @@
 
 # Compile the WASM
 cargo build --release --target wasm32-unknown-unknown
-# Pack DNAs
-hc dna pack --output=snapmail.dna snapmail.dna.workdir
-# Pack the Happ with everything
-hc app pack --output=snapmail.happ snapmail.dna.workdir
+# test zome
+hc dna pack --output=secret.dna test_dna/dna
+hc app pack --output=secret.happ test_dna/dna

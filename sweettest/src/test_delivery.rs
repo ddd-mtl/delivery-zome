@@ -81,7 +81,7 @@ use crate::print::*;
 ///
 pub async fn test_delivery_dm() {
    /// Setup
-   let (conductors, agents, apps) = setup_3_conductors().await;
+   let (conductors, agents, apps) = setup_2_conductors().await;
    let cells = apps.cells_flattened();
    let all_entry_names = get_dna_entry_names(&conductors[0], &cells[0]).await;
 

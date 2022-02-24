@@ -57,7 +57,7 @@ pub fn determine_entry_type(eh: EntryHash, entry: &Entry) -> ExternResult<EntryT
         Entry::CapClaim(_claim) => EntryType::CapClaim,
         Entry::CapGrant(_grant) => EntryType::CapGrant,
         Entry::App(_entry_bytes) => get_entry_type_from_eh(eh)?,
-        Entry::CounterSign(_data, _bytes) => unreachable!(),
+        Entry::CounterSign(_data, _bytes) => unreachable!("CounterSign"),
     })
 }
 
@@ -74,9 +74,9 @@ pub fn get_entry_type_from_eh(eh: EntryHash) -> ExternResult<EntryType> {
 
 /// Get Element at address using query()
 pub fn get_local_from_hh(hh: HeaderHash) -> ExternResult<Element> {
-    let inmail_query_args = ChainQueryFilter::default()
+    let query_args = ChainQueryFilter::default()
        .include_entries(true);
-    let maybe_vec = query(inmail_query_args);
+    let maybe_vec = query(query_args);
     if let Err(err) = maybe_vec {
         return error(&format!("{:?}",err));
     }
@@ -91,9 +91,9 @@ pub fn get_local_from_hh(hh: HeaderHash) -> ExternResult<Element> {
 
 /// Get Element at address using query()
 pub fn get_local_from_eh(eh: EntryHash) -> ExternResult<Element> {
-    let inmail_query_args = ChainQueryFilter::default()
+    let query_args = ChainQueryFilter::default()
        .include_entries(true);
-    let maybe_vec = query(inmail_query_args);
+    let maybe_vec = query(query_args);
     if let Err(err) = maybe_vec {
         return error(&format!("{:?}",err));
     }

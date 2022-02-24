@@ -61,7 +61,7 @@ impl LinkKind {
          return kind.as_type();
       }
       error!("Fatal error: LinkKind::prop_to_type() failed : {}", kind_str);
-      unreachable!()
+      unreachable!("LinkKind::prop_to_type() failed")
    }
 
    /// Check if link edges have correct types

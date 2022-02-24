@@ -4,11 +4,7 @@ use holochain::conductor::{
    ConductorHandle,
 };
 use maplit::hashset;
-use holo_hash::*;
-
-// use delivery::{
-//    CHUNK_MAX_SIZE,
-// };
+//use holo_hash::*;
 
 use crate::setup::*;
 use crate::test_delivery::*;
@@ -25,10 +21,6 @@ pub async fn test(arg: String) {
    // Pub Key
    if arg == "all" || arg == "key" {
       test_pub_enc_key().await;
-   }
-   // Encryption
-   if arg == "all" || arg == "enc" {
-      test_encryption().await;
    }
    // // Deliver to self
    // if arg == "all" || arg == "self" {
@@ -122,38 +114,4 @@ pub async fn test_pub_enc_key() {
    //let _enc_key: holochain_zome_types::X25519PubKey = conductor.call(&cell1.zome("snapmail"), "get_my_enc_key", ()).await;
 
    //let _handle_address1: HeaderHash = conductor.call(&cell1.zome("snapmail"), "set_handle", "toto").await;
-}
-
-
-///
-pub async fn test_encryption() {
-   // Setup
-   let (conductors, agents, apps) = setup_3_conductors().await;
-   let cells = apps.cells_flattened();
-
-   // let _: HeaderHash = conductors[0].call(&cells[0].zome("snapmail"), "set_handle", ALEX_NICK).await;
-   // let _: HeaderHash = conductors[1].call(&cells[1].zome("snapmail"), "set_handle", BILLY_NICK).await;
-   // let _: HeaderHash = conductors[2].call(&cells[2].zome("snapmail"), "set_handle", CAMILLE_NICK).await;
-   //
-   // print_chain(&conductors[0], &agents[0], &cells[0]).await;
-   //
-   // //println!("Waiting for consistency...");
-   // //holochain::test_utils::consistency_10s(cells.as_slice()).await;
-   // //println!("consistency done!");
-   //
-   // let mut length = 0;
-   // for _ in 0..10u32 {
-   //    let handle_list: Vec<HandleItem> = conductors[0].call(&cells[0].zome("snapmail"), "get_all_handles", ()).await;
-   //    length = handle_list.len();
-   //    println!("handle_list: {:?}", handle_list);
-   //    if length == 3 {
-   //       break;
-   //    }
-   //    print_peers(&conductors[0], &cells[0]).await;
-   //    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-   // }
-   // assert_eq!(3, length);
-   //
-   // // Test
-   // let _output: () = conductors[0].call(&cells[0].zome("snapmail"), "test_encryption", agents[1].clone()).await;
 }

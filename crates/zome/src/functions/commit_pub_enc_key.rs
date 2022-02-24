@@ -75,15 +75,3 @@ fn test_encryption(to: AgentPubKey) -> ExternResult<()> {
    Ok(())
 }
 
-// -- VALIDATION -- //
-
-///
-pub fn validate_PubEncKey_entry(_: PubEncKey, _maybe_validation_package: Option<ValidationPackage>) -> ExternResult<ValidateCallbackResult> {
-   trace!("*** validate_PubEncKey_entry() called!");
-   Ok(ValidateCallbackResult::Valid)
-}
-
-#[hdk_extern]
-fn validate_PubEncKey_delete(_: ValidateData) -> ExternResult<ValidateCallbackResult> {
-   Ok(ValidateCallbackResult::Invalid("Agent must always have a Handle".into()))
-}

@@ -41,7 +41,7 @@ fn validate_app_entry(entry_bytes: AppEntryBytes, input: ValidateData) -> Extern
         app_entry_type.id()
     } else {
         debug!("validation failure: Non App types should have already been filtered out");
-        unreachable!()
+        unreachable!("In validate_app_entry")
     };
     let delivery_entry = deserialize_into_zome_entry(&entry_index, entry_bytes)?;
     let validation = delivery_entry.validate(input.validation_package);

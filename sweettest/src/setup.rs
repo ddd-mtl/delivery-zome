@@ -1,13 +1,10 @@
-use std::collections::HashMap;
-use holochain::conductor::*;
 use holochain::sweettest::*;
-use holochain_state::source_chain::*;
 use holochain_zome_types::*;
 use holochain::conductor::config::ConductorConfig;
 use holo_hash::*;
-use holochain_p2p::*;
-use colored::*;
 use futures::future;
+use tokio::time::{sleep, Duration};
+
 use crate::print::*;
 
 pub const DNA_FILEPATH: &str = "./secret.dna";
@@ -61,6 +58,42 @@ pub async fn setup_1_conductor() -> (SweetConductor, AgentPubKey, SweetCell, Vec
    (conductor, alex, cell1, all_entry_names)
 }
 
+///
+pub async fn setup_2_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, SweetAppBatch) {
+   let (conductors, agents, apps) = setup_conductors(2).await;
+   let cells = apps.cells_flattened();
+
+   println!("\n\n\n WAITING FOR INIT TO FINISH...\n\n");
+   sleep(Duration::from_millis(10 * 1000)).await;
+
+   println!("\n\n\n CALLING get_enc_key() TO SELF ...\n\n");
+   let _: X25519PubKey = conductors[0].call(&cells[0].zome("delivery"), "get_enc_key", &agents[0]).await;
+   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[1]).await;
+   println!("\n\n\n CALLING get_enc_key() TO FRIEND ...\n\n");
+   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[0]).await;
+
+   println!("\n\n\n AGENTS SETUP DONE\n\n");
+
+   (conductors, agents, apps)
+}
+
+
+///
+pub async fn setup_3_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, SweetAppBatch) {
+   let (conductors, agents, apps) = setup_conductors(3).await;
+   let cells = apps.cells_flattened();
+
+   println!("\n\n\n WAITING FOR INIT TO FINISH...\n\n");
+   sleep(Duration::from_millis(10 * 1000)).await;
+
+   let _: X25519PubKey = conductors[0].call(&cells[0].zome("delivery"), "get_enc_key", &agents[0]).await;
+   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[1]).await;
+   //let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[1]).await;
+
+   println!("\n\n\n AGENTS SETUP DONE\n\n");
+
+   (conductors, agents, apps)
+}
 
 
 ///
@@ -97,26 +130,6 @@ pub async fn setup_conductors(n: usize) -> (SweetConductorBatch, Vec<AgentPubKey
    println!("\n* CONDUCTORS SETUP DONE\n\n");
    (conductors, all_agents, apps)
 }
-
-
-///
-pub async fn setup_3_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, SweetAppBatch) {
-   let (conductors, agents, apps) = setup_conductors(3).await;
-   let cells = apps.cells_flattened();
-
-   let _: X25519PubKey = conductors[0].call(&cells[0].zome("delivery"), "get_enc_key", &agents[1]).await;
-   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[0]).await;
-   // let _: HeaderHash = conductors[2].call(&cells[2].zome("snapmail"), "set_handle", CAMILLE_NICK).await;
-   //
-   // let _ = try_zome_call(&conductors[0], cells[0], "get_all_handles", (),
-   //                                                  |handle_list: &Vec<HandleItem>| handle_list.len() == 3).await;
-
-   println!("\n\n\n AGENTS SETUP DONE\n\n");
-
-   (conductors, agents, apps)
-}
-
-
 
 
 /// Call a zome function several times, waiting for a certainr result

@@ -6,6 +6,7 @@ use crate::utils::*;
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]
 pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResult<Vec<DeliveryNotice>> {
+   debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
    /// Get all Create ParcelReceived Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
@@ -40,6 +41,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 ///Find ParcelReceived with field with given value
 #[hdk_extern]
 pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Option<ParcelReceived>> {
+   debug!("*** query_ParcelReceived() CALLED with {:?}", field);
    /// Get all Create ParcelReceived Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)

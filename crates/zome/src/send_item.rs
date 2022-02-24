@@ -26,11 +26,11 @@ pub fn send_item(
    /// Try sending directly to other Agent if Online
    // let result = send_item_by_dm(recipient, distribution_eh, pending_item.clone(), signed_item);
    let response_dm = send_dm(recipient.clone(), DeliveryProtocol::Item(pending_item.clone()))?;
-   debug!("send_item_by_dm() response_dm = {:?}", response_dm);
+   debug!("send_item_by_dm() response_dm = {}", response_dm);
    if let DeliveryProtocol::Success(_) = response_dm {
       return Ok(SendSuccessKind::OK_DIRECT);
    } else {
-      debug!("send_item() failed: {:?}", response_dm);
+      debug!("send_item() failed: {}", response_dm);
    }
    debug!("send_item() - Commit PendingItem...");
    /// DM failed, send to DHT instead by creating a PendingItem
@@ -39,9 +39,9 @@ pub fn send_item(
       item: pending_item,
       recipient: recipient.clone(),
    };
-   debug!("send_item() - calling commit_pending_mail()");
+   debug!("send_item() - calling commit_pending_item()");
    let response = call_self("commit_pending_item", input)?;
-   debug!("send_confirmation() - commit_pending_mail() response: {:?}", response);
+   debug!("send_confirmation() - commit_pending_item() response: {:?}", response);
    return match response {
       ZomeCallResponse::Ok(_) => Ok(SendSuccessKind::OK_PENDING),
       _ => error("call_self() to commit_pending_item() failed"),

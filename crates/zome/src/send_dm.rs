@@ -16,7 +16,7 @@ pub fn send_dm(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<
    /// Prepare payload
    let dm_packet = DirectMessage { from: me, msg: msg.clone() };
    /// Call peer
-   debug!("calling remote receive_dm() ; dm = {:?}", msg);
+   debug!("calling remote receive_dm() ; dm = '{}'", msg);
    let response = call_remote(
       destination,
       zome_info()?.name,
@@ -24,7 +24,7 @@ pub fn send_dm(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<
       None,
       &dm_packet,
    )?;
-   debug!("calling remote receive_dm() DONE ; msg = {:?}", msg);
+   debug!("calling remote receive_dm() DONE ; msg = '{}'", msg);
    return match response {
        ZomeCallResponse::Ok(output) => Ok(output.decode()?),
        ZomeCallResponse::Unauthorized(_, _, _, _) => Ok(DeliveryProtocol::Failure("Unauthorized".to_string())),

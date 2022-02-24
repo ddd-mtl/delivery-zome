@@ -31,7 +31,7 @@ pub enum EntryKind {
 impl FromStr for EntryKind {
    type Err = ();
    fn from_str(input: &str) -> Result<EntryKind, Self::Err> {
-      trace!("EntryKind::from_str({}) called...", input);
+      debug!("EntryKind::from_str({}) called...", input);
       for entry_kind in EntryKind::iter() {
          //let entry_kind = EntryKind::from_ordinal(ordinal);
          if input == entry_kind.as_ref() {
@@ -45,7 +45,7 @@ impl FromStr for EntryKind {
 
 ///
 pub fn deserialize_into_zome_entry(entry_index: &EntryDefIndex, entry_bytes: AppEntryBytes) -> ExternResult<Box<dyn ZomeEntry>> {
-   trace!("*** can_deserialize_into_type() called! ({:?})", entry_index);
+   debug!("*** deserialize_into_zome_entry() called! ({:?})", entry_index);
    let entry_kind = EntryKind::from_index(&entry_index);
    entry_kind.into_zome_entry(entry_bytes)
 }
@@ -55,7 +55,7 @@ pub fn deserialize_into_zome_entry(entry_index: &EntryDefIndex, entry_bytes: App
 pub fn is_type(entry: Entry, type_candidat: EntryType) -> bool {
    trace!("*** is_type() called: {:?} == {:?} ?", type_candidat, entry);
    let res =  match entry {
-      Entry::CounterSign(_data, _bytes) => unreachable!(),
+      Entry::CounterSign(_data, _bytes) => unreachable!("CounterSign"),
       Entry::Agent(_agent_hash) => EntryType::AgentPubKey == type_candidat,
       Entry::CapClaim(_claim) => EntryType::CapClaim == type_candidat,
       Entry::CapGrant(_grant) => EntryType::CapGrant == type_candidat,
@@ -67,7 +67,7 @@ pub fn is_type(entry: Entry, type_candidat: EntryType) -> bool {
          res
       },
    };
-   trace!("*** is_type({:?}) result = {}", type_candidat, res);
+   debug!("*** is_type({:?}) result = {}", type_candidat, res);
    res
 }
 
@@ -113,7 +113,7 @@ impl EntryKind {
          return index;
       }
       error!("Fatal error EntryKind::index() not found for {:?}", id);
-      unreachable!()
+      unreachable!("EntryKind::index() not found")
    }
 
    ///
@@ -122,14 +122,14 @@ impl EntryKind {
          .expect("Zome should be operational")
          .entry_defs;
       let i: usize = index.0 as usize;
-      trace!("EntryKind::from_index() i = {}", i);
+      debug!("EntryKind::from_index() i = {}", i);
       let entry_def_id = entre_defs[i].id.clone();
       if let EntryDefId::App(id) = entry_def_id {
          return Self::from_str(&id)
             .expect("Zome should have Entry with that name");
       }
       error!("Fatal error in EntryKind::from_index()");
-      unreachable!()
+      unreachable!("Fatal error in EntryKind::from_index()")
    }
 
    ///

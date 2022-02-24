@@ -26,13 +26,17 @@ fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
          EntryType::AgentPubKey => {},
          EntryType::CapClaim => {},
          EntryType::CapGrant => {},
-         EntryType::App(app_type) => { let _ = post_commit_app_entry(eh, app_type); },
+         EntryType::App(app_type) => {
+            let result = post_commit_app_entry(eh, app_type);
+            debug!(" << post_commit() result = {:?}", result);
+         },
       }
    }
 }
 
 ///
 fn post_commit_app_entry(eh: &EntryHash, app_type: &AppEntryType) -> ExternResult<()> {
+   debug!(" >> post_commit() called for a {:?}", app_type);
    /// Get Entry from local chain
    let monad: HashSet<EntryHash> = HashSet::from([eh.clone()]);
    let query_args = ChainQueryFilter::default()
