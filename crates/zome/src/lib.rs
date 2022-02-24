@@ -42,6 +42,7 @@ pub use dm_protocol::*;
 pub use receive_dm::*;
 pub use send_item::*;
 pub use zome_delivery_types::delivery::*;
+pub use utils::*;
 
 //pub use signal_protocol::*;
 

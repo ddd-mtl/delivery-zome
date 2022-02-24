@@ -26,7 +26,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    let notice = maybe_notice.unwrap();
    let notice_eh = hash_entry(notice)?;
    /// Must not already have a ParcelReceived
-   let maybe_receipt = query_ParcelReceived(ParcelReceivedField::Notice(notice_eh.clone()))?;
+   let maybe_receipt = query_ParcelReceived(ParcelReceivedQueryField::Notice(notice_eh.clone()))?;
    if let Some(receipt) = maybe_receipt {
       return Ok(Some(receipt.parcel_eh));
    }

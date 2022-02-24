@@ -3,13 +3,13 @@ use zome_delivery_types::*;
 use crate::zome_entry_trait::*;
 use crate::send_item::*;
 use crate::functions::*;
+use crate::utils::*;
 
 impl ZomeEntry for Distribution {
     ///
     fn validate(&self, _maybe_package: Option<ValidationPackage>) -> ExternResult<ValidateCallbackResult> {
         if self.recipients.is_empty() {
-            let result = ValidateCallbackResult::Invalid("Need at least one recipient".to_owned());
-            return Ok(result);
+            return invalid("Need at least one recipient");
         }
 
         /// FIXME: validate parcel ; make sure Parcel entry has been committed

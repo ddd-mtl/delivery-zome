@@ -11,6 +11,10 @@ pub fn error<T>(reason: &str) -> ExternResult<T> {
 }
 
 
+pub fn invalid(reason: &str) -> ExternResult<ValidateCallbackResult> {
+    Ok(ValidateCallbackResult::Invalid(reason.to_string()))
+}
+
 /// Returns number of seconds since UNIX_EPOCH
 pub fn now() -> u64 {
     let now = sys_time().expect("sys_time() should always work");

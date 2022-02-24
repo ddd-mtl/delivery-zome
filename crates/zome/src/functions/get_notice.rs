@@ -8,7 +8,7 @@ use crate::functions::query::*;
 /// Return DeliveryNotice from which we received a Parcel
 #[hdk_extern]
 pub fn get_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
-   let field = ParcelReceivedField::Parcel(parcel_eh.clone());
+   let field = ParcelReceivedQueryField::Parcel(parcel_eh.clone());
    let maybe_receipt = query_ParcelReceived(field)?;
    if maybe_receipt.is_none() {
       return Ok(None)

@@ -39,7 +39,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 
 ///Find ParcelReceived with field with given value
 #[hdk_extern]
-pub fn query_ParcelReceived(field: ParcelReceivedField) -> ExternResult<Option<ParcelReceived>> {
+pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Option<ParcelReceived>> {
    /// Get all Create ParcelReceived Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
@@ -48,7 +48,7 @@ pub fn query_ParcelReceived(field: ParcelReceivedField) -> ExternResult<Option<P
    let receipts = query(query_args)?;
 
    match field {
-      ParcelReceivedField::Notice(eh) => {
+      ParcelReceivedQueryField::Notice(eh) => {
          for receipt_el in receipts {
             let receipt: ParcelReceived = get_typed_from_el(receipt_el)?;
             if receipt.notice_eh == eh {
@@ -56,7 +56,7 @@ pub fn query_ParcelReceived(field: ParcelReceivedField) -> ExternResult<Option<P
             }
          }
       },
-      ParcelReceivedField::Parcel(eh) => {
+      ParcelReceivedQueryField::Parcel(eh) => {
          for receipt_el in receipts {
             let receipt: ParcelReceived = get_typed_from_el(receipt_el)?;
             if receipt.parcel_eh == eh {
