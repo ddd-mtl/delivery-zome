@@ -26,7 +26,7 @@ mod send_item;
 
 pub mod callbacks;
 pub mod functions;
-pub(crate) mod zome_entry_kind;
+pub(crate) mod zome_entry_trait;
 pub mod link_kind;
 pub mod utils_parcel;
 pub mod utils;

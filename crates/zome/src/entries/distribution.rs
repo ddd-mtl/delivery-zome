@@ -1,10 +1,10 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
-use crate::zome_entry_kind::*;
+use crate::zome_entry_trait::*;
 use crate::send_item::*;
 use crate::functions::*;
 
-impl ZomeEntryKind for Distribution {
+impl ZomeEntry for Distribution {
     ///
     fn validate(&self, _maybe_package: Option<ValidationPackage>) -> ExternResult<ValidateCallbackResult> {
         if self.recipients.is_empty() {

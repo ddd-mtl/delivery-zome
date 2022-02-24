@@ -7,7 +7,7 @@ use strum_macros::AsRefStr;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use crate::zome_entry_kind::*;
+use crate::zome_entry_trait::*;
 use zome_delivery_types::*;
 
 /// Listing all Entry kinds for this Zome
@@ -42,7 +42,7 @@ impl FromStr for EntryKind {
 
 
 ///
-pub fn deserialize_into_zome_entry(entry_index: &EntryDefIndex, entry_bytes: AppEntryBytes) -> ExternResult<Box<dyn ZomeEntryKind>> {
+pub fn deserialize_into_zome_entry(entry_index: &EntryDefIndex, entry_bytes: AppEntryBytes) -> ExternResult<Box<dyn ZomeEntry>> {
    trace!("*** can_deserialize_into_type() called! ({:?})", entry_index);
    let entry_kind = EntryKind::from_index(&entry_index);
    entry_kind.into_zome_entry(entry_bytes)
@@ -73,7 +73,7 @@ pub fn is_type(entry: Entry, type_candidat: EntryType) -> bool {
 
 impl EntryKind {
    ///
-   pub fn into_zome_entry(&self, entry_bytes: AppEntryBytes) -> ExternResult<Box<dyn ZomeEntryKind>> {
+   pub fn into_zome_entry(&self, entry_bytes: AppEntryBytes) -> ExternResult<Box<dyn ZomeEntry>> {
       let sb = entry_bytes.into_sb();
       match self {
          EntryKind::PubEncKey => Ok(Box::new(PubEncKey::try_from(sb.clone())?)),
