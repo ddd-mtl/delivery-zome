@@ -15,9 +15,9 @@ extern crate strum_macros;
 mod entry_kind;
 mod entries;
 mod parcel;
-mod zfn_inputs;
+mod inputs;
 
 pub use entries::*;
-pub use zfn_inputs::*;
+pub use inputs::*;
 pub use parcel::*;
 pub use entry_kind::*;

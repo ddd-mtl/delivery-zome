@@ -7,8 +7,7 @@ use crate::parcel::*;
 pub struct DistributeParcelInput {
    pub recipients: Vec<AgentPubKey>,
    pub strategy: DistributionStrategy,
-   pub parcel_kind: ParcelKind,
-   pub parcel_eh: EntryHash,
+   pub parcel_ref: ParcelReference,
 }
 
 

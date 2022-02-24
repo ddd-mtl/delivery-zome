@@ -2,7 +2,6 @@ use hdk::prelude::*;
 
 use crate::{
    //send_dm::*,
-   path_kind,
    constants::*,
    functions::*,
 };
@@ -30,7 +29,7 @@ fn init_caps(_: ()) -> ExternResult<()> {
 fn init(_: ()) -> ExternResult<InitCallbackResult> {
    debug!("*** init() callback START");
    /// Set Global Anchors
-   Path::from(path_kind::Directory).ensure()?;
+   Path::from(DIRECTORY_PATH).ensure()?;
    /// Setup initial capabilities
    init_caps(())?;
    /// Create public encryption key and broadcast it

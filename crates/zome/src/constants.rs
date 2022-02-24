@@ -9,5 +9,9 @@ pub const CHUNK_MAX_SIZE: usize = 200 * 1024;
 pub const PARCEL_MAX_SIZE: usize = 10 * 1024 * 1024;
 pub const NAME_MIN_LENGTH: usize = 2;
 
+/// Listing all Holochain Path used in this DNA
+pub const DIRECTORY_PATH: &'static str = "directory";
+
 /// PSEUDO CONDITIONAL COMPILATION FOR DEBUGGING / TESTING
 pub const CAN_DM: bool = true;
+

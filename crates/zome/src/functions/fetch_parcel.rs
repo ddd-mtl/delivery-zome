@@ -30,7 +30,7 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    /// Commit Parcel
    let _parcel_hh = create_entry(input)?;
    /// Create ParcelReceived if not a manifest
-   if let ParcelReference::AppEntry(_) = notice.parcel_summary.reference {
+   if let ParcelReference::AppEntry(..) = notice.parcel_summary.reference {
       let received = ParcelReceived {
          notice_eh,
          parcel_eh: parcel_eh.clone(),

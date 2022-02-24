@@ -16,8 +16,6 @@ extern crate strum_macros;
 //pub mod api_error;
 
 mod constants;
-mod path_kind;
-
 mod send_dm;
 mod dm_protocol;
 
@@ -38,7 +36,6 @@ pub mod utils;
 //----------------------------------------------------------------------------------------
 
 pub use constants::*;
-pub use path_kind::*;
 pub use send_dm::*;
 pub use dm_protocol::*;
 pub use receive_dm::*;

@@ -14,21 +14,18 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    recipients.extend(set.into_iter());
    debug!("distribute_parcel() recipients: {}", recipients.len());
    /// Create ParcelSummary
-   let parcel_summary = match input.parcel_kind {
-      ParcelKind::AppEntry(app_type) => {
-         ParcelSummary {
-            size: get_app_entry_size(input.parcel_eh.clone())?,
-            reference: ParcelReference::AppEntry((app_type, input.parcel_eh))
-         }
-      }
-      ParcelKind::Manifest => {
-         let manifest: ParcelManifest = get_typed_from_eh(input.parcel_eh.clone())?;
-         ParcelSummary {
-            size: manifest.size,
-            reference: ParcelReference::Manifest(input.parcel_eh),
-         }
+   let size = match input.parcel_ref.clone() {
+      ParcelReference::AppEntry(_, _, eh) => get_app_entry_size(eh)?,
+      ParcelReference::Manifest(eh) => {
+         let manifest: ParcelManifest = get_typed_from_eh(eh.clone())?;
+         manifest.size
       }
    };
+   let parcel_summary = ParcelSummary {
+      size,
+      reference: input.parcel_ref,
+   };
+
    debug!("distribute_parcel() parcel_summary: {:?}", parcel_summary);
    /// Sign summary
    let summary_signature = sign(agent_info()?.agent_latest_pubkey, parcel_summary.clone())?;

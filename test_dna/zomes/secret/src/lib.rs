@@ -121,11 +121,15 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
    /// Make sure secret is committed
    let _: Secret = get_typed_from_eh(input.secret_eh.clone())?;
    /// Distribute
+   let parcel_ref = ParcelReference::AppEntry(
+      zome_info()?.name,
+      EntryDefId::App("Secret".into()),
+      input.secret_eh,
+   );
    let distribution = DistributeParcelInput {
       recipients: vec![input.recipient],
       strategy: DistributionStrategy::NORMAL,
-      parcel_kind: ParcelKind::AppEntry((zome_info()?.name, EntryDefId::App("Secret".into()))),
-      parcel_eh: input.secret_eh,
+      parcel_ref,
    };
    debug!("send_secret() call distribute_parcel...");
    let response = call_delivery_zome("distribute_parcel", distribution)?;
