@@ -1,11 +1,11 @@
 use hdk::prelude::*;
 
-use zome_delivery_types::{entries::*, entry_kind::*, parcel::*, utils::*};
-
+use zome_delivery_types::*;
 use crate::send_dm::*;
 use crate::dm_protocol::*;
 use crate::link_kind::*;
 use crate::functions::*;
+use crate::utils::*;
 
 
 /// Zone Function

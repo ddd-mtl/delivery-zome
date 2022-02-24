@@ -7,13 +7,58 @@
 
 use hdk::prelude::*;
 use zome_delivery_types::*;
-use zome_delivery_types::utils::*;
-use zome_delivery_types::parcel::*;
 
 entry_defs![
    Secret::entry_def()
 ];
 
+//----------------------------------------------------------------------------------------
+// Helpers
+//----------------------------------------------------------------------------------------
+
+
+pub fn error<T>(reason: &str) -> ExternResult<T> {
+   //Err(HdkError::Wasm(WasmError::Zome(String::from(reason))))
+   Err(WasmError::Guest(String::from(reason)))
+}
+
+
+///
+pub fn decode_response<T>(response: ZomeCallResponse) -> ExternResult<T>
+   where
+      T: for<'de> serde::Deserialize<'de> + std::fmt::Debug
+{
+   return match response {
+      ZomeCallResponse::Ok(output) => Ok(output.decode()?),
+      ZomeCallResponse::Unauthorized(_, _, _, _) => error("Unauthorized call"),
+      ZomeCallResponse::NetworkError(e) => error(&format!("NetworkError: {:?}", e)),
+      ZomeCallResponse::CountersigningSession(e) => error(&format!("CountersigningSession: {:?}", e)),
+   };
+}
+
+/// Call get() to obtain EntryHash and AppEntry from an EntryHash
+pub fn get_typed_from_eh<T: TryFrom<Entry>>(eh: EntryHash) -> ExternResult<T> {
+   match get(eh, GetOptions::content())? {
+      Some(element) => Ok(get_typed_from_el(element)?),
+      None => error("Entry not found"),
+   }
+}
+
+/// Obtain AppEntry from Element
+pub fn get_typed_from_el<T: TryFrom<Entry>>(element: Element) -> ExternResult<T> {
+   match element.entry() {
+      element::ElementEntry::Present(entry) => get_typed_from_entry::<T>(entry.clone()),
+      _ => error("Could not convert element"),
+   }
+}
+
+// Obtain AppEntry from Entry
+pub fn get_typed_from_entry<T: TryFrom<Entry>>(entry: Entry) -> ExternResult<T> {
+   return match T::try_from(entry.clone()) {
+      Ok(a) => Ok(a),
+      Err(_) => error(&format!("get_typed_from_entry() failed for: {:?}", entry)),
+   }
+}
 
 fn call_delivery_zome<T>(fn_name: &str, payload: T) -> ExternResult<ZomeCallResponse>
    where
@@ -27,6 +72,8 @@ fn call_delivery_zome<T>(fn_name: &str, payload: T) -> ExternResult<ZomeCallResp
       payload,
    )
 }
+
+//----------------------------------------------------------------------------------------
 
 /// Entry representing a secret message
 #[hdk_entry(id = "Secret", visibility = "private")]

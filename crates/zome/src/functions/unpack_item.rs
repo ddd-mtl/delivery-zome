@@ -1,10 +1,8 @@
 use hdk::prelude::*;
 
-use crate::entries::*;
-use crate::utils::*;
-use crate::entry_kind::*;
-use crate::parcel::*;
+use zome_delivery_types::*;
 use crate::functions::*;
+use crate::utils::*;
 
 /// Attempt to decrypt PendingItem with provided keys
 fn attempt_decrypt<T>(packed_item: &PendingItem, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T>

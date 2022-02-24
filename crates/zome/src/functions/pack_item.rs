@@ -1,9 +1,8 @@
 use hdk::prelude::*;
 
-use crate::entries::*;
+use zome_delivery_types::*;
 use crate::utils::*;
-use crate::entry_kind::*;
-use crate::parcel::*;
+
 
 /// Create PendingItem
 /// This will encrypt the content with my encryption key and the recipient's public encryption key

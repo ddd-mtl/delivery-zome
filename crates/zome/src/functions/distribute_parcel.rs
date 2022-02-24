@@ -1,10 +1,7 @@
 use hdk::prelude::*;
-use zome_delivery_types::parcel::*;
-use zome_delivery_types::utils_parcel::*;
-use zome_delivery_types::{
-   DistributeParcelInput,
-   entries::*, entry_kind::*, parcel::*, utils::*,
-};
+use zome_delivery_types::*;
+use crate::utils_parcel::*;
+use crate::utils::*;
 
 
 /// Zone Function

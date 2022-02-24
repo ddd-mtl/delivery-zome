@@ -1,10 +1,11 @@
 use hdk::prelude::*;
 use crate::link_kind::*;
-use zome_delivery_types::{entries::*, entry_kind::*, parcel::*, utils::*};
-
+use zome_delivery_types::*;
 use crate::send_dm::*;
 use crate::dm_protocol::*;
 use crate::functions::*;
+use crate::utils::*;
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FetchChunkInput {

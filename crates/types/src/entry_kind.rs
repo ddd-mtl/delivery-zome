@@ -11,7 +11,6 @@ use strum_macros::EnumIter;
 use crate::entries::*;
 use crate::entries::parcel_chunk::ParcelChunk;
 use crate::entries::pub_enc_key::*;
-use crate::utils::*;
 
 /// Listing all Entry kinds for this DNA
 /// !! Visibility prop value must match hdk_entry visibility !!

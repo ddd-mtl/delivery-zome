@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use zome_delivery_types::utils::*;
+use crate::utils::*;
 
 use crate::DeliveryProtocol;
 use zome_delivery_types::*;

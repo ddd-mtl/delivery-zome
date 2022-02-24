@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use zome_delivery_types::entries::PendingItem;
+use zome_delivery_types::PendingItem;
 use crate::link_kind::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 
-use crate::utils::*;
 
 #[hdk_entry(id = "ParcelManifest", visibility = "private")]
 #[derive(Clone, PartialEq)]

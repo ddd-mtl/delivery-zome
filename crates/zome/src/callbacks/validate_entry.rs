@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use hdk::prelude::element::ElementEntry;
-use zome_delivery_types::entry_kind::*;
+use zome_delivery_types::*;
 //use hdk::prelude::countersigning::CounterSigningSessionData;
 
 //use crate::entries::*;

@@ -1,7 +1,6 @@
 use hdk::prelude::*;
 
 use crate::entries::*;
-use crate::utils::*;
 use crate::entry_kind::*;
 
 // pub enum ReceptionResponse {

@@ -2,10 +2,10 @@ use hdk::prelude::*;
 
 use std::collections::HashSet;
 use std::iter::FromIterator;
-use zome_delivery_types::utils::*;
 
-use zome_delivery_types::{entries::*, entry_kind::*, parcel::*, utils::*};
+use zome_delivery_types::*;
 use crate::functions::*;
+use crate::utils::*;
 use crate::zome_entry_kind::*;
 
 /// Zone Function

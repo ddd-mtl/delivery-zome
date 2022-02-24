@@ -12,12 +12,12 @@ extern crate strum_macros;
 
 //----------------------------------------------------------------------------------------
 
-pub mod entry_kind;
-pub mod entries;
-pub mod utils;
-pub mod utils_parcel;
-pub mod parcel;
-pub mod zfn_inputs;
+mod entry_kind;
+mod entries;
+mod parcel;
+mod zfn_inputs;
 
 pub use entries::*;
 pub use zfn_inputs::*;
+pub use parcel::*;
+pub use entry_kind::*;

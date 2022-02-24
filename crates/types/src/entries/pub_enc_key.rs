@@ -1,7 +1,4 @@
-
 use hdk::prelude::*;
-
-use crate::utils::*;
 
 /// Entry representing the Public Encryption Key of an Agent
 #[hdk_entry(id = "PubEncKey", visibility = "public")]

@@ -1,8 +1,7 @@
 use hdk::prelude::*;
 
-use crate::entries::*;
+use zome_delivery_types::*;
 use crate::utils::*;
-use crate::entry_kind::*;
 
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]

@@ -11,7 +11,6 @@ use futures::future;
 use strum::AsStaticRef;
 
 use zome_delivery_types::*;
-use zome_delivery_types::entry_kind::*;
 
 pub const DNA_FILEPATH: &str = "./secret.dna";
 pub const ALEX_NICK: &str = "alex";
