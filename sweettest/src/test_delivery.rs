@@ -118,7 +118,8 @@ pub async fn test_delivery_dm() {
    /// B accepts A's secret
    let _eh: EntryHash = conductors[1].call(&cells[1].zome("secret"), "accept_secret", waiting_parcels[0].clone()).await;
 
-   /// Wait for parcel to be received
+   /// Wait for B to receive parcel
+   sleep(Duration::from_millis(2 * 1000)).await;
    sleep(Duration::from_millis(2 * 1000)).await;
    print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
 

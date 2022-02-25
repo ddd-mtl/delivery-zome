@@ -63,8 +63,8 @@ pub async fn setup_2_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, Swe
    let (conductors, agents, apps) = setup_conductors(2).await;
    let cells = apps.cells_flattened();
 
-   println!("\n\n\n WAITING FOR INIT TO FINISH...\n\n");
-   sleep(Duration::from_millis(10 * 1000)).await;
+   println!("* WAITING FOR INIT TO FINISH...\n\n");
+   sleep(Duration::from_millis(5 * 1000)).await;
 
    println!("\n\n\n CALLING get_enc_key() TO SELF ...\n\n");
    let _: X25519PubKey = conductors[0].call(&cells[0].zome("delivery"), "get_enc_key", &agents[0]).await;

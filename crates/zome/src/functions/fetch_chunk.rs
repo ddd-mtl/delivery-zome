@@ -41,7 +41,7 @@ pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<O
    let pending_items = get_links_and_load_type::<PendingItem>(
       my_agent_eh.clone(),
       LinkKind::Inbox.as_tag_opt(),
-      false,
+      //false,
    )?;
    /// Check each Inbox link
    for pending_item in &pending_items {

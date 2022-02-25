@@ -112,8 +112,8 @@ pub enum ItemKind {
    DeliveryReply,
    ParcelReceived,
    Entry,
-   // ParcelManifest
    ParcelChunk,
+   // ParcelManifest
 }
 
 /// A Public Entry representing an encrypted private Entry on the DHT

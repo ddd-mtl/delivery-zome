@@ -9,15 +9,15 @@ fn attempt_decrypt<T>(packed_item: &PendingItem, sender: X25519PubKey, recipient
    where
       T: for<'de> serde::Deserialize<'de>
 {
-   trace!("attempt_decrypt of: {:?}", packed_item.encrypted_data.clone());
+   debug!("attempt_decrypt of {:?}", packed_item.kind.clone());
    trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender.clone(), recipient.clone());
    /// Decrypt
    let maybe_decrypted = x_25519_x_salsa20_poly1305_decrypt(
-      sender,
-      recipient,
+      recipient, // sender,
+      sender, //recipient,
       packed_item.encrypted_data.clone(),
    ).expect("Decryption should work");
-   trace!("attempt_decrypt maybe_decrypted = {:?}", maybe_decrypted);
+   debug!("attempt_decrypt maybe_decrypted = {:?}", maybe_decrypted.is_some());
    let decrypted = match maybe_decrypted {
       Some(data) => data,
       None => return None,
@@ -43,7 +43,7 @@ pub fn unpack_item<T>(item: PendingItem, from: AgentPubKey) -> ExternResult<Opti
    debug!("try_into() sender_key: {:?}", sender_key);
    /// Decrypt
    let maybe_thing: Option<T> = attempt_decrypt(&item,sender_key, recipient_key);
-   //debug!("try_into() maybe_thing: {:?}", maybe_thing);
+   debug!("try_into() maybe_thing: {:?}", maybe_thing.is_some());
    /// Into DeliveryNotification
    if maybe_thing.is_none() {
       return Ok(None);

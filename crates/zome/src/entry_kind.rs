@@ -122,7 +122,7 @@ impl EntryKind {
          .expect("Zome should be operational")
          .entry_defs;
       let i: usize = index.0 as usize;
-      debug!("EntryKind::from_index() i = {}", i);
+      trace!("EntryKind::from_index() i = {}", i);
       let entry_def_id = entre_defs[i].id.clone();
       if let EntryDefId::App(id) = entry_def_id {
          return Self::from_str(&id)

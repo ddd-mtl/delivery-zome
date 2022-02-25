@@ -117,7 +117,7 @@ pub struct SendSecretInput {
 /// Zome Function
 #[hdk_extern]
 pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
-   debug!("send_secret() START");
+   debug!("send_secret() START - {:?}", input.secret_eh);
    /// Make sure secret is committed
    let _: Secret = get_typed_from_eh(input.secret_eh.clone())?;
    /// Distribute

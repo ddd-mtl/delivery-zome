@@ -7,11 +7,19 @@ use crate::link_kind::*;
 use crate::functions::*;
 use crate::utils::*;
 
+/// Zome Function Callback required by Delivery-zome
+#[hdk_extern]
+pub(crate) fn commit_ParcelReceived(input: ParcelReceived) -> ExternResult<EntryHash> {
+   let eh = hash_entry(input.clone())?;
+   let _hh = create_entry(input)?;
+   return Ok(eh);
+}
 
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
 pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
+   debug!("fetch_parcel() {:?}", notice_eh);
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
    /// Look for Parcel
@@ -19,23 +27,37 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    if maybe_parcel.is_none() {
       return Ok(None);
    };
-   /// Create CreateInput
-   let parcel_entry = maybe_parcel.unwrap();
-   let parcel_eh = hash_entry(parcel_entry.clone())?;
-   let input = CreateInput {
-     entry_def_id: notice.parcel_summary.reference.entry_def_id(),
-     entry: parcel_entry,
-     chain_top_ordering: ChainTopOrdering::Strict,
+
+   /// Call The Zome owner of the entry to commit it
+   let input = CommitParcelInput {
+      entry_def_id: notice.parcel_summary.reference.entry_def_id(),
+      entry: maybe_parcel.unwrap(),
    };
-   /// Commit Parcel
-   let _parcel_hh = create_entry(input)?;
-   /// Create ParcelReceived if not a manifest
+   let zome_name = notice.parcel_summary.reference.entry_zome_name();
+   debug!("fetch_parcel() zome_name = {:?}", zome_name);
+   //if &zome_name != DELIVERY_ZOME_NAME.to_string().into() {
+      let response = call_remote(
+         agent_info()?.agent_latest_pubkey,
+         zome_name,
+         COMMIT_PARCEL_CALLBACK.into(),
+         None,
+         input,
+      )?;
+   //}
+   let parcel_eh: EntryHash = decode_response(response)?;
+   debug!("fetch_parcel() parcel_eh = {:?}", parcel_eh);
+
+   /// Create ParcelReceived if its an AppEntry
+   /// (for a Manifest, we have to wait for all chunks to be received)
    if let ParcelReference::AppEntry(..) = notice.parcel_summary.reference {
       let received = ParcelReceived {
          notice_eh,
          parcel_eh: parcel_eh.clone(),
       };
-      let _hh = create_entry(received)?;
+      let response = call_self("commit_ParcelReceived", received)?;
+      let received_eh: EntryHash = decode_response(response)?;
+      debug!("fetch_parcel() received_eh = {:?}", received_eh);
+      // let _hh = create_entry(received)?;
    }
    /// Done
    Ok(Some(parcel_eh))
@@ -43,6 +65,7 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
 
 /// Try to retrieve the parcel entry
 pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
+   debug!("pull_parcel() {:?}", notice.parcel_summary.reference.entry_address());
    /// Request Parcel
    /// Check Inbox first:
    /// Get all Parcels inbox and see if its there
@@ -51,7 +74,7 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
    let pending_items = get_links_and_load_type::<PendingItem>(
       my_agent_eh.clone(),
       LinkKind::Inbox.as_tag_opt(),
-      false,
+      //false,
    )?;
    /// Check each Inbox link
    for pending_item in &pending_items {
@@ -70,8 +93,9 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
    }
    /// Not found in Inbox
    /// Try via DM second
-   let dm = DeliveryProtocol::ParcelRequest(notice.parcel_summary.reference.entry_address());
+   let dm = DeliveryProtocol::ParcelRequest(notice.distribution_eh);
    let response = send_dm(notice.sender, dm)?;
+   debug!("pull_parcel() dm response: {}", response);
    if let DeliveryProtocol::ParcelResponse(entry) = response {
       /// Check entry
       let received_eh = hash_entry(entry.clone())?;

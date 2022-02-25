@@ -50,7 +50,10 @@ fn post_commit_app_entry(eh: &EntryHash, app_type: &AppEntryType) -> ExternResul
    /// Deserialize it and call its post_commit()
    if let Entry::App(entry_bytes) = entry {
       let delivery_entry = deserialize_into_zome_entry(&app_type.id(), entry_bytes.clone())?;
-      let _ = delivery_entry.post_commit(eh);
+      let res = delivery_entry.post_commit(eh);
+      if let Err(e) = res {
+         error!("app post_commit() failed: {:?}", e);
+      }
       return Ok(());
    }
    return error("EntryHash has already been filtered as an App type");

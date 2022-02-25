@@ -27,7 +27,7 @@ pub fn send_item(
    // let result = send_item_by_dm(recipient, distribution_eh, pending_item.clone(), signed_item);
    let response_dm = send_dm(recipient.clone(), DeliveryProtocol::Item(pending_item.clone()))?;
    debug!("send_item_by_dm() response_dm = {}", response_dm);
-   if let DeliveryProtocol::Success(_) = response_dm {
+   if let DeliveryProtocol::Success = response_dm {
       return Ok(SendSuccessKind::OK_DIRECT);
    } else {
       debug!("send_item() failed: {}", response_dm);

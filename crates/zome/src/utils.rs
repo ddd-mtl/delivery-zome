@@ -5,6 +5,18 @@ use std::convert::TryFrom;
 pub type TypedEntryAndHash<T> = (T, HeaderHash, EntryHash);
 pub type OptionTypedEntryAndHash<T> = Option<TypedEntryAndHash<T>>;
 
+// macro_rules! function {
+//     () => {{
+//         fn f() {}
+//         fn type_name_of<T>(_: T) -> &'static str {
+//             std::any::type_name::<T>()
+//         }
+//         let name = type_name_of(f);
+//         &name[..name.len() - 3]
+//     }}
+// }
+
+
 pub fn error<T>(reason: &str) -> ExternResult<T> {
     //Err(HdkError::Wasm(WasmError::Zome(String::from(reason))))
     Err(WasmError::Guest(String::from(reason)))
@@ -14,6 +26,7 @@ pub fn error<T>(reason: &str) -> ExternResult<T> {
 pub fn invalid(reason: &str) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Invalid(reason.to_string()))
 }
+
 
 /// Returns number of seconds since UNIX_EPOCH
 pub fn now() -> u64 {
@@ -139,7 +152,7 @@ pub fn get_typed_from_hh<T: TryFrom<Entry>>(hash: HeaderHash)
             let eh = element.header().entry_hash().expect("Converting HeaderHash which does not have an Entry");
             Ok((eh.clone(), get_typed_from_el(element)?))
         },
-        None => error("Entry not found"),
+        None => error("get_typed_from_hh(): Entry not found"),
     }
 }
 
@@ -148,7 +161,7 @@ pub fn get_typed_from_hh<T: TryFrom<Entry>>(hash: HeaderHash)
 pub fn get_typed_from_eh<T: TryFrom<Entry>>(eh: EntryHash) -> ExternResult<T> {
     match get(eh, GetOptions::content())? {
         Some(element) => Ok(get_typed_from_el(element)?),
-        None => error("Entry not found"),
+        None => error("get_typed_from_eh(): Entry not found"),
     }
 }
 
@@ -261,11 +274,38 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
 // Copied from hc-utils
 //----------------------------------------------------------------------------------------
 
+/// optimized get details by links
+pub fn my_get_details(links: Vec<Link>, option: GetOptions) -> ExternResult<Vec<Option<Details>>> {
+    let msg_results_input: Vec<GetInput> = links
+       .into_iter()
+       .map(|link| GetInput::new(link.target.into(), option.clone()))
+       .collect();
+    let res = HDK.with(|hdk| hdk.borrow().get_details(msg_results_input))?;
+    Ok(res)
+}
+
 ///
 pub fn get_links_and_load_type<R: TryFrom<Entry>>(
-    _base: EntryHash,
-    _tag: Option<LinkTag>,
-    _include_latest_updated_entry: bool,
+    base: EntryHash,
+    tag: Option<LinkTag>,
+    //include_latest_updated_entry: bool,
 ) -> ExternResult<Vec<R>> {
-    error("FIXME use hc-utils dependency")
+    let link_info = get_links(base.into(), tag)?;
+
+    let all_results_elements = my_get_details(link_info, GetOptions::default())?;
+    let res = all_results_elements
+       .iter()
+       .flat_map(|link| match link {
+           Some(Details::Entry(EntryDetails { entry, .. })) => {
+               match R::try_from(entry.clone()) {
+                   Ok(e) => Ok(e),
+                   Err(_) => error(
+                       "Could not convert get_links result to requested type",
+                   ),
+               }
+           }
+           _ => error("get_links did not return an app entry"),
+       })
+       .collect();
+    Ok(res)
 }

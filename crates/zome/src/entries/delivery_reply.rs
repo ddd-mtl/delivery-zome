@@ -9,6 +9,7 @@ impl ZomeEntry for DeliveryReply {
     ///
     fn post_commit(&self, reply_eh: &EntryHash) -> ExternResult<()> {
         debug!("post_commit_DeliveryReply() {:?}", reply_eh);
+        debug!("self.notice_eh = {:?}", self.notice_eh.clone());
         /// Get DeliveryNotice
         let notice: DeliveryNotice = get_typed_from_eh(self.notice_eh.clone())?;
         /// Create PendingItem from DeliveryReply
@@ -25,7 +26,7 @@ impl ZomeEntry for DeliveryReply {
         /// Try to retrieve parcel if it has been accepted
         if self.has_accepted {
             let response = call_self("fetch_parcel", self.notice_eh.clone())?;
-            debug!("receive_delivery() response: {:?}", response);
+            debug!("fetch_parcel() response: {:?}", response);
             assert!(matches!(response, ZomeCallResponse::Ok { .. }));
         }
         /// Done

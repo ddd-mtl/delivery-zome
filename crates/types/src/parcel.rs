@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-
+use crate::DELIVERY_ZOME_NAME;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ParcelSummary {
@@ -27,6 +27,13 @@ impl ParcelReference {
       match self {
          ParcelReference::Manifest(_) => EntryDefId::App("ParcelManifest".to_string()),
          ParcelReference::AppEntry(_, id, _) => id.to_owned(),
+      }
+   }
+
+   pub fn entry_zome_name(&self) -> ZomeName {
+      match self {
+         ParcelReference::Manifest(_) => DELIVERY_ZOME_NAME.to_string().into(),
+         ParcelReference::AppEntry(zn,_, _) => zn.clone(),
       }
    }
 }
