@@ -3,7 +3,7 @@ use zome_delivery_types::*;
 use crate::zome_entry_trait::*;
 use crate::utils::*;
 use crate::constants::*;
-
+use crate::functions::*;
 
 impl ZomeEntry for ParcelManifest {
    fn validate(&self, _maybe_package: Option<ValidationPackage>) -> ExternResult<ValidateCallbackResult> {
@@ -31,12 +31,23 @@ impl ZomeEntry for ParcelManifest {
    /// Try to retrieve every chunk
    fn post_commit(&self, manifest_eh: &EntryHash) -> ExternResult<()> {
       debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
+      /// Find notice
+      let notices = query_DeliveryNotice(DeliveryNoticeQueryField::Parcel(manifest_eh.clone()))?;
+      if notices.is_empty() {
+         warn!("No DeliveryNotice found for post-committed ParcelManifest");
+         /// Normal if it is its owners
+         return Ok(())
+      }
+      let notice_eh = hash_entry(notices[0].clone())?;
       /// Try to retrieve parcel if it has been accepted
       for chunk_eh in self.chunks.clone() {
-         let response = call_self("fetch_chunk", chunk_eh)?;
+         let input = FetchChunkInput {
+            chunk_eh,
+            notice_eh: notice_eh.clone(),
+         };
+         let response = call_self("fetch_chunk", input)?;
          debug!("fetch_chunk() response: {:?}", response);
-         //assert!(matches!(response, ZomeCallResponse::Ok { .. }));
-
+         assert!(matches!(response, ZomeCallResponse::Ok { .. }));
       }
       /// Done
       Ok(())

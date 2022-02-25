@@ -20,6 +20,13 @@ pub struct RespondToNoticeInput {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct FetchChunkInput {
+   pub chunk_eh: EntryHash,
+   pub notice_eh: EntryHash,
+}
+
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DeliveryNoticeQueryField {
    Sender(AgentPubKey),
    Parcel(EntryHash)

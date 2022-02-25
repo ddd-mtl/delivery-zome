@@ -34,10 +34,10 @@ pub async fn test(arg: String) {
    // if arg == "all" || arg == "pending" {
    //    test_delivery_pending().await;
    // }
-   // // Deliver via DM
-   // if arg == "all" || arg == "dm_chunks" {
-   //    test_delivery_dm_chunks().await;
-   // }
+   // Deliver via DM
+   if arg == "all" || arg == "dm_manifest" {
+      test_delivery_dm_manifest().await;
+   }
    // // Deliver via DHT
    // if arg == "all" || arg == "pending_chunks" {
    //    test_delivery_pending_chunks().await;

@@ -136,7 +136,7 @@ pub async fn test_delivery_dm() {
 
    /// B gets secret
    let secret: String = conductors[1].call(&cells[1].zome("secret"), "get_secret", waiting_parcels[0].clone()).await;
-   println!("secret received: {:?}", secret);
+   println!("\n secret received: {:?}\n", secret);
 
    // let outmail_state: OutMailState = conductors[0].call(&cells[0].zome("snapmail"), "get_outmail_state", outmail_hh.clone()).await;
    // println!("outmail_state: {:?}", outmail_state);
@@ -147,6 +147,65 @@ pub async fn test_delivery_dm() {
    print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
 
 }
+
+
+
+///
+pub async fn test_delivery_dm_manifest() {
+   /// Setup
+   let (conductors, agents, apps) = setup_2_conductors().await;
+   let cells = apps.cells_flattened();
+   let all_entry_names = get_dna_entry_names(&conductors[0], &cells[0]).await;
+
+
+   /// A Store secret
+   let manifest_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "create_split_secret", "I like bananas").await;
+   println!("manifest_eh: {:?}", manifest_eh);
+   /// A Check secret is stored
+   let secret_msg: String = conductors[0].call(&cells[0].zome("secret"), "get_secret", manifest_eh.clone()).await;
+   println!("secret_msg: {}", secret_msg);
+
+   sleep(Duration::from_millis(200)).await;
+   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   sleep(Duration::from_millis(200)).await;
+
+   /// A sends secret to B
+   let input = SendSecretInput {
+      secret_eh: manifest_eh.clone(),
+      recipient: agents[1].clone(),
+   };
+   let _distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
+
+   sleep(Duration::from_millis(2 * 1000)).await;
+   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   sleep(Duration::from_millis(200)).await;
+
+   /// B checks if request received
+   let waiting_parcels: Vec<EntryHash> = try_zome_call(&conductors[1], cells[1], "get_secrets_from", agents[0].clone(),
+                                                       |result: &Vec<EntryHash>| {result.len() == 1})
+      .await
+      .expect("Should have a waiting parcel");
+   println!("parcel requests received: {}", waiting_parcels.len());
+
+   /// B accepts A's secret
+   let _eh: EntryHash = conductors[1].call(&cells[1].zome("secret"), "accept_secret", waiting_parcels[0].clone()).await;
+
+   /// Wait for B to receive parcel
+   sleep(Duration::from_millis(2 * 1000)).await;
+   sleep(Duration::from_millis(2 * 1000)).await;
+   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+
+   /// B gets secret
+   let secret: String = conductors[1].call(&cells[1].zome("secret"), "get_secret", waiting_parcels[0].clone()).await;
+   println!("\n secret received: {:?}\n", secret);
+
+   /// Check A's chain for a DeliveryReceipt
+   sleep(Duration::from_millis(500)).await;
+   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+
+}
+
+
 
 
 //

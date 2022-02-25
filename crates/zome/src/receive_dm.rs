@@ -17,7 +17,9 @@ pub struct DirectMessage {
 pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> {
     debug!("Received DM: from: {} | msg: {}", dm.from, dm.msg);
     let reply = match dm.msg {
-        DeliveryProtocol::ChunkRequest(_chunk_eh) => { /* FIXME */ DeliveryProtocol::Pong },
+        DeliveryProtocol::ChunkRequest(chunk_eh) => {
+            receive_dm_chunk_request(dm.from, chunk_eh)
+        },
         DeliveryProtocol::ParcelRequest(distribution_eh) => {
             receive_dm_parcel_request(dm.from, distribution_eh)
         },
@@ -38,8 +40,18 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
     Ok(reply)
 }
 
+/// Returns ChunkResponse or Failure
+pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> DeliveryProtocol {
+    /// Get Distribution Entry
+    let maybe_chunk: ExternResult<ParcelChunk> = get_typed_from_eh(chunk_eh);
+    if let Err(err) = maybe_chunk {
+        return failure_err("ParcelChunk not found", err);
+    }
+    return DeliveryProtocol::ChunkResponse(maybe_chunk.unwrap().to_owned());
+}
 
-/// Returns Success or Failure
+
+/// Returns ParcelResponse or Failure
 pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) -> DeliveryProtocol {
     /// Get Distribution Entry
     let maybe_distribution: ExternResult<Distribution> = get_typed_from_eh(distribution_eh);
@@ -138,9 +150,7 @@ pub fn receive_dm_reception(from: AgentPubKey, pending_item: PendingItem) -> Del
     /// Commit DeliveryReceipt
     let maybe_hh = create_entry(&receipt);
     if let Err(err) = maybe_hh {
-        let response_str = "Failed committing DeliveryReceipt";
-        debug!("{}: {}", response_str, err);
-        return DeliveryProtocol::Failure(response_str.to_string());
+        return failure_err("Failed committing DeliveryReceipt", err);
     }
     /// Return Success
     return DeliveryProtocol::Success;

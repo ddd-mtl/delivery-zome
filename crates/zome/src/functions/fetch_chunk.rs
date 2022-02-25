@@ -7,29 +7,23 @@ use crate::functions::*;
 use crate::utils::*;
 
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct FetchChunkInput {
-   chunk_eh: EntryHash,
-   notice_eh: EntryHash,
-}
-
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
-pub fn fetch_chunk(input: FetchChunkInput) -> ExternResult<Option<EntryHash>> {
+pub fn fetch_chunk(input: FetchChunkInput) -> ExternResult<bool> {
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Look for Chunk
    let maybe_chunk = pull_chunk(input.chunk_eh, notice)?;
    if maybe_chunk.is_none() {
-      return Ok(None);
+      return Ok(false);
    };
    /// Commit Chunk
    let parcel_chunk = maybe_chunk.unwrap();
-   let chunk_eh = hash_entry(parcel_chunk.clone())?;
+   //let _chunk_eh = hash_entry(parcel_chunk.clone())?;
    let _chunk_hh = create_entry(parcel_chunk.clone())?;
    /// Done
-   Ok(Some(chunk_eh))
+   Ok(true)
 }
 
 /// Try to retrieve the chunk entry

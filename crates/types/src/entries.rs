@@ -87,7 +87,7 @@ pub struct ParcelChunk {
 #[derive(Clone, PartialEq)]
 pub struct ParcelManifest {
    pub name: String,
-   pub entry_id: String,
+   pub custum_entry_type: String,
    //pub data_hash: String,
    pub size: usize,
    pub chunks: Vec<EntryHash>,
