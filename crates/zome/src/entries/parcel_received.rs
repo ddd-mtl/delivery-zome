@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
 use crate::zome_entry_trait::*;
-use crate::utils::*;
+use zome_utils::*;
 use crate::send_item::*;
 use crate::functions::*;
 
@@ -22,8 +22,8 @@ impl ZomeEntry for ParcelReceived {
       /// Send it to recipient
       let _ = send_item(
          notice.sender,
-         //notice.distribution_eh.clone(),
          pending_item,
+         notice.parcel_summary.distribution_strategy,
          //signature,
       )?;
       /// Done

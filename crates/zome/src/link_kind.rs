@@ -6,7 +6,7 @@ use std::convert::AsRef;
 use strum_macros::AsRefStr;
 use strum_macros::EnumIter;
 use strum::EnumProperty;
-use crate::utils::*;
+use zome_utils::*;
 use crate::entry_kind::*;
 
 pub const LinkSeparator: &'static str = "___";

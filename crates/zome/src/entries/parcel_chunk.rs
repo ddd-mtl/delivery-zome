@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
 use crate::zome_entry_trait::*;
-use crate::utils::*;
+use zome_utils::*;
 use crate::constants::*;
 
 impl ZomeEntry for ParcelChunk {

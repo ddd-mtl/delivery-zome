@@ -10,6 +10,7 @@ extern crate strum_macros;
 
 #[macro_use] extern crate enum_ordinalize;
 
+
 //----------------------------------------------------------------------------------------
 
 //#[cfg(not(target_arch = "wasm32"))]
@@ -28,9 +29,9 @@ pub mod functions;
 pub(crate) mod zome_entry_trait;
 pub mod link_kind;
 pub mod utils_parcel;
-pub mod utils;
 pub mod entry_kind;
 mod entries;
+mod utils_delivery;
 
 
 //----------------------------------------------------------------------------------------
@@ -40,7 +41,7 @@ pub use send_dm::*;
 pub use dm_protocol::*;
 pub use receive_dm::*;
 pub use send_item::*;
-pub use utils::*;
+pub use utils_delivery::*;
 
 //pub use signal_protocol::*;
 

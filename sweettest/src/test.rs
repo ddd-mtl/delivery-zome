@@ -4,6 +4,7 @@ use holochain::conductor::{
    ConductorHandle,
 };
 use maplit::hashset;
+use zome_delivery_types::DistributionStrategy;
 //use holo_hash::*;
 
 use crate::setup::*;
@@ -28,20 +29,20 @@ pub async fn test(arg: String) {
    // }
    // Deliver via DM
    if arg == "all" || arg == "dm" {
-      test_delivery_dm().await;
+      test_delivery(DistributionStrategy::DM_ONLY).await;
    }
-   // // Deliver via DHT
-   // if arg == "all" || arg == "pending" {
-   //    test_delivery_pending().await;
-   // }
    // Deliver via DM
    if arg == "all" || arg == "dm_manifest" {
-      test_delivery_dm_manifest().await;
+      test_delivery_manifest(DistributionStrategy::DM_ONLY).await;
    }
-   // // Deliver via DHT
-   // if arg == "all" || arg == "pending_chunks" {
-   //    test_delivery_pending_chunks().await;
-   // }
+   // Deliver via DHT
+   if arg == "all" || arg == "dht" {
+      test_delivery(DistributionStrategy::DHT_ONLY).await;
+   }
+   // Deliver via DHT
+   if arg == "all" || arg == "dht_manifest" {
+      test_delivery_manifest(DistributionStrategy::DHT_ONLY).await;
+   }
 
    // Print elapsed
    match now.elapsed() {

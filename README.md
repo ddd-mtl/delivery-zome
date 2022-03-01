@@ -1,13 +1,11 @@
-# snapmail-rsm
+# Delivery Zome
 
-Holochain Zome Module for sending private data between agents.
-
-Some design documentation is available in the `/spec` folder.
+Holochain Zome Module for sending private data between agents asynchronously.
 
 CI and NIX configs are not set up for the moment.
 
 
-## Design Goal
+## Design
 
 Enable private sharing of custom data between P2P agents.
 Features:
@@ -16,19 +14,22 @@ Features:
  - Multiple distribution strategies:
    - Send via DM
    - Send via DHT
-   - Define private Drop-Off points (cap-grants?)
-   - recipient 2 recipient sharing
-   - public
- - Spliting / Chunking large parcels for delivery
- - Failsafe and recovery (with post_commit())
- - A default chunk entry is provided for arbitrary data 
- - Acknowledgement system?
+   - (TODO) Define private Drop-Off points (cap-grants?)
+   - (TODO) recipient 2 recipient sharing
+   - (TODO) public
+ - Spliting / Chunking large parcels into many small ones
+ - A default Chunk entry is provided for arbitrary data
+ - Robust multi-step and failure recovery (with post_commit())
+ - (TODO) Acknowledgement system?
 
-Constraints:
+
 A sender can send any Entry to a list of recipients
 The Entry must be first committed to the sender's source chain.
 The recipient has the option to accept or refuse an incoming delivery.
-Parcel types can have the option to not be refusable (ex: acks, mails)? With parcel trait?
+
+The module is to be used by other zomes (via inter-zome calls) on their own entry types.
+
+?Parcel types can have the option to not be refusable (ex: acks, mails)? With parcel trait?
 
 
 Commit arbitrary entries to your source chain
@@ -50,20 +51,9 @@ To rebuild the DNA for holochain:
 
 
 ## Testing
-Steps for running tests:
- 1. Install Holochain
- 2. Go to ``test`` sub directory.
- 3. Run command: `npm test`
- 
-Test suites can also be enabled/disabled by commenting out the lines in `test\test.ts`
 
+A testing zome has been implemented, called 'secret'.
 
-## Running with UI
-
- 1. Download the [snapmail-ui repo](https://github.com/glassbeadsoftware/snapmail-ui) and store it at same folder level as `snapmail-rsm`
- 2. CD to its root folder
- 2. Make sure bootstrap server and proxy server are up and running.
- 3. Launch `alex`, `billy`, or `camille` agents like this:`npm run alex`
- 4. Or launch all three with `npm run all`
-
-Browser windows should automatically pop-up for each agent.
+Test suite with sweeettest:
+1. `cargo build`
+2. `./target/debug/delivery_sweettest.exe <testname>`

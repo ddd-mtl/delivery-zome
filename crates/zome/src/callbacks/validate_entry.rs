@@ -3,7 +3,7 @@ use hdk::prelude::element::ElementEntry;
 //use zome_delivery_types::*;
 //use hdk::prelude::countersigning::CounterSigningSessionData;
 
-//use crate::entries::*;
+use zome_utils::*;
 //use crate::entries::pub_enc_key::*;
 use crate::entry_kind::*;
 
@@ -12,6 +12,7 @@ use crate::entry_kind::*;
 #[hdk_extern]
 fn validate(input: ValidateData) -> ExternResult<ValidateCallbackResult> {
     trace!("*** `validate()` callback called!: {:?}", input);
+    std::panic::set_hook(Box::new(my_panic_hook));
     /// Get entry
     let entry = input.element.clone().into_inner().1;
     let entry = match entry {

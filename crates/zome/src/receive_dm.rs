@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use crate::utils::*;
+use zome_utils::*;
 
 use zome_delivery_types::*;
 use crate::functions::*;
@@ -25,11 +25,15 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         },
         DeliveryProtocol::Item(item) => {
             match item.kind {
-                ItemKind::DeliveryNotice => receive_dm_notice(dm.from, item),
+                /// Sent by recipient
                 ItemKind::DeliveryReply  => receive_dm_reply(dm.from, item),
-                //ItemKind::Entry => {/* FIXME */},
                 ItemKind::ParcelReceived => receive_dm_reception(dm.from, item),
-                _ => panic!("FIXME kind not supported yet"),
+                /// Sent by sender
+                ItemKind::DeliveryNotice => receive_dm_notice(dm.from, item),
+                /// Sent by sender through DHT
+                //ItemKind::Entry => { receive_entry(dm.from, item)},
+                //ItemKind::ParcelChunk => { receive_chunk(dm.from, item)},
+                _ => panic!("ItemKind '{:?}' should not be received via DM", item.kind),
             }
         },
         DeliveryProtocol::Ping => DeliveryProtocol::Pong,
@@ -39,6 +43,38 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
     };
     Ok(reply)
 }
+
+
+pub fn receive_entry(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
+    let maybe_maybe_entry: ExternResult<Option<Entry>> = unpack_item(item.clone(), from.clone());
+    if let Err(err) = maybe_maybe_entry {
+        return failure_err("Failed deserializing Entry", err);
+    }
+    let maybe_entry = maybe_maybe_entry.unwrap();
+    if maybe_entry.is_none() {
+        return failure("Failed deserializing Entry (2)");
+    }
+    /// Make sure we accepted to receive this Entry
+
+    /// Done
+    DeliveryProtocol::Success
+}
+
+pub fn receive_chunk(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
+    let maybe_maybe_chunk: ExternResult<Option<ParcelChunk>> = unpack_item(item.clone(), from.clone());
+    if let Err(err) = maybe_maybe_chunk {
+        return failure_err("Failed deserializing ParcelChunk", err);
+    }
+    let maybe_chunk = maybe_maybe_chunk.unwrap();
+    if maybe_chunk.is_none() {
+        return failure("Failed deserializing ParcelChunk (2)");
+    }
+    /// Make sure we accepted to receive this chunk
+
+    /// Done
+    DeliveryProtocol::Success
+}
+
 
 /// Returns ChunkResponse or Failure
 pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> DeliveryProtocol {

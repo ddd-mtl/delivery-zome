@@ -19,7 +19,7 @@ impl ZomeEntry for DeliveryReceipt {}
 //impl ZomeEntry for DeliveryReply {}
 impl ZomeEntry for NoticeReceived {}
 //impl ZomeEntry for ParcelReceived {}
-impl ZomeEntry for ReplyReceived {}
+//impl ZomeEntry for ReplyReceived {}
 impl ZomeEntry for PendingItem {}
 //impl ZomeEntry for ParcelManifest {}
 //impl ZomeEntry for ParcelChunk {}

@@ -1,6 +1,7 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
 
+use zome_utils::*;
 
 /// Zome function
 /// Write base64 file as string to source chain
@@ -8,6 +9,7 @@ use zome_delivery_types::*;
 #[hdk_extern]
 pub fn commit_parcel_manifest(input: ParcelManifest) -> ExternResult<EntryHash> {
    trace!(" commit_parcel_manifest({}) -  {}", input.custum_entry_type, input.name);
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Commit entry
    let manifest_eh = hash_entry(input.clone())?;
    let _ = create_entry(&input)?;

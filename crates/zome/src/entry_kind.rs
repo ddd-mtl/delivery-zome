@@ -31,7 +31,7 @@ pub enum EntryKind {
 impl FromStr for EntryKind {
    type Err = ();
    fn from_str(input: &str) -> Result<EntryKind, Self::Err> {
-      debug!("EntryKind::from_str({}) called...", input);
+      trace!("EntryKind::from_str({}) called...", input);
       for entry_kind in EntryKind::iter() {
          //let entry_kind = EntryKind::from_ordinal(ordinal);
          if input == entry_kind.as_ref() {
@@ -45,7 +45,7 @@ impl FromStr for EntryKind {
 
 ///
 pub fn deserialize_into_zome_entry(entry_index: &EntryDefIndex, entry_bytes: AppEntryBytes) -> ExternResult<Box<dyn ZomeEntry>> {
-   debug!("*** deserialize_into_zome_entry() called! ({:?})", entry_index);
+   //debug!("*** deserialize_into_zome_entry() called! ({:?})", entry_index);
    let entry_kind = EntryKind::from_index(&entry_index);
    entry_kind.into_zome_entry(entry_bytes)
 }

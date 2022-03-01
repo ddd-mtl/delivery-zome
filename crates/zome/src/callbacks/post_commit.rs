@@ -1,13 +1,12 @@
 use hdk::prelude::*;
-use crate::utils::*;
+use zome_utils::*;
 use crate::entry_kind::*;
-
 
 /// Zome Callback
 #[hdk_extern(infallible)]
 fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
-   //debug!("post_commit() called: {:?}", hhList);
    debug!("post_commit() called for {} entries", signedHeaderList.len());
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Process each header
    for signedHeader in signedHeaderList {
       //debug!(" - {:?}", signedHeader.header().entry_type());

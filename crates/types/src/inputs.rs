@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 
-use crate::entries::*;
 use crate::parcel::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

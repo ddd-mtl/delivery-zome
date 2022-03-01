@@ -25,11 +25,6 @@ pub struct DeliveryReceipt {
 }
 
 
-// pub enum ReceptionResponse {
-//     Accepted((HeaderHash, Signature)),
-//     Refused,
-// }
-
 /// Entry for confirming a delivery has been well received or refused by a recipient
 #[hdk_entry(id = "DeliveryReply", visibility = "private")]
 #[derive(Clone, PartialEq)]
@@ -38,27 +33,12 @@ pub struct DeliveryReply {
    pub has_accepted: bool,
 }
 
-
-#[allow(non_camel_case_types)]
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub enum DistributionStrategy {
-   /// DM first, DHT otherwise
-   NORMAL,
-   /// Publish to DHT unencrypted,
-   PUBLIC,
-   /// Encrypt to recipients on DHT
-   DHT_ONLY,
-   /// Only via DM
-   DM_ONLY,
-}
-
 /// Entry representing a request to send a Parcel to one or multiple recipients
 #[hdk_entry(id = "Distribution", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct Distribution {
    pub recipients: Vec<AgentPubKey>,
    pub parcel_summary: ParcelSummary,
-   pub strategy: DistributionStrategy,
    pub summary_signature: Signature,
    //pub can_share_between_recipients: bool, // Make recipient list "public" to recipients
 }
@@ -108,23 +88,37 @@ pub struct ParcelReceived {
 /// List of structs that PendingItem can embed
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ItemKind {
-   DeliveryNotice,
+   /// Sent by recipient
    DeliveryReply,
    ParcelReceived,
+   /// Sent by sender
+   DeliveryNotice,
    Entry,
    ParcelChunk,
    // ParcelManifest
 }
 
+impl ItemKind {
+   pub fn can_link_to_distribution(&self) -> bool {
+      match self {
+         Self::DeliveryNotice => true,
+         Self::Entry => true,
+         Self::ParcelChunk => true,
+         _ => false,
+
+      }
+   }
+}
+
 /// A Public Entry representing an encrypted private Entry on the DHT
 /// waiting to be received by some recipient.
-/// The recipient is the agentId where the entry is linked from.
 /// The Entry is encrypted with the recipient's public encryption key.
+/// The recipient is the agentId where the entry is linked from.
 #[hdk_entry(id = "PendingItem")]
 #[derive(Clone, PartialEq)]
 pub struct PendingItem {
    pub kind: ItemKind,
-   //pub app_type: &'static str,
+   pub author: AgentPubKey,
    pub author_signature: Signature, // Signature of the Entry's author
    pub encrypted_data: XSalsa20Poly1305EncryptedData,
    pub distribution_eh: EntryHash,

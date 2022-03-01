@@ -1,5 +1,5 @@
 [package]
-name = "secret"
+name = "zome_utils"
 version = "0.0.1"
 edition = "2018"
 
@@ -9,14 +9,12 @@ edition = "2018"
 #[workspace]
 
 [lib]
-name = "secret"
+name = "zome_utils"
 crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
+chrono = "=0.4.19"
 serde = { version = "1.0", default-features = false }
-
-zome_utils = {path = "../../../crates/zome-utils" }
-zome_delivery_types = {path = "../../../crates/types" }
 
 # online
 #hc_utils = { git = "https://github.com/holochain/hc-utils.git", rev = "dbca5cb6fee45fa53e0f330add49a26421f9e035", default-features = false }

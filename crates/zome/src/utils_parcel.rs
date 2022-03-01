@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 
-use crate::utils::*;
+use zome_utils::*;
 
 /// Return size of an AppEntry
 pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {

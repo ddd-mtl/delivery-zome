@@ -22,3 +22,17 @@ pub use commit_parcel::*;
 pub const DELIVERY_ZOME_NAME: &'static str = "delivery";
 
 pub const COMMIT_PARCEL_CALLBACK: &'static str = "commit_parcel";
+
+use hdk::prelude::*;
+pub fn call_delivery_zome<T>(fn_name: &str, payload: T) -> ExternResult<ZomeCallResponse>
+   where
+      T: serde::Serialize + std::fmt::Debug,
+{
+   call(
+      CallTargetCell::Local,
+      DELIVERY_ZOME_NAME.into(),
+      fn_name.to_string().into(),
+      None,
+      payload,
+   )
+}

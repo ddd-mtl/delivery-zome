@@ -5,13 +5,14 @@ use std::iter::FromIterator;
 
 use zome_delivery_types::*;
 use crate::functions::*;
-use crate::utils::*;
+use zome_utils::*;
 use crate::entry_kind::*;
 
 /// Zone Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
 pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Find manifest with that chunk_eh
    let maybe_manifest = find_ParcelManifest(chunk_eh)?;
    if maybe_manifest.is_none() {

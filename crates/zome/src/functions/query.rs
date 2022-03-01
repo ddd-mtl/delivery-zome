@@ -1,12 +1,13 @@
 use hdk::prelude::*;
 
 use zome_delivery_types::*;
-use crate::utils::*;
+use zome_utils::*;
 
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]
 pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResult<Vec<DeliveryNotice>> {
    debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Get all Create ParcelReceived Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
@@ -42,6 +43,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 #[hdk_extern]
 pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Option<ParcelReceived>> {
    debug!("*** query_ParcelReceived() CALLED with {:?}", field);
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Get all Create ParcelReceived Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)

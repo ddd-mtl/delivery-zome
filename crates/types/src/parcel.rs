@@ -4,6 +4,7 @@ use crate::DELIVERY_ZOME_NAME;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ParcelSummary {
    pub size: usize,
+   pub distribution_strategy: DistributionStrategy,
    pub reference: ParcelReference,
 }
 
@@ -38,3 +39,34 @@ impl ParcelReference {
    }
 }
 
+
+#[allow(non_camel_case_types)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum DistributionStrategy {
+   /// DM first, DHT otherwise
+   NORMAL,
+   // /// Publish to DHT unencrypted,
+   // PUBLIC,
+   /// Only via DM no DHT
+   DM_ONLY,
+   /// Encrypt to recipients on DHT, no DM
+   DHT_ONLY,
+}
+
+
+impl DistributionStrategy {
+   pub fn can_dm(&self) -> bool {
+      match self {
+         Self::NORMAL => true,
+         Self::DHT_ONLY => false,
+         Self::DM_ONLY => true,
+      }
+   }
+   pub fn can_dht(&self) -> bool {
+      match self {
+         Self::NORMAL => true,
+         Self::DHT_ONLY => true,
+         Self::DM_ONLY => false,
+      }
+   }
+}

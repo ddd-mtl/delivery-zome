@@ -1,13 +1,14 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
 use crate::utils_parcel::*;
-use crate::utils::*;
+use zome_utils::*;
 
 
 /// Zone Function
 #[hdk_extern]
 pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash> {
    debug!("distribute_parcel() START: {:?}", input);
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Remove duplicate recipients
    let mut recipients = input.recipients.clone();
    let set: HashSet<_> = recipients.drain(..).collect(); // dedup
@@ -23,6 +24,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    };
    let parcel_summary = ParcelSummary {
       size,
+      distribution_strategy: input.strategy,
       reference: input.parcel_ref,
    };
 
@@ -34,7 +36,6 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
       recipients,
       parcel_summary,
       summary_signature,
-      strategy: input.strategy,
    };
    /// Commit Distribution
    let eh = hash_entry(distribution.clone())?;

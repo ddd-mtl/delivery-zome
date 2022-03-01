@@ -1,9 +1,9 @@
 use hdk::prelude::*;
+use zome_utils::*;
 use zome_delivery_types::*;
 use crate::zome_entry_trait::*;
 use crate::send_item::*;
 use crate::functions::*;
-use crate::utils::*;
 
 impl ZomeEntry for Distribution {
     ///
@@ -11,10 +11,8 @@ impl ZomeEntry for Distribution {
         if self.recipients.is_empty() {
             return invalid("Need at least one recipient");
         }
-
         /// FIXME: validate parcel ; make sure Parcel entry has been committed
         //validate_parcel(input.parcel_description)?;
-
         Ok(ValidateCallbackResult::Valid)
     }
 
@@ -25,6 +23,7 @@ impl ZomeEntry for Distribution {
 
         /// FIXME match distribution.strategy
 
+
         /// Create DeliveryNotice
         let notice = DeliveryNotice {
             distribution_eh: distribution_eh.clone(),
@@ -32,8 +31,7 @@ impl ZomeEntry for Distribution {
             parcel_summary: self.parcel_summary.clone(),
             sender_summary_signature: self.summary_signature.clone(),
         };
-        /// Sign notice
-        //let signature = sign(agent_info()?.agent_latest_pubkey, notice.clone())?;
+
         /// Send to each recipient
         for recipient in self.recipients.clone() {
             /// Create PendingItem
@@ -44,8 +42,8 @@ impl ZomeEntry for Distribution {
             /// Send it to recipient
             let res = send_item(
                 recipient,
-                //distribution_eh.clone(),
                 pending_item,
+                self.parcel_summary.distribution_strategy.clone(),
                // signature.clone(),
             );
             match res {

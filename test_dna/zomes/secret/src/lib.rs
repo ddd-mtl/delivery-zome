@@ -7,73 +7,12 @@
 
 use hdk::prelude::*;
 use zome_delivery_types::*;
+use zome_utils::*;
 
 entry_defs![
    Secret::entry_def()
 ];
 
-//----------------------------------------------------------------------------------------
-// Helpers
-//----------------------------------------------------------------------------------------
-
-
-pub fn error<T>(reason: &str) -> ExternResult<T> {
-   //Err(HdkError::Wasm(WasmError::Zome(String::from(reason))))
-   Err(WasmError::Guest(String::from(reason)))
-}
-
-
-///
-pub fn decode_response<T>(response: ZomeCallResponse) -> ExternResult<T>
-   where
-      T: for<'de> serde::Deserialize<'de> + std::fmt::Debug
-{
-   return match response {
-      ZomeCallResponse::Ok(output) => Ok(output.decode()?),
-      ZomeCallResponse::Unauthorized(_, _, _, _) => error("Unauthorized call"),
-      ZomeCallResponse::NetworkError(e) => error(&format!("NetworkError: {:?}", e)),
-      ZomeCallResponse::CountersigningSession(e) => error(&format!("CountersigningSession: {:?}", e)),
-   };
-}
-
-/// Call get() to obtain EntryHash and AppEntry from an EntryHash
-pub fn get_typed_from_eh<T: TryFrom<Entry>>(eh: EntryHash) -> ExternResult<T> {
-   match get(eh, GetOptions::content())? {
-      Some(element) => Ok(get_typed_from_el(element)?),
-      None => error("Entry not found"),
-   }
-}
-
-/// Obtain AppEntry from Element
-pub fn get_typed_from_el<T: TryFrom<Entry>>(element: Element) -> ExternResult<T> {
-   match element.entry() {
-      element::ElementEntry::Present(entry) => get_typed_from_entry::<T>(entry.clone()),
-      _ => error("Could not convert element"),
-   }
-}
-
-// Obtain AppEntry from Entry
-pub fn get_typed_from_entry<T: TryFrom<Entry>>(entry: Entry) -> ExternResult<T> {
-   return match T::try_from(entry.clone()) {
-      Ok(a) => Ok(a),
-      Err(_) => error(&format!("get_typed_from_entry() failed for: {:?}", entry)),
-   }
-}
-
-fn call_delivery_zome<T>(fn_name: &str, payload: T) -> ExternResult<ZomeCallResponse>
-   where
-      T: serde::Serialize + std::fmt::Debug,
-{
-   call(
-      CallTargetCell::Local,
-      "delivery".into(),
-      fn_name.to_string().into(),
-      None,
-      payload,
-   )
-}
-
-//----------------------------------------------------------------------------------------
 
 /// Entry representing a secret message
 #[hdk_entry(id = "Secret", visibility = "private")]
@@ -130,23 +69,26 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    return Ok(eh);
 }
 
+
 /// Zome Function
 #[hdk_extern]
 pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
-   // let set: HashSet<_> = vec![eh].drain(..).collect(); // dedup
-   // let query_args = ChainQueryFilter::default()
-   //    .include_entries(true)
-   //    .entry_hashes(set);
-   // let entries = query(query_args)?;
-   // if entries.len() != 1 {
-   //    return Err(WasmError::Guest(String::from("No Secret found at given EntryHash")));
-   // }
+   debug!("get_secret() - pull_inbox");
+   let response = call_delivery_zome("pull_inbox", ())?;
+   let inbox_items: Vec<HeaderHash> = decode_response(response)?;
+   debug!("get_secret() - inbox_items: {}", inbox_items.len());
+
    let maybe_secret: ExternResult<Secret> = get_typed_from_eh(eh.clone());
    if let Ok(secret) = maybe_secret {
       return Ok(secret.value);
    }
+   debug!("get_secret() - Not a Secret Entry, should be a ParcelManifest");
    /// Not a Secret Entry, so it should be a Manifest
-   let manifest: ParcelManifest = get_typed_from_eh(eh)?;
+   let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(eh);
+   if maybe_manifest.is_err() {
+      return error("No entry found at given EntryHash");
+   }
+   let manifest = maybe_manifest.unwrap();
    /// Get all chunks
    let set: HashSet<_> = manifest.chunks.clone().drain(..).collect(); // dedup
    let query_args = ChainQueryFilter::default()
@@ -154,11 +96,11 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
       .entry_hashes(set);
    let entries = query(query_args)?;
    if entries.len() != manifest.chunks.len() {
-      return Err(WasmError::Guest(String::from("Not all chunks have been found on chain")));
+      return error("Not all chunks have been found on chain");
    }
    /// Concat all chunks
    if manifest.custum_entry_type != "split_secret".to_owned() {
-      return Err(WasmError::Guest(String::from("Manifest of an unknown entry type")));
+      return error("Manifest of an unknown entry type");
    }
    let mut secret = String::new();
    for el in entries {
@@ -174,6 +116,7 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SendSecretInput {
    pub secret_eh: EntryHash,
+   pub strategy: DistributionStrategy,
    pub recipient: AgentPubKey,
 }
 
@@ -197,7 +140,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
 
    let distribution = DistributeParcelInput {
       recipients: vec![input.recipient],
-      strategy: DistributionStrategy::NORMAL,
+      strategy: input.strategy,
       parcel_ref,
    };
    debug!("send_secret() call distribute_parcel...");
@@ -208,17 +151,23 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
    Ok(eh)
 }
 
+
 /// Zome Function
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
    debug!("get_secrets_from() START");
+   debug!("get_secrets_from() - pull_inbox");
+   let response = call_delivery_zome("pull_inbox", ())?;
+   let inbox_items: Vec<HeaderHash> = decode_response(response)?;
+   debug!("get_secrets_from() - inbox_items: {}", inbox_items.len());
+   debug!("get_secrets_from() - query_DeliveryNotice");
    let response = call_delivery_zome(
       "query_DeliveryNotice",
       DeliveryNoticeQueryField::Sender(sender),
    )?;
    let notices: Vec<DeliveryNotice> = decode_response(response)?;
-   let parcels = notices.iter().map(|x| x.parcel_summary.reference.entry_address()).collect();
-   debug!("get_secrets_from() END");
+   let parcels: Vec<EntryHash> = notices.iter().map(|x| x.parcel_summary.reference.entry_address()).collect();
+   debug!("get_secrets_from() END - parcels found: {}", parcels.len());
    Ok(parcels)
 }
 
@@ -243,4 +192,13 @@ pub fn accept_secret(parcel_eh: EntryHash) -> ExternResult<EntryHash> {
    // return respond_to_notice(input)?;
    let eh: EntryHash = decode_response(response)?;
    Ok(eh)
+}
+
+
+/// Zome Function
+#[hdk_extern]
+pub fn pull_inbox(_: ()) -> ExternResult<()> {
+   let response = call_delivery_zome("pull_inbox", ())?;
+   let _: Vec<HeaderHash> = decode_response(response)?;
+   Ok(())
 }

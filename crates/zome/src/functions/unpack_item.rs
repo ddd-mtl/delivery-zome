@@ -2,7 +2,7 @@ use hdk::prelude::*;
 
 use zome_delivery_types::*;
 use crate::functions::*;
-use crate::utils::*;
+use zome_utils::*;
 
 /// Attempt to decrypt PendingItem with provided keys
 fn attempt_decrypt<T>(packed_item: &PendingItem, sender: X25519PubKey, recipient: X25519PubKey) -> Option<T>
@@ -10,7 +10,7 @@ fn attempt_decrypt<T>(packed_item: &PendingItem, sender: X25519PubKey, recipient
       T: for<'de> serde::Deserialize<'de>
 {
    debug!("attempt_decrypt of {:?}", packed_item.kind.clone());
-   trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender.clone(), recipient.clone());
+   debug!("with:\n -    sender = {:?}\n - recipient = {:?}", sender.clone(), recipient.clone());
    /// Decrypt
    let maybe_decrypted = x_25519_x_salsa20_poly1305_decrypt(
       recipient, // sender,
@@ -29,21 +29,22 @@ fn attempt_decrypt<T>(packed_item: &PendingItem, sender: X25519PubKey, recipient
    Some(item)
 }
 
-
+///
 pub fn unpack_item<T>(item: PendingItem, from: AgentPubKey) -> ExternResult<Option<T>>
    where
       T: for<'de> serde::Deserialize<'de> + Clone + serde::Serialize + std::fmt::Debug //+ Sized
 {
+   debug!("unpack_item() {:?} from {:?}", item.kind, from);
    /// Get my key
    let me = agent_info()?.agent_latest_pubkey;
    let recipient_key = get_enc_key(me.clone())?;
-   debug!("try_into() recipient_key: {:?}", recipient_key);
+   trace!("try_into() recipient_key: {:?}", recipient_key);
    /// Get sender's key
    let sender_key = get_enc_key(from.clone())?;
-   debug!("try_into() sender_key: {:?}", sender_key);
+   trace!("try_into() sender_key: {:?}", sender_key);
    /// Decrypt
    let maybe_thing: Option<T> = attempt_decrypt(&item,sender_key, recipient_key);
-   debug!("try_into() maybe_thing: {:?}", maybe_thing.is_some());
+   trace!("try_into() maybe_thing: {:?}", maybe_thing.is_some());
    /// Into DeliveryNotification
    if maybe_thing.is_none() {
       return Ok(None);

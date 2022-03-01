@@ -2,7 +2,7 @@ use hdk::prelude::*;
 use crate::constants::CHUNK_MAX_SIZE;
 
 use zome_delivery_types::*;
-use crate::utils::*;
+use zome_utils::*;
 
 
 /// Zome function
@@ -11,6 +11,7 @@ use crate::utils::*;
 #[hdk_extern]
 pub fn commit_parcel_chunk(data: String) -> ExternResult<EntryHash> {
    trace!(" commit_parcel_chunk() {} bytes", data.len());
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Check size
    if data.is_empty() {
       return error("Data string is empty");

@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 
 use zome_delivery_types::*;
-use crate::utils::*;
+use zome_utils::*;
 
 
 /// Create PendingItem
@@ -16,19 +16,21 @@ fn create_PendingItem<T>(
    where
       T: serde::Serialize + Clone + Sized + std::fmt::Debug
 {
+   debug!("create_PendingItem() {:?} for {:?}", kind, recipient);
+   std::panic::set_hook(Box::new(my_panic_hook));
    /// Get my key
    let me = agent_info()?.agent_latest_pubkey;
-   debug!("get_enc_key() for sender {:?}", me);
+   trace!("get_enc_key() for sender {:?}", me);
    let response = call_self("get_enc_key", me.clone())?;
-   debug!("get_enc_key() for sender result: {:?}", response);
+   trace!("get_enc_key() for sender result: {:?}", response);
    let sender_key: X25519PubKey = decode_response(response)?;
-   debug!("PendingItem: sender_key = {:?}", sender_key);
+   trace!("PendingItem: sender_key found");
    /// Get recipient's key
-   debug!("get_enc_key() for recipient {:?}", recipient);
+   trace!("get_enc_key() for recipient {:?}", recipient);
    let response = call_self("get_enc_key", recipient.clone())?;
-   debug!("get_enc_key() for recipient result: {:?}", response);
+   trace!("get_enc_key() for recipient result: {:?}", response);
    let recipient_key: X25519PubKey = decode_response(response)?;
-   debug!("PendingItem: recipient_key = {:?}", recipient_key);
+   trace!("PendingItem: recipient_key found");
    /// Sign content
    let author_signature = sign(me, content.clone())
       .expect("Should be able to sign with my key");
@@ -45,7 +47,7 @@ fn create_PendingItem<T>(
    /// Done
    let item = PendingItem {
       kind,
-      //app_type: type_name::<T>(),
+      author: agent_info()?.agent_latest_pubkey,
       encrypted_data,
       distribution_eh,
       author_signature,
@@ -59,14 +61,18 @@ pub fn pack_notice(notice: DeliveryNotice, recipient: AgentPubKey) -> ExternResu
    create_PendingItem::<DeliveryNotice>(ItemKind::DeliveryNotice, notice.clone(), notice.distribution_eh.clone(), recipient)
 }
 /// called from post_commit()
-pub fn pack_reply(reply: DeliveryReply, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<DeliveryReply>(ItemKind::DeliveryReply, reply.clone(), reply.notice_eh.clone(), recipient)
+pub fn pack_reply(reply: DeliveryReply, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<DeliveryReply>(ItemKind::DeliveryReply, reply.clone(), distribution_eh, recipient)
 }
 /// called from post_commit()
 pub fn pack_reception(reception: ParcelReceived, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
    create_PendingItem::<ParcelReceived>(ItemKind::ParcelReceived, reception, distribution_eh, recipient)
 }
-///
+/// called from post_commit()
 pub fn pack_parcel(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
    create_PendingItem::<Entry>(ItemKind::Entry, parcel_entry, distribution_eh, recipient)
+}
+/// called from post_commit()
+pub fn pack_chunk(chunk: ParcelChunk, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<ParcelChunk>(ItemKind::ParcelChunk, chunk, distribution_eh, recipient)
 }

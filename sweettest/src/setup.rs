@@ -1,6 +1,7 @@
 use holochain::sweettest::*;
 use holochain_zome_types::*;
 use holochain::conductor::config::ConductorConfig;
+use holochain::conductor::{api::error::ConductorApiResult};
 use holo_hash::*;
 use futures::future;
 use tokio::time::{sleep, Duration};
@@ -67,12 +68,16 @@ pub async fn setup_2_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, Swe
    sleep(Duration::from_millis(5 * 1000)).await;
 
    println!("\n\n\n CALLING get_enc_key() TO SELF ...\n\n");
-   let _: X25519PubKey = conductors[0].call(&cells[0].zome("delivery"), "get_enc_key", &agents[0]).await;
-   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[1]).await;
+   let _: X25519PubKey = try_zome_call_fallible(&conductors[0], &cells[0],"delivery", "get_enc_key", &agents[0])
+      .await.unwrap();
+   let _: X25519PubKey = try_zome_call_fallible(&conductors[1], &cells[1],"delivery", "get_enc_key", &agents[1])
+      .await.unwrap();
    println!("\n\n\n CALLING get_enc_key() TO FRIEND ...\n\n");
-   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[0]).await;
-
+   let _: X25519PubKey = try_zome_call_fallible(&conductors[1], &cells[1],"delivery", "get_enc_key", &agents[0])
+      .await.unwrap();
    println!("\n\n\n AGENTS SETUP DONE\n\n");
+
+   print_peers(&conductors[1], &cells[1]).await;
 
    (conductors, agents, apps)
 }
@@ -86,8 +91,10 @@ pub async fn setup_3_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, Swe
    println!("\n\n\n WAITING FOR INIT TO FINISH...\n\n");
    sleep(Duration::from_millis(10 * 1000)).await;
 
-   let _: X25519PubKey = conductors[0].call(&cells[0].zome("delivery"), "get_enc_key", &agents[0]).await;
-   let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[1]).await;
+   let _: X25519PubKey = try_zome_call_fallible(&conductors[0], &cells[0],"delivery", "get_enc_key", &agents[0])
+      .await.unwrap();
+   let _: X25519PubKey = try_zome_call_fallible(&conductors[1], &cells[1],"delivery", "get_enc_key", &agents[1])
+      .await.unwrap();
    //let _: X25519PubKey = conductors[1].call(&cells[1].zome("delivery"), "get_enc_key", &agents[1]).await;
 
    println!("\n\n\n AGENTS SETUP DONE\n\n");
@@ -131,11 +138,35 @@ pub async fn setup_conductors(n: usize) -> (SweetConductorBatch, Vec<AgentPubKey
    (conductors, all_agents, apps)
 }
 
+/// Call a zome function several times, waiting for a certainr result
+pub async fn try_zome_call_fallible<T,P>(
+   conductor: &SweetConductor,
+   cell: &SweetCell,
+   zome_name: &str,
+   fn_name: &str,
+   payload: P,
+) -> Result<T, ()>
+   where
+      T: serde::de::DeserializeOwned + std::fmt::Debug,
+      P: Clone + serde::Serialize + std::fmt::Debug,
+{
+   for _ in 0..10u32 {
+      let maybe: ConductorApiResult<T> = conductor.call_fallible(&cell.zome(zome_name), fn_name, payload.clone())
+                            .await;
+      if let Ok(res) = maybe {
+         return Ok(res);
+      }
+      tokio::time::sleep(std::time::Duration::from_millis(2 * 1000)).await;
+   }
+   Err(())
+}
+
 
 /// Call a zome function several times, waiting for a certainr result
 pub async fn try_zome_call<T,P>(
    conductor: &SweetConductor,
    cell: &SweetCell,
+   zome_name: &str,
    fn_name: &str,
    payload: P,
    predicat: fn(res: &T) -> bool,
@@ -145,12 +176,12 @@ pub async fn try_zome_call<T,P>(
       P: Clone + serde::Serialize + std::fmt::Debug,
 {
    for _ in 0..10u32 {
-      let res: T = conductor.call(&cell.zome("secret"), fn_name, payload.clone())
+      let res: T = conductor.call(&cell.zome(zome_name), fn_name, payload.clone())
                             .await;
       if predicat(&res) {
          return Ok(res);
       }
-      tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+      tokio::time::sleep(std::time::Duration::from_millis(2 * 1000)).await;
    }
    Err(())
 }

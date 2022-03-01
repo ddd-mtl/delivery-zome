@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use crate::utils::*;
+use zome_utils::*;
 
 use zome_delivery_types::*;
 use crate::functions::query::*;
@@ -8,6 +8,7 @@ use crate::functions::query::*;
 /// Return DeliveryNotice from which we received a Parcel
 #[hdk_extern]
 pub fn get_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
+   std::panic::set_hook(Box::new(my_panic_hook));
    let field = ParcelReceivedQueryField::Parcel(parcel_eh.clone());
    let maybe_receipt = query_ParcelReceived(field)?;
    if maybe_receipt.is_none() {
