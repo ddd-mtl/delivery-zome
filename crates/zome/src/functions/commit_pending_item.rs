@@ -14,7 +14,6 @@ pub struct CommitPendingItemInput {
 fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash> {
    debug!("commit_pending_item() START **********");
    std::panic::set_hook(Box::new(my_panic_hook));
-
    let me = agent_info()?.agent_latest_pubkey;
    /// Commit Pending Item
    let pending_item_eh = hash_entry(&input.item)?;
@@ -42,7 +41,11 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash
    }
    /// Commit Inbox Link
    let tag = LinkKind::Inbox.concat_hash(&me);
-   let maybe_link2_hh = create_link(EntryHash::from(input.recipient.clone()), pending_item_eh, tag);
+   let maybe_link2_hh = create_link(
+      EntryHash::from(input.recipient.clone()),
+      pending_item_eh,
+     LinkKind::Inbox.as_tag()  // tag,
+   );
    if let Err(err) = maybe_link2_hh.clone() {
       trace!("link2 failed = {:?}", err);
       return Err(maybe_link2_hh.err().unwrap());

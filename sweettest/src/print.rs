@@ -130,7 +130,7 @@ pub async fn print_peers(conductor: &SweetConductor, cell: &SweetCell) {
       env.into(),
       Some(cell_id.clone()),
    ).await.expect("p2p_store should not fail");
-   println!(" *** peer_dump: {:?}",peer_dump.peers);
+   println!(" *** peer_dump: {}\n\n",peer_dump.peers.len());
 }
 
 
@@ -160,7 +160,13 @@ pub async fn print_chain(conductor: &SweetConductor, agent: &AgentPubKey, cell: 
    let json_dump = dump_state(vault.clone().into(), agent.clone()).await.unwrap();
    //let json = serde_json::to_string_pretty(&json_dump).unwrap();
 
-   println!(" ====== SOURCE-CHAIN STATE DUMP START ===== {}", json_dump.elements.len());
+   if json_dump.elements.is_empty() {
+      println!("\n\n>>>>>> SOURCE-CHAIN EMPTY <<<<<<\n\n");
+      return;
+   }
+
+   let author = json_dump.elements[0].header.author().clone();
+   println!("\n====== SOURCE-CHAIN STATE DUMP START ===== {}", author);
    //println!("source_chain_dump({}) of {:?}", json_dump.elements.len(), agent);
 
    let mut count = 0;
@@ -170,5 +176,6 @@ pub async fn print_chain(conductor: &SweetConductor, agent: &AgentPubKey, cell: 
       count += 1;
    }
 
-   println!(" ====== SOURCE-CHAIN STATE DUMP END  ===== {}", json_dump.elements.len());
+   println!("====== SOURCE-CHAIN STATE DUMP END  ===== {} / {}\n",
+            json_dump.elements.len(), json_dump.published_ops_count);
 }

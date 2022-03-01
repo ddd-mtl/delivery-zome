@@ -21,7 +21,7 @@ pub fn send_item(
    pending_item: PendingItem,
    strategy: DistributionStrategy,
 ) -> ExternResult<SendSuccessKind> {
-   debug!("send_item() START - {:?}", recipient);
+   debug!("send_item() START - '{:?}' to {}", pending_item.kind, snip(&recipient));
    /// Try with DM
    if strategy.can_dm() {
       debug!("send_item() DM - {:?}", strategy);

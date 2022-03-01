@@ -22,7 +22,6 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
       LinkKind::Inbox.as_tag_opt(),
       //false,
    )?;
-
    // debug!("pull_inbox() items found: {}", pending_items.len());
    // /// Act as is if we received it from a DM
    // for pending_item in pending_items.clone() {

@@ -20,7 +20,7 @@ serde = { version = "1.0", default-features = false }
 #hc_utils = { git = "https://github.com/holochain/hc-utils.git", rev = "dbca5cb6fee45fa53e0f330add49a26421f9e035", default-features = false }
 
 hdk = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "hdk", default-features = false }
-holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holo_hash", default-features = false }
+holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holo_hash", features = [ "encoding" ] }
 
 
 # local

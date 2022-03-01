@@ -13,27 +13,36 @@ pub use query::*;
 
 use hdk::prelude::*;
 
+use holo_hash::*;
 use std::convert::TryFrom;
 
 pub type TypedEntryAndHash<T> = (T, HeaderHash, EntryHash);
 pub type OptionTypedEntryAndHash<T> = Option<TypedEntryAndHash<T>>;
 
 
+pub fn snip(agent: &AgentPubKey) -> String {
+   //format!("{:?}", agent)[12..24].to_string()
+   //format!("{}", agent)[..12].to_string()
+   let b64: AgentPubKeyB64 = AgentPubKeyB64::from(agent.clone());
+   format!("{:?}", b64)[24..36].to_string()
+}
+
+
+///
 pub fn get_context() -> String {
    let mut msg = String::new();
    let maybe_zome_info = zome_info();
    if let Ok(zome_info) = maybe_zome_info {
       let maybe_call_info = call_info();
       if let Ok(call_info) = maybe_call_info {
-         let provenance = &format!("{}", call_info.provenance)[..12];
+         let provenance = snip(&call_info.provenance);
          msg.push_str(&format!("\n\nPanic during zome call '{}::{}()' by {} ",
                                zome_info.name, call_info.function_name, provenance));
       }
    }
    let maybe_agent_info = agent_info();
    if let Ok(agent_info) = maybe_agent_info {
-      let agent = &format!("{}", agent_info.agent_latest_pubkey)[..12];
-      msg.push_str(&format!("in chain of {}", agent));
+      msg.push_str(&format!("in chain of {}", snip(&agent_info.agent_latest_pubkey)));
    }
    msg
 }
@@ -317,7 +326,7 @@ pub fn get_links_and_load_type<R: TryFrom<Entry>>(
    //include_latest_updated_entry: bool,
 ) -> ExternResult<Vec<R>> {
    let links = get_links(base.into(), tag)?;
-
+   debug!("get_links_and_load_type() links found: {}", links.len());
    let all_results_elements = my_get_details(links, GetOptions::default())?;
    let res = all_results_elements
       .iter()

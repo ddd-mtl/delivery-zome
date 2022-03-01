@@ -130,6 +130,8 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
 
    /// B gets secret
    sleep(Duration::from_millis(2 * 1000)).await;
+   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+
    let secret: String = try_zome_call_fallible(&conductors[1], &cells[1], "secret", "get_secret", waiting_parcels[0].clone())
       .await
       .expect("Should have received Secret Parcel");
