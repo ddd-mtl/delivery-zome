@@ -3,10 +3,6 @@ use hdk::prelude::*;
 use zome_delivery_types::*;
 use zome_utils::*;
 
-
-/// Create PendingItem
-/// This will encrypt the content with my encryption key and the recipient's public encryption key
-/// called from post_commit()
 fn create_PendingItem<T>(
    kind: ItemKind,
    content: T,
@@ -16,12 +12,65 @@ fn create_PendingItem<T>(
    where
       T: serde::Serialize + Clone + Sized + std::fmt::Debug
 {
-   debug!("create_PendingItem() {:?} for {:?}", kind, recipient);
-   std::panic::set_hook(Box::new(my_panic_hook));
-   /// Get my key
+   debug!("create_pending_item() {:?} for {:?}", kind, recipient);
+   assert!(kind != ItemKind::AppEntryBytes);
    let me = agent_info()?.agent_latest_pubkey;
-   trace!("get_enc_key() for sender {:?}", me);
-   let response = call_self("get_enc_key", me.clone())?;
+   /// Sign content
+   let author_signature = sign(me.clone(), content.clone())
+      .expect("Should be able to sign with my key");
+   /// Serialize
+   let data: XSalsa20Poly1305Data = bincode::serialize(&content).unwrap().into();
+   /// Encrypt
+   let encrypted_data = encrypt_parcel(data, recipient)?;
+   /// Done
+   let item = PendingItem {
+      kind,
+      author: me,
+      encrypted_data,
+      distribution_eh,
+      author_signature,
+   };
+   Ok(item)
+}
+
+///
+fn create_pending_parcel(
+   kind: ItemKind,
+   entry_bytes: AppEntryBytes,
+   distribution_eh: EntryHash,
+   recipient: AgentPubKey,
+) -> ExternResult<PendingItem>
+{
+   debug!("create_pending_item() {:?} for {:?}", kind, recipient);
+   let me = agent_info()?.agent_latest_pubkey;
+   /// Sign content
+   let author_signature = sign(me.clone(), entry_bytes.clone())
+      .expect("Should be able to sign with my key");
+   /// Serialize
+   let data: XSalsa20Poly1305Data = XSalsa20Poly1305Data::from(entry_bytes.into_sb().bytes().to_owned());
+   /// Encrypt
+   let encrypted_data = encrypt_parcel(data, recipient)?;
+   /// Done
+   let item = PendingItem {
+      kind,
+      author: me,
+      encrypted_data,
+      distribution_eh,
+      author_signature,
+   };
+   Ok(item)
+}
+
+
+/// Encrypt some data with my encryption key and the recipient's public encryption key
+/// called from post_commit()
+fn encrypt_parcel(
+   data: XSalsa20Poly1305Data,
+   recipient: AgentPubKey,
+) -> ExternResult<XSalsa20Poly1305EncryptedData> {
+   /// Get my key
+   trace!("get_enc_key() for sender {:?}", agent_info()?.agent_latest_pubkey);
+   let response = call_self("get_enc_key", agent_info()?.agent_latest_pubkey)?;
    trace!("get_enc_key() for sender result: {:?}", response);
    let sender_key: X25519PubKey = decode_response(response)?;
    trace!("PendingItem: sender_key found");
@@ -31,28 +80,11 @@ fn create_PendingItem<T>(
    trace!("get_enc_key() for recipient result: {:?}", response);
    let recipient_key: X25519PubKey = decode_response(response)?;
    trace!("PendingItem: recipient_key found");
-   /// Sign content
-   let author_signature = sign(me, content.clone())
-      .expect("Should be able to sign with my key");
-   /// Serialize
-   let serialized = bincode::serialize(&content).unwrap();
-   let data: XSalsa20Poly1305Data = serialized.into();
    /// Encrypt
    let encrypted_data = x_25519_x_salsa20_poly1305_encrypt(sender_key, recipient_key, data)
       .expect("Encryption should work");
-   trace!("Encrypted: {:?}", encrypted_data.clone());
-   // let me = agent_info().expect("Should have agent info").agent_latest_pubkey;
-   // let signature = sign(me, mail).expect("Should be able to sign with my key");
-   trace!("with:\n -    sender = {:?}\n - recipient = {:?}", sender_key.clone(), recipient_key.clone());
-   /// Done
-   let item = PendingItem {
-      kind,
-      author: agent_info()?.agent_latest_pubkey,
-      encrypted_data,
-      distribution_eh,
-      author_signature,
-   };
-   Ok(item)
+   //trace!("Encrypted: {:?}", encrypted_data.clone());
+   Ok(encrypted_data)
 }
 
 
@@ -70,7 +102,10 @@ pub fn pack_reception(reception: ParcelReceived, distribution_eh: EntryHash, rec
 }
 /// called from post_commit()
 pub fn pack_parcel(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<Entry>(ItemKind::Entry, parcel_entry, distribution_eh, recipient)
+   if let Entry::App(entry_bytes) = parcel_entry {
+      return create_pending_parcel(ItemKind::AppEntryBytes, entry_bytes, distribution_eh, recipient);
+   }
+   return error("Can only pack Entry::App entries");
 }
 /// called from post_commit()
 pub fn pack_chunk(chunk: ParcelChunk, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {

@@ -93,7 +93,7 @@ pub enum ItemKind {
    ParcelReceived,
    /// Sent by sender
    DeliveryNotice,
-   Entry,
+   AppEntryBytes,
    ParcelChunk,
    // ParcelManifest
 }
@@ -102,7 +102,7 @@ impl ItemKind {
    pub fn can_link_to_distribution(&self) -> bool {
       match self {
          Self::DeliveryNotice => true,
-         Self::Entry => true,
+         Self::AppEntryBytes => true,
          Self::ParcelChunk => true,
          _ => false,
 

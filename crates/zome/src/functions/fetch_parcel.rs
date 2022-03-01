@@ -81,12 +81,12 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<Entry>> {
       /// Check each Inbox link
       for pending_item in &pending_items {
          match pending_item.kind {
-            ItemKind::Entry => {
+            ItemKind::AppEntryBytes => {
                if pending_item.distribution_eh != notice.distribution_eh {
                   continue;
                }
                /// We have the parcel we just need to deserialize it
-               let parcel_entry: Entry = unpack_item(pending_item.clone(), notice.sender.clone())?
+               let parcel_entry: Entry = unpack_entry(pending_item.clone(), notice.sender.clone())?
                   .expect("PendingItem should hold an Entry");
                return Ok(Some(parcel_entry));
             }

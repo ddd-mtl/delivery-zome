@@ -3,7 +3,7 @@ use hdk::prelude::*;
 
 use zome_delivery_types::*;
 use crate::DeliveryProtocol;
-use crate::functions::unpack_item;
+use crate::functions::*;
 use crate::link_kind::*;
 use zome_utils::*;
 use crate::entry_kind::{EntryKind};
@@ -55,8 +55,8 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
          ItemKind::ParcelReceived => { receive_dm_reception(pending_item.author.clone(), pending_item);},
          ItemKind::DeliveryNotice => { receive_dm_notice(pending_item.author.clone(), pending_item);},
          /// Behavior specific to DHT
-         ItemKind::Entry => {
-            let entry: Entry = unpack_item(pending_item.clone(), pending_item.author.clone())?.unwrap();
+         ItemKind::AppEntryBytes => {
+            let entry: Entry = unpack_entry(pending_item.clone(), pending_item.author.clone())?.unwrap();
             let eh = hash_entry(entry.clone())?;
             /// Check if its a Manifest
             if let Entry::App(entry_bytes) = entry.clone() {
@@ -68,7 +68,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
                   entry_map.insert(eh, entry.clone());
                }
             }
-         },
+         }
          ItemKind::ParcelChunk => {
             let chunk: ParcelChunk = unpack_item(pending_item.clone(), pending_item.author.clone())?.unwrap();
             let eh = hash_entry(chunk.clone())?;

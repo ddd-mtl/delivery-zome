@@ -46,7 +46,7 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
 
 
 pub fn receive_entry(from: AgentPubKey, item: PendingItem) -> DeliveryProtocol {
-    let maybe_maybe_entry: ExternResult<Option<Entry>> = unpack_item(item.clone(), from.clone());
+    let maybe_maybe_entry: ExternResult<Option<Entry>> = unpack_entry(item.clone(), from.clone());
     if let Err(err) = maybe_maybe_entry {
         return failure_err("Failed deserializing Entry", err);
     }
