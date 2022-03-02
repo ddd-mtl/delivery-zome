@@ -6,35 +6,25 @@ use crate::dm_protocol::*;
 use crate::functions::*;
 use zome_utils::*;
 
+//#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
 
-/// Zone Function
+/// Internal Zome Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
-pub fn fetch_chunk(input: FetchChunkInput) -> ExternResult<bool> {
+fn fetch_chunk(input: FetchChunkInput) -> ExternResult<FetchChunkOutput> {
+   trace!(" fetch_chunk() {:?}", input);
    std::panic::set_hook(Box::new(my_panic_hook));
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Look for Chunk
-   let maybe_chunk = pull_chunk(input.chunk_eh, notice)?;
-   if maybe_chunk.is_none() {
-      return Ok(false);
-   };
-   /// Commit Chunk
-   let (parcel_chunk, maybe_link) = maybe_chunk.unwrap();
-   //let _chunk_eh = hash_entry(parcel_chunk.clone())?;
-   let _chunk_hh = create_entry(parcel_chunk.clone())?;
-   /// Delete Link
-   if let Some(link) = maybe_link {
-      let _hh = delete_link(link.create_link_hash)?;
-   }
-   /// Done
-   Ok(true)
+   let maybe_chunk = pull_chunk(input.chunk_eh.clone(), notice)?;
+   Ok(maybe_chunk)
 }
 
+
 /// Try to retrieve the chunk entry
-pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice)
-   -> ExternResult<Option<(ParcelChunk, Option<Link>)>>
-{
+pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<FetchChunkOutput> {
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
    if notice.parcel_summary.distribution_strategy.can_dht() {

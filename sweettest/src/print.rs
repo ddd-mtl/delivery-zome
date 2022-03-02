@@ -101,19 +101,7 @@ fn print_element(element: &SourceChainJsonElement, entry_names: &Vec<Vec<String>
       }
       _ => {},
    }
-
-   //       else {
-   //    if (element.header.entry_type) {
-   //       if (typeof element.header.entry_type === 'object') {
-   //          str += ' - AppEntry ; id = ' + element.header.entry_type.App.id
-   //       } else {
-   //          str += ' - ' + element.header.entry_type
-   //       }
-   //    }
-   // }
-
-   let mut line = format!("{:<40} ({})", str, element.header_address);
-
+   let mut line = format!("{:<40} ({}) ({:?})", str, element.header_address, element.header.entry_hash());
    if element.header.is_genesis() {
       line = line.blue().to_string();
    }

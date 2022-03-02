@@ -48,8 +48,8 @@ fn post_commit_app_entry(eh: &EntryHash, app_type: &AppEntryType) -> ExternResul
    let entry = elements[0].entry().as_option().unwrap();
    /// Deserialize it and call its post_commit()
    if let Entry::App(entry_bytes) = entry {
-      let delivery_entry = deserialize_into_zome_entry(&app_type.id(), entry_bytes.clone())?;
-      let res = delivery_entry.post_commit(eh);
+      let delivery_zome_entry = deserialize_into_zome_entry(&app_type.id(), entry_bytes.clone())?;
+      let res = delivery_zome_entry.post_commit(eh);
       if let Err(e) = res {
          error!("app post_commit() failed: {:?}", e);
       }

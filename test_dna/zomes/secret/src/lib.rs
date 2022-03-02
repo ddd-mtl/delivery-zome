@@ -157,8 +157,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
 /// Zome Function
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
-   debug!("get_secrets_from() START");
-   debug!("get_secrets_from() - pull_inbox");
+   debug!("get_secrets_from() START - pull_inbox");
    let response = call_delivery_zome("pull_inbox", ())?;
    let inbox_items: Vec<HeaderHash> = decode_response(response)?;
    debug!("get_secrets_from() - inbox_items: {}", inbox_items.len());

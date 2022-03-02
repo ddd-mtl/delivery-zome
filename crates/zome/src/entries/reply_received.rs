@@ -36,6 +36,7 @@ impl ZomeEntry for ReplyReceived {
                reply.recipient.clone(),
             )?;
             /// Send it to recipient
+            debug!("Delivery accepted ; sending chunk {}", chunk_eh);
             let _ = send_item(
                reply.recipient.clone(),
                pending_item,
@@ -44,6 +45,7 @@ impl ZomeEntry for ReplyReceived {
          }
       }
       /// - Send AppEntry Parcel
+      debug!("Delivery accepted ; sending item {:?}", distribution.parcel_summary.reference);
       /// Get Entry
       let el: Element = get_local_from_eh(distribution.parcel_summary.reference.entry_address().clone())?;
       let entry: Entry = el.entry().clone().into_option().unwrap();
@@ -54,11 +56,12 @@ impl ZomeEntry for ReplyReceived {
          reply.recipient.clone(),
       )?;
       /// Send it to recipient
-      let _ = send_item(
+      let success = send_item(
          reply.recipient,
          pending_item,
          distribution.parcel_summary.distribution_strategy,
       )?;
+      debug!("Delivery accepted ; sending result: {:?}", success);
       /// Done
       Ok(())
    }

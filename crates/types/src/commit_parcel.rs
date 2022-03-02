@@ -15,11 +15,11 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
    debug!("commit_parcel() entry_def_id = {:?} | {}", input.entry_def_id, zome_info()?.name);
    /// Create CreateInput
    //let parcel_eh = hash_entry(input.entry.clone())?;
-   let create_input = CreateInput {
-      entry_def_id: input.entry_def_id,
-      entry: input.entry,
-      chain_top_ordering: ChainTopOrdering::Relaxed, // Strict //Relaxed
-   };
+   let create_input = CreateInput::new(
+      input.entry_def_id,
+      input.entry,
+      ChainTopOrdering::Relaxed, // Strict //Relaxed
+   );
    /// Commit Parcel
    let parcel_hh = create_entry(create_input)?;
    /// Delete Link
@@ -27,5 +27,5 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
       let _hh = delete_link(link_hh)?;
    }
    /// Done
-   return Ok(parcel_hh);
+   Ok(parcel_hh)
 }

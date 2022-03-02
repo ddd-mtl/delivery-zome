@@ -9,6 +9,7 @@ use crate::{
 };
 
 #[allow(non_camel_case_types)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum SendSuccessKind {
    OK_SELF,
    OK_DIRECT,

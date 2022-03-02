@@ -34,28 +34,14 @@ pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(Pe
 pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    debug!("pull_inbox() START");
    std::panic::set_hook(Box::new(my_panic_hook));
-   /// Get all inbox links
+   /// Get all inbox items
    let pending_pairs = get_all_inbox_items(None)?;
-   // debug!("pull_inbox() items found: {}", pending_items.len());
-   // /// Act as is if we received it from a DM
-   // for pending_item in pending_items.clone() {
-   //    let dm = DirectMessage {
-   //       from: pending_item.author.clone(),
-   //       msg: DeliveryProtocol::Item(pending_item.clone()),
-   //    } ;
-   //    let res = receive_delivery_dm(dm);
-   //    if let Err(e) = res {
-   //       error!("Failed receiving Item from {}: {}", pending_item.author, e);
-   //    }
-   // }
-
-   // FIXME: DELETE LINKS !!
-
    /// Convert Each Item
    let mut entry_map = HashMap::new();
    let mut manifest_map = HashMap::new();
    let mut chunk_map = HashMap::new();
    for (pending_item, link) in pending_pairs {
+      debug!("pull_inbox() inbox item: {:?}", pending_item.kind);
       match pending_item.kind {
          /// Same behavior as if received via DM
          ItemKind::DeliveryReply => {
@@ -124,16 +110,21 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    let received_parcels: Vec<ParcelReceived> = get_all_typed_local(EntryKind::ParcelReceived.as_type())?;
    let received_parcel_ehs: Vec<EntryHash> = received_parcels.iter().map(|x| x.notice_eh.clone()).collect();
    let my_replies: Vec<DeliveryReply> = get_all_typed_local(EntryKind::DeliveryReply.as_type())?;
+   debug!("pull_inbox() my_replies: {}", my_replies.len());
    for reply in my_replies {
+      debug!("pull_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
          let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
          unreceived_entries.insert(notice.parcel_summary.reference.entry_address(), notice.clone());
          /// Get unreceived chunks
          if let ParcelReference::Manifest(manifest_eh) = notice.parcel_summary.reference {
-            let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
-            for chunk_eh in manifest.chunks {
-               if !received_chunks_ehs.contains(&chunk_eh) {
-                  unreceived_chunks.push(chunk_eh);
+            let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(manifest_eh);
+            /// Manifest might not have been received yet
+            if let Ok(manifest) = maybe_manifest {
+               for chunk_eh in manifest.chunks {
+                  if !received_chunks_ehs.contains(&chunk_eh) {
+                     unreceived_chunks.push(chunk_eh);
+                  }
                }
             }
          }

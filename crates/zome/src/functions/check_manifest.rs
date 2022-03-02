@@ -12,16 +12,19 @@ use crate::entry_kind::*;
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
 pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
+   trace!("check_manifest() START {}", chunk_eh);
    std::panic::set_hook(Box::new(my_panic_hook));
    /// Find manifest with that chunk_eh
    let maybe_manifest = find_ParcelManifest(chunk_eh)?;
    if maybe_manifest.is_none() {
+      trace!("check_manifest() ABORT - Manifest not found");
       return Ok(None);
    }
    /// Find notice with that manifest
    let manifest_eh = hash_entry(maybe_manifest.unwrap())?;
    let maybe_notice = find_notice(manifest_eh.clone())?;
    if maybe_notice.is_none() {
+      trace!("check_manifest() ABORT - Notice not found for manifest {}", manifest_eh);
       return Ok(None);
    }
    let notice = maybe_notice.unwrap();
@@ -34,6 +37,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    /// Matching notice found. Check if we have all chunks
    let has_all_chunks = has_all_chunks(manifest_eh.clone())?;
    if !has_all_chunks {
+      trace!("check_manifest() ABORT - Missing chunks");
       return Ok(None);
    }
    /// All chunks found. Create ParcelReceived
@@ -96,6 +100,7 @@ pub fn has_all_chunks(manifest_eh: EntryHash) -> ExternResult<bool> {
       .entry_hashes(chunks_set);
    let chunk_els = query(query_args)?;
    /// Check if all found
+   trace!("has_all_chunks: {} == {} ?", chunk_els.len(), len);
    return Ok(chunk_els.len() == len)
 }
 
