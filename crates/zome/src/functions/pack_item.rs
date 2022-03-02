@@ -12,7 +12,7 @@ fn create_PendingItem<T>(
    where
       T: serde::Serialize + Clone + Sized + std::fmt::Debug
 {
-   debug!("create_pending_item() {:?} for {:?}", kind, recipient);
+   debug!("create_pending_item() {:?} for {}", kind, snip(&recipient));
    assert!(kind != ItemKind::AppEntryBytes);
    let me = agent_info()?.agent_latest_pubkey;
    /// Sign content
@@ -41,13 +41,15 @@ fn create_pending_parcel(
    recipient: AgentPubKey,
 ) -> ExternResult<PendingItem>
 {
-   debug!("create_pending_item() {:?} for {:?}", kind, recipient);
+   debug!("create_pending_item() {:?} for {}", kind, snip(&recipient));
    let me = agent_info()?.agent_latest_pubkey;
    /// Sign content
    let author_signature = sign(me.clone(), entry_bytes.clone())
       .expect("Should be able to sign with my key");
    /// Serialize
-   let data: XSalsa20Poly1305Data = XSalsa20Poly1305Data::from(entry_bytes.into_sb().bytes().to_owned());
+   let bytes =  entry_bytes.into_sb().bytes().to_owned();
+   trace!("create_pending_parcel() bytes: {:?}", bytes);
+   let data: XSalsa20Poly1305Data = XSalsa20Poly1305Data::from(bytes);
    /// Encrypt
    let encrypted_data = encrypt_parcel(data, recipient)?;
    /// Done
@@ -101,7 +103,7 @@ pub fn pack_reception(reception: ParcelReceived, distribution_eh: EntryHash, rec
    create_PendingItem::<ParcelReceived>(ItemKind::ParcelReceived, reception, distribution_eh, recipient)
 }
 /// called from post_commit()
-pub fn pack_parcel(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+pub fn pack_entry(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
    if let Entry::App(entry_bytes) = parcel_entry {
       return create_pending_parcel(ItemKind::AppEntryBytes, entry_bytes, distribution_eh, recipient);
    }

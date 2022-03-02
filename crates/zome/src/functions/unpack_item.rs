@@ -10,7 +10,7 @@ pub fn unpack_item<T>(pending_item: PendingItem, from: AgentPubKey) -> ExternRes
    where
       T: for<'de> serde::Deserialize<'de> + Clone + serde::Serialize + std::fmt::Debug
 {
-   debug!("unpack_item() {:?} from {:?}", pending_item.kind, from);
+   debug!("unpack_item() {:?} from {}", pending_item.kind, snip(&from));
    /// - Decrypt
    let maybe_decrypted = attempt_decrypt(pending_item.encrypted_data, from.clone())?;
    trace!("try_into() maybe_decrypted: {:?}", maybe_decrypted.is_some());
@@ -29,25 +29,30 @@ pub fn unpack_item<T>(pending_item: PendingItem, from: AgentPubKey) -> ExternRes
 
 ///
 pub fn unpack_entry(pending_item: PendingItem, from: AgentPubKey) -> ExternResult<Option<Entry>> {
-   debug!("unpack_entry() {:?} from {:?}", pending_item.kind, from);
+   debug!("unpack_entry() {:?} from {}", pending_item.kind, snip(&from));
    assert!(pending_item.kind == ItemKind::AppEntryBytes);
    /// - Decrypt
    let maybe_decrypted = attempt_decrypt(pending_item.encrypted_data, from.clone())?;
-   trace!("try_into() maybe_decrypted: {:?}", maybe_decrypted.is_some());
+   trace!("unpack_entry() maybe_decrypted: {:?}", maybe_decrypted.is_some());
    if maybe_decrypted.is_none() {
       return Ok(None);
    }
+   // entry_bytes.into_sb().bytes().to_owned()
    /// Convert
    let bytes: UnsafeBytes = maybe_decrypted.unwrap().as_ref().to_vec().into();
+   //debug!("unpack_entry() bytes: {:?}", bytes);
    let item_sb: SerializedBytes = SerializedBytes::try_from(bytes)?;
+   //debug!("unpack_entry() item_sb: {:?}", item_sb);
    let maybe_entry = Entry::app(item_sb.clone());
    if let Err(e) = maybe_entry {
       return error(&format!("Failed converting packed AppEntryBytes into Entry: {:?}", e));
    }
+   let entry = maybe_entry.unwrap();
+   trace!("unpack_entry() entry valid");
    /// Check signature
    check_signature(from, pending_item.author_signature, item_sb)?;
    /// Done
-   Ok(Some(maybe_entry.unwrap()))
+   Ok(Some(entry))
 }
 
 ///
@@ -59,15 +64,15 @@ fn check_signature<T>(from: AgentPubKey, signature: Signature, data: T) -> Exter
    match maybe_verified {
       Err(err) => {
          let response_str = "Verifying PendingItem failed";
-         debug!("{}: {}", response_str, err);
+         trace!("{}: {}", response_str, err);
          return error(response_str);
       }
       Ok(false) => {
          let response_str = "Failed verifying PendingItem signature";
-         debug!("{}", response_str);
+         trace!("{}", response_str);
          return error(response_str);
       }
-      Ok(true) => debug!("Valid PendingItem signature"),
+      Ok(true) => trace!("Valid PendingItem signature"),
    }
    Ok(())
 }

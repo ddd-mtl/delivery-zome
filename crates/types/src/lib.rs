@@ -20,6 +20,9 @@ pub use commit_parcel::*;
 
 
 pub const DELIVERY_ZOME_NAME: &'static str = "delivery";
+pub const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
+
+
 
 pub const COMMIT_PARCEL_CALLBACK: &'static str = "commit_parcel";
 

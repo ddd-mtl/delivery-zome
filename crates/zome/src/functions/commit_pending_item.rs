@@ -40,11 +40,11 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash
       trace!("link1_hh = {}", link1_hh);
    }
    /// Commit Inbox Link
-   let tag = LinkKind::Inbox.concat_hash(&me);
+   let tag = LinkKind::Inbox.concat_hash(&me); //LinkKind::Inbox.as_tag()
    let maybe_link2_hh = create_link(
       EntryHash::from(input.recipient.clone()),
       pending_item_eh,
-     LinkKind::Inbox.as_tag()  // tag,
+     tag,
    );
    if let Err(err) = maybe_link2_hh.clone() {
       trace!("link2 failed = {:?}", err);

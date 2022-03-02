@@ -5,3 +5,4 @@ mod validate_agent;
 mod validate_entry;
 mod validate_link;
 mod validate_package;
+mod entry_defs;

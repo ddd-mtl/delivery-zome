@@ -13,7 +13,7 @@ pub trait ZomeEntry {
 
 impl ZomeEntry for PubEncKey {}
 impl ZomeEntry for PathEntry {}
-//impl ZomeEntry for DeliveryNotice {}
+impl ZomeEntry for DeliveryNotice {}
 //impl ZomeEntryKind for Distribution {}
 impl ZomeEntry for DeliveryReceipt {}
 //impl ZomeEntry for DeliveryReply {}

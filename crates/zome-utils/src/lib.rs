@@ -112,7 +112,7 @@ pub fn determine_entry_type(eh: EntryHash, entry: &Entry) -> ExternResult<EntryT
    })
 }
 
-/// Get Element at address using query()
+/// Get Element at address
 pub fn get_entry_type_from_eh(eh: EntryHash) -> ExternResult<EntryType> {
    let maybe_element = get(eh, GetOptions::latest())?;
    if maybe_element.is_none() {
@@ -121,37 +121,6 @@ pub fn get_entry_type_from_eh(eh: EntryHash) -> ExternResult<EntryType> {
    let element = maybe_element.unwrap();
    let entry_type = element.header().entry_type().unwrap().clone();
    Ok(entry_type)
-}
-
-/// Get Element at address using query()
-pub fn get_local_from_hh(hh: HeaderHash) -> ExternResult<Element> {
-   let query_args = ChainQueryFilter::default()
-      .include_entries(true);
-   let maybe_vec = query(query_args);
-   if let Err(err) = maybe_vec {
-      return error(&format!("{:?}",err));
-   }
-   let vec = maybe_vec.unwrap();
-   for element in vec {
-      if element.header_address() == &hh {
-         return Ok(element.clone());
-      }
-   }
-   return error("Element not found at given HeaderHash");
-}
-
-/// Get Element at address using query()
-pub fn get_local_from_eh(eh: EntryHash) -> ExternResult<Element> {
-   let mut set = HashSet::with_capacity(1);
-   set.insert(eh);
-   let query_args = ChainQueryFilter::default()
-      .include_entries(true)
-      .entry_hashes(set);
-   let vec = query(query_args)?;
-   if vec.len() != 1 {
-      return error("Element not found at given EntryHash");
-   }
-   Ok(vec[0].clone())
 }
 
 
@@ -167,13 +136,13 @@ pub fn get_eh(element: &Element) -> ExternResult<EntryHash> {
 
 /// Call get() to obtain EntryHash from a HeaderHash
 pub fn hh_to_eh(hh: HeaderHash) -> ExternResult<EntryHash> {
-   trace!("hh_to_eh(): START - get...");
+   trace!("hh_to_eh() START - get...");
    let maybe_element = get(hh, GetOptions::content())?;
-   trace!("hh_to_eh(): START - get DONE");
    if let None = maybe_element {
-      warn!("hh_to_eh(): Element not found");
+      warn!("hh_to_eh() END - Element not found");
       return error("hh_to_eh(): Element not found");
    }
+   trace!("hh_to_eh() END - Element found");
    return get_eh(&maybe_element.unwrap());
 }
 
@@ -310,30 +279,32 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
 //----------------------------------------------------------------------------------------
 
 /// optimized get details by links
-pub fn my_get_details(links: Vec<Link>, option: GetOptions) -> ExternResult<Vec<Option<Details>>> {
-   let msg_results_input: Vec<GetInput> = links
+pub fn get_links_details(links: &mut Vec<Link>, option: GetOptions) -> ExternResult<Vec<(Option<Details>, Link)>> {
+   let get_inputs: Vec<GetInput> = links
       .into_iter()
-      .map(|link| GetInput::new(link.target.into(), option.clone()))
+      .map(|link| GetInput::new(link.target.clone().into(), option.clone()))
       .collect();
-   let res = HDK.with(|hdk| hdk.borrow().get_details(msg_results_input))?;
-   Ok(res)
+   let details = HDK.with(|hdk| hdk.borrow().get_details(get_inputs))?;
+   assert!(details.len() == links.len());
+   let pairs = details.iter().map(|x|  (x.clone(), links.pop().unwrap())).collect();
+   Ok(pairs)
 }
 
 ///
-pub fn get_links_and_load_type<R: TryFrom<Entry>>(
+pub fn get_typed_from_links<R: TryFrom<Entry>>(
    base: EntryHash,
    tag: Option<LinkTag>,
    //include_latest_updated_entry: bool,
-) -> ExternResult<Vec<R>> {
+) -> ExternResult<Vec<(R, Link)>> {
    let links = get_links(base.into(), tag)?;
    debug!("get_links_and_load_type() links found: {}", links.len());
-   let all_results_elements = my_get_details(links, GetOptions::default())?;
-   let res = all_results_elements
+   let result_pairs = get_links_details(&mut links.clone(), GetOptions::default())?;
+   let typed_pairs = result_pairs
       .iter()
-      .flat_map(|details| match details {
+      .flat_map(|pair| match pair.0.clone() {
          Some(Details::Entry(EntryDetails { entry, .. })) => {
             match R::try_from(entry.clone()) {
-               Ok(r) => Ok(r),
+               Ok(r) => Ok((r, pair.1.clone())),
                Err(_) => error(
                   "Could not convert get_links result to requested type",
                ),
@@ -342,5 +313,5 @@ pub fn get_links_and_load_type<R: TryFrom<Entry>>(
          _ => error("get_links did not return an app entry"),
       })
       .collect();
-   Ok(res)
+   Ok(typed_pairs)
 }

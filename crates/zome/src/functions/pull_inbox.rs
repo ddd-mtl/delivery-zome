@@ -2,12 +2,32 @@ use std::collections::HashMap;
 use hdk::prelude::*;
 
 use zome_delivery_types::*;
-use crate::DeliveryProtocol;
 use crate::functions::*;
 use crate::link_kind::*;
 use zome_utils::*;
 use crate::entry_kind::{EntryKind};
-use crate::receive_dm::*;
+use crate::receive::*;
+use crate::utils_parcel::*;
+
+
+///
+pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
+   /// Get typed targets
+   let my_agent_eh = EntryHash::from(agent_info()?.agent_latest_pubkey);
+   let mut pending_pairs = get_typed_from_links::<PendingItem>(
+      my_agent_eh.clone(),
+      LinkKind::Inbox.as_tag_opt(),
+      //false,
+   )?;
+   /// Filter
+   if maybe_kind.is_some() {
+      let kind = maybe_kind.unwrap();
+      pending_pairs.retain(|pair|  pair.0.kind == kind)
+   }
+   /// Done
+   Ok(pending_pairs)
+}
+
 
 /// Zome Function
 #[hdk_extern]
@@ -15,13 +35,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    debug!("pull_inbox() START");
    std::panic::set_hook(Box::new(my_panic_hook));
    /// Get all inbox links
-   let me = agent_info()?.agent_latest_pubkey;
-   let my_agent_eh = EntryHash::from(me.clone());
-   let pending_items = get_links_and_load_type::<PendingItem>(
-      my_agent_eh.clone(),
-      LinkKind::Inbox.as_tag_opt(),
-      //false,
-   )?;
+   let pending_pairs = get_all_inbox_items(None)?;
    // debug!("pull_inbox() items found: {}", pending_items.len());
    // /// Act as is if we received it from a DM
    // for pending_item in pending_items.clone() {
@@ -41,18 +55,30 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    let mut entry_map = HashMap::new();
    let mut manifest_map = HashMap::new();
    let mut chunk_map = HashMap::new();
-   for pending_item in pending_items {
+   for (pending_item, link) in pending_pairs {
       match pending_item.kind {
          /// Same behavior as if received via DM
          ItemKind::DeliveryReply => {
-            let response = receive_dm_reply(pending_item.author.clone(), pending_item);
-            /// DELETE lINK
-            if response == DeliveryProtocol::Success {
-               //let res = delete_link(link_hh);
+            let res = receive_reply(pending_item.author.clone(), pending_item);
+            match res {
+               Err(e) => warn!("{}", e),
+               Ok(_) => { let _res = delete_link(link.create_link_hash); },
             }
          },
-         ItemKind::ParcelReceived => { receive_dm_reception(pending_item.author.clone(), pending_item);},
-         ItemKind::DeliveryNotice => { receive_dm_notice(pending_item.author.clone(), pending_item);},
+         ItemKind::ParcelReceived => {
+            let res = receive_reception(pending_item.author.clone(), pending_item);
+            match res {
+               Err(e) => warn!("{}", e),
+               Ok(_) => { let _res = delete_link(link.create_link_hash); },
+            }
+         },
+         ItemKind::DeliveryNotice => {
+            let res = receive_notice(pending_item.author.clone(), pending_item);
+            match res {
+               Err(e) => warn!("{}", e),
+               Ok(_) => { let _res = delete_link(link.create_link_hash); },
+            }
+         },
          /// Behavior specific to DHT
          ItemKind::AppEntryBytes => {
             let entry: Entry = unpack_entry(pending_item.clone(), pending_item.author.clone())?.unwrap();
@@ -64,14 +90,14 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
                if let Ok(manifest ) = maybe_manifest {
                   manifest_map.insert(eh, manifest);
                } else {
-                  entry_map.insert(eh, entry.clone());
+                  entry_map.insert(eh, (entry.clone(), link));
                }
             }
          }
          ItemKind::ParcelChunk => {
             let chunk: ParcelChunk = unpack_item(pending_item.clone(), pending_item.author.clone())?.unwrap();
             let eh = hash_entry(chunk.clone())?;
-            chunk_map.insert(eh, chunk);
+            chunk_map.insert(eh, (chunk, link));
          },
       }
    }
@@ -117,13 +143,13 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    /// Commit received parcels
    let mut hhs = Vec::new();
    /// Process entries
-   for (eh, entry) in entry_map.iter() {
+   for (eh, (entry, link)) in entry_map.iter() {
       if let Some(notice) = unreceived_entries.get(eh) {
-         let input = CommitParcelInput {
-            entry_def_id: notice.parcel_summary.reference.entry_def_id(),
-            entry: entry.to_owned(),
-         };
-         let hh = commit_parcel(input)?;
+         let hh = call_commit_parcel(
+            entry.to_owned(),
+            notice,
+            Some(link.create_link_hash.clone()),
+         )?;
          hhs.push(hh);
       }
    }
@@ -137,13 +163,14 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    }
    debug!("pull_inbox() unreceived_chunks entries: {}", unreceived_chunks.len());
    /// Process chunks
-   for (eh, entry) in chunk_map.iter() {
+   for (eh, (entry, link)) in chunk_map.iter() {
       if unreceived_chunks.contains(eh) {
          let hh = create_entry(entry)?;
+         let _link_hh = delete_link(link.create_link_hash.clone())?;
          hhs.push(hh);
       }
    }
    /// Done
-   debug!("pull_inbox() END - Received {} parcels", parcel_count);
+   debug!("pull_inbox() END - Received {} parcels ({})", parcel_count, hhs.len());
    Ok(hhs)
 }

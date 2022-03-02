@@ -153,6 +153,7 @@ pub async fn try_zome_call_fallible<T,P>(
    for _ in 0..10u32 {
       let maybe: ConductorApiResult<T> = conductor.call_fallible(&cell.zome(zome_name), fn_name, payload.clone())
                             .await;
+      println!("try_zome_call_fallible() maybe = {:?}", maybe);
       if let Ok(res) = maybe {
          return Ok(res);
       }

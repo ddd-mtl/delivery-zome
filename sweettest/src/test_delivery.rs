@@ -102,7 +102,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    let input = SendSecretInput {
       secret_eh: secret_eh.clone(),
       recipient: agents[1].clone(),
-      strategy,
+      strategy: strategy.clone(),
    };
    let _distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
 
@@ -124,24 +124,36 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
 
    /// Have A receive reply and send Parcel
    sleep(Duration::from_millis(2 * 1000)).await;
-   let _: ()  = conductors[0].call(&cells[0].zome("secret"), "pull_inbox", ()).await;
+   println!("\n A receive reply; pull_inbox()...");
+   let _: Vec<HeaderHash> = conductors[0].call(&cells[0].zome("delivery"), "pull_inbox", ()).await;
    sleep(Duration::from_millis(2 * 1000)).await;
    print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
 
    /// B gets secret
-   sleep(Duration::from_millis(2 * 1000)).await;
+   if strategy.can_dht() {
+      println!("\n B trying to get secret pull_inbox()...");
+      // let _: Vec<HeaderHash> = conductors[1].call(&cells[1].zome("delivery"), "pull_inbox", ()).await;
+      let _: Vec<HeaderHash> = try_zome_call(&conductors[1], cells[1], "delivery", "pull_inbox", (),
+                                             |result: &Vec<HeaderHash>| { result.len() == 1 })
+         .await
+         .expect("Should have received 1 parcel");
+   }
+   //sleep(Duration::from_millis(2 * 1000)).await;
    print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
 
-   let secret: String = try_zome_call_fallible(&conductors[1], &cells[1], "secret", "get_secret", waiting_parcels[0].clone())
-      .await
-      .expect("Should have received Secret Parcel");
+   // let secret: String = try_zome_call_fallible(&conductors[1], &cells[1], "secret", "get_secret", waiting_parcels[0].clone())
+   //    .await
+   //    .expect("Should have received Secret Parcel");
+   println!("\n B calls get_secret()...");
+   let secret: String  = conductors[1].call(&cells[1].zome("secret"), "get_secret", waiting_parcels[0].clone()).await;
    println!("\n secret received: {:?}\n", secret);
+   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
 
    /// Check A's chain for a DeliveryReceipt
    sleep(Duration::from_millis(2 * 1000)).await;
-   let _: () = conductors[0].call(&cells[0].zome("secret"), "pull_inbox", ()).await;
+   let _: Vec<HeaderHash> = conductors[0].call(&cells[0].zome("delivery"), "pull_inbox", ()).await;
    print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
-
+   sleep(Duration::from_millis(2 * 1000)).await;
 }
 
 

@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use crate::DELIVERY_ZOME_NAME;
+use crate::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ParcelSummary {
@@ -8,6 +8,7 @@ pub struct ParcelSummary {
    pub reference: ParcelReference,
 }
 
+/// A Parcel is a generic Entry or a ParcelManifest
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ParcelReference {
    /// Any Entry type
@@ -26,7 +27,7 @@ impl ParcelReference {
 
    pub fn entry_def_id(&self) -> EntryDefId {
       match self {
-         ParcelReference::Manifest(_) => EntryDefId::App("ParcelManifest".to_string()),
+         ParcelReference::Manifest(_) => EntryDefId::App(MANIFEST_ENTRY_NAME.to_string()),
          ParcelReference::AppEntry(_, id, _) => id.to_owned(),
       }
    }

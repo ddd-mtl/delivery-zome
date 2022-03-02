@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use crate::link_kind::*;
+//use crate::link_kind::*;
 use zome_delivery_types::*;
 use crate::send_dm::*;
 use crate::dm_protocol::*;
@@ -20,40 +20,36 @@ pub fn fetch_chunk(input: FetchChunkInput) -> ExternResult<bool> {
       return Ok(false);
    };
    /// Commit Chunk
-   let parcel_chunk = maybe_chunk.unwrap();
+   let (parcel_chunk, maybe_link) = maybe_chunk.unwrap();
    //let _chunk_eh = hash_entry(parcel_chunk.clone())?;
    let _chunk_hh = create_entry(parcel_chunk.clone())?;
+   /// Delete Link
+   if let Some(link) = maybe_link {
+      let _hh = delete_link(link.create_link_hash)?;
+   }
    /// Done
    Ok(true)
 }
 
 /// Try to retrieve the chunk entry
-pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Option<ParcelChunk>> {
+pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice)
+   -> ExternResult<Option<(ParcelChunk, Option<Link>)>>
+{
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
    if notice.parcel_summary.distribution_strategy.can_dht() {
-      let me = agent_info()?.agent_latest_pubkey;
-      let my_agent_eh = EntryHash::from(me.clone());
-      let pending_items = get_links_and_load_type::<PendingItem>(
-         my_agent_eh.clone(),
-         LinkKind::Inbox.as_tag_opt(),
-         //false,
-      )?;
+      let pending_chunk_pairs = get_all_inbox_items(Some(ItemKind::ParcelChunk))?;
       /// Check each Inbox link
-      for pending_item in &pending_items {
-         match pending_item.kind {
-            ItemKind::ParcelChunk => {
-               if pending_item.distribution_eh != notice.distribution_eh {
-                  continue;
-               }
-               /// We have the chunk we just need to deserialize it
-               let item: Entry = unpack_entry(pending_item.clone(), notice.sender.clone())?
-                  .expect("PendingItem should hold an Entry");
-               let chunk = get_typed_from_entry(item)?;
-               return Ok(Some(chunk));
-            }
-            _ => continue,
+      for (pending_chunk, link) in &pending_chunk_pairs {
+         assert!(pending_chunk.kind == ItemKind::ParcelChunk);
+         if pending_chunk.distribution_eh != notice.distribution_eh {
+            continue;
          }
+         /// We have the chunk we are looking for, we just need to deserialize it
+         let chunk = unpack_item(pending_chunk.clone(), notice.sender.clone())?
+            .expect("PendingItem should hold a ParcelChunk");
+         //let chunk = get_typed_from_entry(item)?;
+         return Ok(Some((chunk, Some(link.clone()))));
       }
    }
    /// Not found in Inbox
@@ -62,7 +58,7 @@ pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<O
       let dm = DeliveryProtocol::ChunkRequest(chunk_eh.clone());
       let response = send_dm(notice.sender, dm)?;
       if let DeliveryProtocol::ChunkResponse(chunk) = response {
-         return Ok(Some(chunk));
+         return Ok(Some((chunk, None)));
       }
    }
    /// TODO: Ask Recipient peers?

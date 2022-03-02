@@ -62,7 +62,7 @@ pub struct ParcelChunk {
    pub data: String,
 }
 
-
+/// WARN : Change MANIFEST_ENTRY_NAME const when renaming
 #[hdk_entry(id = "ParcelManifest", visibility = "private")]
 #[derive(Clone, PartialEq)]
 pub struct ParcelManifest {

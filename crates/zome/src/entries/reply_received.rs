@@ -48,7 +48,7 @@ impl ZomeEntry for ReplyReceived {
       let el: Element = get_local_from_eh(distribution.parcel_summary.reference.entry_address().clone())?;
       let entry: Entry = el.entry().clone().into_option().unwrap();
       /// Create PendingItem
-      let pending_item = pack_parcel(
+      let pending_item = pack_entry(
          entry,
          reply.distribution_eh.clone(),
          reply.recipient.clone(),

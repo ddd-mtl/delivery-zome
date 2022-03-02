@@ -20,7 +20,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    }
    /// Find notice with that manifest
    let manifest_eh = hash_entry(maybe_manifest.unwrap())?;
-   let maybe_notice = find_DeliveryNotice(manifest_eh.clone())?;
+   let maybe_notice = find_notice(manifest_eh.clone())?;
    if maybe_notice.is_none() {
       return Ok(None);
    }
@@ -65,8 +65,8 @@ pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelMan
    Ok(None)
 }
 
-///Find manifest with that chunk_eh
-pub fn find_DeliveryNotice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
+/// Find manifest with that chunk_eh
+pub fn find_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
    /// Get all Create DeliveryNotice Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
@@ -75,10 +75,9 @@ pub fn find_DeliveryNotice(parcel_eh: EntryHash) -> ExternResult<Option<Delivery
    let notices = query(query_args)?;
    for notice_el in notices {
       let notice: DeliveryNotice = get_typed_from_el(notice_el)?;
-      if let ParcelReference::Manifest(eh) = notice.parcel_summary.reference.clone() {
-         if eh == parcel_eh {
-            return Ok(Some(notice));
-         }
+      let summary_eh = notice.parcel_summary.reference.entry_address();
+      if summary_eh == parcel_eh {
+         return Ok(Some(notice));
       }
    }
    /// Done

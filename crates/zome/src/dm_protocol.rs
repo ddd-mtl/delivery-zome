@@ -9,8 +9,9 @@ pub fn failure(reason: &str) -> DeliveryProtocol {
 }
 
 pub fn failure_err(reason: &str, err: WasmError) -> DeliveryProtocol {
-    warn!("{}: {:?}", reason, err);
-    return DeliveryProtocol::Failure(reason.to_string());
+    let msg = format!("{}: {:?}", reason, err);
+    warn!("{}", msg);
+    return DeliveryProtocol::Failure(msg);
 }
 
 
@@ -47,6 +48,16 @@ impl fmt::Display for DeliveryProtocol {
         Ok(())
     }
 }
+
+impl From<ExternResult<()>> for DeliveryProtocol {
+    fn from(result: ExternResult<()>) -> Self {
+        match result {
+            Err(err) => failure_err("", err),
+            Ok(_) => DeliveryProtocol::Success,
+        }
+    }
+}
+
 
 // #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, SerializedBytes)]
 // pub struct AckMessage {

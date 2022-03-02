@@ -1,11 +1,12 @@
 use hdk::prelude::*;
 
+use zome_delivery_types::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
-    ReceivedNotice(NoticeItem),
-    ReceivedReply(ReplyItem),
-    ReceivedParcel(EntryHash),
+    ReceivedNotice(DeliveryNotice),
+    ReceivedReply(ReplyReceived),
+    //ReceivedParcel(EntryHash),
 }
 
 // #[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
