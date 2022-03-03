@@ -1,7 +1,27 @@
 use hdk::prelude::*;
-
 use zome_utils::*;
 use zome_delivery_types::*;
+
+use crate::link_kind::*;
+
+
+///
+pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
+    /// Get typed targets
+    let my_agent_eh = EntryHash::from(agent_info()?.agent_latest_pubkey);
+    let mut pending_pairs = get_typed_from_links::<PendingItem>(
+        my_agent_eh.clone(),
+        LinkKind::Inbox.as_tag_opt(),
+    )?;
+    /// Filter
+    if maybe_kind.is_some() {
+        let kind = maybe_kind.unwrap();
+        pending_pairs.retain(|pair|  pair.0.kind == kind)
+    }
+    /// Done
+    Ok(pending_pairs)
+}
+
 
 /// Call The Zome owner of the entry to commit it
 pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: Option<HeaderHash>)

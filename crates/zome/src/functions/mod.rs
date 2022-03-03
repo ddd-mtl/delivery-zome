@@ -8,25 +8,23 @@ mod fetch_chunk;
 mod check_manifest;
 mod get_notice;
 mod commit_pending_item;
-mod commit_pub_enc_key;
+mod pub_enc_key;
 mod query;
-mod pack_item;
-mod unpack_item;
 
 
+pub use crate::pack_item::*;
+pub use crate::unpack_item::*;
 pub use self::{
+   check_manifest::*,
    commit_parcel_chunk::*,
    commit_parcel_manifest::*,
-   distribute_parcel::*,
-   respond_to_notice::*,
-   pull_inbox::*,
-   fetch_parcel::*,
-   fetch_chunk::*,
-   check_manifest::*,
-   get_notice::*,
    commit_pending_item::*,
-   commit_pub_enc_key::*,
-   pack_item::*,
-   unpack_item::*,
+   pub_enc_key::*,
+   distribute_parcel::*,
+   fetch_chunk::*,
+   fetch_parcel::*,
+   get_notice::*,
+   pull_inbox::*,
    query::*,
+   respond_to_notice::*,
 };

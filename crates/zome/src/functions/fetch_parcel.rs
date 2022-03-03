@@ -8,21 +8,11 @@ use crate::functions::*;
 use crate::utils_parcel::*;
 
 
-/// Zome Function Callback required by Delivery-zome
-#[hdk_extern]
-pub(crate) fn commit_ParcelReceived(input: ParcelReceived) -> ExternResult<EntryHash> {
-   std::panic::set_hook(Box::new(zome_panic_hook));
-   let eh = hash_entry(input.clone())?;
-   let _hh = create_entry(input)?;
-   return Ok(eh);
-}
-
-
 /// Zone Function
 /// Can only be called via remote call to self
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
-fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
+pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    debug!("fetch_parcel() {:?}", notice_eh);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get DeliveryNotice
@@ -99,4 +89,14 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Option
    /// TODO: Ask Recipient peers?
    /// Not found
    Ok(None)
+}
+
+
+/// Internal Zome Function Callback required by delivery-zome
+#[hdk_extern]
+fn commit_ParcelReceived(input: ParcelReceived) -> ExternResult<EntryHash> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   let eh = hash_entry(input.clone())?;
+   let _hh = create_entry(input)?;
+   return Ok(eh);
 }

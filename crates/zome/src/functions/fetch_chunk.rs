@@ -5,7 +5,7 @@ use zome_utils::*;
 use crate::send_dm::*;
 use crate::dm_protocol::*;
 use crate::functions::*;
-
+use crate::utils_parcel::*;
 
 pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
 

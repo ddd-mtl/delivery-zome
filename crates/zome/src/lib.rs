@@ -26,6 +26,8 @@ mod signal_protocol;
 mod utils_delivery;
 mod utils_parcel;
 mod zome_entry_trait;
+mod unpack_item;
+mod pack_item;
 
 //----------------------------------------------------------------------------------------
 
