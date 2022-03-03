@@ -2,6 +2,7 @@ use hdk::prelude::*;
 use zome_delivery_types::*;
 use zome_utils::*;
 
+
 /// Zone Function
 /// Return EntryHash of DeliveryReply
 #[hdk_extern]
@@ -20,4 +21,3 @@ pub fn respond_to_notice(input: RespondToNoticeInput) -> ExternResult<EntryHash>
    /// Done
    Ok(eh)
 }
-

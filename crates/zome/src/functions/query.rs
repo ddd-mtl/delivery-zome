@@ -1,7 +1,7 @@
 use hdk::prelude::*;
-
 use zome_delivery_types::*;
 use zome_utils::*;
+
 
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]
@@ -28,7 +28,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
       DeliveryNoticeQueryField::Parcel(parcel_eh) => {
          for notice_el in notices {
             let notice: DeliveryNotice = get_typed_from_el(notice_el)?;
-            if notice.parcel_summary.parcel_reference.entry_address() == parcel_eh {
+            if notice.summary.parcel_reference.entry_address() == parcel_eh {
                res.push(notice.clone());
             }
          }

@@ -1,9 +1,11 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
-use crate::zome_entry_trait::*;
 use zome_utils::*;
+
+use crate::zome_entry_trait::*;
 use crate::constants::*;
 use crate::functions::*;
+
 
 impl ZomeEntry for ParcelManifest {
    fn validate(&self, _maybe_package: Option<ValidationPackage>) -> ExternResult<ValidateCallbackResult> {
@@ -19,14 +21,11 @@ impl ZomeEntry for ParcelManifest {
       if self.name.len() < NAME_MIN_LENGTH {
          return invalid(&format!("Name is too small: {} > {}", self.name, NAME_MIN_LENGTH));
       }
-
       /// FIXME: Check each entry exists and is a ParcelChunk
       /// FIXME: Also check total size
-
       /// Done
       Ok(ValidateCallbackResult::Valid)
    }
-
 
    /// Try to retrieve every chunk
    fn post_commit(&self, manifest_eh: &EntryHash) -> ExternResult<()> {
@@ -58,7 +57,6 @@ impl ZomeEntry for ParcelManifest {
       let response = call_self("commit_chunks", pairs)?;
       debug!("commit_chunks() response: {:?}", response);
       assert!(matches!(response, ZomeCallResponse::Ok { .. }));
-
       /// Done
       Ok(())
    }
@@ -81,8 +79,9 @@ fn commit_chunks(chunks: CommitChunksInput) -> ExternResult<()> {
       .entry_hashes(set)
       ;
    let locals = query(query_args)?;
-   let local_ehs: Vec<EntryHash> = locals.iter().map(|x| x.header().entry_hash().unwrap().to_owned()).collect();
-   ///
+   let local_ehs: Vec<EntryHash> = locals.iter()
+      .map(|x| x.header().entry_hash().unwrap().to_owned())
+      .collect();
    for (chunk, maybe_link) in chunks {
       /// Skip local
       let chunk_eh = hash_entry(chunk.clone())?;

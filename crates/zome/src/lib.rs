@@ -5,9 +5,7 @@
 #![allow(unused_attributes)]
 
 extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
+#[macro_use] extern crate strum_macros;
 #[macro_use] extern crate enum_ordinalize;
 
 

@@ -1,10 +1,7 @@
 use hdk::prelude::*;
 use hdk::prelude::element::ElementEntry;
-//use zome_delivery_types::*;
-//use hdk::prelude::countersigning::CounterSigningSessionData;
 
 use zome_utils::*;
-//use crate::entries::pub_enc_key::*;
 use crate::entry_kind::*;
 
 
@@ -17,11 +14,11 @@ fn validate(input: ValidateData) -> ExternResult<ValidateCallbackResult> {
     let entry = input.element.clone().into_inner().1;
     let entry = match entry {
         ElementEntry::Present(e) => e,
-        _ => return Ok(ValidateCallbackResult::Valid), // WARN - Why not invalid?
+        _ => return Ok(ValidateCallbackResult::Valid), // WARN - Why not invalid if no entry found?
     };
     /// Determine where to dispatch according to base
     let result = match entry {
-        Entry::CounterSign(_data, _bytes) => Ok(ValidateCallbackResult::Invalid("Validation failed: Not authorized".into())), //validate_counter_sign_entry(data, bytes, maybe_package),
+        Entry::CounterSign(_data, _bytes) => Ok(ValidateCallbackResult::Invalid("Validation failed: Not authorized".into())),
         Entry::Agent(agent_hash) => validate_agent_entry(agent_hash, input.validation_package),
         Entry::CapClaim(claim) => validate_claim_entry(claim, input.validation_package),
         Entry::CapGrant(grant) => validate_grant_entry(grant, input.validation_package),
@@ -32,7 +29,8 @@ fn validate(input: ValidateData) -> ExternResult<ValidateCallbackResult> {
     result
 }
 
-///
+
+/// Call trait ZomeEntry::validate()
 #[allow(unreachable_patterns)]
 fn validate_app_entry(entry_bytes: AppEntryBytes, input: ValidateData) -> ExternResult<ValidateCallbackResult> {
     trace!("*** validate_app_entry() callback called!");
@@ -50,6 +48,7 @@ fn validate_app_entry(entry_bytes: AppEntryBytes, input: ValidateData) -> Extern
     validation
 }
 
+
 ///
 fn validate_agent_entry(
     _agent_hash: AgentPubKey,
@@ -60,6 +59,7 @@ fn validate_agent_entry(
     // FIXME
     Ok(ValidateCallbackResult::Valid)
 }
+
 
 ///
 fn validate_claim_entry(
@@ -73,6 +73,7 @@ fn validate_claim_entry(
     //Ok(ValidateCallbackResult::Invalid("Validation failed: Not authorized".into()))
 }
 
+
 ///
 fn validate_grant_entry(
     _grant: ZomeCallCapGrant,
@@ -84,17 +85,3 @@ fn validate_grant_entry(
     Ok(ValidateCallbackResult::Valid)
     //Ok(ValidateCallbackResult::Invalid("Validation failed: Not authorized".into()))
 }
-
-
-//
-//fn validate_counter_sign_entry(
-//    _data: Box<CounterSigningSessionData, Global>,
-//    _bytes: AppEntryBytes,
-//    _maybe_validation_package: Option<ValidationPackage>,
-//) -> ExternResult<ValidateCallbackResult>
-//{
-//    trace!("*** validate_counter_sign_entry() called!");
-//    // FIXME validation
-//    //Ok(ValidateCallbackResult::Valid)
-//    Ok(ValidateCallbackResult::Invalid("Validation failed: Not authorized".into()))
-//}

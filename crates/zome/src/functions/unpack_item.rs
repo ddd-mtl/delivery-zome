@@ -1,8 +1,8 @@
 use hdk::prelude::*;
-
 use zome_delivery_types::*;
-use crate::functions::*;
 use zome_utils::*;
+
+use crate::functions::*;
 
 
 ///
@@ -11,7 +11,7 @@ pub fn unpack_item<T>(pending_item: PendingItem, from: AgentPubKey) -> ExternRes
       T: for<'de> serde::Deserialize<'de> + Clone + serde::Serialize + std::fmt::Debug
 {
    debug!("unpack_item() {:?} from {}", pending_item.kind, snip(&from));
-   /// - Decrypt
+   /// Decrypt
    let maybe_decrypted = attempt_decrypt(pending_item.encrypted_data, from.clone())?;
    trace!("try_into() maybe_decrypted: {:?}", maybe_decrypted.is_some());
    if maybe_decrypted.is_none() {

@@ -1,7 +1,8 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
-use crate::utils_parcel::*;
 use zome_utils::*;
+
+use crate::utils_parcel::*;
 
 
 /// Zone Function
@@ -22,19 +23,18 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
          manifest.size
       }
    };
-   let parcel_summary = DeliverySummary {
+   let delivery_summary = DeliverySummary {
       parcel_size: size,
       distribution_strategy: input.strategy,
       parcel_reference: input.parcel_ref,
    };
-
-   debug!("distribute_parcel() parcel_summary: {:?}", parcel_summary);
+   debug!("distribute_parcel() delivery_summary: {:?}", delivery_summary);
    /// Sign summary
-   let summary_signature = sign(agent_info()?.agent_latest_pubkey, parcel_summary.clone())?;
+   let summary_signature = sign(agent_info()?.agent_latest_pubkey, delivery_summary.clone())?;
    /// Create Distribution
    let distribution = Distribution {
       recipients,
-      parcel_summary,
+      delivery_summary: delivery_summary,
       summary_signature,
    };
    /// Commit Distribution

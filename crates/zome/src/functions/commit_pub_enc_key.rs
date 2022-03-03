@@ -1,7 +1,9 @@
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_types::PubEncKey;
+
 use crate::link_kind::*;
+
 
 /// Create public encryption key and broadcast it
 pub fn create_enc_key() -> ExternResult<()> {
@@ -18,6 +20,7 @@ pub fn create_enc_key() -> ExternResult<()> {
    debug!("**** EncKey linked to agent!");
    Ok(())
 }
+
 
 /// Zome function
 #[hdk_extern]
@@ -50,6 +53,7 @@ pub fn get_my_enc_key(_: ()) -> ExternResult<X25519PubKey> {
    get_enc_key(latest_pubkey)
 }
 
+
 #[hdk_extern]
 fn test_encryption(to: AgentPubKey) -> ExternResult<()> {
    /// Get my key
@@ -74,4 +78,3 @@ fn test_encryption(to: AgentPubKey) -> ExternResult<()> {
    /// Done
    Ok(())
 }
-

@@ -1,7 +1,9 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
-use crate::link_kind::*;
 use zome_utils::*;
+
+use crate::link_kind::*;
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CommitPendingItemInput {
@@ -9,10 +11,9 @@ pub struct CommitPendingItemInput {
    pub recipient: AgentPubKey,
 }
 
-
 #[hdk_extern]
 fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash> {
-   debug!("commit_pending_item() START **********");
+   debug!("commit_pending_item() START");
    std::panic::set_hook(Box::new(zome_panic_hook));
    let me = agent_info()?.agent_latest_pubkey;
    /// Commit Pending Item
@@ -40,7 +41,7 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash
       trace!("link1_hh = {}", link1_hh);
    }
    /// Commit Inbox Link
-   let tag = LinkKind::Inbox.concat_hash(&me); //LinkKind::Inbox.as_tag()
+   let tag = LinkKind::Inbox.concat_hash(&me);
    let maybe_link2_hh = create_link(
       EntryHash::from(input.recipient.clone()),
       pending_item_eh,

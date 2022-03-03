@@ -1,12 +1,12 @@
 use hdk::prelude::*;
-//use crate::link_kind::*;
 use zome_delivery_types::*;
+use zome_utils::*;
+
 use crate::send_dm::*;
 use crate::dm_protocol::*;
 use crate::functions::*;
-use zome_utils::*;
 
-//#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+
 pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
 
 /// Internal Zome Function
@@ -24,10 +24,10 @@ fn fetch_chunk(input: FetchChunkInput) -> ExternResult<FetchChunkOutput> {
 
 
 /// Try to retrieve the chunk entry
-pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<FetchChunkOutput> {
+fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<FetchChunkOutput> {
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
-   if notice.parcel_summary.distribution_strategy.can_dht() {
+   if notice.summary.distribution_strategy.can_dht() {
       let pending_chunk_pairs = get_all_inbox_items(Some(ItemKind::ParcelChunk))?;
       /// Check each Inbox link
       for (pending_chunk, link) in &pending_chunk_pairs {
@@ -44,7 +44,7 @@ pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<F
    }
    /// Not found in Inbox
    /// Try via DM second
-   if notice.parcel_summary.distribution_strategy.can_dm() {
+   if notice.summary.distribution_strategy.can_dm() {
       let dm = DeliveryProtocol::ChunkRequest(chunk_eh.clone());
       let response = send_dm(notice.sender, dm)?;
       if let DeliveryProtocol::ChunkResponse(chunk) = response {

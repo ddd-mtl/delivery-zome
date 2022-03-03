@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use zome_utils::*;
-
 use zome_delivery_types::*;
+
 use crate::functions::*;
 use crate::dm_protocol::*;
 use crate::utils_parcel::*;
@@ -13,7 +13,7 @@ pub struct DirectMessage {
 }
 
 /// Start point for any remote call in this zome
-/// WARN: Name of function must match REMOTE_ENDPOINT const value
+/// Name of function must match REMOTE_ENDPOINT const value
 #[hdk_extern]
 pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> {
     debug!("Received DM from: {} ; msg: {}", snip(&dm.from), dm.msg);
@@ -111,7 +111,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) 
         return failure("Request from invalid recipient");
     }
     /// Get Parcel entry hash
-    let parcel_eh = distribution.parcel_summary.parcel_reference.entry_address();
+    let parcel_eh = distribution.delivery_summary.parcel_reference.entry_address();
     debug!("Looking for Parcel: {:?}", parcel_eh);
     /// Get entry
     let maybe_maybe_element = get(parcel_eh, GetOptions::content());
@@ -140,7 +140,7 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> 
     }
     /// Check for duplicate DeliveryNotice
     let notice = maybe_notice.unwrap();
-    let maybe_already = find_notice(notice.parcel_summary.parcel_reference.entry_address())?;
+    let maybe_already = find_notice(notice.summary.parcel_reference.entry_address())?;
     if maybe_already.is_some() {
         return error("Already have this Notice");
     }

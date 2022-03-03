@@ -1,8 +1,10 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
-use crate::zome_entry_trait::*;
 use zome_utils::*;
+
+use crate::zome_entry_trait::*;
 use crate::constants::*;
+
 
 impl ZomeEntry for ParcelChunk {
     ///
@@ -18,7 +20,6 @@ impl ZomeEntry for ParcelChunk {
         /// Done
         Ok(ValidateCallbackResult::Valid)
     }
-
 
     ///
     fn post_commit(&self, chunk_eh: &EntryHash) -> ExternResult<()> {

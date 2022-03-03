@@ -51,6 +51,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    Ok(Some(received_eh))
 }
 
+
 ///Find manifest with that chunk_eh
 pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelManifest>> {
    /// Get all Create ParcelManifest Elements with query
@@ -69,6 +70,7 @@ pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelMan
    Ok(None)
 }
 
+
 /// Find manifest with that chunk_eh
 pub fn find_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
    /// Get all Create DeliveryNotice Elements with query
@@ -79,7 +81,7 @@ pub fn find_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>>
    let notices = query(query_args)?;
    for notice_el in notices {
       let notice: DeliveryNotice = get_typed_from_el(notice_el)?;
-      let summary_eh = notice.parcel_summary.parcel_reference.entry_address();
+      let summary_eh = notice.summary.parcel_reference.entry_address();
       if summary_eh == parcel_eh {
          return Ok(Some(notice));
       }
@@ -87,6 +89,7 @@ pub fn find_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>>
    /// Done
    Ok(None)
 }
+
 
 /// Return all ParcelChunks of a ParcelManifest
 pub fn has_all_chunks(manifest_eh: EntryHash) -> ExternResult<bool> {
@@ -103,4 +106,3 @@ pub fn has_all_chunks(manifest_eh: EntryHash) -> ExternResult<bool> {
    trace!("has_all_chunks: {} == {} ?", chunk_els.len(), len);
    return Ok(chunk_els.len() == len)
 }
-

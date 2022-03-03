@@ -10,9 +10,9 @@ use crate::delivery::*;
 #[derive(Clone, PartialEq)]
 pub struct DeliveryNotice {
    pub distribution_eh: EntryHash,
+   pub summary: DeliverySummary,
    pub sender: AgentPubKey,
    pub sender_summary_signature: Signature,
-   pub parcel_summary: DeliverySummary,
 }
 
 
@@ -40,9 +40,8 @@ pub struct DeliveryReply {
 #[derive(Clone, PartialEq)]
 pub struct Distribution {
    pub recipients: Vec<AgentPubKey>,
-   pub parcel_summary: DeliverySummary,
+   pub delivery_summary: DeliverySummary,
    pub summary_signature: Signature,
-   //pub can_share_between_recipients: bool, // Make recipient list "public" to recipients
 }
 
 
@@ -132,10 +131,10 @@ pub struct PendingItem {
 #[derive(Clone, PartialEq)]
 pub struct ReplyReceived {
    pub distribution_eh: EntryHash,
-   //pub date_of_reply: u64,
    pub recipient: AgentPubKey,
    pub has_accepted: bool,
    pub recipient_signature: Signature,
+   //pub date_of_reply: u64,
 }
 
 

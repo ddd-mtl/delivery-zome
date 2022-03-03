@@ -1,9 +1,11 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
-use crate::zome_entry_trait::*;
 use zome_utils::*;
+
+use crate::zome_entry_trait::*;
 use crate::send_item::*;
 use crate::functions::*;
+
 
 impl ZomeEntry for ParcelReceived {
    ///
@@ -11,8 +13,6 @@ impl ZomeEntry for ParcelReceived {
       debug!("post_commit_ParcelReceived() {:?}", receipt_eh);
       /// Get DeliveryNotice
       let notice: DeliveryNotice = get_typed_from_eh(self.notice_eh.clone())?;
-      /// Sign Item
-      //let signature = sign(agent_info()?.agent_latest_pubkey, reception.clone())?;
       /// Create PendingItem
       let pending_item = pack_reception(
          self.clone(),
@@ -23,8 +23,7 @@ impl ZomeEntry for ParcelReceived {
       let _ = send_item(
          notice.sender,
          pending_item,
-         notice.parcel_summary.distribution_strategy,
-         //signature,
+         notice.summary.distribution_strategy,
       )?;
       /// Done
       Ok(())

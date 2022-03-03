@@ -1,4 +1,3 @@
-
 mod init;
 mod post_commit;
 mod validate_agent;

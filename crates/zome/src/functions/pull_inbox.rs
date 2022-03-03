@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use hdk::prelude::*;
-
+use zome_utils::*;
 use zome_delivery_types::*;
+
 use crate::functions::*;
 use crate::link_kind::*;
-use zome_utils::*;
-use crate::entry_kind::{EntryKind};
+use crate::entry_kind::EntryKind;
 use crate::receive::*;
 use crate::utils_parcel::*;
 
@@ -17,7 +17,6 @@ pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(Pe
    let mut pending_pairs = get_typed_from_links::<PendingItem>(
       my_agent_eh.clone(),
       LinkKind::Inbox.as_tag_opt(),
-      //false,
    )?;
    /// Filter
    if maybe_kind.is_some() {
@@ -115,9 +114,9 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
       debug!("pull_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
          let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
-         unreceived_entries.insert(notice.parcel_summary.parcel_reference.entry_address(), notice.clone());
+         unreceived_entries.insert(notice.summary.parcel_reference.entry_address(), notice.clone());
          /// Get unreceived chunks
-         if let ParcelReference::Manifest(manifest_eh) = notice.parcel_summary.parcel_reference {
+         if let ParcelReference::Manifest(manifest_eh) = notice.summary.parcel_reference {
             let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(manifest_eh);
             /// Manifest might not have been received yet
             if let Ok(manifest) = maybe_manifest {

@@ -9,18 +9,12 @@ fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each header
    for signedHeader in signedHeaderList {
-      //debug!(" - {:?}", signedHeader.header().entry_type());
+      trace!(" - {:?}", signedHeader.header().entry_type());
       let header = signedHeader.header();
-
-      //let hash = signedHeader.as_hash().get_raw_39();
-      //let hash64 = format!("u{}", base64::encode_config(hash, base64::URL_SAFE_NO_PAD));
-      // debug!(" - {} ({:?})", hash64, signedHeader.header().entry_type());
-
       if header.entry_type().is_none() {
          continue;
       }
       let (eh, entry_type) = header.entry_data().unwrap();
-
       match entry_type {
          EntryType::AgentPubKey => {},
          EntryType::CapClaim => {},
@@ -33,7 +27,8 @@ fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
    }
 }
 
-///
+
+/// Call trait ZomeEntry::post_commit()
 fn post_commit_app_entry(eh: &EntryHash, app_type: &AppEntryType) -> ExternResult<()> {
    debug!(" >> post_commit() called for a {:?}", app_type);
    /// Get Entry from local chain
@@ -50,7 +45,6 @@ fn post_commit_app_entry(eh: &EntryHash, app_type: &AppEntryType) -> ExternResul
    if let Entry::App(entry_bytes) = entry {
       let entry_kind = EntryKind::from_index(&app_type.id());
       let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes.clone())?;
-      //let delivery_zome_entry = deserialize_into_zome_entry(&app_type.id(), entry_bytes.clone())?;
       let res = delivery_zome_entry.post_commit(eh);
       if let Err(e) = res {
          error!("app post_commit() failed: {:?}", e);

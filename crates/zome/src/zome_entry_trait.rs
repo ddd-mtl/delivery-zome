@@ -1,16 +1,14 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
 
-
+/// All Entries must implement this trait
 pub trait ZomeEntry {
-   fn validate(&self, _maybe_package: Option<ValidationPackage>) -> ExternResult<ValidateCallbackResult> {
-      Ok(ValidateCallbackResult::Valid)
-   }
+   fn validate(&self, _maybe_package: Option<ValidationPackage>)
+      -> ExternResult<ValidateCallbackResult> { Ok(ValidateCallbackResult::Valid) }
    fn post_commit(&self, _eh: &EntryHash) -> ExternResult<()> { Ok(()) }
-
-   //fn commit();
 }
 
+/// - Default implementations
 impl ZomeEntry for PubEncKey {}
 impl ZomeEntry for PathEntry {}
 impl ZomeEntry for DeliveryNotice {}
