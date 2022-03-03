@@ -6,7 +6,7 @@ use zome_utils::*;
 /// Return EntryHash of DeliveryReply
 #[hdk_extern]
 pub fn respond_to_notice(input: RespondToNoticeInput) -> ExternResult<EntryHash> {
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Make sure its a DeliveryNotification
    let _: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Create DeliveryReply

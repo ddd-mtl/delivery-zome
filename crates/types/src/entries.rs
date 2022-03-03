@@ -1,6 +1,8 @@
+//! All zome entry types
+
 use hdk::prelude::*;
 
-use crate::parcel::*;
+use crate::delivery::*;
 
 
 /// Entry representing a received Manifest
@@ -10,7 +12,7 @@ pub struct DeliveryNotice {
    pub distribution_eh: EntryHash,
    pub sender: AgentPubKey,
    pub sender_summary_signature: Signature,
-   pub parcel_summary: ParcelSummary,
+   pub parcel_summary: DeliverySummary,
 }
 
 
@@ -38,7 +40,7 @@ pub struct DeliveryReply {
 #[derive(Clone, PartialEq)]
 pub struct Distribution {
    pub recipients: Vec<AgentPubKey>,
-   pub parcel_summary: ParcelSummary,
+   pub parcel_summary: DeliverySummary,
    pub summary_signature: Signature,
    //pub can_share_between_recipients: bool, // Make recipient list "public" to recipients
 }

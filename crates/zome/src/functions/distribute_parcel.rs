@@ -8,7 +8,7 @@ use zome_utils::*;
 #[hdk_extern]
 pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash> {
    debug!("distribute_parcel() START: {:?}", input);
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Remove duplicate recipients
    let mut recipients = input.recipients.clone();
    let set: HashSet<_> = recipients.drain(..).collect(); // dedup
@@ -22,10 +22,10 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
          manifest.size
       }
    };
-   let parcel_summary = ParcelSummary {
-      size,
+   let parcel_summary = DeliverySummary {
+      parcel_size: size,
       distribution_strategy: input.strategy,
-      reference: input.parcel_ref,
+      parcel_reference: input.parcel_ref,
    };
 
    debug!("distribute_parcel() parcel_summary: {:?}", parcel_summary);

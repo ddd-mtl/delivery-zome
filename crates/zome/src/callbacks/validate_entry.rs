@@ -12,7 +12,7 @@ use crate::entry_kind::*;
 #[hdk_extern]
 fn validate(input: ValidateData) -> ExternResult<ValidateCallbackResult> {
     trace!("*** `validate()` callback called!: {:?}", input);
-    std::panic::set_hook(Box::new(my_panic_hook));
+    std::panic::set_hook(Box::new(zome_panic_hook));
     /// Get entry
     let entry = input.element.clone().into_inner().1;
     let entry = match entry {
@@ -44,8 +44,9 @@ fn validate_app_entry(entry_bytes: AppEntryBytes, input: ValidateData) -> Extern
         debug!("validation failure: Non App types should have already been filtered out");
         unreachable!("In validate_app_entry")
     };
-    let delivery_entry = deserialize_into_zome_entry(&entry_index, entry_bytes)?;
-    let validation = delivery_entry.validate(input.validation_package);
+    let entry_kind = EntryKind::from_index(&entry_index);
+    let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes)?;
+    let validation = delivery_zome_entry.validate(input.validation_package);
     validation
 }
 

@@ -167,7 +167,7 @@ pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
       DeliveryNoticeQueryField::Sender(sender),
    )?;
    let notices: Vec<DeliveryNotice> = decode_response(response)?;
-   let parcels: Vec<EntryHash> = notices.iter().map(|x| x.parcel_summary.reference.entry_address()).collect();
+   let parcels: Vec<EntryHash> = notices.iter().map(|x| x.parcel_summary.parcel_reference.entry_address()).collect();
    debug!("get_secrets_from() END - secret parcels found: {}", parcels.len());
    Ok(parcels)
 }

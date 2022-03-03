@@ -14,7 +14,7 @@ pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
 #[hdk_extern]
 fn fetch_chunk(input: FetchChunkInput) -> ExternResult<FetchChunkOutput> {
    trace!(" fetch_chunk() {:?}", input);
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Look for Chunk

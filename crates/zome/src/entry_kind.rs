@@ -1,14 +1,13 @@
 use hdk::prelude::*;
 
 use std::str::FromStr;
-
 use std::convert::AsRef;
-use strum_macros::AsRefStr;
+use strum_macros::{AsRefStr, EnumIter};
 use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
 
 use crate::zome_entry_trait::*;
 use zome_delivery_types::*;
+
 
 /// Listing all Entry kinds for this Zome
 #[derive(AsRefStr, EnumIter, Ordinalize, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -41,36 +40,6 @@ impl FromStr for EntryKind {
       Err(())
    }
 }
-
-
-///
-pub fn deserialize_into_zome_entry(entry_index: &EntryDefIndex, entry_bytes: AppEntryBytes) -> ExternResult<Box<dyn ZomeEntry>> {
-   //debug!("*** deserialize_into_zome_entry() called! ({:?})", entry_index);
-   let entry_kind = EntryKind::from_index(&entry_index);
-   entry_kind.into_zome_entry(entry_bytes)
-}
-
-
-/// Try to deserialize entry to given type
-pub fn is_type(entry: Entry, type_candidat: EntryType) -> bool {
-   trace!("*** is_type() called: {:?} == {:?} ?", type_candidat, entry);
-   let res =  match entry {
-      Entry::CounterSign(_data, _bytes) => unreachable!("CounterSign"),
-      Entry::Agent(_agent_hash) => EntryType::AgentPubKey == type_candidat,
-      Entry::CapClaim(_claim) => EntryType::CapClaim == type_candidat,
-      Entry::CapGrant(_grant) => EntryType::CapGrant == type_candidat,
-      Entry::App(entry_bytes) => {
-         let mut res = false;
-         if let EntryType::App(app_entry_type) = type_candidat.clone() {
-            res = deserialize_into_zome_entry(&app_entry_type.id(), entry_bytes).is_ok()
-         }
-         res
-      },
-   };
-   trace!("*** is_type({:?}) result = {}", type_candidat, res);
-   res
-}
-
 
 
 impl EntryKind {

@@ -13,32 +13,28 @@ extern crate strum_macros;
 
 //----------------------------------------------------------------------------------------
 
-//#[cfg(not(target_arch = "wasm32"))]
-//pub mod api_error;
+mod callbacks;
+mod entries;
+mod functions;
 
 mod constants;
-mod send_dm;
 mod dm_protocol;
+mod entry_kind;
+mod link_kind;
 mod receive;
+mod send_dm;
 mod send_item;
-
-pub mod callbacks;
-pub mod functions;
-pub(crate) mod zome_entry_trait;
-pub mod link_kind;
-pub mod utils_parcel;
-pub mod entry_kind;
-mod entries;
+mod signal_protocol;
 mod utils_delivery;
-pub mod signal_protocol;
-
+mod utils_parcel;
+mod zome_entry_trait;
 
 //----------------------------------------------------------------------------------------
 
 pub use constants::*;
-pub use send_dm::*;
 pub use dm_protocol::*;
 pub use receive::*;
+pub use send_dm::*;
 pub use send_item::*;
-pub use utils_delivery::*;
 pub use signal_protocol::*;
+pub use utils_delivery::*;

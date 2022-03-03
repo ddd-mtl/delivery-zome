@@ -33,7 +33,7 @@ pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(Pe
 #[hdk_extern]
 pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    debug!("pull_inbox() START");
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all inbox items
    let pending_pairs = get_all_inbox_items(None)?;
    /// Convert Each Item
@@ -115,9 +115,9 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
       debug!("pull_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
          let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
-         unreceived_entries.insert(notice.parcel_summary.reference.entry_address(), notice.clone());
+         unreceived_entries.insert(notice.parcel_summary.parcel_reference.entry_address(), notice.clone());
          /// Get unreceived chunks
-         if let ParcelReference::Manifest(manifest_eh) = notice.parcel_summary.reference {
+         if let ParcelReference::Manifest(manifest_eh) = notice.parcel_summary.parcel_reference {
             let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(manifest_eh);
             /// Manifest might not have been received yet
             if let Ok(manifest) = maybe_manifest {

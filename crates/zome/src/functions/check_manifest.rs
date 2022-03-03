@@ -13,7 +13,7 @@ use crate::entry_kind::*;
 #[hdk_extern]
 pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    trace!("check_manifest() START {}", chunk_eh);
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Find manifest with that chunk_eh
    let maybe_manifest = find_ParcelManifest(chunk_eh)?;
    if maybe_manifest.is_none() {
@@ -79,7 +79,7 @@ pub fn find_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>>
    let notices = query(query_args)?;
    for notice_el in notices {
       let notice: DeliveryNotice = get_typed_from_el(notice_el)?;
-      let summary_eh = notice.parcel_summary.reference.entry_address();
+      let summary_eh = notice.parcel_summary.parcel_reference.entry_address();
       if summary_eh == parcel_eh {
          return Ok(Some(notice));
       }

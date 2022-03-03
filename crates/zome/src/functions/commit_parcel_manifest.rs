@@ -9,7 +9,7 @@ use zome_utils::*;
 #[hdk_extern]
 pub fn commit_parcel_manifest(input: ParcelManifest) -> ExternResult<EntryHash> {
    trace!(" commit_parcel_manifest({}) -  {}", input.custum_entry_type, input.name);
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Commit entry
    let manifest_eh = hash_entry(input.clone())?;
    let _ = create_entry(&input)?;

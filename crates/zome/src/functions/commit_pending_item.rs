@@ -13,7 +13,7 @@ pub struct CommitPendingItemInput {
 #[hdk_extern]
 fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash> {
    debug!("commit_pending_item() START **********");
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    let me = agent_info()?.agent_latest_pubkey;
    /// Commit Pending Item
    let pending_item_eh = hash_entry(&input.item)?;

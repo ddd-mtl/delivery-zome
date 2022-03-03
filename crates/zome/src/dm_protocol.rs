@@ -20,12 +20,11 @@ pub enum DeliveryProtocol {
     Failure(String),
     Success,
     Item(PendingItem),
-    /// Distribution EntryHash of the Parcel
     ParcelRequest(EntryHash),
     ParcelResponse(Entry),
     ChunkRequest(EntryHash),
     ChunkResponse(ParcelChunk),
-    UnknownEntry,
+    //UnknownEntry, // TODO implement
     Ping,
     Pong,
 }
@@ -40,7 +39,7 @@ impl fmt::Display for DeliveryProtocol {
             DeliveryProtocol::ParcelResponse(_entry) => format!("ParcelResponse"),
             DeliveryProtocol::ChunkRequest(eh) => format!("ChunkRequest: {}", eh),
             DeliveryProtocol::ChunkResponse(_chunk) => format!("ChunkResponse"),
-            DeliveryProtocol::UnknownEntry => "UnknownEntry".to_owned(),
+            // DeliveryProtocol::UnknownEntry => "UnknownEntry".to_owned(),
             DeliveryProtocol::Ping => "Ping".to_owned(),
             DeliveryProtocol::Pong => "Pong".to_owned(),
         };
@@ -57,10 +56,3 @@ impl From<ExternResult<()>> for DeliveryProtocol {
         }
     }
 }
-
-
-// #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, SerializedBytes)]
-// pub struct AckMessage {
-//     pub outmail_eh: EntryHash,
-//     pub ack_signature: Signature,
-// }

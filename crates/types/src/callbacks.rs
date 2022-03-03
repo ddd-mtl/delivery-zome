@@ -1,4 +1,8 @@
+//! Extra callbacks that will be called by the delivery zome
+
 use hdk::prelude::*;
+
+pub const COMMIT_PARCEL_CALLBACK_NAME: &'static str = "commit_parcel";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CommitParcelInput {
@@ -7,14 +11,13 @@ pub struct CommitParcelInput {
    pub maybe_link_hh: Option<HeaderHash>,
 }
 
-/// Zome Function Callback required by Delivery-zome
+/// Zome Function Callback required by delivery-zome
 /// Should not be called directly. Only via remote call to self
-/// Name function must match COMMIT_PARCEL_CALLBACK global cosnt
+/// Name function must match COMMIT_PARCEL_CALLBACK_NAME global const
 #[hdk_extern]
 fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
    debug!("commit_parcel() entry_def_id = {:?} | {}", input.entry_def_id, zome_info()?.name);
    /// Create CreateInput
-   //let parcel_eh = hash_entry(input.entry.clone())?;
    let create_input = CreateInput::new(
       input.entry_def_id,
       input.entry,

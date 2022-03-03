@@ -24,9 +24,9 @@ pub enum LinkKind {
    Pendings,
 }
 
+
 /// Public
 impl LinkKind {
-
    /// Convert to LinkTag
    pub fn as_tag(&self) -> LinkTag {
       LinkTag::new(self.as_ref().as_bytes().clone())
@@ -37,12 +37,12 @@ impl LinkKind {
       Some(self.as_tag())
    }
 
-   ///
+   /// Get Link's base type
    pub fn allowed_base_type(&self) -> EntryType {
       return self.prop_to_type("BaseType");
    }
 
-   ///
+   /// Get Link's target type
    pub fn allowed_target_type(&self) -> EntryType {
       return self.prop_to_type("TargetType");
    }
@@ -82,7 +82,7 @@ impl LinkKind {
    }
 }
 
-/// Concat
+/// Concat data to link tag
 impl LinkKind {
    /// Create LinkTag with concatenated raw data
    pub fn concat(&self, suffix: &[u8]) -> LinkTag {
@@ -145,4 +145,28 @@ impl LinkKind {
    //    }
    //    Ok(substrs[1].to_string())
    // }
+}
+
+
+
+/// Try to deserialize entry to given type
+fn is_type(entry: Entry, type_candidat: EntryType) -> bool {
+   trace!("*** is_type() called: {:?} == {:?} ?", type_candidat, entry);
+   let res =  match entry {
+      Entry::CounterSign(_data, _bytes) => unreachable!("CounterSign"),
+      Entry::Agent(_agent_hash) => EntryType::AgentPubKey == type_candidat,
+      Entry::CapClaim(_claim) => EntryType::CapClaim == type_candidat,
+      Entry::CapGrant(_grant) => EntryType::CapGrant == type_candidat,
+      Entry::App(entry_bytes) => {
+         let mut res = false;
+         if let EntryType::App(app_entry_type) = type_candidat.clone() {
+            let entry_kind = EntryKind::from_index(&app_entry_type.id());
+            let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes);
+            res = delivery_zome_entry.is_ok();
+         }
+         res
+      },
+   };
+   trace!("*** is_type({:?}) result = {}", type_candidat, res);
+   res
 }

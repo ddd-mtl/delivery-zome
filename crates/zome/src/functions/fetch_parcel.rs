@@ -10,7 +10,7 @@ use zome_utils::*;
 /// Zome Function Callback required by Delivery-zome
 #[hdk_extern]
 pub(crate) fn commit_ParcelReceived(input: ParcelReceived) -> ExternResult<EntryHash> {
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    let eh = hash_entry(input.clone())?;
    let _hh = create_entry(input)?;
    return Ok(eh);
@@ -23,7 +23,7 @@ pub(crate) fn commit_ParcelReceived(input: ParcelReceived) -> ExternResult<Entry
 #[hdk_extern]
 fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    debug!("fetch_parcel() {:?}", notice_eh);
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
    /// Look for Parcel
@@ -44,7 +44,7 @@ fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    debug!("fetch_parcel() parcel_hh = {:?}", parcel_hh);
    /// Create ParcelReceived if its an AppEntry
    /// (for a Manifest, we have to wait for all chunks to be received)
-   if let ParcelReference::AppEntry(..) = notice.parcel_summary.reference {
+   if let ParcelReference::AppEntry(..) = notice.parcel_summary.parcel_reference {
       let received = ParcelReceived {
          notice_eh,
          parcel_eh: parcel_eh.clone(),
@@ -60,7 +60,7 @@ fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
 
 /// Try to retrieve the parcel entry
 pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Option<Link>)>> {
-   debug!("pull_parcel() {:?}", notice.parcel_summary.reference.entry_address());
+   debug!("pull_parcel() {:?}", notice.parcel_summary.parcel_reference.entry_address());
    /// Request Parcel
    /// Check Inbox first
    if notice.parcel_summary.distribution_strategy.can_dht() {
@@ -86,7 +86,7 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Option
       if let DeliveryProtocol::ParcelResponse(entry) = response {
          /// Check entry
          let received_eh = hash_entry(entry.clone())?;
-         if received_eh != notice.parcel_summary.reference.entry_address() {
+         if received_eh != notice.parcel_summary.parcel_reference.entry_address() {
             warn!("The entry the sender sent does not match notice's Parcel EntryHash");
             return Ok(None);
          }

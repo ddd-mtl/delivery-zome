@@ -1,6 +1,8 @@
+//! All Zome function input types
+
 use hdk::prelude::*;
 
-use crate::parcel::*;
+use crate::delivery::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DistributeParcelInput {

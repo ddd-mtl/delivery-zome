@@ -23,7 +23,7 @@ pub fn create_enc_key() -> ExternResult<()> {
 #[hdk_extern]
 pub fn get_enc_key(from: AgentPubKey) -> ExternResult<X25519PubKey> {
    trace!("*** get_enc_key() CALLED by {}()", call_info()?.function_name);
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get All Handle links on agent ; should have only one
    let key_links = get_links(from.into(), LinkKind::EncKey.as_tag_opt())
       .expect("No reason for this to fail");

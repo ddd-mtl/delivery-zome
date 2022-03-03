@@ -6,7 +6,7 @@ use crate::entry_kind::*;
 #[hdk_extern(infallible)]
 fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
    debug!("post_commit() called for {} entries", signedHeaderList.len());
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each header
    for signedHeader in signedHeaderList {
       //debug!(" - {:?}", signedHeader.header().entry_type());
@@ -48,7 +48,9 @@ fn post_commit_app_entry(eh: &EntryHash, app_type: &AppEntryType) -> ExternResul
    let entry = elements[0].entry().as_option().unwrap();
    /// Deserialize it and call its post_commit()
    if let Entry::App(entry_bytes) = entry {
-      let delivery_zome_entry = deserialize_into_zome_entry(&app_type.id(), entry_bytes.clone())?;
+      let entry_kind = EntryKind::from_index(&app_type.id());
+      let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes.clone())?;
+      //let delivery_zome_entry = deserialize_into_zome_entry(&app_type.id(), entry_bytes.clone())?;
       let res = delivery_zome_entry.post_commit(eh);
       if let Err(e) = res {
          error!("app post_commit() failed: {:?}", e);

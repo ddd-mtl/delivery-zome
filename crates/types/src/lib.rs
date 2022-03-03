@@ -6,27 +6,25 @@
 
 
 mod entries;
-mod parcel;
 mod inputs;
 mod delivery;
-mod commit_parcel;
+mod callbacks;
 
 
 pub use entries::*;
 pub use inputs::*;
-pub use parcel::*;
 pub use delivery::*;
-pub use commit_parcel::*;
+pub use callbacks::*;
 
+
+//----------------------------------------------------------------------------------------
+// API
 
 pub const DELIVERY_ZOME_NAME: &'static str = "delivery";
-pub const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
-
-
-
-pub const COMMIT_PARCEL_CALLBACK: &'static str = "commit_parcel";
 
 use hdk::prelude::*;
+
+/// Helper function for calling the delivery-zome via inter-zome call
 pub fn call_delivery_zome<T>(fn_name: &str, payload: T) -> ExternResult<ZomeCallResponse>
    where
       T: serde::Serialize + std::fmt::Debug,

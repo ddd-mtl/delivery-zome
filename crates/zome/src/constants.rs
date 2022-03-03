@@ -11,7 +11,3 @@ pub const NAME_MIN_LENGTH: usize = 2;
 
 /// Listing all Holochain Path used in this DNA
 pub const DIRECTORY_PATH: &'static str = "directory";
-
-/// PSEUDO CONDITIONAL COMPILATION FOR DEBUGGING / TESTING
-pub const CAN_DM: bool = true;
-

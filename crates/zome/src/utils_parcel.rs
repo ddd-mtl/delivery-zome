@@ -8,15 +8,15 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: 
     -> ExternResult<HeaderHash>
 {
     let input = CommitParcelInput {
-        entry_def_id: notice.parcel_summary.reference.entry_def_id(),
+        entry_def_id: notice.parcel_summary.parcel_reference.entry_def_id(),
         entry,
         maybe_link_hh,
     };
-    debug!("call_commit_parcel() zome_name = {:?}", notice.parcel_summary.reference.entry_zome_name());
+    debug!("call_commit_parcel() zome_name = {:?}", notice.parcel_summary.parcel_reference.entry_zome_name());
     let response = call_remote(
         agent_info()?.agent_latest_pubkey,
-        notice.parcel_summary.reference.entry_zome_name(),
-        COMMIT_PARCEL_CALLBACK.into(),
+        notice.parcel_summary.parcel_reference.entry_zome_name(),
+        COMMIT_PARCEL_CALLBACK_NAME.into(),
         None,
         input.clone(),
     )?;

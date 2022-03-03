@@ -11,7 +11,7 @@ use zome_utils::*;
 #[hdk_extern]
 pub fn commit_parcel_chunk(data: String) -> ExternResult<EntryHash> {
    trace!(" commit_parcel_chunk() {} bytes", data.len());
-   std::panic::set_hook(Box::new(my_panic_hook));
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Check size
    if data.is_empty() {
       return error("Data string is empty");
