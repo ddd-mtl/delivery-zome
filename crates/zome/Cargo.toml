@@ -13,43 +13,13 @@ name = "zome_delivery"
 crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
-shrinkwraprs = "=0.3.0"
-chrono = "=0.4.19"
 serde = { version = "1.0", default-features = false }
-strum = "=0.24"
-strum_macros = "=0.24"
-derive_more = "=0.99.16"
-bincode = "=1.3.3"
-base64 = {version = "0.13"}
-enum-ordinalize =  "3.1.10"
+strum = "0.24"
+strum_macros = "0.24"
+enum-ordinalize =  "3.1"
+bincode = "1.3"
+
+hdk = { version = "0.0.122", default-features = false }
 
 zome_utils = { path = "../zome-utils" }
 zome_delivery_types = { path = "../types" }
-
-
-# online
-#hc_utils = { git = "https://github.com/holochain/hc-utils.git", rev = "dbca5cb6fee45fa53e0f330add49a26421f9e035", default-features = false }
-
-hdk = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "hdk", default-features = false }
-holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holo_hash", default-features = false }
-
-
-# local
-#hdk = { path = "../../../holochain-develop/crates/hdk" }
-#holo_hash = { path = "../../../holochain-develop/crates/holo_hash" }
-
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-thiserror = "1.0.24"
-
-# online
-holochain_serialized_bytes = "=0.0.51"
-holochain = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holochain", default-features = false, features = ["only_check_wasms"] }
-holochain_util = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holochain_util", default-features = false }
-holochain_conductor_api = { git = "https://github.com/holochain/holochain.git", rev = "296a08dc25e799c6fb3da3eecafc457179d9bd59", package = "holochain_conductor_api", default-features = false }
-
-# local
-#holochain = { path = "../../../holochain-develop/crates/holochain" }
-#holochain_util = { path = "../../../holochain-develop/crates/holochain_util" }
-#holochain_conductor_api = { path = "../../../holochain-develop/crates/holochain_conductor_api" }
-

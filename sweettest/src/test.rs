@@ -1,11 +1,10 @@
 use std::time::SystemTime;
-use holochain::sweettest::*;
-use holochain::conductor::{
-   ConductorHandle,
-};
 use maplit::hashset;
+
+use holochain::sweettest::*;
+use holochain::conductor::ConductorHandle;
+
 use zome_delivery_types::DistributionStrategy;
-//use holo_hash::*;
 
 use crate::setup::*;
 use crate::test_delivery::*;

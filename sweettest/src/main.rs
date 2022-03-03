@@ -7,7 +7,7 @@ pub mod test_delivery;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod setup;
 #[cfg(not(target_arch = "wasm32"))]
-mod print;
+pub mod print;
 
 
 #[cfg(not(target_arch = "wasm32"))]

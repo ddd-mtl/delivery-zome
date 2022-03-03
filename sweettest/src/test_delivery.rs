@@ -1,6 +1,3 @@
-// use delivery::{
-//    entries::*,
-// };
 
 use secret::*;
 use holo_hash::*;
