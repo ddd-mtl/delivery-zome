@@ -20,6 +20,7 @@ Features:
  - Spliting / Chunking large parcels into many small ones
  - A default Chunk entry is provided for arbitrary data
  - Robust multi-step and failure recovery (with post_commit())
+ - (TODO) auto-reception with Scheduler
  - (TODO) Acknowledgement system?
 
 

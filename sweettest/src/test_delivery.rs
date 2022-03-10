@@ -4,8 +4,9 @@ use holo_hash::*;
 use tokio::time::{sleep, Duration};
 use zome_delivery_types::DistributionStrategy;
 
-use crate::setup::*;
-use crate::print::*;
+use sweettest_utils::*;
+use crate::DNA_FILEPATH;
+
 
 //
 // ///
@@ -79,7 +80,7 @@ use crate::print::*;
 ///
 pub async fn test_delivery(strategy: DistributionStrategy) {
    /// Setup
-   let (conductors, agents, apps) = setup_2_conductors().await;
+   let (conductors, agents, apps) = setup_2_conductors(DNA_FILEPATH).await;
    let cells = apps.cells_flattened();
    let all_entry_names = get_dna_entry_names(&conductors[0], &cells[0]).await;
 
@@ -156,7 +157,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
 ///
 pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    /// Setup
-   let (conductors, agents, apps) = setup_2_conductors().await;
+   let (conductors, agents, apps) = setup_2_conductors(DNA_FILEPATH).await;
    let cells = apps.cells_flattened();
    let all_entry_names = get_dna_entry_names(&conductors[0], &cells[0]).await;
 

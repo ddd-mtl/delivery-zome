@@ -6,9 +6,10 @@ use holochain::conductor::ConductorHandle;
 
 use zome_delivery_types::DistributionStrategy;
 
-use crate::setup::*;
+use sweettest_utils::*;
+
 use crate::test_delivery::*;
-use crate::print::*;
+use crate::DNA_FILEPATH;
 
 ///
 pub async fn test(arg: String) {
@@ -100,7 +101,7 @@ pub async fn test_list_apps() {
 
 ///
 pub async fn test_pub_enc_key() {
-   let (conductor, alex, cell1, entry_names) = setup_1_conductor().await;
+   let (conductor, alex, cell1, entry_names) = setup_1_conductor(DNA_FILEPATH).await;
 
    println!("Calling get_my_enc_key()");
    let enc_key: holochain_zome_types::X25519PubKey = conductor.call(&cell1.zome("delivery"), "get_my_enc_key", ()).await;

@@ -4,11 +4,9 @@
 pub mod test;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod test_delivery;
-#[cfg(not(target_arch = "wasm32"))]
-pub mod setup;
-#[cfg(not(target_arch = "wasm32"))]
-pub mod print;
 
+
+pub const DNA_FILEPATH: &str = "./secret.dna";
 
 #[cfg(not(target_arch = "wasm32"))]
 #[tokio::main(flavor = "multi_thread")]
