@@ -5,8 +5,7 @@ use tokio::time::{sleep, Duration};
 use zome_delivery_types::DistributionStrategy;
 
 use sweettest_utils::*;
-use crate::DNA_FILEPATH;
-
+use crate::setup::*;
 
 //
 // ///
@@ -80,9 +79,8 @@ use crate::DNA_FILEPATH;
 ///
 pub async fn test_delivery(strategy: DistributionStrategy) {
    /// Setup
-   let (conductors, agents, apps) = setup_2_conductors(DNA_FILEPATH).await;
+   let (conductors, agents, apps) = setup_2_conductors().await;
    let cells = apps.cells_flattened();
-   let all_entry_names = get_dna_entry_names(&conductors[0], &cells[0]).await;
 
    /// A Store secret
    let secret_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "create_secret", "I like bananas").await;
@@ -92,7 +90,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    println!("secret_msg: {}", secret_msg);
 
    sleep(Duration::from_millis(200)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
    sleep(Duration::from_millis(200)).await;
 
    /// A sends secret to B
@@ -104,7 +102,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    let _distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
 
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
    sleep(Duration::from_millis(2 * 1000)).await;
 
    /// B checks if Notice received
@@ -117,14 +115,14 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    /// B accepts A's secret
    let _eh: EntryHash = conductors[1].call(&cells[1].zome("secret"), "accept_secret", waiting_parcels[0].clone()).await;
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+   print_chain(&conductors[1], &agents[1], &cells[1]).await;
 
    /// Have A receive reply and send Parcel
    sleep(Duration::from_millis(2 * 1000)).await;
    println!("\n A receive reply; pull_inbox()...");
    let _: Vec<HeaderHash> = conductors[0].call(&cells[0].zome("delivery"), "pull_inbox", ()).await;
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
 
    /// B gets secret
    if strategy.can_dht() {
@@ -136,7 +134,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
          .expect("Should have received 1 parcel");
    }
    //sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+   print_chain(&conductors[1], &agents[1], &cells[1]).await;
 
    // let secret: String = try_zome_call_fallible(&conductors[1], &cells[1], "secret", "get_secret", waiting_parcels[0].clone())
    //    .await
@@ -144,23 +142,21 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    println!("\n B calls get_secret()...");
    let secret: String  = conductors[1].call(&cells[1].zome("secret"), "get_secret", waiting_parcels[0].clone()).await;
    println!("\n secret received: {:?}\n", secret);
-   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+   print_chain(&conductors[1], &agents[1], &cells[1]).await;
 
    /// Check A's chain for a DeliveryReceipt
    sleep(Duration::from_millis(2 * 1000)).await;
    let _: Vec<HeaderHash> = conductors[0].call(&cells[0].zome("delivery"), "pull_inbox", ()).await;
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
 }
 
 
 ///
 pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    /// Setup
-   let (conductors, agents, apps) = setup_2_conductors(DNA_FILEPATH).await;
+   let (conductors, agents, apps) = setup_2_conductors().await;
    let cells = apps.cells_flattened();
-   let all_entry_names = get_dna_entry_names(&conductors[0], &cells[0]).await;
-
 
    /// A Store secret
    let manifest_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "create_split_secret", "I like bananas").await;
@@ -170,7 +166,7 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    println!("secret_msg: {}", secret_msg);
 
    sleep(Duration::from_millis(200)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
    sleep(Duration::from_millis(200)).await;
 
    /// A sends secret to B
@@ -182,7 +178,7 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    let _distribution_eh: EntryHash = conductors[0].call(&cells[0].zome("secret"), "send_secret", input).await;
 
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
    sleep(Duration::from_millis(200)).await;
 
    /// B checks if request received
@@ -195,14 +191,14 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    /// B accepts A's secret
    let _eh: EntryHash = conductors[1].call(&cells[1].zome("secret"), "accept_secret", waiting_parcels[0].clone()).await;
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+   print_chain(&conductors[1], &agents[1], &cells[1]).await;
 
    /// Have A receive reply and send Parcel
    sleep(Duration::from_millis(2 * 1000)).await;
    println!("\n A receive reply; pull_inbox()...");
    let _: Vec<HeaderHash> = conductors[0].call(&cells[0].zome("delivery"), "pull_inbox", ()).await;
    sleep(Duration::from_millis(20 * 1000)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
 
    /// B gets secret
    if strategy.can_dht() {
@@ -214,19 +210,19 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
          .expect("Should have received 1 parcel");
    }
    sleep(Duration::from_millis(5 * 1000)).await;
-   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+   print_chain(&conductors[1], &agents[1], &cells[1]).await;
 
    println!("\n B calls get_secret()...");
    let secret: String = conductors[1].call(&cells[1].zome("secret"), "get_secret", waiting_parcels[0].clone()).await;
    println!("\n secret received: {:?}\n", secret);
-   print_chain(&conductors[1], &agents[1], &cells[1], all_entry_names.clone()).await;
+   print_chain(&conductors[1], &agents[1], &cells[1]).await;
 
 
    /// Check A's chain for a DeliveryReceipt
    sleep(Duration::from_millis(2 * 1000)).await;
    let _: Vec<HeaderHash> = conductors[0].call(&cells[0].zome("delivery"), "pull_inbox", ()).await;
    sleep(Duration::from_millis(2 * 1000)).await;
-   print_chain(&conductors[0], &agents[0], &cells[0], all_entry_names.clone()).await;
+   print_chain(&conductors[0], &agents[0], &cells[0]).await;
 }
 
 

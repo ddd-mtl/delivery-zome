@@ -4,9 +4,12 @@
 pub mod test;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod test_delivery;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod setup;
 
 
 pub const DNA_FILEPATH: &str = "./secret.dna";
+
 
 #[cfg(not(target_arch = "wasm32"))]
 #[tokio::main(flavor = "multi_thread")]
@@ -24,3 +27,4 @@ async fn main() {
 /// Dummy main for wasm32 target
 #[cfg(target_arch = "wasm32")]
 fn main() { }
+
