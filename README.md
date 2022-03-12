@@ -43,6 +43,14 @@ get() the entry
 `query_drop_off()` Ask drop-off agent if it has a parcel for me.
 `take_from_drop_off()` Request drop-off agent to hand over parcel.
 
+### TODO
+
+- Investigate double send of entry (should we use `receive_entry()`)
+- Test simultaneous sends and receives of parcels
+- Test big file transfer (> 16 MiB)
+- Test failure recovery
+- Add signaling
+
 ## Building
 
 To rebuild the DNA for holochain:
