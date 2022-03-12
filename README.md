@@ -50,6 +50,8 @@ get() the entry
 - Test big file transfer (> 16 MiB)
 - Test failure recovery
 - Add signaling
+- Add 'determine state' zome functions
+- Cleanup code base
 
 ## Building
 
