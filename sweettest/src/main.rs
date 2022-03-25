@@ -6,6 +6,10 @@ pub mod test;
 pub mod test_delivery;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod setup;
+#[cfg(not(target_arch = "wasm32"))]
+mod test_multiple;
+#[cfg(not(target_arch = "wasm32"))]
+mod secret_agent;
 
 
 pub const DNA_FILEPATH: &str = "./secret.dna";

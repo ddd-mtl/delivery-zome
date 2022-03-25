@@ -6,7 +6,6 @@ use sweettest_utils::*;
 
 use crate::DNA_FILEPATH;
 
-
 ///
 pub async fn setup_2_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, SweetAppBatch) {
    let (conductors, agents, apps) = setup_conductors(DNA_FILEPATH, 2).await;

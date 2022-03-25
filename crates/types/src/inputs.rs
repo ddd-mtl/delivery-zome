@@ -38,3 +38,10 @@ pub enum ParcelReceivedQueryField {
    Notice(EntryHash),
    Parcel(EntryHash)
 }
+
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum NoticeReceivedQueryField {
+   Recipient(AgentPubKey),
+   Distribution(EntryHash)
+}

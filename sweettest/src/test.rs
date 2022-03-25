@@ -10,6 +10,8 @@ use sweettest_utils::*;
 
 use crate::test_delivery::*;
 use crate::DNA_FILEPATH;
+use crate::test_multiple::test_multiple_delivery;
+
 
 ///
 pub async fn test(arg: String) {
@@ -23,10 +25,10 @@ pub async fn test(arg: String) {
    if arg == "all" || arg == "key" {
       test_pub_enc_key().await;
    }
-   // // Deliver to self
-   // if arg == "all" || arg == "self" {
-   //    test_delivery_self().await;
-   // }
+   // Deliver to self
+   if arg == "all" || arg == "self" {
+      test_delivery_self().await;
+   }
    // Deliver via DM
    if arg == "all" || arg == "dm" {
       test_delivery(DistributionStrategy::DM_ONLY).await;
@@ -42,6 +44,10 @@ pub async fn test(arg: String) {
    // Deliver via DHT
    if arg == "all" || arg == "dht_manifest" {
       test_delivery_manifest(DistributionStrategy::DHT_ONLY).await;
+   }
+   // Deliver many via DM
+   if arg == "all" || arg == "multi" {
+      test_multiple_delivery(DistributionStrategy::DM_ONLY).await;
    }
 
    // Print elapsed
