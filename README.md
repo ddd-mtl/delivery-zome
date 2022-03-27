@@ -21,6 +21,7 @@ Features:
  - A default Chunk entry is provided for arbitrary data
  - Robust multi-step and failure recovery (with post_commit())
  - (TODO) auto-reception with Scheduler
+ - (TODO) auto Chunk ordering
  - (TODO) Acknowledgement system?
 
 
@@ -45,7 +46,6 @@ get() the entry
 
 ### TODO
 
-- Chunk order
 - Investigate double send of entry (should we use `receive_entry()`)
 - Test simultaneous sends and receives of parcels
 - Test big file transfer (> 16 MiB)

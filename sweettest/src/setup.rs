@@ -3,8 +3,45 @@ use holochain::sweettest::*;
 use holo_hash::*;
 use tokio::time::{sleep, Duration};
 use sweettest_utils::*;
+use zome_delivery_types::DistributionStrategy;
 
 use crate::DNA_FILEPATH;
+use crate::secret_agent::SecretAgent;
+
+
+///
+pub async fn setup_2_secret_agents(strategy: DistributionStrategy) -> (SecretAgent, SecretAgent) {
+   let (conductors, mut agents, apps) = setup_2_conductors().await;
+   let mut apps = apps.into_inner();
+   let mut conductor_vec = conductors.into_inner();
+
+   let mut alex = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap());
+   let mut billy = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap());
+
+   alex.set_strategy(strategy.clone());
+   billy.set_strategy(strategy.clone());
+
+   return (alex, billy);
+}
+
+
+pub async fn setup_3_secret_agents(strategy: DistributionStrategy) -> (SecretAgent, SecretAgent, SecretAgent) {
+   let (conductors, mut agents, apps) = setup_2_conductors().await;
+   let mut apps = apps.into_inner();
+   let mut conductor_vec = conductors.into_inner();
+
+   let mut alex = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap());
+   let mut billy = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap());
+   let mut camille = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap());
+
+
+   alex.set_strategy(strategy.clone());
+   billy.set_strategy(strategy.clone());
+   camille.set_strategy(strategy.clone());
+
+   return (alex, billy, camille);
+}
+
 
 ///
 pub async fn setup_2_conductors() -> (SweetConductorBatch, Vec<AgentPubKey>, SweetAppBatch) {

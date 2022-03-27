@@ -8,17 +8,7 @@ use crate::setup::*;
 ///
 pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    /// Setup
-   let (conductors, agents, apps) = setup_2_conductors().await;
-   let cells = apps.cells_flattened();
-
-   let mut alex = SecretAgent::new(&conductors[0], agents[0].clone(), cells[0]);
-   let mut billy = SecretAgent::new(&conductors[1], agents[1].clone(), cells[1]);
-   let mut camille = SecretAgent::new(&conductors[2], agents[2].clone(), cells[2]);
-
-
-   alex.set_strategy(strategy.clone());
-   billy.set_strategy(strategy.clone());
-   camille.set_strategy(strategy.clone());
+   let (alex, billy, camille) = setup_3_secret_agents(strategy.clone()).await;
 
    /// A Store secrets
    let secret1_eh: EntryHash = alex.call_zome("create_secret", "I like bananas").await;
@@ -37,7 +27,7 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    alex.print_chain(200).await;
 
    /// B checks if Notice received
-   let waiting_parcels: Vec<EntryHash> = billy.try_call_zome("secret","get_secrets_from", agents[0].clone(),
+   let waiting_parcels: Vec<EntryHash> = billy.try_call_zome("secret","get_secrets_from", alex.key(),
                                                        |result: &Vec<EntryHash>| {result.len() == 2})
       .await
       .expect("Should have a waiting parcel");
@@ -83,7 +73,7 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
 
 
    /// B checks if Notice received
-   let waiting_parcels: Vec<EntryHash> = billy.try_call_zome("secret","get_secrets_from", agents[0].clone(),
+   let waiting_parcels: Vec<EntryHash> = billy.try_call_zome("secret","get_secrets_from", alex.key(),
                                                              |result: &Vec<EntryHash>| {result.len() == 1})
                                               .await
                                               .expect("Should have a waiting parcel");

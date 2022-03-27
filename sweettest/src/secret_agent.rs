@@ -9,19 +9,19 @@ use sweettest_utils::*;
 use secret::*;
 
 
-pub struct SecretAgent<'a> {
+pub struct SecretAgent {
    agent: AgentPubKey,
-   cell: &'a SweetCell,
-   conductor: &'a SweetConductor,
+   cell: SweetCell,
+   conductor: SweetConductor,
    strategy: DistributionStrategy,
    signal_stack: Vec<AppSignal>,
 }
 
 
-impl<'a> SecretAgent<'a> {
+impl SecretAgent {
 
    ///
-   pub fn new(conductor: &'a SweetConductor, agent: AgentPubKey, cell:  &'a SweetCell) -> Self {
+   pub fn new(conductor: SweetConductor, agent: AgentPubKey, cell: SweetCell) -> Self {
 
       // // Make the channel buffer big enough to not block
       // let (resp, mut recv) = tokio::sync::mpsc::channel(NUM_CONDUCTORS * NUM_MESSAGES * 2);
@@ -80,7 +80,7 @@ impl<'a> SecretAgent<'a> {
    ///
    pub async fn print_chain(&self, millis: u64) {
       sleep(Duration::from_millis(millis)).await;
-      print_chain(self.conductor, &self.agent, self.cell).await;
+      print_chain(&self.conductor, &self.agent, &self.cell).await;
    }
 
    ///
