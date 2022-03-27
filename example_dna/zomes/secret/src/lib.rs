@@ -155,6 +155,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
 
 
 /// Zome Function
+/// Return list of parcels' EntryHash
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
    debug!("get_secrets_from() START - pull_inbox");
@@ -175,7 +176,22 @@ pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
 
 /// Zome Function
 #[hdk_extern]
+pub fn refuse_secret(parcel_eh: EntryHash) -> ExternResult<EntryHash> {
+   return respond_to_secret(parcel_eh, false);
+
+}
+
+
+/// Zome Function
+#[hdk_extern]
 pub fn accept_secret(parcel_eh: EntryHash) -> ExternResult<EntryHash> {
+   return respond_to_secret(parcel_eh, true);
+
+}
+
+
+///
+pub fn respond_to_secret(parcel_eh: EntryHash, has_accepted: bool) -> ExternResult<EntryHash> {
    let response = call_delivery_zome(
       "query_DeliveryNotice",
       DeliveryNoticeQueryField::Parcel(parcel_eh),
@@ -187,7 +203,7 @@ pub fn accept_secret(parcel_eh: EntryHash) -> ExternResult<EntryHash> {
    let notice_eh = hash_entry(notices[0].clone())?;
    let input = RespondToNoticeInput {
       notice_eh,
-      has_accepted: true,
+      has_accepted,
    };
    let response = call_delivery_zome("respond_to_notice", input)?;
    // return respond_to_notice(input)?;

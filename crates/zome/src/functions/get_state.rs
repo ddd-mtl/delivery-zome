@@ -7,7 +7,7 @@ use crate::link_kind::LinkKind;
 
 ///
 #[hdk_extern]
-pub fn get_destribution_state(distribution_eh: EntryHash) -> ExternResult<DistributionState> {
+pub fn get_distribution_state(distribution_eh: EntryHash) -> ExternResult<DistributionState> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("get_destribution_state() CALLED");
    let distribution: Distribution = get_typed_from_eh(distribution_eh.clone())?;
@@ -23,9 +23,9 @@ pub fn get_destribution_state(distribution_eh: EntryHash) -> ExternResult<Distri
    if deliveries.contains(&DeliveryState::Unsent) {
       return Ok(DistributionState::Unsent);
    }
-   /// Return 'AllSent' if at least one Notice is Pending
+   /// Return 'AllNoticesSent' if at least one Notice is Pending
    if deliveries.contains(&DeliveryState::PendingNotice) {
-      return Ok(DistributionState::AllSent);
+      return Ok(DistributionState::AllNoticesSent);
    }
    /// Return 'AllNoticeReceived' if at least one reply is missing
    if deliveries.contains(&DeliveryState::NoticeDelivered) {
@@ -55,6 +55,7 @@ pub fn get_delivery_state(distribution_eh: EntryHash, recipient: &AgentPubKey) -
       Some(recipient.clone()),
    )?;
    if !receipts.is_empty() {
+      debug!("get_delivery_state() DeliveryReceipt found");
       return Ok(DeliveryState::ParcelDelivered);
    }
    /// Look for ReplyReceived
@@ -63,12 +64,14 @@ pub fn get_delivery_state(distribution_eh: EntryHash, recipient: &AgentPubKey) -
       Some(recipient.clone()),
    )?;
    if !replies.is_empty() {
+      debug!("get_delivery_state() ReplyReceived found: {}", replies[0].has_accepted);
       if !replies[0].has_accepted {
          return Ok(DeliveryState::ParcelRefused);
       }
       // Look for PendingParcel
       let maybe_pending = find_PendingItem(distribution_eh, recipient.clone(), ItemKind::AppEntryBytes)?;
       if maybe_pending.is_some() {
+         debug!("get_delivery_state() PendingParcel found");
          return Ok(DeliveryState::PendingParcel);
       }
       return Ok(DeliveryState::ParcelAccepted);
@@ -80,10 +83,12 @@ pub fn get_delivery_state(distribution_eh: EntryHash, recipient: &AgentPubKey) -
       // Look for PendingNotice
       let maybe_pending = find_PendingItem(distribution_eh, recipient.clone(), ItemKind::DeliveryNotice)?;
       if maybe_pending.is_some() {
+         debug!("get_delivery_state() PendingNotice found");
          return Ok(DeliveryState::PendingNotice);
       }
       return Ok(DeliveryState::Unsent);
    }
+   debug!("get_delivery_state() NoticeDelivered found");
    Ok(DeliveryState::NoticeDelivered)
 }
 

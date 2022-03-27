@@ -47,7 +47,7 @@ pub enum DistributionState {
    /// Initial state ; Distribution committed
    Unsent,
    /// (yellow) All deliveries have been sent (no Unsent state)
-   AllSent,
+   AllNoticesSent,
    /// (black) All notices have been sent (no Unsent or PendingNotice state)
    AllNoticeReceived,
    /// (blue) All deliveries have ParcelRefused, ParcelAccepted or PendingParcel state

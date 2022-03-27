@@ -45,12 +45,12 @@ get() the entry
 
 ### TODO
 
+- Chunk order
 - Investigate double send of entry (should we use `receive_entry()`)
 - Test simultaneous sends and receives of parcels
 - Test big file transfer (> 16 MiB)
 - Test failure recovery
 - Add signaling
-- Add 'determine state' zome functions
 - Cleanup code base
 
 ## Building

@@ -3,6 +3,8 @@
 use hdk::prelude::*;
 
 use crate::delivery::*;
+use crate::DeliveryNotice;
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DistributeParcelInput {
@@ -26,10 +28,17 @@ pub struct FetchChunkInput {
    pub notice_eh: EntryHash,
 }
 
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct GetNoticeOutput {
+   pub notice: DeliveryNotice,
+   pub state: NoticeState,
+}
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DeliveryNoticeQueryField {
    Sender(AgentPubKey),
+   Distribution(EntryHash),
    Parcel(EntryHash)
 }
 

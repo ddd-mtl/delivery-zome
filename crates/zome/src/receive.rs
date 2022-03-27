@@ -4,6 +4,7 @@ use zome_delivery_types::*;
 
 use crate::functions::*;
 use crate::dm_protocol::*;
+use crate::SignalProtocol;
 use crate::utils_parcel::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -146,6 +147,11 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> 
     }
     /// Commit DeliveryNotice
     let _hh = create_entry(&notice)?;
+    /// Emit Signal
+    let res = emit_signal(&SignalProtocol::ReceivedNotice(notice));
+    if let Err(err) = res {
+        error!("Emit signal failed: {}", err);
+    }
     /// Done
     Ok(())
 }
@@ -165,7 +171,12 @@ pub fn receive_reply(from: AgentPubKey, pending_item: PendingItem) -> ExternResu
         //date: now(),
     };
     /// Commit ReplyReceived
-    let _hh = create_entry(&receipt)?;
+    let _hh = create_entry(&receipt.clone())?;
+    /// Emit Signal
+    let res = emit_signal(&SignalProtocol::ReceivedReply(receipt));
+    if let Err(err) = res {
+        error!("Emit signal failed: {}", err);
+    }
     /// Done
     Ok(())
 }
@@ -184,6 +195,11 @@ pub fn receive_reception(from: AgentPubKey, pending_item: PendingItem) -> Extern
     };
     /// Commit DeliveryReceipt
     let _hh = create_entry(&receipt)?;
+    /// Emit Signal
+    let res = emit_signal(&SignalProtocol::ReceivedReceipt(receipt));
+    if let Err(err) = res {
+        error!("Emit signal failed: {}", err);
+    }
     /// Done
     Ok(())
 }

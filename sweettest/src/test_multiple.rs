@@ -11,9 +11,14 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    let (conductors, agents, apps) = setup_2_conductors().await;
    let cells = apps.cells_flattened();
 
-   let alex = SecretAgent::new(&conductors[0], agents[0].clone(), cells[0]);
-   let billy= SecretAgent::new(&conductors[1], agents[1].clone(), cells[1]);
+   let mut alex = SecretAgent::new(&conductors[0], agents[0].clone(), cells[0]);
+   let mut billy = SecretAgent::new(&conductors[1], agents[1].clone(), cells[1]);
+   let mut camille = SecretAgent::new(&conductors[2], agents[2].clone(), cells[2]);
 
+
+   alex.set_strategy(strategy.clone());
+   billy.set_strategy(strategy.clone());
+   camille.set_strategy(strategy.clone());
 
    /// A Store secrets
    let secret1_eh: EntryHash = alex.call_zome("create_secret", "I like bananas").await;
@@ -40,7 +45,7 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
 
    /// B accepts A's secret 1 & 2
    let _eh: EntryHash = billy.call_zome("accept_secret", waiting_parcels[0].clone()).await;
-   let _eh: EntryHash = billy.call_zome("accept_secret", waiting_parcels[1].clone()).await;
+   let _eh: EntryHash = billy.call_zome("refuse_secret", waiting_parcels[1].clone()).await;
 
    billy.print_chain(2 * 1000).await;
 

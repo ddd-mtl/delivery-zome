@@ -6,31 +6,33 @@ use zome_utils::*;
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]
 pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResult<Vec<DeliveryNotice>> {
-   debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
+   //debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Get all Create ParcelReceived Elements with query
-   let query_args = ChainQueryFilter::default()
-      .include_entries(true)
-      .header_type(HeaderType::Create)
-      .entry_type(entry_type!(DeliveryNotice)?);
-   let notices = query(query_args)?;
+   /// Get all Create DeliveryNotice Elements with query
+   let notices: Vec<DeliveryNotice> = get_all_typed_local(entry_type!(DeliveryNotice)?)?;
    /// Search through query result
    let mut res = Vec::new();
    match query_field {
       DeliveryNoticeQueryField::Sender(sender) => {
-         for notice_el in notices {
-            let notice: DeliveryNotice = get_typed_from_el(notice_el)?;
+         for notice in notices {
             if notice.sender == sender {
                res.push(notice.clone());
             }
          }
       },
       DeliveryNoticeQueryField::Parcel(parcel_eh) => {
-         for notice_el in notices {
-            let notice: DeliveryNotice = get_typed_from_el(notice_el)?;
+         for notice in notices {
             if notice.summary.parcel_reference.entry_address() == parcel_eh {
                res.push(notice.clone());
             }
+         }
+      },
+      DeliveryNoticeQueryField::Distribution(distrib_eh) => {
+         if notices.len() > 1 {
+            error!("More than one Notice found for distribution")
+         }
+         if notices[0].distribution_eh == distrib_eh {
+            res.push(notices[0].clone());
          }
       }
    }
@@ -43,7 +45,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 ///Find NoticeReceived with field with given value
 #[hdk_extern]
 pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec<NoticeReceived>> {
-   debug!("*** query_NoticeReceived() CALLED with {:?}", field);
+   //debug!("*** query_NoticeReceived() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create NoticeReceived Elements with query
    let receiveds: Vec<NoticeReceived> = get_all_typed_local(entry_type!(NoticeReceived)?)?;
@@ -73,7 +75,7 @@ pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec
 
 ///Find DeliveryReply with given notice_eh value
 pub fn query_DeliveryReply(notice_eh: EntryHash) -> ExternResult<Option<DeliveryReply>> {
-   debug!("*** query_DeliveryReply() CALLED with {:?}", notice_eh);
+   //debug!("*** query_DeliveryReply() CALLED with {:?}", notice_eh);
    /// Get all Create DeliveryReply Elements with query
    let replies: Vec<DeliveryReply> = get_all_typed_local(entry_type!(DeliveryReply)?)?;
    if replies.len() > 1 {
@@ -92,7 +94,7 @@ pub fn query_DeliveryReply(notice_eh: EntryHash) -> ExternResult<Option<Delivery
 pub fn query_ReplyReceived(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
    -> ExternResult<Vec<ReplyReceived>> {
    //std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("*** query_ReplyReceived() CALLED");
+   //debug!("*** query_ReplyReceived() CALLED");
    /// Get all Create DeliveryReceipt Elements with query
    let mut typeds: Vec<ReplyReceived> = get_all_typed_local(entry_type!(ReplyReceived)?)?;
    /// Search through query result
@@ -110,27 +112,23 @@ pub fn query_ReplyReceived(maybe_distribution: Option<EntryHash>, maybe_recipien
 ///Find ParcelReceived with field with given value
 #[hdk_extern]
 pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Option<ParcelReceived>> {
-   debug!("*** query_ParcelReceived() CALLED with {:?}", field);
+   //debug!("*** query_ParcelReceived() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create ParcelReceived Elements with query
-   let query_args = ChainQueryFilter::default()
-      .include_entries(true)
-      .header_type(HeaderType::Create)
-      .entry_type(entry_type!(ParcelReceived)?);
-   let receipts = query(query_args)?;
-
+   let receipts: Vec<ParcelReceived> = get_all_typed_local(entry_type!(ParcelReceived)?)?;
+   //debug!("*** query_ParcelReceived() CALLED with {:?}", field);
+   /// Search through query result
    match field {
       ParcelReceivedQueryField::Notice(eh) => {
-         for receipt_el in receipts {
-            let receipt: ParcelReceived = get_typed_from_el(receipt_el)?;
+         for receipt in receipts {
             if receipt.notice_eh == eh {
                return Ok(Some(receipt));
             }
          }
       },
       ParcelReceivedQueryField::Parcel(eh) => {
-         for receipt_el in receipts {
-            let receipt: ParcelReceived = get_typed_from_el(receipt_el)?;
+         for receipt in receipts {
+            //debug!("*** query_ParcelReceived() Parcel  receipt.parcel_eh {:?}", receipt.parcel_eh );
             if receipt.parcel_eh == eh {
                return Ok(Some(receipt));
             }
@@ -146,7 +144,7 @@ pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Opt
 pub fn query_DeliveryReceipt(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
    -> ExternResult<Vec<DeliveryReceipt>> {
    //std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("*** query_DeliveryReceipt() CALLED");
+   //debug!("*** query_DeliveryReceipt() CALLED");
    /// Get all Create DeliveryReceipt Elements with query
    let mut receipts: Vec<DeliveryReceipt> = get_all_typed_local(entry_type!(DeliveryReceipt)?)?;
    /// Search through query result

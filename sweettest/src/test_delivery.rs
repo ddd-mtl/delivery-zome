@@ -1,6 +1,6 @@
 use holo_hash::*;
 use tokio::time::{sleep, Duration};
-use zome_delivery_types::DistributionStrategy;
+use zome_delivery_types::*;
 
 use sweettest_utils::*;
 use crate::DNA_FILEPATH;
@@ -24,17 +24,24 @@ pub async fn test_delivery_self() {
    alex.print_chain(200).await;
 
    /// A sends secret to A
-   let _distribution_eh: EntryHash = alex.send(secret_eh, alex.key()).await;
+   let distribution_eh: EntryHash = alex.send(secret_eh, alex.key()).await;
 
    alex.print_chain(2000).await;
+
+   alex.assert_distribution_state(distribution_eh, DistributionState::Unsent).await;
+
 }
 
 
 ///
 pub async fn test_delivery(strategy: DistributionStrategy) {
    /// Setup
-   let (conductors, agents, apps) = setup_2_conductors().await;
+   let (mut conductors, agents, apps) = setup_2_conductors().await;
    let cells = apps.cells_flattened();
+
+   //let signals = conductors[0].signals().take(10);
+   //let signals: Vec<holochain_types::Signal> = signals.collect().await;
+   // Signal::App(cell_id, app_signal)
 
    let mut alex = SecretAgent::new(&conductors[0], agents[0].clone(), cells[0]);
    let mut billy= SecretAgent::new(&conductors[1], agents[1].clone(), cells[1]);
@@ -51,9 +58,12 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    alex.print_chain(200).await;
 
    /// A sends secret to B
-   let _ = alex.send(secret_eh, billy.key()).await;
-
+   let distribution_eh = alex.send(secret_eh.clone(), billy.key()).await;
    alex.print_chain(2 * 1000).await;
+
+   let state: DistributionState = alex.call_any_zome("delivery", "get_distribution_state", distribution_eh.clone()).await;
+   println!("Distribution state: {:?}", state);
+   //assert_eq!(DistributionState::AllNoticeReceived, state);
 
 
    /// B checks if Notice received
@@ -63,8 +73,13 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
       .expect("Should have a waiting parcel");
    println!("parcel requests received: {}", waiting_parcels.len());
 
+   billy.assert_notice_state(distribution_eh.clone(), NoticeState::Unreplied).await;
+
+
    /// B accepts A's secret
-   let _eh: EntryHash = billy.call_zome("accept_secret", waiting_parcels[0].clone()).await;
+   let _reply_eh: EntryHash = billy.call_zome("accept_secret", waiting_parcels[0].clone()).await;
+
+   billy.assert_notice_state(distribution_eh.clone(), NoticeState::Accepted).await;
 
    billy.print_chain(2 * 1000).await;
 
@@ -73,6 +88,10 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    println!("\n A receive reply; pull_inbox()...");
    let _: Vec<HeaderHash> = alex.pull_inbox().await;
    alex.print_chain(2 * 1000).await;
+
+   let state: DistributionState = alex.call_any_zome("delivery", "get_distribution_state", distribution_eh.clone()).await;
+   println!("Distribution state: {:?}", state);
+   //assert_eq!(DistributionState::AllNoticeReceived, state);
 
    /// B gets secret
    if strategy.can_dht() {
@@ -92,14 +111,17 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    println!("\n B calls get_secret()...");
    let secret: String  = billy.call_zome("get_secret", waiting_parcels[0].clone()).await;
    println!("\n secret received: {:?}\n", secret);
-
+   sleep(Duration::from_millis(1 * 1000)).await;
    billy.print_chain(0).await;
+   billy.assert_notice_state(distribution_eh.clone(), NoticeState::Received).await;
 
    /// Check A's chain for a DeliveryReceipt
    sleep(Duration::from_millis(2 * 1000)).await;
    let _: Vec<HeaderHash> = alex.pull_inbox().await;
 
    alex.print_chain(2 * 1000).await;
+
+   alex.assert_distribution_state(distribution_eh, DistributionState::AllAcceptedParcelsReceived).await;
 }
 
 
@@ -125,9 +147,9 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    alex.print_chain(200).await;
 
    /// A sends secret to B
-   let _distribution_eh: EntryHash = alex.send(manifest_eh, billy.key()).await;
+   let distribution_eh: EntryHash = alex.send(manifest_eh, billy.key()).await;
 
-   sleep(Duration::from_millis(2 * 1000)).await;
+   sleep(Duration::from_millis(10 * 1000)).await;
    print_chain(&conductors[0], &agents[0], &cells[0]).await;
 
 
@@ -137,18 +159,20 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
       .await
       .expect("Should have a waiting parcel");
    println!("parcel requests received: {}", waiting_parcels.len());
+   billy.assert_notice_state(distribution_eh.clone(), NoticeState::Unreplied).await;
+
 
    /// B accepts A's secret
    let _eh: EntryHash = billy.call_zome("accept_secret", waiting_parcels[0].clone()).await;
-
-   billy.print_chain(2 * 1000).await;
+   billy.assert_notice_state(distribution_eh.clone(), NoticeState::Accepted).await;
+   billy.print_chain(10 * 1000).await;
 
    /// Have A receive reply and send Parcel
    sleep(Duration::from_millis(2 * 1000)).await;
    println!("\n A receive reply; pull_inbox()...");
    let _: Vec<HeaderHash> = alex.pull_inbox().await;
    alex.print_chain(20 * 1000).await;
-
+   alex.assert_distribution_state(distribution_eh.clone(), DistributionState::AllRepliesReceived).await;
 
    /// B gets secret
    if strategy.can_dht() {
@@ -164,14 +188,16 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    println!("\n B calls get_secret()...");
    let secret: String = billy.call_zome("get_secret", waiting_parcels[0].clone()).await;
    println!("\n secret received: {:?}\n", secret);
+   //assert_eq!(secret, "I.like.bananas");
 
    billy.print_chain(0).await;
+   billy.assert_notice_state(distribution_eh.clone(), NoticeState::Received).await;
 
 
    /// Check A's chain for a DeliveryReceipt
-   sleep(Duration::from_millis(2 * 1000)).await;
+   sleep(Duration::from_millis(10 * 1000)).await;
    let _: Vec<HeaderHash> = alex.pull_inbox().await;
+   alex.print_chain(4 * 1000).await;
 
-   alex.print_chain(2 * 1000).await;
-
+   alex.assert_distribution_state(distribution_eh, DistributionState::AllAcceptedParcelsReceived).await;
 }

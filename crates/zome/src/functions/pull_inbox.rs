@@ -9,6 +9,8 @@ use crate::receive::*;
 use crate::utils_parcel::*;
 
 /// Zome Function
+/// Get All inbox items waiting for this agent (pending links) and process them.
+/// Return HeaderHashs of parcels committed during the pull
 #[hdk_extern]
 pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    debug!("pull_inbox() START");

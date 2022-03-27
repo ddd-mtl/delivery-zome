@@ -33,18 +33,6 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
       maybe_link.map(|x|x.create_link_hash),
    )?;
    debug!("fetch_parcel() parcel_hh = {:?}", parcel_hh);
-   /// Create ParcelReceived if its an AppEntry
-   /// (for a Manifest, we have to wait for all chunks to be received)
-   if let ParcelReference::AppEntry(..) = notice.summary.parcel_reference {
-      let received = ParcelReceived {
-         notice_eh,
-         parcel_eh: parcel_eh.clone(),
-      };
-      let response = call_self("commit_ParcelReceived", received)?;
-      let received_eh: EntryHash = decode_response(response)?;
-      debug!("fetch_parcel() received_eh = {:?}", received_eh);
-      // let _hh = create_entry(received)?;
-   }
    /// Done
    Ok(Some(parcel_eh))
 }

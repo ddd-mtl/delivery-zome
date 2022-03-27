@@ -6,6 +6,7 @@ use zome_delivery_types::*;
 
 use crate::functions::*;
 use crate::entry_kind::*;
+use crate::SignalProtocol;
 
 
 /// Zone Function
@@ -46,7 +47,12 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
       parcel_eh: manifest_eh,
    };
    let received_eh = hash_entry(received.clone())?;
-   let _hh = create_entry(received)?;
+   let _hh = create_entry(received.clone())?;
+   /// Emit Signal
+   let res = emit_signal(&SignalProtocol::ReceivedParcel(received));
+   if let Err(err) = res {
+      error!("Emit signal failed: {}", err);
+   }
    /// Done
    Ok(Some(received_eh))
 }

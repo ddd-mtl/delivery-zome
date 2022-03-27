@@ -3,6 +3,7 @@ use zome_utils::*;
 use zome_delivery_types::*;
 
 use crate::link_kind::*;
+use crate::SignalProtocol;
 
 
 ///
@@ -29,7 +30,7 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: 
 {
     let input = CommitParcelInput {
         entry_def_id: notice.summary.parcel_reference.entry_def_id(),
-        entry,
+        entry: entry.clone(),
         maybe_link_hh,
     };
     debug!("call_commit_parcel() zome_name = {:?}", notice.summary.parcel_reference.entry_zome_name());
@@ -41,6 +42,23 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: 
         input.clone(),
     )?;
     let hh = decode_response(response)?;
+    /// Create ParcelReceived if its an AppEntry
+    /// (for a Manifest, we have to wait for all chunks to be received)
+    if let ParcelReference::AppEntry(..) = notice.summary.parcel_reference {
+        let received = ParcelReceived {
+            notice_eh: hash_entry(notice.clone())?,
+            parcel_eh: hash_entry(entry.clone())?,
+        };
+        let response = call_self("commit_ParcelReceived", received.clone())?;
+        let received_eh: EntryHash = decode_response(response)?;
+        debug!("call_commit_parcel() received_eh = {:?}", received_eh);
+        /// Emit Signal
+        let res = emit_signal(&SignalProtocol::ReceivedParcel(received));
+        if let Err(err) = res {
+            error!("Emit signal failed: {}", err);
+        }
+    }
+    /// Done
     Ok(hh)
 }
 
