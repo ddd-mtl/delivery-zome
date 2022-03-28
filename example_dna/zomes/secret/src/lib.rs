@@ -119,7 +119,7 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
 pub struct SendSecretInput {
    pub secret_eh: EntryHash,
    pub strategy: DistributionStrategy,
-   pub recipient: AgentPubKey,
+   pub recipients: Vec<AgentPubKey>,
 }
 
 /// Zome Function
@@ -141,7 +141,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
    };
 
    let distribution = DistributeParcelInput {
-      recipients: vec![input.recipient],
+      recipients: input.recipients,
       strategy: input.strategy,
       parcel_ref,
    };

@@ -3,75 +3,34 @@ use holochain::sweettest::{SweetCell, SweetConductor};
 use tokio::time::{sleep, Duration};
 use zome_delivery_types::{DistributionState, DistributionStrategy, GetNoticeOutput, NoticeState};
 
-
-use std::sync::Arc;
-use stream_cancel::{Trigger, Valve};
-
 use sweettest_utils::*;
-use tokio::sync::Mutex;
-use tokio::task::JoinHandle;
-
-use secret::*;
 use zome_delivery_types::*;
-use holochain_types::prelude::*;
+use secret::*;
+
 
 
 pub struct SecretAgent {
-   agent: AgentPubKey,
-   cell: SweetCell,
-   conductor: SweetConductor,
+   cell: SweeterCell,
+   signals: Vec<SignalProtocol>,
+   ///
    strategy: DistributionStrategy,
-   // Signal handling
-   signals: Arc<Mutex<Vec<SignalProtocol>>>,
-   jh: JoinHandle<()>,
-   trigger: Trigger,
 }
 
 
 impl SecretAgent {
 
    ///
-   pub async fn new(mut conductor: SweetConductor, agent: AgentPubKey, cell: SweetCell) -> Self {
-
-      let signals = Arc::new(Mutex::new(vec![]));
-
-      let (trigger, valve) = Valve::new();
-
-      use futures::stream::StreamExt;
-      let mut stream = valve.wrap(conductor.signals());
-      let jh = tokio::task::spawn({
-         let clone = Arc::clone(&signals);
-         async move {
-            while let Some(Signal::App(_, app_signal)) = stream.next().await {
-               let signal: SignalProtocol = app_signal.into_inner().decode().unwrap();
-               println!("\n SIGNAL RECEIVED: {:?}\n\n", signal);
-               let mut v = clone.lock().await;
-               v.push(signal);
-            }
-         }
-      });
-
-
-      // /// Drop
-      // trigger.cancel();
-      // for jh in jhs {
-      //    jh.await.unwrap();
-      // }
-
+   pub async fn new(conductor: SweetConductor, cell: SweetCell) -> Self {
       Self {
-         agent,
-         cell,
-         conductor,
+         cell: SweeterCell::new(conductor, cell).await,
+         signals: Vec::new(),
          strategy: DistributionStrategy::NORMAL,
-         signals,
-         jh,
-         trigger,
       }
    }
 
 
    pub fn key(&self) -> AgentPubKey {
-      self.agent.clone()
+      self.cell.key()
    }
 
    ///
@@ -79,25 +38,36 @@ impl SecretAgent {
       self.strategy = strategy;
    }
 
-   pub async fn signals(&self) -> Vec<SignalProtocol> {
-      self.signals.lock().await.clone()
+   pub fn signals(&self) -> Vec<SignalProtocol> {
+      self.signals.clone()
+   }
+
+   pub async fn drain_signals(&mut self) -> Vec<SignalProtocol> {
+      let mut app_signals = self.cell.drain_signals().await;
+      //println!("Drained signals count: {}", app_signals.len());
+      let new_signals = app_signals.drain(..).map(|app_signal| {
+         let signal: SignalProtocol = app_signal.into_inner().decode().unwrap();
+         self.signals.push(signal.clone());
+         signal.clone()
+      }).collect();
+      new_signals
    }
 
    pub async fn print_signals(&self) {
-      println!("\n****** SIGNALS DUMP START ****** {}", self.agent);
-      let signals = self.signals.lock().await.clone();
+      println!("\n******************** SIGNALS DUMP START ******************** {}", self.key());
       let mut count = 0;
-      for signal in signals {
-         println!(" {:2}. {:?}", count, signal);
+      for signal in self.signals.iter() {
+         let signal_txt = print_signal(signal.clone());
+         println!(" {:2}. {}", count, signal_txt);
          count += 1;
       }
-      println!("\n****** SIGNALS DUMP END   ****** {}", count);
+      println!("******************** SIGNALS DUMP END   ******************** {}\n", count);
    }
 
    ///
    pub async fn print_chain(&self, millis: u64) {
       sleep(Duration::from_millis(millis)).await;
-      print_chain(&self.conductor, &self.agent, &self.cell).await;
+      self.cell.print_chain().await;
    }
 
    ///
@@ -106,7 +76,7 @@ impl SecretAgent {
          I: serde::Serialize + std::fmt::Debug,
          O: serde::de::DeserializeOwned + std::fmt::Debug,
    {
-      return self.conductor.call(&self.cell.zome(zome_name), fn_name, payload).await;
+      return self.cell.call_any_zome(zome_name, fn_name, payload).await;
    }
 
 
@@ -116,7 +86,7 @@ impl SecretAgent {
       I: serde::Serialize + std::fmt::Debug,
       O: serde::de::DeserializeOwned + std::fmt::Debug,
    {
-      return self.conductor.call(&self.cell.zome("secret"), fn_name, payload).await;
+      return self.cell.call_any_zome("secret", fn_name, payload).await;
    }
 
 
@@ -132,21 +102,13 @@ impl SecretAgent {
          T: serde::de::DeserializeOwned + std::fmt::Debug,
          P: Clone + serde::Serialize + std::fmt::Debug,
    {
-      for _ in 0..10u32 {
-         let res: T = self.conductor.call(&self.cell.zome(zome_name), fn_name, payload.clone())
-            .await;
-         if predicat(&res) {
-            return Ok(res);
-         }
-         tokio::time::sleep(std::time::Duration::from_millis(2 * 1000)).await;
-      }
-      Err(())
+      return self.cell.try_call_zome(zome_name, fn_name, payload, predicat).await;
    }
 
 
    ///
    pub async fn pull_inbox(&self) -> Vec<HeaderHash> {
-      return self.conductor.call(&self.cell.zome("delivery"), "pull_inbox", ()).await;
+      return self.call_any_zome("delivery", "pull_inbox", ()).await;
    }
 
 
@@ -154,7 +116,19 @@ impl SecretAgent {
    pub async fn send(&self, secret_eh: EntryHash, recipient: AgentPubKey) -> EntryHash {
       let input = SendSecretInput {
          secret_eh,
-         recipient,
+         recipients: vec![recipient],
+         strategy: self.strategy.clone(),
+      };
+      let distribution_eh: EntryHash = self.call_zome("send_secret", input).await;
+      return distribution_eh;
+   }
+
+   ///
+   pub async fn send_multiple(&self, secret_eh: EntryHash, recipients: Vec<AgentPubKey>) -> EntryHash {
+      assert!(recipients.len() > 1);
+      let input = SendSecretInput {
+         secret_eh,
+         recipients,
          strategy: self.strategy.clone(),
       };
       let distribution_eh: EntryHash = self.call_zome("send_secret", input).await;
@@ -177,5 +151,49 @@ impl SecretAgent {
       let state: DistributionState = self.call_any_zome("delivery", "get_distribution_state", distribution_eh).await;
       //println!("Distribution state: {:?}", state);
       assert_eq!(state, required_state);
+   }
+
+
+   /// -- SIGNALS
+
+   pub fn has_signal(&self, kind: &SignalKind, eh: &EntryHash) -> bool {
+      for signal in self.signals.iter() {
+         if signal.is(kind, eh) {
+            return true;
+         }
+      }
+      false
+   }
+
+   ///
+   pub async fn pull_and_wait_for_signal(&mut self, kind: SignalKind, eh: &EntryHash) -> Result<(), ()> {
+      for _ in 0..10u32 {
+         let _ = self.pull_inbox().await;
+         let _ = self.drain_signals().await;
+         if self.has_signal(&kind, eh) {
+            return Ok(())
+         };
+         tokio::time::sleep(std::time::Duration::from_millis(2 * 1000)).await;
+      }
+      Err(())
+   }
+}
+
+
+
+fn print_signal(signal: SignalProtocol) -> String {
+   match signal {
+      SignalProtocol::ReceivedNotice(notice) => {
+         format!("ReceivedNotice for {}", notice.distribution_eh)
+      },
+      SignalProtocol::ReceivedReply(reply) => {
+         format!("ReceivedReply for {}", reply.distribution_eh)
+      },
+      SignalProtocol::ReceivedParcel(parcel) => {
+         format!("ReceivedParcel {}", parcel.parcel_eh)
+      },
+      SignalProtocol::ReceivedReceipt(receipt) => {
+         format!("ReceivedReceipt for {}", receipt.distribution_eh)
+      },
    }
 }

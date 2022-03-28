@@ -11,18 +11,16 @@ use crate::secret_agent::SecretAgent;
 
 ///
 pub async fn setup_2_secret_agents(strategy: DistributionStrategy) -> (SecretAgent, SecretAgent) {
-   let (conductors, mut agents, apps) = setup_2_conductors().await;
+   let (conductors, _agents, apps) = setup_2_conductors().await;
    let mut apps = apps.into_inner();
    let mut conductor_vec = conductors.into_inner();
 
    let mut alex = SecretAgent::new(
       conductor_vec.pop().unwrap(),
-      agents.pop().unwrap(),
       apps.pop().unwrap().into_cells().pop().unwrap())
       .await;
    let mut billy = SecretAgent::new(
       conductor_vec.pop().unwrap(),
-      agents.pop().unwrap(),
       apps.pop().unwrap().into_cells().pop().unwrap())
       .await;
 
@@ -34,13 +32,13 @@ pub async fn setup_2_secret_agents(strategy: DistributionStrategy) -> (SecretAge
 
 
 pub async fn setup_3_secret_agents(strategy: DistributionStrategy) -> (SecretAgent, SecretAgent, SecretAgent) {
-   let (conductors, mut agents, apps) = setup_2_conductors().await;
+   let (conductors, _agents, apps) = setup_3_conductors().await;
    let mut apps = apps.into_inner();
    let mut conductor_vec = conductors.into_inner();
 
-   let mut alex = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap()).await;
-   let mut billy = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap()).await;
-   let mut camille = SecretAgent::new(conductor_vec.pop().unwrap(), agents.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap()).await;
+   let mut alex = SecretAgent::new(conductor_vec.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap()).await;
+   let mut billy = SecretAgent::new(conductor_vec.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap()).await;
+   let mut camille = SecretAgent::new(conductor_vec.pop().unwrap(), apps.pop().unwrap().into_cells().pop().unwrap()).await;
 
 
    alex.set_strategy(strategy.clone());
