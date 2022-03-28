@@ -2,7 +2,6 @@ use holo_hash::*;
 use tokio::time::{sleep, Duration};
 use zome_delivery_types::DistributionStrategy;
 
-use crate::secret_agent::SecretAgent;
 use crate::setup::*;
 
 ///

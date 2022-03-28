@@ -1,12 +1,19 @@
 use holo_hash::*;
 use holochain::sweettest::{SweetCell, SweetConductor};
-use holochain_zome_types::AppSignal;
 use tokio::time::{sleep, Duration};
 use zome_delivery_types::{DistributionState, DistributionStrategy, GetNoticeOutput, NoticeState};
 
+
+use std::sync::Arc;
+use stream_cancel::{Trigger, Valve};
+
 use sweettest_utils::*;
+use tokio::sync::Mutex;
+use tokio::task::JoinHandle;
 
 use secret::*;
+use zome_delivery_types::*;
+use holochain_types::prelude::*;
 
 
 pub struct SecretAgent {
@@ -14,54 +21,51 @@ pub struct SecretAgent {
    cell: SweetCell,
    conductor: SweetConductor,
    strategy: DistributionStrategy,
-   signal_stack: Vec<AppSignal>,
+   // Signal handling
+   signals: Arc<Mutex<Vec<SignalProtocol>>>,
+   jh: JoinHandle<()>,
+   trigger: Trigger,
 }
 
 
 impl SecretAgent {
 
    ///
-   pub fn new(conductor: SweetConductor, agent: AgentPubKey, cell: SweetCell) -> Self {
+   pub async fn new(mut conductor: SweetConductor, agent: AgentPubKey, cell: SweetCell) -> Self {
 
-      // // Make the channel buffer big enough to not block
-      // let (resp, mut recv) = tokio::sync::mpsc::channel(NUM_CONDUCTORS * NUM_MESSAGES * 2);
-      // let mut jhs = Vec::new();
-      // let (trigger, valve) = Valve::new();
-      // let total_recv = Arc::new(AtomicUsize::new(0));
-      // for c in conductors.iter_mut() {
-      //    use futures::stream::StreamExt;
-      //    let mut stream = valve.wrap(c.signals().await);
-      //    let jh = tokio::task::spawn({
-      //       let mut resp = resp.clone();
-      //       let total_recv = total_recv.clone();
-      //       async move {
-      //          while let Some(Signal::App(_, signal)) = stream.next().await {
-      //             let signal: SignalPayload = signal.into_inner().decode().unwrap();
-      //             if let SignalPayload::Message(SignalMessageData {
-      //                                              message_data:
-      //                                              MessageData {
-      //                                                 message: Message { uuid, .. },
-      //                                                 ..
-      //                                              },
-      //                                              ..
-      //                                           }) = signal
-      //             {
-      //                total_recv.fetch_add(1, Ordering::Relaxed);
-      //                resp.send(uuid).await.expect("Failed to send uuid");
-      //             }
-      //          }
-      //       }
-      //    });
-      //    jhs.push(jh);
+      let signals = Arc::new(Mutex::new(vec![]));
+
+      let (trigger, valve) = Valve::new();
+
+      use futures::stream::StreamExt;
+      let mut stream = valve.wrap(conductor.signals());
+      let jh = tokio::task::spawn({
+         let clone = Arc::clone(&signals);
+         async move {
+            while let Some(Signal::App(_, app_signal)) = stream.next().await {
+               let signal: SignalProtocol = app_signal.into_inner().decode().unwrap();
+               println!("\n SIGNAL RECEIVED: {:?}\n\n", signal);
+               let mut v = clone.lock().await;
+               v.push(signal);
+            }
+         }
+      });
+
+
+      // /// Drop
+      // trigger.cancel();
+      // for jh in jhs {
+      //    jh.await.unwrap();
       // }
-
 
       Self {
          agent,
          cell,
          conductor,
          strategy: DistributionStrategy::NORMAL,
-         signal_stack: Vec::new(),
+         signals,
+         jh,
+         trigger,
       }
    }
 
@@ -70,12 +74,25 @@ impl SecretAgent {
       self.agent.clone()
    }
 
-
    ///
    pub fn set_strategy(&mut self, strategy: DistributionStrategy) {
       self.strategy = strategy;
    }
 
+   pub async fn signals(&self) -> Vec<SignalProtocol> {
+      self.signals.lock().await.clone()
+   }
+
+   pub async fn print_signals(&self) {
+      println!("\n****** SIGNALS DUMP START ****** {}", self.agent);
+      let signals = self.signals.lock().await.clone();
+      let mut count = 0;
+      for signal in signals {
+         println!(" {:2}. {:?}", count, signal);
+         count += 1;
+      }
+      println!("\n****** SIGNALS DUMP END   ****** {}", count);
+   }
 
    ///
    pub async fn print_chain(&self, millis: u64) {

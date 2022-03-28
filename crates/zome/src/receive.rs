@@ -4,7 +4,6 @@ use zome_delivery_types::*;
 
 use crate::functions::*;
 use crate::dm_protocol::*;
-use crate::SignalProtocol;
 use crate::utils_parcel::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

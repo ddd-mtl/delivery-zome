@@ -9,13 +9,14 @@ mod entries;
 mod inputs;
 mod delivery;
 mod callbacks;
+mod signal_protocol;
 
 
 pub use entries::*;
 pub use inputs::*;
 pub use delivery::*;
 pub use callbacks::*;
-
+pub use signal_protocol::*;
 
 //----------------------------------------------------------------------------------------
 // API

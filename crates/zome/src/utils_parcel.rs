@@ -3,7 +3,6 @@ use zome_utils::*;
 use zome_delivery_types::*;
 
 use crate::link_kind::*;
-use crate::SignalProtocol;
 
 
 ///

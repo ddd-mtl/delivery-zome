@@ -6,7 +6,6 @@ use zome_delivery_types::*;
 
 use crate::functions::*;
 use crate::entry_kind::*;
-use crate::SignalProtocol;
 
 
 /// Zone Function

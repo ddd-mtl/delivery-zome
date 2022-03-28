@@ -12,7 +12,7 @@ pub async fn test_delivery_self() {
    /// Setup
    let (conductor0, alex_key, cell0) = setup_1_conductor(DNA_FILEPATH).await;
 
-   let alex = SecretAgent::new(conductor0, alex_key, cell0);
+   let alex = SecretAgent::new(conductor0, alex_key, cell0).await;
 
    /// A Store secret
    let secret_eh: EntryHash = alex.call_zome("create_secret", "I like bananas").await;
@@ -117,6 +117,9 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
 
    alex.print_chain(2 * 1000).await;
 
+   alex.print_signals().await;
+   billy.print_signals().await;
+
    alex.assert_distribution_state(distribution_eh, DistributionState::AllAcceptedParcelsReceived).await;
 }
 
@@ -186,6 +189,9 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    sleep(Duration::from_millis(10 * 1000)).await;
    let _: Vec<HeaderHash> = alex.pull_inbox().await;
    alex.print_chain(4 * 1000).await;
+
+   alex.print_signals().await;
+   billy.print_signals().await;
 
    alex.assert_distribution_state(distribution_eh, DistributionState::AllAcceptedParcelsReceived).await;
 }
