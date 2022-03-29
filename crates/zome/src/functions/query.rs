@@ -28,11 +28,13 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
          }
       },
       DeliveryNoticeQueryField::Distribution(distrib_eh) => {
-         if notices.len() > 1 {
-            error!("More than one Notice found for distribution")
+         for notice in notices {
+            if notice.distribution_eh == distrib_eh {
+               res.push(notice.clone());
+            }
          }
-         if notices[0].distribution_eh == distrib_eh {
-            res.push(notices[0].clone());
+         if res.len() > 1 {
+            error!("More than one Notice found for distribution");
          }
       }
    }

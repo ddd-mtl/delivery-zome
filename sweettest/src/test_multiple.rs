@@ -32,6 +32,8 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    billy.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution1_eh).await.expect("Should have received notice");
    billy.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution2_eh).await.expect("Should have received notice");
    billy.print_chain(0).await;
+   //billy.print_signals().await;
+   camille.print_chain(0).await;
    camille.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution2_eh).await.expect("Should have received notice");
    camille.print_chain(0).await;
 
@@ -65,7 +67,7 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    /// A sends secret 3 to B
    let distribution3_eh: EntryHash = alex.send(secret3_eh.clone(), billy.key()).await;
    /// A accepts B's secret 4
-   let alex_waiting_parcels: Vec<EntryHash> = alex.try_call_zome("secret","get_secrets_from", alex.key(),
+   let alex_waiting_parcels: Vec<EntryHash> = alex.try_call_zome("secret","get_secrets_from", billy.key(),
                                                              |result: &Vec<EntryHash>| {result.len() == 1})
                                               .await
                                               .expect("Alex should have a waiting parcel");
@@ -100,13 +102,13 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
 
    /// B checks if notice 3 received
    let waiting_parcels: Vec<EntryHash> = billy.try_call_zome("secret","get_secrets_from", alex.key(),
-                                                             |result: &Vec<EntryHash>| {result.len() == 1})
+                                                             |result: &Vec<EntryHash>| {result.len() == 3})
                                               .await
                                               .expect("Billy should have a waiting parcel");
-   println!("parcel requests received: {}\n", waiting_parcels.len());
+   println!("billy parcel requests received: {}\n", waiting_parcels.len());
 
    /// B accepts A's secret 3
-   let _eh: EntryHash = billy.call_zome("accept_secret", waiting_parcels[0].clone()).await;
+   let _eh: EntryHash = billy.call_zome("accept_secret", secret3_eh.clone()).await;
    billy.print_chain(2 * 1000).await;
 
    /// Have A receive reply and send Parcel 3
@@ -118,15 +120,15 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    billy.pull_and_wait_for_signal(SignalKind::ReceivedParcel, &secret3_eh).await.expect("Should have received parcel");
    billy.print_chain(0).await;
    println!("\n B calls get_secret()...\n");
-   let secret: String  = billy.call_zome("get_secret", waiting_parcels[0].clone()).await;
+   let secret: String  = billy.call_zome("get_secret", secret3_eh.clone()).await;
    println!("\n B received secret 3: {:?}\n", secret);
    billy.assert_notice_state(distribution3_eh.clone(), NoticeState::Received).await;
 
    /// A gets B's secret 4
-   alex.pull_and_wait_for_signal(SignalKind::ReceivedParcel, &secret3_eh).await.expect("Should have received parcel");
+   alex.pull_and_wait_for_signal(SignalKind::ReceivedParcel, &secret4_eh).await.expect("Should have received parcel");
    alex.print_chain(0).await;
    println!("\n A calls get_secret()...\n");
-   let secret: String  = alex.call_zome("get_secret", waiting_parcels[0].clone()).await;
+   let secret: String  = alex.call_zome("get_secret", secret4_eh.clone()).await;
    println!("\n A received secret 4: {:?}\n", secret);
    alex.assert_notice_state(distribution4_eh.clone(), NoticeState::Received).await;
 

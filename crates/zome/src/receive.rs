@@ -81,7 +81,7 @@ pub fn receive_chunk(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     /// Make sure we accepted to receive this chunk
     // FIXME
     /// Commit entry
-    let _maybe_hh = create_entry(maybe_chunk.unwrap())?;
+    let _maybe_hh = create_entry_relaxed(maybe_chunk.unwrap(), "ParcelChunk")?;
     /// Done
     Ok(())
 }
@@ -144,8 +144,10 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> 
     if maybe_already.is_some() {
         return error("Already have this Notice");
     }
+
     /// Commit DeliveryNotice
-    let _hh = create_entry(&notice)?;
+    let _hh = create_entry_relaxed(notice.clone(), "DeliveryNotice")?;
+
     /// Emit Signal
     let res = emit_signal(&SignalProtocol::ReceivedNotice(notice));
     if let Err(err) = res {
@@ -170,7 +172,7 @@ pub fn receive_reply(from: AgentPubKey, pending_item: PendingItem) -> ExternResu
         //date: now(),
     };
     /// Commit ReplyReceived
-    let _hh = create_entry(&receipt.clone())?;
+    let _hh = create_entry_relaxed(&receipt.clone(), "ReplyReceived")?;
     /// Emit Signal
     let res = emit_signal(&SignalProtocol::ReceivedReply(receipt));
     if let Err(err) = res {
@@ -193,7 +195,7 @@ pub fn receive_reception(from: AgentPubKey, pending_item: PendingItem) -> Extern
         //date_of_response: now(),
     };
     /// Commit DeliveryReceipt
-    let _hh = create_entry(&receipt)?;
+    let _hh = create_entry_relaxed(&receipt, "DeliveryReceipt")?;
     /// Emit Signal
     let res = emit_signal(&SignalProtocol::ReceivedReceipt(receipt));
     if let Err(err) = res {
