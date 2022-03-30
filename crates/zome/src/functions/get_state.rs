@@ -9,7 +9,7 @@ use crate::link_kind::LinkKind;
 #[hdk_extern]
 pub fn get_distribution_state(distribution_eh: EntryHash) -> ExternResult<DistributionState> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("get_destribution_state() CALLED");
+   debug!("get_destribution_state() CALLED - {}", distribution_eh.clone());
    let distribution: Distribution = get_typed_from_eh(distribution_eh.clone())?;
    /// Get delivery state for each recipient
    //let mut deliveries: HashMap<AgentPubKey, DeliveryState> = HashMap::new();
@@ -48,7 +48,7 @@ pub fn get_distribution_state(distribution_eh: EntryHash) -> ExternResult<Distri
 //#[hdk_extern]
 pub fn get_delivery_state(distribution_eh: EntryHash, recipient: &AgentPubKey) -> ExternResult<DeliveryState> {
    //std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("get_delivery_state() CALLED");
+   debug!("get_delivery_state() CALLED recipeint: {}", recipient);
    /// Look for DeliveryReceipt
    let receipts = query_DeliveryReceipt(
       Some(distribution_eh.clone()),

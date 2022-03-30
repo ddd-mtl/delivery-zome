@@ -11,6 +11,7 @@ pub struct CommitPendingItemInput {
    pub recipient: AgentPubKey,
 }
 
+
 #[hdk_extern]
 fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash> {
    debug!("commit_pending_item() START");
@@ -18,9 +19,9 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash
    let me = agent_info()?.agent_latest_pubkey;
    /// Commit Pending Item
    let pending_item_eh = hash_entry(&input.item)?;
-   let maybe_pending_item_hh = create_entry(&input.item);
+   let maybe_pending_item_hh = create_entry_relaxed(input.item.clone());
    if let Err(err) = maybe_pending_item_hh.clone() {
-      debug!("PendingItem create_entry() failed = {:?}", err);
+      debug!("PendingItem create_entry_relaxed() failed = {:?}", err);
       return Err(maybe_pending_item_hh.err().unwrap());
    };
    let pending_item_hh = maybe_pending_item_hh.unwrap();
@@ -29,7 +30,7 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash
    if input.item.kind.can_link_to_distribution() {
       let tag = LinkKind::Pendings.concat_hash(&input.recipient);
       trace!("pendings tag = {:?}", tag);
-      let maybe_link1_hh = create_link(
+      let maybe_link1_hh = create_link_relaxed(
          input.item.distribution_eh.clone(),
          pending_item_eh.clone(),
          tag);
@@ -42,7 +43,7 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<HeaderHash
    }
    /// Commit Inbox Link
    let tag = LinkKind::Inbox.concat_hash(&me);
-   let maybe_link2_hh = create_link(
+   let maybe_link2_hh = create_link_relaxed(
       EntryHash::from(input.recipient.clone()),
       pending_item_eh,
      tag,

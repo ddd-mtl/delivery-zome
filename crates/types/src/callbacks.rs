@@ -13,7 +13,7 @@ pub struct CommitParcelInput {
 
 /// Zome Function Callback required by delivery-zome
 /// Should not be called directly. Only via remote call to self
-/// Name function must match COMMIT_PARCEL_CALLBACK_NAME global const
+/// Name of this function must equal COMMIT_PARCEL_CALLBACK_NAME global constant
 #[hdk_extern]
 fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
    debug!("commit_parcel() entry_def_id = {:?} | {}", input.entry_def_id, zome_info()?.name);
@@ -27,7 +27,15 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
    let parcel_hh = create_entry(create_input)?;
    /// Delete Link
    if let Some(link_hh) = input.maybe_link_hh {
-      let _hh = delete_link(link_hh)?;
+      debug!("commit_parcel() delete_link: {:?}", link_hh);
+      let input = DeleteLinkInput::new(link_hh,
+         ChainTopOrdering::Relaxed,
+      );
+      let _hh = HDK.with(|h| {
+         h.borrow()
+          .delete_link(input)
+      })?;
+       // let _hh = delete_link(link_hh)?;
    }
    /// Done
    Ok(parcel_hh)

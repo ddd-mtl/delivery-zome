@@ -89,7 +89,7 @@ fn commit_chunks(chunks: CommitChunksInput) -> ExternResult<()> {
          continue;
       }
       /// Commit Parcel
-      let _hh = create_entry(chunk)?;
+      let _hh = create_entry_relaxed(chunk)?;
       /// Delete Link
       if let Some(link) = maybe_link {
          let _hh = delete_link(link.create_link_hash)?;

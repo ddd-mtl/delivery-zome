@@ -22,7 +22,7 @@ pub fn commit_parcel_chunk(data: String) -> ExternResult<EntryHash> {
    /// Commit entry
    let parcel_chunk = ParcelChunk {data};
    let chunk_eh = hash_entry(parcel_chunk.clone())?;
-   let _chunk_hh = create_entry(&parcel_chunk)?;
+   let _chunk_hh = create_entry(parcel_chunk)?;
    /// Done
    Ok(chunk_eh)
 }

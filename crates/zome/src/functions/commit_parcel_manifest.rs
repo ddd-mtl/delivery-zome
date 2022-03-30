@@ -12,7 +12,7 @@ pub fn commit_parcel_manifest(input: ParcelManifest) -> ExternResult<EntryHash> 
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Commit entry
    let manifest_eh = hash_entry(input.clone())?;
-   let _ = create_entry(&input)?;
+   let _ = create_entry_relaxed(input)?;
    /// Done
    Ok(manifest_eh)
 }

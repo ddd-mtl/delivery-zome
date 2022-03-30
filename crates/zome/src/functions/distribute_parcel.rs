@@ -40,7 +40,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    /// Commit Distribution
    let eh = hash_entry(distribution.clone())?;
    debug!("distribute_parcel() eh: {}", eh);
-   let _hh = create_entry(distribution)?;
+   let _hh = create_entry_relaxed(distribution)?;
    /// Done
    Ok(eh)
 }

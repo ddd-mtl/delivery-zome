@@ -17,7 +17,7 @@ pub fn respond_to_notice(input: RespondToNoticeInput) -> ExternResult<EntryHash>
    };
    let eh = hash_entry(reply.clone())?;
    /// Commit DeliveryReply
-   let _hh = create_entry(reply)?;
+   let _hh = create_entry_relaxed(reply)?;
    /// Done
    Ok(eh)
 }

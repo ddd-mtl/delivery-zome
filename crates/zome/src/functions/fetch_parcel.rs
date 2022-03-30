@@ -85,6 +85,6 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Option
 fn commit_ParcelReceived(input: ParcelReceived) -> ExternResult<EntryHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let eh = hash_entry(input.clone())?;
-   let _hh = create_entry(input)?;
+   let _hh = create_entry_relaxed(input)?;
    return Ok(eh);
 }

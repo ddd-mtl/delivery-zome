@@ -8,6 +8,7 @@ use crate::entry_kind::EntryKind;
 use crate::receive::*;
 use crate::utils_parcel::*;
 
+
 /// Zome Function
 /// Get All inbox items waiting for this agent (pending links) and process them.
 /// Return HeaderHashs of parcels committed during the pull
@@ -29,21 +30,21 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
             let res = receive_reply(pending_item.author.clone(), pending_item);
             match res {
                Err(e) => warn!("{}", e),
-               Ok(_) => { let _res = delete_link(link.create_link_hash); },
+               Ok(_) => { let _res = delete_link_relaxed(link.create_link_hash); },
             }
          },
          ItemKind::ParcelReceived => {
             let res = receive_reception(pending_item.author.clone(), pending_item);
             match res {
                Err(e) => warn!("{}", e),
-               Ok(_) => { let _res = delete_link(link.create_link_hash); },
+               Ok(_) => { let _res = delete_link_relaxed(link.create_link_hash); },
             }
          },
          ItemKind::DeliveryNotice => {
             let res = receive_notice(pending_item.author.clone(), pending_item);
             match res {
                Err(e) => warn!("{}", e),
-               Ok(_) => { let _res = delete_link(link.create_link_hash); },
+               Ok(_) => { let _res = delete_link_relaxed(link.create_link_hash); },
             }
          },
          /// Behavior specific to DHT
@@ -93,7 +94,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    let my_replies: Vec<DeliveryReply> = get_all_typed_local(EntryKind::DeliveryReply.as_type())?;
    debug!("pull_inbox() my_replies: {}", my_replies.len());
    for reply in my_replies {
-      debug!("pull_inbox() reply: {:?}", reply);
+      //debug!("pull_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
          let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
          unreceived_entries.insert(notice.summary.parcel_reference.entry_address(), notice.clone());
@@ -117,6 +118,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    /// Process entries
    for (eh, (entry, link)) in entry_map.iter() {
       if let Some(notice) = unreceived_entries.get(eh) {
+         println!("pull_inbox() commit parcel from link: {:?}", link.create_link_hash.clone());
          let hh = call_commit_parcel(
             entry.to_owned(),
             notice,
@@ -128,7 +130,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    /// Process manifests
    for (eh, manifest) in manifest_map.iter() {
       if let Some(_notice) = unreceived_entries.get(eh) {
-         let hh = create_entry(manifest)?;
+         let hh = create_entry_relaxed(manifest.clone())?;
          hhs.push(hh);
          manifest.chunks.iter().for_each(|x|unreceived_chunks.push(x.clone()));
       }
@@ -137,8 +139,8 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    /// Process chunks
    for (eh, (entry, link)) in chunk_map.iter() {
       if unreceived_chunks.contains(eh) {
-         let hh = create_entry(entry)?;
-         let _link_hh = delete_link(link.create_link_hash.clone())?;
+         let hh = create_entry_relaxed(entry.clone())?;
+         let _link_hh = delete_link_relaxed(link.create_link_hash.clone())?;
          hhs.push(hh);
       }
    }

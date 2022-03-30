@@ -76,7 +76,14 @@ impl SecretAgent {
          I: serde::Serialize + std::fmt::Debug,
          O: serde::de::DeserializeOwned + std::fmt::Debug,
    {
-      return self.cell.call_any_zome(zome_name, fn_name, payload).await;
+
+      let res = self.cell.call_any_zome(zome_name, fn_name, payload).await;
+      if let Err(e) = res {
+         println!("Zome call failed {}::{}(): {:?}", zome_name, fn_name, e);
+         self.print_chain(0).await;
+         panic!();
+      }
+      res.unwrap()
    }
 
 
@@ -86,7 +93,7 @@ impl SecretAgent {
       I: serde::Serialize + std::fmt::Debug,
       O: serde::de::DeserializeOwned + std::fmt::Debug,
    {
-      return self.cell.call_any_zome("secret", fn_name, payload).await;
+      return self.call_any_zome("secret", fn_name, payload).await;
    }
 
 
@@ -97,12 +104,20 @@ impl SecretAgent {
       fn_name: &str,
       payload: P,
       predicat: fn(res: &T) -> bool,
-   ) -> Result<T, ()>
+   ) -> T
       where
          T: serde::de::DeserializeOwned + std::fmt::Debug,
          P: Clone + serde::Serialize + std::fmt::Debug,
    {
-      return self.cell.try_call_zome(zome_name, fn_name, payload, predicat).await;
+      let res = self.cell.try_call_zome(zome_name, fn_name, payload, predicat).await;
+      match res {
+         Ok(value) => value,
+         Err(e) => {
+            println!("try_call_zome() failed {}::{}(): {:?}", zome_name, fn_name, e);
+            self.print_chain(0).await;
+            panic!();
+         },
+      }
    }
 
 
@@ -142,14 +157,21 @@ impl SecretAgent {
       let maybe_output: Option<GetNoticeOutput> = self.call_any_zome("delivery", "get_notice", distribution_eh.clone())
                                                        .await;
       let notice_state = maybe_output.unwrap().state;
-      //println!("Notice state: {:?}", notice_state);
+      if notice_state != required_state {
+         println!("\n assert_notice_state() failed for distribution: {}", distribution_eh);
+         self.print_chain(0).await;
+      }
       assert_eq!(notice_state, required_state);
    }
 
    ///
    pub async fn assert_distribution_state(&self, distribution_eh: EntryHash, required_state: DistributionState) {
-      let state: DistributionState = self.call_any_zome("delivery", "get_distribution_state", distribution_eh).await;
+      let state: DistributionState = self.call_any_zome("delivery", "get_distribution_state", distribution_eh.clone()).await;
       //println!("Distribution state: {:?}", state);
+      if state != required_state {
+         println!("\n assert_distribution_state() failed for distribution: {}", distribution_eh);
+         self.print_chain(0).await;
+      }
       assert_eq!(state, required_state);
    }
 
@@ -165,6 +187,16 @@ impl SecretAgent {
       false
    }
 
+   pub fn has_signals(&self, kind: &SignalKind, eh: &EntryHash, expected_count: u32) -> bool {
+      let mut count = 0;
+      for signal in self.signals.iter() {
+         if signal.is(kind, eh) {
+            count += 1;
+         }
+      }
+      return count == expected_count;
+   }
+
    ///
    pub async fn pull_and_wait_for_signal(&mut self, kind: SignalKind, eh: &EntryHash) -> Result<(), ()> {
       for _ in 0..10u32 {
@@ -175,8 +207,24 @@ impl SecretAgent {
          };
          tokio::time::sleep(std::time::Duration::from_millis(2 * 1000)).await;
       }
+      self.print_chain(0).await;
       Err(())
    }
+
+   ///
+   pub async fn pull_and_wait_for_signals(&mut self, kind: SignalKind, eh: &EntryHash, expected_count: u32) -> Result<(), ()> {
+      for _ in 0..10u32 {
+         let _ = self.pull_inbox().await;
+         let _ = self.drain_signals().await;
+         if self.has_signals(&kind, eh, expected_count) {
+            return Ok(())
+         };
+         tokio::time::sleep(std::time::Duration::from_millis(2 * 1000)).await;
+      }
+      self.print_chain(0).await;
+      Err(())
+   }
+
 }
 
 

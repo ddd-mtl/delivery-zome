@@ -52,9 +52,12 @@ pub fn send_item(
       };
       debug!("send_item() - calling commit_pending_item()");
       let response = call_self("commit_pending_item", input)?;
-      debug!("send_item() - commit_pending_item() response: {:?}", response);
+      //debug!("send_item() - commit_pending_item() response: {:?}", response);
       return match response {
          ZomeCallResponse::Ok(_) => Ok(SendSuccessKind::OK_PENDING),
+         ZomeCallResponse::NetworkError(err) => {
+            return error(&format!("call_self() to commit_pending_item() failed: {}", err));
+         },
          _ => error("call_self() to commit_pending_item() failed"),
       };
    }

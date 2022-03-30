@@ -41,6 +41,19 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: 
         input.clone(),
     )?;
     let hh = decode_response(response)?;
+
+    // /// Delete Link
+    // if let Some(link_hh) = input.maybe_link_hh {
+    //    debug!("call_commit_parcel() delete_link {:?}", link_hh);
+    //        let input = DeleteLinkInput::new(link_hh,
+    //           ChainTopOrdering::Relaxed,
+    //        );
+    //     let _hh = HDK.with(|h| {
+    //         h.borrow()
+    //          .delete_link(input)
+    //     })?;
+    // }
+
     /// Create ParcelReceived if its an AppEntry
     /// (for a Manifest, we have to wait for all chunks to be received)
     if let ParcelReference::AppEntry(..) = notice.summary.parcel_reference {

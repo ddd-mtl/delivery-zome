@@ -58,8 +58,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    /// B checks if Notice received
    let waiting_parcels: Vec<EntryHash> = billy.try_call_zome("secret","get_secrets_from", alex.key(),
                                                        |result: &Vec<EntryHash>| {result.len() == 1})
-      .await
-      .expect("Should have a waiting parcel");
+      .await;
    println!("parcel requests received: {}\n", waiting_parcels.len());
    billy.drain_signals().await;
    assert!(billy.has_signal(&SignalKind::ReceivedNotice, &distribution_eh));
@@ -85,8 +84,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
       // let _: Vec<HeaderHash> = conductors[1].call(&cells[1].zome("delivery"), "pull_inbox", ()).await;
       let _: Vec<HeaderHash> = billy.try_call_zome("delivery", "pull_inbox", (),
                                              |result: &Vec<HeaderHash>| { result.len() == 1 })
-         .await
-         .expect("Should have received 1 parcel");
+         .await;
    }
    billy.drain_signals().await;
    assert!(billy.has_signal(&SignalKind::ReceivedParcel, &secret_eh));
@@ -129,8 +127,7 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    /// B checks if request received
    let waiting_parcels: Vec<EntryHash> = billy.try_call_zome("secret", "get_secrets_from", alex.key(),
                                                        |result: &Vec<EntryHash>| {result.len() == 1})
-      .await
-      .expect("Should have a waiting parcel");
+      .await;
    println!("parcel requests received: {}\n", waiting_parcels.len());
    billy.assert_notice_state(distribution_eh.clone(), NoticeState::Unreplied).await;
 
