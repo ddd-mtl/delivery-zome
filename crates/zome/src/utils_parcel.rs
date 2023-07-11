@@ -30,8 +30,17 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: 
     let input = CommitParcelInput {
         entry_def_id: notice.summary.parcel_reference.entry_def_id(),
         entry: entry.clone(),
-        maybe_link_hh,
+        maybe_link_hh: maybe_link_hh.clone(),
     };
+
+    /// Make sure CreateLink exists
+    if let Some(link_hh) = maybe_link_hh {
+        let maybe_el = get(link_hh.clone(), GetOptions::default())?;
+        if maybe_el.is_none() {
+            return Err(WasmError::Guest("call_commit_parcel(): CreateLink not found.".to_string()));
+        }
+    }
+
     debug!("call_commit_parcel() zome_name = {:?}", notice.summary.parcel_reference.entry_zome_name());
     let response = call_remote(
         agent_info()?.agent_latest_pubkey,

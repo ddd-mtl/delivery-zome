@@ -119,6 +119,15 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    for (eh, (entry, link)) in entry_map.iter() {
       if let Some(notice) = unreceived_entries.get(eh) {
          println!("pull_inbox() commit parcel from link: {:?}", link.create_link_hash.clone());
+
+         /// Make sure CreateLink exists
+         let maybe_el = get(link.create_link_hash.clone(), GetOptions::default())?;
+         if maybe_el.is_none() {
+            warn!("pull_inbox(): CreateLink not found.");
+            // return Err(WasmError::Guest("pull_inbox(): CreateLink not found.".to_string()));
+            continue;
+         }
+
          let hh = call_commit_parcel(
             entry.to_owned(),
             notice,

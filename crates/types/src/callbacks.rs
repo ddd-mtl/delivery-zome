@@ -28,6 +28,12 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
    /// Delete Link
    if let Some(link_hh) = input.maybe_link_hh {
       debug!("commit_parcel() delete_link: {:?}", link_hh);
+      /// Make sure CreateLink exists
+      let maybe_el = get(link_hh.clone(), GetOptions::default())?;
+      if maybe_el.is_none() {
+         return Err(WasmError::Guest("CreateLink not found.".to_string()));
+      }
+      /// Delete
       let input = DeleteLinkInput::new(link_hh,
          ChainTopOrdering::Relaxed,
       );
