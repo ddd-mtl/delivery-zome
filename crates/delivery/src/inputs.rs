@@ -1,6 +1,6 @@
 //! All Zome function input types
 
-use hdk::prelude::*;
+use hdi::prelude::*;
 
 use crate::delivery::*;
 use crate::DeliveryNotice;

@@ -1,4 +1,4 @@
-use hdk::prelude::*;
+use hdi::prelude::*;
 
 use strum::IntoEnumIterator;
 use crate::link_kind::*;

@@ -1,12 +1,12 @@
 //! All zome entry types
 
-use hdk::prelude::*;
+use hdi::prelude::*;
 
-use crate::delivery::*;
+use zome_delivery_types::*;
 
 
 /// Entry representing a received Manifest
-#[hdk_entry(id = "DeliveryNotice", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct DeliveryNotice {
    pub distribution_eh: EntryHash,
@@ -17,7 +17,7 @@ pub struct DeliveryNotice {
 
 
 /// Entry for confirming a delivery has been well received or refused by a recipient
-#[hdk_entry(id = "DeliveryReceipt", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct DeliveryReceipt {
    pub distribution_eh: EntryHash,
@@ -28,7 +28,7 @@ pub struct DeliveryReceipt {
 
 
 /// Entry for confirming a delivery has been well received or refused by a recipient
-#[hdk_entry(id = "DeliveryReply", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct DeliveryReply {
    pub notice_eh: EntryHash,
@@ -36,7 +36,7 @@ pub struct DeliveryReply {
 }
 
 /// Entry representing a request to send a Parcel to one or multiple recipients
-#[hdk_entry(id = "Distribution", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Distribution {
    pub recipients: Vec<AgentPubKey>,
@@ -46,7 +46,7 @@ pub struct Distribution {
 
 
 /// Entry for confirming a manifest has been well received by a recipient
-#[hdk_entry(id = "NoticeReceived", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct NoticeReceived {
    pub distribution_eh: EntryHash,
@@ -57,14 +57,14 @@ pub struct NoticeReceived {
 
 
 /// Entry representing a file chunk.
-#[hdk_entry(id = "ParcelChunk", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelChunk {
    pub data: String,
 }
 
 /// WARN : Change MANIFEST_ENTRY_NAME const when renaming
-#[hdk_entry(id = "ParcelManifest", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelManifest {
    pub name: String,
@@ -77,7 +77,7 @@ pub struct ParcelManifest {
 
 /// Entry for confirming a delivery has been well received or refused by a recipient
 /// TODO: This should be a private link instead of an entry
-#[hdk_entry(id = "ParcelReceived", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelReceived {
    pub notice_eh: EntryHash,
@@ -115,7 +115,7 @@ impl ItemKind {
 /// waiting to be received by some recipient.
 /// The Entry is encrypted with the recipient's public encryption key.
 /// The recipient is the agentId where the entry is linked from.
-#[hdk_entry(id = "PendingItem")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct PendingItem {
    pub kind: ItemKind,
@@ -127,7 +127,7 @@ pub struct PendingItem {
 
 
 /// Entry for confirming a delivery has been well received or refused by a recipient
-#[hdk_entry(id = "ReplyReceived", visibility = "private")]
+#[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ReplyReceived {
    pub distribution_eh: EntryHash,
@@ -135,22 +135,4 @@ pub struct ReplyReceived {
    pub has_accepted: bool,
    pub recipient_signature: Signature,
    //pub date_of_reply: u64,
-}
-
-
-/// Entry representing the Public Encryption Key of an Agent
-#[hdk_entry(id = "PubEncKey", visibility = "public")]
-#[derive(Clone, PartialEq)]
-pub struct PubEncKey {
-   pub value: X25519PubKey,
-}
-
-impl PubEncKey {
-   pub fn new() -> Self {
-      let value = create_x25519_keypair()
-         .expect("Create Keypair should work");
-      Self {
-         value,
-      }
-   }
 }

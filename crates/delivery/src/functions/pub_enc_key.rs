@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use zome_utils::*;
-use zome_delivery_types::PubEncKey;
+use zome_delivery_integrity::PubEncKey;
 
 use crate::link_kind::*;
 

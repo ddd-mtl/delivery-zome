@@ -1,7 +1,8 @@
 [package]
 name = "zome_delivery_types"
-version = "0.0.1"
-edition = "2021"
+version.workspace = true
+rust-version.workspace = true
+edition.workspace = true
 
 # Ensure that this is not inside of any other workspace.
 # This crate should be an implementation detail of test_utils_wasm and
@@ -9,10 +10,8 @@ edition = "2021"
 #[workspace]
 
 [lib]
-name = "zome_delivery_types"
 crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
-serde = { version = "1.0", default-features = false }
-
-hdk = { version = "0.0.122", default-features = false }
+serde.workspace = true
+hdi.workspace = true

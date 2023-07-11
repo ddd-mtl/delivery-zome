@@ -17,13 +17,11 @@ mod functions;
 
 mod constants;
 mod dm_protocol;
-mod entry_kind;
 mod link_kind;
 mod receive;
 mod send_dm;
 mod send_item;
 mod utils_parcel;
-mod zome_entry_trait;
 mod unpack_item;
 mod pack_item;
 

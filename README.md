@@ -2,12 +2,10 @@
 
 Holochain Zome Module for sending private data between agents asynchronously.
 
-CI and NIX configs are not set up for the moment.
-
 
 ## Design
 
-Enable private sharing of custom data between P2P agents.
+Enable private sharing of custom data between P2P agents (parcels).
 Features:
  - Sign and encrypt parcels
  - Delivery Receipt
@@ -29,7 +27,7 @@ A sender can send any Entry to a list of recipients
 The Entry must be first committed to the sender's source chain.
 The recipient has the option to accept or refuse an incoming delivery.
 
-The module is to be used by other zomes (via inter-zome calls) on their own entry types.
+The module is to be used by other zomes (via inter-zome calls) for their own entry types.
 
 ?Parcel types can have the option to not be refusable (ex: acks, mails)? With parcel trait?
 

@@ -7,14 +7,22 @@ use strum_macros::AsRefStr;
 use strum_macros::EnumIter;
 use strum::EnumProperty;
 
-use zome_utils::*;
-
 use crate::entry_kind::*;
+
+
+
+// /// List of all Link kinds handled by this Zome
+// #[hdk_link_types]
+// #[derive(Serialize, Deserialize)]
+// pub enum LinkKind {
+//    EncKey,
+// }
 
 
 pub const LinkSeparator: &'static str = "___";
 
 /// List of all Link kinds handled by this Zome
+#[hdk_link_types]
 #[derive(AsRefStr, EnumIter, EnumProperty, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum LinkKind {
    #[strum(props(BaseType = "Path", TargetType = "AgentPubKey"))]

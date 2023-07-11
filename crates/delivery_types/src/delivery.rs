@@ -1,6 +1,6 @@
 //! Delivery related types and states
 
-use hdk::prelude::*;
+use hdi::prelude::*;
 
 const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
 
@@ -102,7 +102,7 @@ impl ParcelReference {
 
    pub fn entry_def_id(&self) -> EntryDefId {
       match self {
-         ParcelReference::Manifest(_) => EntryDefId::App(MANIFEST_ENTRY_NAME.to_string()),
+         ParcelReference::Manifest(_) => EntryDefId::App(MANIFEST_ENTRY_NAME.to_string().into()),
          ParcelReference::AppEntry(_, id, _) => id.to_owned(),
       }
    }
