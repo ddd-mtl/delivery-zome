@@ -2,10 +2,9 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 use hdk::prelude::*;
 use zome_utils::*;
-use zome_delivery_types::*;
 
-use crate::functions::*;
-use crate::entry_kind::*;
+use zome_delivery_integrity::*;
+use crate::*;
 
 
 /// Zone Function
@@ -46,7 +45,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
       parcel_eh: manifest_eh,
    };
    let received_eh = hash_entry(received.clone())?;
-   let _hh = create_entry_relaxed(received.clone())?;
+   let _hh = create_entry_relaxed(DeliveryEntry::ParcelReceived(received.clone()))?;
    /// Emit Signal
    let res = emit_signal(&SignalProtocol::ReceivedParcel(received));
    if let Err(err) = res {
@@ -62,11 +61,11 @@ pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelMan
    /// Get all Create ParcelManifest Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
-      .header_type(HeaderType::Create)
-      .entry_type(EntryKind::ParcelManifest.as_type());
+      .action_type(ActionType::Create)
+      .entry_type(DeliveryEntryTypes::ParcelManifest.try_into().unwrap());
    let manifests = query(query_args)?;
-   for manifest_el in manifests {
-      let manifest: ParcelManifest = get_typed_from_el(manifest_el)?;
+   for manifest_record in manifests {
+      let manifest: ParcelManifest = get_typed_from_record(manifest_record)?;
       if manifest.chunks.contains(&chunk_eh) {
          return Ok(Some(manifest))
       }
@@ -81,11 +80,11 @@ pub fn find_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>>
    /// Get all Create DeliveryNotice Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
-      .header_type(HeaderType::Create)
-      .entry_type(EntryKind::DeliveryNotice.as_type());
+      .action_type(ActionType::Create)
+      .entry_type(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap());
    let notices = query(query_args)?;
    for notice_el in notices {
-      let notice: DeliveryNotice = get_typed_from_el(notice_el)?;
+      let notice: DeliveryNotice = get_typed_from_record(notice_el)?;
       let summary_eh = notice.summary.parcel_reference.entry_address();
       if summary_eh == parcel_eh {
          return Ok(Some(notice));

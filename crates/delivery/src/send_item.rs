@@ -2,6 +2,7 @@ use hdk::prelude::*;
 
 use zome_utils::*;
 use zome_delivery_types::*;
+use zome_delivery_integrity::*;
 
 use crate::{
    send_dm, DeliveryProtocol,

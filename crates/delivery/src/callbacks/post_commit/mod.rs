@@ -5,30 +5,40 @@ mod parcel_manifest;
 mod parcel_received;
 mod reply_received;
 
+pub use distribution::*;
+pub use delivery_reply::*;
+pub use parcel_chunk::*;
+pub use parcel_manifest::*;
+pub use parcel_received::*;
+pub use reply_received::*;
+
 
 use hdk::prelude::*;
 use zome_utils::*;
-//use crate::entry_kind::*;
+use zome_delivery_integrity::*;
+
+
+
 
 /// Zome Callback
 #[hdk_extern(infallible)]
-fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
-   debug!("post_commit() called for {} entries", signedHeaderList.len());
+fn post_commit(signedActionList: Vec<SignedActionHashed>) {
+   debug!("post_commit() called for {} entries", signedActionList.len());
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Process each header
-   for signedHeader in signedHeaderList {
-      trace!(" - {:?}", signedHeader.header().entry_type());
-      let header = signedHeader.header();
-      if header.entry_type().is_none() {
+   /// Process each Action
+   for signedAction in signedActionList {
+      trace!(" - {:?}", signedAction.action().entry_type());
+      let action = signedAction.action();
+      if action.entry_type().is_none() {
          continue;
       }
-      let (eh, entry_type) = header.entry_data().unwrap();
+      let (eh, entry_type) = action.entry_data().unwrap();
       match entry_type {
          EntryType::AgentPubKey => {},
          EntryType::CapClaim => {},
          EntryType::CapGrant => {},
-         EntryType::App(app_type) => {
-            let result = post_commit_app_entry(eh, app_type);
+         EntryType::App(app_entry_def) => {
+            let result = post_commit_app_entry(eh, app_entry_def);
             debug!(" << post_commit() result = {:?}", result);
          },
       }
@@ -36,28 +46,33 @@ fn post_commit(signedHeaderList: Vec<SignedHeaderHashed>) {
 }
 
 
-/// Call trait ZomeEntry::post_commit()
-fn post_commit_app_entry(eh: &EntryHash, app_type: &AppEntryType) -> ExternResult<()> {
-   debug!(" >> post_commit() called for a {:?}", app_type);
+///
+fn post_commit_app_entry(eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
+   debug!(" >> post_commit() called for a {:?}", app_entry_def);
    /// Get Entry from local chain
    let monad: HashSet<EntryHash> = HashSet::from([eh.clone()]);
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
       .entry_hashes(monad);
-   let elements = query(query_args)?;
-   if elements.is_empty() {
-      return error("Post committed entry not found on chain");
+   let records = query(query_args)?;
+   if records.is_empty() {
+      return zome_error!("Post committed entry not found on chain");
    }
-   let entry = elements[0].entry().as_option().unwrap();
+   let entry = records[0].entry().as_option().unwrap().to_owned();
    /// Deserialize it and call its post_commit()
-   if let Entry::App(entry_bytes) = entry {
-      let entry_kind = EntryKind::from_index(&app_type.id());
-      let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes.clone())?;
-      let res = delivery_zome_entry.post_commit(eh);
-      if let Err(e) = res {
-         error!("app post_commit() failed: {:?}", e);
-      }
-      return Ok(());
+   let Entry::App(ref entry_bytes) = entry
+      else {
+         return zome_error!("EntryHash has already been filtered as an App type");
+      };
+
+   // let entry_kind = EntryKind::from_index(&app_entry_def.id());
+
+   // let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes.clone())?;
+   let variant = entry_index_to_variant(app_entry_def.entry_index)?;
+   match variant {
+      DeliveryEntryTypes::Distribution => post_commit_Distribution(entry, eh),
+      DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(entry, eh),
+      DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(entry, eh),
+      _ => Ok(()),
    }
-   return error("EntryHash has already been filtered as an App type");
 }

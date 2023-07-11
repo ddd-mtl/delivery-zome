@@ -122,7 +122,7 @@ impl SecretAgent {
 
 
    ///
-   pub async fn pull_inbox(&self) -> Vec<HeaderHash> {
+   pub async fn pull_inbox(&self) -> Vec<ActionHash> {
       return self.call_any_zome("delivery", "pull_inbox", ()).await;
    }
 

@@ -1,9 +1,8 @@
 use hdk::prelude::*;
 use zome_utils::*;
-use zome_delivery_types::*;
-use crate::functions::get_state::get_notice_state;
 
-use crate::functions::query::*;
+use zome_delivery_integrity::*;
+use crate::*;
 
 /// Zone Function
 /// Return DeliveryNotice from which we received a Parcel

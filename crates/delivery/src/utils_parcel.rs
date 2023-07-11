@@ -1,9 +1,9 @@
 use hdk::prelude::*;
 use zome_utils::*;
+
 use zome_delivery_types::*;
-
-use crate::link_kind::*;
-
+use zome_delivery_integrity::*;
+use crate::*;
 
 ///
 pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
@@ -11,7 +11,8 @@ pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(Pe
     let my_agent_eh = EntryHash::from(agent_info()?.agent_latest_pubkey);
     let mut pending_pairs = get_typed_from_links::<PendingItem>(
         my_agent_eh.clone(),
-        LinkKind::Inbox.as_tag_opt(),
+        LinkTypes::Inbox,
+        None,
     )?;
     /// Filter
     if maybe_kind.is_some() {
@@ -24,20 +25,22 @@ pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(Pe
 
 
 /// Call The Zome owner of the entry to commit it
-pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: Option<HeaderHash>)
-    -> ExternResult<HeaderHash>
+pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: Option<ActionHash>)
+    -> ExternResult<ActionHash>
 {
     let input = CommitParcelInput {
-        entry_def_id: notice.summary.parcel_reference.entry_def_id(),
+        zome_index: ZomeIndex::from(get_zome_index(notice.summary.parcel_reference.entry_zome_name())?),
+        entry_index: notice.summary.parcel_reference.entry_index(),
+        entry_visibility: notice.summary.parcel_reference.entry_visibility(),
         entry: entry.clone(),
-        maybe_link_hh: maybe_link_hh.clone(),
+        maybe_link_ah: maybe_link_ah.clone(),
     };
 
     /// Make sure CreateLink exists
-    if let Some(link_hh) = maybe_link_hh {
+    if let Some(link_hh) = maybe_link_ah {
         let maybe_el = get(link_hh.clone(), GetOptions::default())?;
         if maybe_el.is_none() {
-            return Err(WasmError::Guest("call_commit_parcel(): CreateLink not found.".to_string()));
+            return zome_error!("call_commit_parcel(): CreateLink not found.");
         }
     }
 
@@ -49,7 +52,7 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: 
         None,
         input.clone(),
     )?;
-    let hh = decode_response(response)?;
+    let ah = decode_response(response)?;
 
     // /// Delete Link
     // if let Some(link_hh) = input.maybe_link_hh {
@@ -80,7 +83,7 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_hh: 
         }
     }
     /// Done
-    Ok(hh)
+    Ok(ah)
 }
 
 
@@ -96,7 +99,7 @@ pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
     let entry = element
        .entry()
        .as_option()
-       .ok_or(WasmError::Guest(String::from("No AppEntry found at given payload address")))
+       .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No AppEntry found at given payload address"))))
        ?
        .to_owned();
     if let Entry::App(app_bytes) = entry {

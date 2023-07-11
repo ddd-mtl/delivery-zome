@@ -9,14 +9,23 @@ mod entry_types;
 
 mod pub_enc_key;
 mod validate_app_entry;
-//mod validate_link;
 pub use entry_types::*;
 
 pub use pub_enc_key::*;
 
 
-
 use hdi::prelude::*;
+
+/// List of all Link kinds handled by this Zome
+#[hdk_link_types]
+#[derive(Serialize, Deserialize)]
+pub enum LinkTypes {
+   EncKey,
+   Members,
+   Inbox,
+   Pendings,
+}
+
 
 #[hdk_entry_defs]
 #[unit_enum(DeliveryEntryTypes)]
@@ -34,7 +43,7 @@ pub enum DeliveryEntry {
    #[entry_def(required_validations = 1, visibility = "private")]
    ParcelChunk(ParcelChunk),
    #[entry_def(required_validations = 1, visibility = "private")]
-   ParcelManifest(ParcelManifest),
+   ParcelManifest(ParcelManifest), // WARN. DONT MOVE THIS
    #[entry_def(required_validations = 1, visibility = "private")]
    ParcelReceived(ParcelReceived),
    #[entry_def(required_validations = 1, visibility = "private")]

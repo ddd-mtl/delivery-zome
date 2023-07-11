@@ -12,7 +12,7 @@
 //    // let billy;
 //    // {
 //    //    let (mut conductor1, billy_temp, cell1) = setup_1_conductor().await;
-//    //    let _: HeaderHash = conductor1.call(&cell1.zome("snapmail"), "set_handle", BILLY_NICK).await;
+//    //    let _: ActionHash = conductor1.call(&cell1.zome("snapmail"), "set_handle", BILLY_NICK).await;
 //    //    billy = billy_temp.clone();
 //    //    conductor1.shutdown().await;
 //    // }
@@ -22,9 +22,9 @@
 //    // let _agents = vec![&alex, &billy, &camille];
 //    // //let cells = vec![&cell0, &cell1, &cell2];
 //    //
-//    // let _: HeaderHash = conductor0.call(&cell0.zome("snapmail"), "set_handle", ALEX_NICK).await;
+//    // let _: ActionHash = conductor0.call(&cell0.zome("snapmail"), "set_handle", ALEX_NICK).await;
 //    //
-//    // let _: HeaderHash = conductor2.call(&cell2.zome("snapmail"), "set_handle", CAMILLE_NICK).await;
+//    // let _: ActionHash = conductor2.call(&cell2.zome("snapmail"), "set_handle", CAMILLE_NICK).await;
 //
 //    // consistency_10s(cells.as_slice()).await;
 //    //println!("consistency done!");
@@ -51,7 +51,7 @@
 //       bcc: vec![],
 //       manifest_address_list: vec![],
 //    };
-//    let outmail_hh: HeaderHash = conductors[0].call(
+//    let outmail_hh: ActionHash = conductors[0].call(
 //       &cells[0].zome("snapmail"),
 //       "send_mail",
 //       mail,
@@ -78,10 +78,10 @@
 //    print_chain(&conductors[1], &agents[1], &cells[1]).await;
 //
 //    /// B checks inbox
-//    try_zome_call(&conductors[1], cells[1], "check_mail_inbox", (), |res:&Vec<HeaderHash>| {res.len() > 0})
+//    try_zome_call(&conductors[1], cells[1], "check_mail_inbox", (), |res:&Vec<ActionHash>| {res.len() > 0})
 //       .await
 //       .expect("Should have one mail");
-//    let mail_hhs = try_zome_call(&conductors[1], cells[1], "get_all_unacknowledged_inmails", (), |res:&Vec<HeaderHash>| {res.len() > 0})
+//    let mail_hhs = try_zome_call(&conductors[1], cells[1], "get_all_unacknowledged_inmails", (), |res:&Vec<ActionHash>| {res.len() > 0})
 //       .await
 //       .expect("Should have one mail");
 //

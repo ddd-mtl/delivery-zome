@@ -2,7 +2,8 @@
 
 use hdi::prelude::*;
 
-const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
+
+//const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
 
 
 // #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -12,7 +13,7 @@ const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
 //
 // #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 // pub struct IncomingDeliveryItem {
-//    pub hh: HeaderHash,
+//    pub hh: ActionHash,
 //    pub author: AgentPubKey,
 //    //pub parcel: Parcel,
 //    pub state: NoticeState,
@@ -87,7 +88,7 @@ pub struct DeliverySummary {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ParcelReference {
    /// Any Entry type
-   AppEntry(ZomeName, EntryDefId, EntryHash),
+   AppEntry(ZomeName, EntryDefIndex, EntryHash, EntryVisibility),
    /// A ParcelManifest
    Manifest(EntryHash),
 }
@@ -96,21 +97,28 @@ impl ParcelReference {
    pub fn entry_address(&self) -> EntryHash {
       match self {
          ParcelReference::Manifest(eh) => eh.clone(),
-         ParcelReference::AppEntry(_,_, eh) => eh.clone(),
+         ParcelReference::AppEntry(_,_, eh,_) => eh.clone(),
       }
    }
 
-   pub fn entry_def_id(&self) -> EntryDefId {
+   pub fn entry_index(&self) -> EntryDefIndex {
       match self {
-         ParcelReference::Manifest(_) => EntryDefId::App(MANIFEST_ENTRY_NAME.to_string().into()),
-         ParcelReference::AppEntry(_, id, _) => id.to_owned(),
+         ParcelReference::Manifest(_) => EntryDefIndex::from(6), // FIXME should not be hardcoded
+         ParcelReference::AppEntry(_, id, _, _) => id.to_owned(),
       }
    }
 
    pub fn entry_zome_name(&self) -> ZomeName {
       match self {
          ParcelReference::Manifest(_) => crate::DELIVERY_ZOME_NAME.to_string().into(),
-         ParcelReference::AppEntry(zn,_, _) => zn.clone(),
+         ParcelReference::AppEntry(zn,_, _, _) => zn.clone(),
+      }
+   }
+
+   pub fn entry_visibility(&self) -> EntryVisibility {
+      match self {
+         ParcelReference::Manifest(_) => EntryVisibility::Private,
+         ParcelReference::AppEntry(_,_, _, viz) => viz.clone(),
       }
    }
 }

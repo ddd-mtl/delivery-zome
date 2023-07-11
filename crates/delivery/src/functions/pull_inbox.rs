@@ -1,19 +1,16 @@
 use std::collections::HashMap;
 use hdk::prelude::*;
 use zome_utils::*;
+
 use zome_delivery_types::*;
-
-use crate::functions::*;
-use crate::entry_kind::EntryKind;
-use crate::receive::*;
-use crate::utils_parcel::*;
-
+use zome_delivery_integrity::*;
+use crate::*;
 
 /// Zome Function
 /// Get All inbox items waiting for this agent (pending links) and process them.
-/// Return HeaderHashs of parcels committed during the pull
+/// Return ActionHashs of parcels committed during the pull
 #[hdk_extern]
-pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
+pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    debug!("pull_inbox() START");
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all inbox items
@@ -83,17 +80,17 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    /// Get list of entries waiting to be received
    let mut unreceived_entries = HashMap::new();
    let mut unreceived_chunks = Vec::new();
-   let received_chunks: Vec<ParcelChunk> = get_all_typed_local(EntryKind::ParcelChunk.as_type())?;
+   let tuples = get_all_typed_local::<ParcelChunk>(EntryType::App(DeliveryEntryTypes::ParcelChunk.try_into().unwrap()))?;
    let mut received_chunks_ehs: Vec<EntryHash> = Vec::new();
-   for chunk in received_chunks {
+   for (_, _, chunk) in tuples {
       let chunk_eh = hash_entry(chunk)?;
       received_chunks_ehs.push(chunk_eh);
    }
-   let received_parcels: Vec<ParcelReceived> = get_all_typed_local(EntryKind::ParcelReceived.as_type())?;
-   let received_parcel_ehs: Vec<EntryHash> = received_parcels.iter().map(|x| x.notice_eh.clone()).collect();
-   let my_replies: Vec<DeliveryReply> = get_all_typed_local(EntryKind::DeliveryReply.as_type())?;
-   debug!("pull_inbox() my_replies: {}", my_replies.len());
-   for reply in my_replies {
+   let tuples = get_all_typed_local::<ParcelReceived>(EntryType::App(DeliveryEntryTypes::ParcelReceived.try_into().unwrap()))?;
+   let received_parcel_ehs: Vec<EntryHash> = tuples.iter().map(|(_, _, x)| x.notice_eh.clone()).collect();
+   let replies_tuples = get_all_typed_local::<DeliveryReply>(EntryType::App(DeliveryEntryTypes::DeliveryReply.try_into().unwrap()))?;
+   debug!("pull_inbox() my_replies: {}", replies_tuples.len());
+   for (_, _, reply) in replies_tuples {
       //debug!("pull_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
          let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
@@ -114,7 +111,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    }
    debug!("pull_inbox() unreceived entries: {}", unreceived_entries.len());
    /// Commit received parcels
-   let mut hhs = Vec::new();
+   let mut ahs = Vec::new();
    /// Process entries
    for (eh, (entry, link)) in entry_map.iter() {
       if let Some(notice) = unreceived_entries.get(eh) {
@@ -128,19 +125,19 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
             continue;
          }
 
-         let hh = call_commit_parcel(
+         let ah = call_commit_parcel(
             entry.to_owned(),
             notice,
             Some(link.create_link_hash.clone()),
          )?;
-         hhs.push(hh);
+         ahs.push(ah);
       }
    }
    /// Process manifests
    for (eh, manifest) in manifest_map.iter() {
       if let Some(_notice) = unreceived_entries.get(eh) {
-         let hh = create_entry_relaxed(manifest.clone())?;
-         hhs.push(hh);
+         let ah = create_entry_relaxed(DeliveryEntry::ParcelManifest(manifest.clone()))?;
+         ahs.push(ah);
          manifest.chunks.iter().for_each(|x|unreceived_chunks.push(x.clone()));
       }
    }
@@ -148,12 +145,12 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<HeaderHash>> {
    /// Process chunks
    for (eh, (entry, link)) in chunk_map.iter() {
       if unreceived_chunks.contains(eh) {
-         let hh = create_entry_relaxed(entry.clone())?;
+         let ah = create_entry_relaxed(DeliveryEntry::ParcelChunk(entry.clone()))?;
          let _link_hh = delete_link_relaxed(link.create_link_hash.clone())?;
-         hhs.push(hh);
+         ahs.push(ah);
       }
    }
    /// Done
-   debug!("pull_inbox() END - Received {} parcels ({})", parcel_count, hhs.len());
-   Ok(hhs)
+   debug!("pull_inbox() END - Received {} parcels ({})", parcel_count, ahs.len());
+   Ok(ahs)
 }

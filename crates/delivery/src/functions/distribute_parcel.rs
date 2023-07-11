@@ -1,8 +1,9 @@
 use hdk::prelude::*;
-use zome_delivery_types::*;
 use zome_utils::*;
 
-use crate::utils_parcel::*;
+use zome_delivery_types::*;
+use zome_delivery_integrity::*;
+use crate::*;
 
 
 /// Zone Function
@@ -17,7 +18,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    debug!("distribute_parcel() recipients: {}", recipients.len());
    /// Create ParcelSummary
    let size = match input.parcel_ref.clone() {
-      ParcelReference::AppEntry(_, _, eh) => get_app_entry_size(eh)?,
+      ParcelReference::AppEntry(_, _, eh, _) => get_app_entry_size(eh)?,
       ParcelReference::Manifest(eh) => {
          let manifest: ParcelManifest = get_typed_from_eh(eh.clone())?;
          manifest.size
@@ -40,7 +41,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    /// Commit Distribution
    let eh = hash_entry(distribution.clone())?;
    debug!("distribute_parcel() eh: {}", eh);
-   let _hh = create_entry_relaxed(distribution)?;
+   let _hh = create_entry_relaxed(DeliveryEntry::Distribution(distribution))?;
    /// Done
    Ok(eh)
 }

@@ -1,8 +1,9 @@
 use hdk::prelude::*;
 use zome_utils::*;
+
 use zome_delivery_types::*;
-use crate::functions::*;
-use crate::link_kind::LinkKind;
+use zome_delivery_integrity::*;
+use crate::*;
 
 
 ///
@@ -123,7 +124,8 @@ pub fn find_PendingItem(distribution_eh: EntryHash, recipient: AgentPubKey, kind
    -> ExternResult<Option<PendingItem>> {
    let mut pairs: Vec<(PendingItem, Link)> = get_typed_from_links(
       distribution_eh,
-      Some(LinkKind::Pendings.concat_hash(&recipient)),
+      LinkTypes::Pendings,
+      Some(LinkTag::from(recipient.as_ref().to_vec())),
    )?;
    pairs.retain(|pair| pair.0.kind == kind);
    /// Search through results

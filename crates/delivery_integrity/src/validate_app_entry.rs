@@ -18,10 +18,6 @@ pub(crate) fn validate_app_entry(_creation_action: EntryCreationAction, entry_in
 }
 
 
-
-
-
-
 ///
 fn validate_Distribution(entry: Entry) -> ExternResult<ValidateCallbackResult> {
     let distribution = Distribution::try_from(entry)?;
@@ -32,7 +28,6 @@ fn validate_Distribution(entry: Entry) -> ExternResult<ValidateCallbackResult> {
     //validate_parcel(input.parcel_description)?;
     Ok(ValidateCallbackResult::Valid)
 }
-
 
 
 ///

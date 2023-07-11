@@ -1,11 +1,8 @@
 use hdk::prelude::*;
 use zome_utils::*;
-use zome_delivery_types::*;
 
-use crate::send_dm::*;
-use crate::dm_protocol::*;
-use crate::functions::*;
-use crate::utils_parcel::*;
+use zome_delivery_integrity::*;
+use crate::*;
 
 
 /// Zone Function
@@ -85,6 +82,6 @@ pub fn pull_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Option
 fn commit_ParcelReceived(input: ParcelReceived) -> ExternResult<EntryHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let eh = hash_entry(input.clone())?;
-   let _hh = create_entry_relaxed(input)?;
+   let _hh = create_entry_relaxed(DeliveryEntry::ParcelReceived(input))?;
    return Ok(eh);
 }

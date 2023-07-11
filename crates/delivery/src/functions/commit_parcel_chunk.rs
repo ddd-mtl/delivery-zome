@@ -1,9 +1,8 @@
 use hdk::prelude::*;
-use zome_delivery_types::*;
 use zome_utils::*;
 
-use crate::constants::CHUNK_MAX_SIZE;
-
+use zome_delivery_types::*;
+use zome_delivery_integrity::*;
 
 /// Zome function
 /// Write base64 file as string to source chain
@@ -22,7 +21,7 @@ pub fn commit_parcel_chunk(data: String) -> ExternResult<EntryHash> {
    /// Commit entry
    let parcel_chunk = ParcelChunk {data};
    let chunk_eh = hash_entry(parcel_chunk.clone())?;
-   let _chunk_hh = create_entry(parcel_chunk)?;
+   let _chunk_hh = create_entry(DeliveryEntry::ParcelChunk(parcel_chunk))?;
    /// Done
    Ok(chunk_eh)
 }

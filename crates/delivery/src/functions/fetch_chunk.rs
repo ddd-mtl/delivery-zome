@@ -1,11 +1,8 @@
 use hdk::prelude::*;
-use zome_delivery_types::*;
 use zome_utils::*;
 
-use crate::send_dm::*;
-use crate::dm_protocol::*;
-use crate::functions::*;
-use crate::utils_parcel::*;
+use zome_delivery_integrity::*;
+use crate::*;
 
 pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
 

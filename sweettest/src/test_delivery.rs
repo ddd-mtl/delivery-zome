@@ -81,9 +81,9 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    /// B gets secret
    if strategy.can_dht() {
       println!("\n B trying to get secret pull_inbox()...\n");
-      // let _: Vec<HeaderHash> = conductors[1].call(&cells[1].zome("delivery"), "pull_inbox", ()).await;
-      let _: Vec<HeaderHash> = billy.try_call_zome("delivery", "pull_inbox", (),
-                                             |result: &Vec<HeaderHash>| { result.len() == 1 })
+      // let _: Vec<ActionHash> = conductors[1].call(&cells[1].zome("delivery"), "pull_inbox", ()).await;
+      let _: Vec<ActionHash> = billy.try_call_zome("delivery", "pull_inbox", (),
+                                             |result: &Vec<ActionHash>| { result.len() == 1 })
          .await;
    }
    billy.drain_signals().await;

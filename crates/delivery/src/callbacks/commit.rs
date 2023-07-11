@@ -2,40 +2,45 @@
 
 use hdk::prelude::*;
 
+use zome_utils::*;
+
 pub const COMMIT_PARCEL_CALLBACK_NAME: &'static str = "commit_parcel";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CommitParcelInput {
-   pub entry_def_id: EntryDefId,
+   pub zome_index: ZomeIndex,
+   pub entry_index: EntryDefIndex,
+   pub entry_visibility: EntryVisibility,
    pub entry: Entry,
-   pub maybe_link_hh: Option<HeaderHash>,
+   pub maybe_link_ah: Option<ActionHash>,
 }
 
 /// Zome Function Callback required by delivery-zome
 /// Should not be called directly. Only via remote call to self
 /// Name of this function must equal COMMIT_PARCEL_CALLBACK_NAME global constant
 #[hdk_extern]
-fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
-   debug!("commit_parcel() entry_def_id = {:?} | {}", input.entry_def_id, zome_info()?.name);
+fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
+   debug!("commit_parcel() entry_def_id = {:?} | {}", input.entry_index, zome_info()?.name);
    /// Create CreateInput
    let create_input = CreateInput::new(
-      input.entry_def_id,
+      EntryDefLocation::App(AppEntryDefLocation {zome_index: input.zome_index, entry_def_index: input.entry_index}),
+      input.entry_visibility,
       input.entry,
       ChainTopOrdering::Relaxed, // Strict //Relaxed
    );
    /// Commit Parcel
-   let parcel_hh = create_entry(create_input)?;
+   let parcel_ah = create(create_input)?;
    /// Delete Link
-   if let Some(link_hh) = input.maybe_link_hh {
-      debug!("commit_parcel() delete_link: {:?}", link_hh);
+   if let Some(link_ah) = input.maybe_link_ah {
+      debug!("commit_parcel() delete_link: {:?}", link_ah);
       /// Make sure CreateLink exists
-      let maybe_el = get(link_hh.clone(), GetOptions::default())?;
+      let maybe_el = get(link_ah.clone(), GetOptions::default())?;
       if maybe_el.is_none() {
-         return Err(WasmError::Guest("CreateLink not found.".to_string()));
+         return zome_error!("CreateLink not found.");
       }
       /// Delete
-      let input = DeleteLinkInput::new(link_hh,
-         ChainTopOrdering::Relaxed,
+      let input = DeleteLinkInput::new(link_ah,
+                                       ChainTopOrdering::Relaxed,
       );
       let _hh = HDK.with(|h| {
          h.borrow()
@@ -44,5 +49,5 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<HeaderHash> {
        // let _hh = delete_link(link_hh)?;
    }
    /// Done
-   Ok(parcel_hh)
+   Ok(parcel_ah)
 }

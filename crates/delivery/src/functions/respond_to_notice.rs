@@ -1,7 +1,8 @@
 use hdk::prelude::*;
-use zome_delivery_types::*;
 use zome_utils::*;
 
+use zome_delivery_integrity::*;
+use crate::*;
 
 /// Zone Function
 /// Return EntryHash of DeliveryReply
@@ -17,7 +18,7 @@ pub fn respond_to_notice(input: RespondToNoticeInput) -> ExternResult<EntryHash>
    };
    let eh = hash_entry(reply.clone())?;
    /// Commit DeliveryReply
-   let _hh = create_entry_relaxed(reply)?;
+   let _hh = create_entry_relaxed(DeliveryEntry::DeliveryReply(reply))?;
    /// Done
    Ok(eh)
 }

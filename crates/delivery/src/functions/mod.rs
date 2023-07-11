@@ -12,7 +12,9 @@ mod pub_enc_key;
 mod query;
 mod get_state;
 
+pub use get_state::*;
 
+pub use pub_enc_key::*;
 pub use crate::pack_item::*;
 pub use crate::unpack_item::*;
 pub use self::{

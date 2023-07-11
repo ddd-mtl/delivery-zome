@@ -1,9 +1,8 @@
 use hdk::prelude::*;
-use zome_delivery_types::*;
 use zome_utils::*;
 
-use crate::functions::*;
-
+use crate::*;
+use zome_delivery_integrity::*;
 
 ///
 pub fn unpack_item<T>(pending_item: PendingItem, from: AgentPubKey) -> ExternResult<Option<T>>

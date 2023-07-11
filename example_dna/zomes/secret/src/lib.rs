@@ -76,7 +76,7 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
    ///// Check inbox first
    // debug!("get_secret() - pull_inbox");
    // let response = call_delivery_zome("pull_inbox", ())?;
-   // let inbox_items: Vec<HeaderHash> = decode_response(response)?;
+   // let inbox_items: Vec<ActionHash> = decode_response(response)?;
    // debug!("get_secret() - inbox_items: {}", inbox_items.len());
    /// Try to get Secret
    let maybe_secret: ExternResult<Secret> = get_typed_from_eh(eh.clone());
@@ -160,7 +160,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
    debug!("get_secrets_from() START - pull_inbox");
    let response = call_delivery_zome("pull_inbox", ())?;
-   let inbox_items: Vec<HeaderHash> = decode_response(response)?;
+   let inbox_items: Vec<ActionHash> = decode_response(response)?;
    debug!("get_secrets_from() - inbox_items: {}", inbox_items.len());
    debug!("get_secrets_from() - query_DeliveryNotice");
    let response = call_delivery_zome(
@@ -216,6 +216,6 @@ pub fn respond_to_secret(parcel_eh: EntryHash, has_accepted: bool) -> ExternResu
 // #[hdk_extern]
 // pub fn pull_inbox(_: ()) -> ExternResult<()> {
 //    let response = call_delivery_zome("pull_inbox", ())?;
-//    let _: Vec<HeaderHash> = decode_response(response)?;
+//    let _: Vec<ActionHash> = decode_response(response)?;
 //    Ok(())
 // }

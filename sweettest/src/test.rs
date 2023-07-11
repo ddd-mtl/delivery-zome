@@ -124,5 +124,5 @@ pub async fn test_pub_enc_key() {
 
    //let _enc_key: holochain_zome_types::X25519PubKey = conductor.call(&cell1.zome("snapmail"), "get_my_enc_key", ()).await;
 
-   //let _handle_address1: HeaderHash = conductor.call(&cell1.zome("snapmail"), "set_handle", "toto").await;
+   //let _handle_address1: ActionHash = conductor.call(&cell1.zome("snapmail"), "set_handle", "toto").await;
 }

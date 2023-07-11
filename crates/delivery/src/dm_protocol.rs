@@ -1,13 +1,16 @@
 use std::fmt;
 use hdk::prelude::*;
-use zome_delivery_types::*;
+use zome_delivery_integrity::*;
 
 
+///
 pub fn failure(reason: &str) -> DeliveryProtocol {
     warn!(reason);
     return DeliveryProtocol::Failure(reason.to_string());
 }
 
+
+///
 pub fn failure_err(reason: &str, err: WasmError) -> DeliveryProtocol {
     let msg = format!("{}: {:?}", reason, err);
     warn!("{}", msg);

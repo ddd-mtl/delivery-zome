@@ -1,9 +1,9 @@
 //! All Zome function input types
 
-use hdi::prelude::*;
+use hdk::prelude::*;
 
-use crate::delivery::*;
-use crate::DeliveryNotice;
+use zome_delivery_types::*;
+use zome_delivery_integrity::*;
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

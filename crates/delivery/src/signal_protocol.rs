@@ -1,6 +1,6 @@
-use hdi::prelude::*;
+use hdk::prelude::*;
 
-use crate::*;
+use zome_delivery_integrity::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalKind {

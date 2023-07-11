@@ -82,7 +82,7 @@ pub struct ParcelManifest {
 pub struct ParcelReceived {
    pub notice_eh: EntryHash,
    pub parcel_eh: EntryHash,
-   //pub signed_parcel: SignedHeaderHashed, // signed header of parcel's Element
+   //pub signed_parcel: SignedActionHashed, // signed Action of parcel's record
 }
 
 

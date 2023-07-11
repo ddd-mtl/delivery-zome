@@ -1,21 +1,20 @@
 use hdk::prelude::*;
 use zome_utils::*;
-use zome_delivery_integrity::PubEncKey;
-
-use crate::link_kind::*;
+use zome_delivery_integrity::*;
 
 
 /// Create public encryption key and broadcast it
 pub fn create_enc_key() -> ExternResult<()> {
-   let new_key = PubEncKey::new();
+   let new_key = PubEncKey::new(create_x25519_keypair()?);
    let key_eh = hash_entry(&new_key)?;
-   let key_hh = create_entry(new_key)?;
+   let key_hh = create_entry(DeliveryEntry::PubEncKey(new_key))?;
    let my_agent_address = agent_info()?.agent_latest_pubkey;
    debug !("key_hh = {:?}", key_hh);
    let _ = create_link(
       EntryHash::from(my_agent_address),
       key_eh.clone(),
-      LinkKind::EncKey.as_tag(),
+      LinkTypes::EncKey,
+      LinkTag::from(()),
    )?;
    debug!("**** EncKey linked to agent!");
    Ok(())
@@ -28,7 +27,7 @@ pub fn get_enc_key(from: AgentPubKey) -> ExternResult<X25519PubKey> {
    trace!("*** get_enc_key() CALLED by {}()", call_info()?.function_name);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get All Handle links on agent ; should have only one
-   let key_links = get_links(from.into(), LinkKind::EncKey.as_tag_opt())
+   let key_links = get_links(EntryHash::try_from(from).unwrap(), LinkTypes::EncKey, None)
       .expect("No reason for this to fail");
    assert!(key_links.len() <= 1);
    if key_links.len() == 0 {
@@ -37,7 +36,7 @@ pub fn get_enc_key(from: AgentPubKey) -> ExternResult<X25519PubKey> {
    }
    /// Get the Entry from the link
    let key_eh = key_links[0].target.clone();
-   let key_and_hash = get_latest_typed_from_eh::<PubEncKey>(key_eh.clone())
+   let key_and_hash = get_latest_typed_from_eh::<PubEncKey>(EntryHash::try_from(key_eh).unwrap())
       .expect("No reason for get_entry to crash")
       .expect("Should have it");
    /// Done
