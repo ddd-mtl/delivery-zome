@@ -5,12 +5,12 @@ use zome_delivery_integrity::*;
 use zome_delivery_types::*;
 use crate::*;
 
-pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
+//pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
 
 /// Internal Zome Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[hdk_extern]
-fn fetch_chunk(input: FetchChunkInput) -> ExternResult<FetchChunkOutput> {
+fn fetch_chunk(input: FetchChunkInput) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
    trace!(" fetch_chunk() {:?}", input);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get DeliveryNotice
@@ -22,7 +22,7 @@ fn fetch_chunk(input: FetchChunkInput) -> ExternResult<FetchChunkOutput> {
 
 
 /// Try to retrieve the chunk entry
-fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<FetchChunkOutput> {
+fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
    if notice.summary.distribution_strategy.can_dht() {

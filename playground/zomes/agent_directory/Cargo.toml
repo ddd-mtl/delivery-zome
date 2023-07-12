@@ -1,0 +1,12 @@
+[package]
+edition = "2021"
+name = "agent_directory"
+version = "0.0.1"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+
+[dependencies]
+agent_directory_zome = {git = "https://github.com/ddd-mtl/agent-directory-zome", package = "agent_directory"}
+hdk.workspace = true

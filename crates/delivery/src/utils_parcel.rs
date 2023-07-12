@@ -29,8 +29,8 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
     -> ExternResult<ActionHash>
 {
     let input = CommitParcelInput {
-        zome_index: ZomeIndex::from(get_zome_index(notice.summary.parcel_reference.entry_zome_name())?),
-        entry_index: notice.summary.parcel_reference.entry_index(),
+        zome_index: get_zome_index(notice.summary.parcel_reference.entry_zome_name())?,
+        entry_index: notice.summary.parcel_reference.entry_index().0,
         entry_visibility: notice.summary.parcel_reference.entry_visibility(),
         entry: entry.clone(),
         maybe_link_ah: maybe_link_ah.clone(),

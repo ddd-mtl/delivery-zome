@@ -27,7 +27,7 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
       };
       let response = call_self("fetch_chunk", input)?;
       debug!("fetch_chunk() response: {:?}", response);
-      let output: FetchChunkOutput = decode_response(response)?;
+      let output: Option<(ParcelChunk, Option<Link>)> = decode_response(response)?;
       //assert!(matches!(response, ZomeCallResponse::Ok { .. }));
       if let Some(pair) = output {
          pairs.push(pair);
@@ -42,12 +42,10 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
 }
 
 
-//#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub type CommitChunksInput = Vec<(ParcelChunk, Option<Link>)>;
 
 /// Internal Zome function
 #[hdk_extern]
-fn commit_chunks(chunks: CommitChunksInput) -> ExternResult<()> {
+fn commit_chunks(chunks: Vec<(ParcelChunk, Option<Link>)>) -> ExternResult<()> {
    debug!("commit_chunks() len = {}", chunks.len());
    /// Check if chunk not already committed
    let mut chunk_ehs: Vec<EntryHash> = chunks.iter().map(|pair| {

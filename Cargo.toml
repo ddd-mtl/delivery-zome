@@ -5,7 +5,10 @@ members = [
   "crates/delivery_integrity",
   "crates/delivery",
   "crates/delivery_api",
-  "example_dna/zomes/secret",
+  "playground/zomes/secret_integrity",
+  "playground/zomes/secret",
+  "playground/zomes/agent_directory",
+  "playground/zomes/agent_directory_integrity",
   #"sweettest",
 ]
 

@@ -1,16 +1,14 @@
 ---
 manifest_version: "1"
 
-name: secret-app
+name: hSecret
 description: Delivery zome test app
 
 roles:
-  - id: secret-zome
+  - name: rSecret
     provisioning:
       strategy: create
       deferred: false
     dna:
       bundled: ../../secret.dna
-      uuid: ~
-      properties: ~
       clone_limit: 0

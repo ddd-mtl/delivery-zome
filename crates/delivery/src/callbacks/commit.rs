@@ -8,8 +8,8 @@ pub const COMMIT_PARCEL_CALLBACK_NAME: &'static str = "commit_parcel";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CommitParcelInput {
-   pub zome_index: ZomeIndex,
-   pub entry_index: EntryDefIndex,
+   pub zome_index: u8, //ZomeIndex,
+   pub entry_index: u8, // EntryDefIndex,
    pub entry_visibility: EntryVisibility,
    pub entry: Entry,
    pub maybe_link_ah: Option<ActionHash>,
@@ -23,7 +23,10 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
    debug!("commit_parcel() entry_def_id = {:?} | {}", input.entry_index, zome_info()?.name);
    /// Create CreateInput
    let create_input = CreateInput::new(
-      EntryDefLocation::App(AppEntryDefLocation {zome_index: input.zome_index, entry_def_index: input.entry_index}),
+      EntryDefLocation::App(AppEntryDefLocation {
+         zome_index: ZomeIndex::from(input.zome_index),
+         entry_def_index: EntryDefIndex::from(input.entry_index),
+      }),
       input.entry_visibility,
       input.entry,
       ChainTopOrdering::Relaxed, // Strict //Relaxed

@@ -1,0 +1,39 @@
+{
+  "name": "secret-playground",
+  "version": "0.1.0",
+  "scripts": {
+    "lint": "eslint --ext .ts .",
+    "tsc": "tsc",
+    "build": "rm -rf dist & tsc && rollup -c rollup.config.js",
+    "build:watch": "tsc -w --incremental --preserveWatchOutput",
+    "start:ui": "concurrently --names tsc,dev-server \"npm run build:watch\" \"web-dev-server --config ./web-dev-server.config.mjs\"",
+    "package": "rm -rf ui.zip && cd dist && bestzip ../ui.zip * && cd .. && hc web-app pack ./webhapp.workdir",
+    "clean:hc": "rm -rf .hc*"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.15.0",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "18.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@rollup/plugin-replace": "^3.0.0",
+    "@rollup/plugin-typescript": "^8.2.5",
+    "@web/dev-server": "^0.1.21",
+    "@web/rollup-plugin-html": "^1.11.0",
+    "babel-plugin-template-html-minifier": "^4.1.0",
+    "bestzip": "^2.2.0",
+    "concurrently": "^5.3.0",
+    "cross-env": "^7.0.3",
+    "deepmerge": "^4.2.2",
+    "exits": "^2.0.1",
+    "new-port-cli": "^1.0.0",
+    "path-exists-cli": "^2.0.0",
+    "rollup": "^2.56.2",
+    "run-singleton-cli": "^0.0.5",
+    "tslib": "^2.4.0",
+    "typescript": "^4.9.0"
+  },
+  "dependencies": {
+    "@ddd-qc/agent-directory": "6.0.0",
+    "@delivery/elements": "file:../../webcomponents"
+  }
+}
