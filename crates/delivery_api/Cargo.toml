@@ -1,5 +1,5 @@
 [package]
-name = "zome_secret"
+name = "zome_delivery_api"
 version.workspace = true
 rust-version.workspace = true
 edition.workspace = true
@@ -8,11 +8,10 @@ edition.workspace = true
 crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
+bincode = "1.3"
+
 serde.workspace = true
 hdk.workspace = true
 zome_utils.workspace = true
 
-zome_delivery_types = {path = "../../../crates/delivery_types" }
-zome_delivery_api = { path = "../../../crates/delivery_api" }
-
-zome_secret_integrity = {path = "../secret_integrity" }
+zome_delivery_types = { path = "../delivery_types" }

@@ -14,16 +14,16 @@ mod send_item;
 mod utils_parcel;
 mod unpack_item;
 mod pack_item;
-mod inputs;
 mod signal_protocol;
+mod call_delivery_zome;
 
 pub use dm_protocol::*;
 pub use receive::*;
 pub use send_dm::*;
 pub use send_item::*;
 pub use utils_parcel::*;
-pub use inputs::*;
 pub use signal_protocol::*;
 pub use functions::*;
 
 pub use callbacks::*;
+pub use call_delivery_zome::*;

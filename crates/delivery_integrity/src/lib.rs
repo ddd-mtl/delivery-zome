@@ -5,16 +5,16 @@
 #![allow(unused_attributes)]
 #![allow(dead_code)]
 
-mod entry_types;
 
 mod pub_enc_key;
 mod validate_app_entry;
-pub use entry_types::*;
 
 pub use pub_enc_key::*;
 
 
 use hdi::prelude::*;
+
+use zome_delivery_types::*;
 
 /// List of all Link kinds handled by this Zome
 #[hdk_link_types]

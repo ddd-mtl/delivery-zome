@@ -1,0 +1,15 @@
+[package]
+name = "zome_secret_integrity"
+version.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = [ "cdylib", "rlib" ]
+
+[dependencies]
+serde.workspace = true
+hdi.workspace = true
+zome_utils.workspace = true
+
+zome_delivery_types = {path = "../../../crates/delivery_types" }

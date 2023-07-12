@@ -2,6 +2,7 @@ use hdk::prelude::*;
 use zome_utils::*;
 
 use zome_delivery_integrity::*;
+use zome_delivery_types::*;
 use crate::*;
 
 pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;

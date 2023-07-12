@@ -6,27 +6,19 @@
 
 
 use hdk::prelude::*;
-use zome_delivery_types::*;
 use zome_utils::*;
 
-entry_defs![
-   Secret::entry_def()
-];
+use zome_delivery_types::*;
+use zome_delivery_api::*;
+use zome_secret_integrity::*;
 
-
-/// Entry representing a secret message
-#[hdk_entry(id = "Secret", visibility = "private")]
-#[derive(Clone, PartialEq)]
-pub struct Secret {
-   pub value: String,
-}
 
 /// Zome Function
 #[hdk_extern]
 pub fn create_secret(value: String) -> ExternResult<EntryHash> {
    let secret = Secret { value };
    let eh = hash_entry(secret.clone())?;
-   let _hh = create_entry(secret)?;
+   let _hh = create_entry(SecretEntry::Secret(secret))?;
    return Ok(eh);
 }
 
@@ -96,8 +88,8 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
       .entry_hashes(set);
-   let entries = query(query_args)?;
-   if entries.len() != manifest.chunks.len() {
+   let records = query(query_args)?;
+   if records.len() != manifest.chunks.len() {
       return error("Not all chunks have been found on chain");
    }
    /// Concat all chunks
@@ -105,8 +97,8 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
       return error("Manifest of an unknown entry type");
    }
    let mut secret = String::new();
-   for el in entries {
-      let chunk: ParcelChunk = get_typed_from_el(el)?;
+   for record in records {
+      let chunk: ParcelChunk = get_typed_from_record(record)?;
       secret += &chunk.data;
       secret += ".";
    }
@@ -128,11 +120,12 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
    debug!("send_secret() START - {:?}", input.secret_eh);
    /// Determine parcel type depending on Entry
    let maybe_secret: ExternResult<Secret> = get_typed_from_eh(input.secret_eh.clone());
-   let parcel_ref =  if let Ok(_secret) = maybe_secret {
+   let parcel_ref = if let Ok(_secret) = maybe_secret {
       ParcelReference::AppEntry(
          zome_info()?.name,
-         EntryDefId::App("Secret".into()),
+         EntryDefIndex::from(get_variant_index::<SecretEntry>(SecretEntryTypes::Secret)?),
          input.secret_eh,
+         EntryVisibility::Private,
       )
    } else {
       /// Should be a Manifest
@@ -198,7 +191,7 @@ pub fn respond_to_secret(parcel_eh: EntryHash, has_accepted: bool) -> ExternResu
    )?;
    let notices: Vec<DeliveryNotice> = decode_response(response)?;
    if notices.len() != 1 {
-      return Err(WasmError::Guest(String::from("No Secret found at given EntryHash")));
+      return zome_error!("No Secret found at given EntryHash");
    }
    let notice_eh = hash_entry(notices[0].clone())?;
    let input = RespondToNoticeInput {

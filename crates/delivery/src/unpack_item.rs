@@ -3,6 +3,8 @@ use zome_utils::*;
 
 use crate::*;
 use zome_delivery_integrity::*;
+use zome_delivery_types::*;
+
 
 ///
 pub fn unpack_item<T>(pending_item: PendingItem, from: AgentPubKey) -> ExternResult<Option<T>>

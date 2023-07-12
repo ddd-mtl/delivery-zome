@@ -4,7 +4,8 @@ members = [
   "crates/delivery_types",
   "crates/delivery_integrity",
   "crates/delivery",
-  #"example_dna/zomes/secret",
+  "crates/delivery_api",
+  "example_dna/zomes/secret",
   #"sweettest",
 ]
 

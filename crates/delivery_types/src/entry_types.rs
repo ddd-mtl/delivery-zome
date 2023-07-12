@@ -2,7 +2,7 @@
 
 use hdi::prelude::*;
 
-use zome_delivery_types::*;
+use crate::*;
 
 
 /// Entry representing a received Manifest
