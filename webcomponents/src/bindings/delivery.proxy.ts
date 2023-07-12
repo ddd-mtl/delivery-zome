@@ -150,10 +150,6 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('commit_parcel', input);
   }
 
-  async initCaps(): Promise<void> {
-    return this.call('init_caps', null);
-  }
-
 
 
   async commitChunks(chunks: [ParcelChunk, Link][]): Promise<void> {

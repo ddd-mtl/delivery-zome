@@ -4,7 +4,7 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 use crate::*;
 
-#[hdk_extern]
+//#[hdk_extern]
 fn init_caps(_: ()) -> ExternResult<()> {
    let mut functions = BTreeSet::new();
    functions.insert((zome_info()?.name, REMOTE_ENDPOINT.into()));

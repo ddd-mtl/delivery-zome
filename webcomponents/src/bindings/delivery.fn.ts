@@ -10,7 +10,6 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"get_dna_info",
 
 	"commit_parcel",
-	"init_caps",
 
 
 	"commit_chunks",
