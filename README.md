@@ -31,10 +31,11 @@ The module is to be used by other zomes (via inter-zome calls) for their own ent
 
 ?Parcel types can have the option to not be refusable (ex: acks, mails)? With parcel trait?
 
+Flow:
 
-Commit arbitrary entries to your source chain
-`distribute_parcel(parcel_eh, [recipients])` to send a custom entry to a list of recipient.
-`query_DeliveryNotice`
+1. Commit arbitrary entries to your source chain with your own zome functions or use `commit_parcel_*()`.
+2. Send the committed entries to a list of recipient: `distribute_parcel(parcel_eh, [recipients])` 
+3. Recipient will first commit a DeliveryNotice to its own source-chain. It can be retrieved with `query_DeliveryNotice()`.
 `respond_to_notice(notice_eh, yes/no)` to accept/refuse an incoming parcel
 get() the entry
 

@@ -4,7 +4,10 @@ mod parcel_chunk;
 mod parcel_manifest;
 mod parcel_received;
 mod reply_received;
+mod delivery_notice;
 
+
+pub use delivery_notice::*;
 pub use distribution::*;
 pub use delivery_reply::*;
 pub use parcel_chunk::*;
@@ -23,11 +26,11 @@ use zome_delivery_integrity::*;
 /// Zome Callback
 #[hdk_extern(infallible)]
 fn post_commit(signedActionList: Vec<SignedActionHashed>) {
-   debug!("post_commit() called for {} entries", signedActionList.len());
+   debug!("DELIVERY post_commit() called for {} actions", signedActionList.len());
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each Action
    for signedAction in signedActionList {
-      trace!(" - {:?}", signedAction.action().entry_type());
+      debug!(" - {:?}", signedAction.action().entry_type());
       let action = signedAction.action();
       if action.entry_type().is_none() {
          continue;
@@ -71,6 +74,7 @@ fn post_commit_app_entry(eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternR
    let variant = entry_index_to_variant(app_entry_def.entry_index)?;
    match variant {
       DeliveryEntryTypes::Distribution => post_commit_Distribution(entry, eh),
+      DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(entry, eh),
       DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(entry, eh),
       DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(entry, eh),
       _ => Ok(()),

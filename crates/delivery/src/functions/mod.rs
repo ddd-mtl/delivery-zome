@@ -10,9 +10,12 @@ mod get_notice;
 mod commit_pending_item;
 mod pub_enc_key;
 mod query;
-mod get_state;
+mod get_distribution_state;
+mod get_notice_state;
 
-pub use get_state::*;
+
+pub use get_distribution_state::*;
+pub use get_notice_state::*;
 
 pub use pub_enc_key::*;
 pub use crate::pack_item::*;

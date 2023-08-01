@@ -8,6 +8,7 @@ export const secretFunctionNames: FunctionName[] = [
 	"entry_defs", 
 	"get_zome_info", 
 	"get_dna_info",
+
 	"create_secret",
 	"create_split_secret",
 	"get_secret",

@@ -58,11 +58,12 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
 
 
   /** */
-  async onCreateList(e: any) {
-    const input = this.shadowRoot!.getElementById("listTitleInput") as HTMLInputElement;
-    //let res = await this._dvm.taskerZvm.createTaskList(input.value);
-    //console.log("onCreateList() res:", res)
-    input.value = "";
+  async onSendSecret(e: any) {
+    const textInput = this.shadowRoot!.getElementById("secretInput") as HTMLInputElement;
+    const agentSelect = this.shadowRoot!.getElementById("selectedAgent") as HTMLSelectElement;
+    let res = await this._dvm.secretZvm.sendSecretToOne(textInput.value, agentSelect.value);
+    console.log("onSendSecret() res:", res)
+    textInput.value = "";
   }
 
 
@@ -128,19 +129,30 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
       return html`<span>Loading...</span>`;
     }
 
+    //const secrets = this._dvm.secretZvm.secrets;
+    let agents: AgentPubKeyB64[] = this._dvm.AgentDirectoryZvm.perspective.agents;
+
+    const AgentOptions = Object.entries(agents).map(
+        ([index, agentIdB64]) => {
+          //console.log("" + index + ". " + agentIdB64)
+          return html `<option value="${agentIdB64}">${agentIdB64.substring(0, 12)}</option>`
+        }
+    )
 
     return html`
       <div>
         <h1>Playground: secret</h1>
-          <label for="listTitleInput">New list:</label>
-          <input type="text" id="listTitleInput" name="title">
-          <input type="button" value="create" @click=${this.onCreateList}>
+          <label for="listTitleInput">Send secret:</label>
+          <input type="text" id="secretInput" name="content">
+          <select name="selectedAgent" id="selectedAgent">
+            ${AgentOptions}
+          </select>        
+          <input type="button" value="create" @click=${this.onSendSecret}>
         <h2>
-          Selected List:
+          Received secrets:
           <select name="listSelector" id="listSelector" @click=${this.onListSelect}>
-            <option value="42">Bob</option>
           </select>
-        </h2>
+        </h2>        
       </div>
     `;
   }

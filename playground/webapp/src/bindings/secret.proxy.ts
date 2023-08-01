@@ -142,6 +142,7 @@ export class SecretProxy extends ZomeProxy {
   static readonly DEFAULT_ZOME_NAME = "zSecret"
   static readonly FN_NAMES = secretFunctionNames
  
+
   async createSecret(value: string): Promise<EntryHash> {
     return this.call('create_secret', value);
   }

@@ -14,8 +14,8 @@ pub struct DirectMessage {
     pub msg: DeliveryProtocol,
 }
 
-/// Start point for any remote call in this zome
-/// Name of function must match REMOTE_ENDPOINT const value
+/// Starting point for any remote call in this zome (i.e. sending a dm)
+/// Name of this function must match REMOTE_ENDPOINT value
 #[hdk_extern]
 pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> {
     debug!("Received DM from: {} ; msg: {}", snip(&dm.from), dm.msg);
@@ -137,24 +137,22 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) 
 /// Commit received DeliveryNotice from sender
 pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     let maybe_notice: Option<DeliveryNotice> = unpack_item(item, from.clone())?;
-    if maybe_notice.is_none() {
-        return error("Failed deserializing DeliveryNotice (2)");
-    }
+    let Some(notice) = maybe_notice
+       else { return zome_error!("Failed deserializing DeliveryNotice (2)"); };
     /// Check for duplicate DeliveryNotice
-    let notice = maybe_notice.unwrap();
     let maybe_already = find_notice(notice.summary.parcel_reference.entry_address())?;
     if maybe_already.is_some() {
-        return error("Already have this Notice");
+        return zome_error!("Already have this Notice");
     }
 
     /// Commit DeliveryNotice
     let _hh = create_entry_relaxed(DeliveryEntry::DeliveryNotice(notice.clone()))?;
 
-    /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedNotice(notice));
-    if let Err(err) = res {
-        error!("Emit signal failed: {}", err);
-    }
+    // /// Emit Signal
+    // let res = emit_signal(&SignalProtocol::ReceivedNotice(notice));
+    // if let Err(err) = res {
+    //     error!("Emit signal failed: {}", err);
+    // }
     /// Done
     Ok(())
 }

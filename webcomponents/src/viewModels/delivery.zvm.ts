@@ -4,17 +4,27 @@ import {
     ActionHash,
     ActionHashB64,
     AgentPubKey,
-    AgentPubKeyB64,
+    AgentPubKeyB64, AppSignalCb,
     decodeHashFromBase64,
-    encodeHashToBase64
+    encodeHashToBase64, EntryHashB64
 } from "@holochain/client";
+import {Distribution, DistributionState} from "../bindings/delivery.types";
+import {AppSignal} from "@holochain/client/lib/api/app/types";
 
 
 export interface DeliveryPerspective {
+    /** -- Encrytion -- */
     myPubEncKey: Uint8Array,
     /** AgentPubKey -> PubEncKey */
     encKeys: Dictionary<Uint8Array>,
+
+    /** -- -- */
     inbox: ActionHashB64[],
+
+    /** -- Distributions -- */
+    /** DistributionEh -> state */
+    myDistributions: Dictionary<DistributionState>
+
 }
 
 /**
@@ -30,12 +40,17 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** -- ViewModel -- */
 
-    private _perspective: DeliveryPerspective = {myPubEncKey: new Uint8Array(), inbox: [], encKeys: {}};
+    private _perspective: DeliveryPerspective = {
+        myPubEncKey: new Uint8Array(),
+        encKeys: {},
+        inbox: [],
+        myDistributions: {},
+    };
 
 
     /* */
-    get perspective(): unknown {
-        return {};
+    get perspective(): DeliveryPerspective {
+        return this._perspective;
     }
 
     /* */
@@ -45,18 +60,33 @@ export class DeliveryZvm extends ZomeViewModel {
     }
 
 
+    /** -- Signals -- */
+
+    signalHandler?: AppSignalCb = this.mySignalHandler;
+
+
+    /** */
+    mySignalHandler(signal: AppSignal): void {
+        console.log("DELIVERY received signal", signal);
+    }
+
+
+    /** -- probe -- */
+
     /** */
     async probeAll(): Promise<void> {
         this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
         await this.probeInbox();
+        await this.queryDistributions();
         this.notifySubscribers();
     }
 
     /** */
-    async probeInbox(): Promise<void> {
+    async probeInbox(): Promise<ActionHashB64[]> {
         const inbox = await this.zomeProxy.pullInbox();
         this._perspective.inbox = inbox.map((ah) => encodeHashToBase64(ah));
         this.notifySubscribers();
+        return this._perspective.inbox;
     }
 
 
@@ -77,5 +107,29 @@ export class DeliveryZvm extends ZomeViewModel {
             this.notifySubscribers();
         }
         return key;
+    }
+
+
+    /** */
+    async queryDistributions(): Promise<Dictionary<DistributionState>> {
+        //console.log("queryDistributions()", this._perspective.myDistributions);
+        const distribs = await this.zomeProxy.queryDistribution();
+        let promises = [];
+        for (const [eh, _distrib] of distribs) {
+            const p = this.zomeProxy.getDistributionState(eh);
+            promises.push(p);
+        }
+        const res = await Promise.allSettled(promises);
+        let myDistributions: Dictionary<DistributionState> = {};
+        let i = 0;
+        for (const [eh, _distrib] of distribs) {
+            if (res[i].status == "fulfilled") {
+                myDistributions[encodeHashToBase64(eh)] = (res[i] as PromiseFulfilledResult<DistributionState>).value;
+            }
+            i += 1;
+        }
+        this._perspective.myDistributions = myDistributions;
+        this.notifySubscribers();
+        return myDistributions;
     }
 }

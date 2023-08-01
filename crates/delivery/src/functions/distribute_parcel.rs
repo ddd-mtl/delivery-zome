@@ -6,7 +6,8 @@ use zome_delivery_integrity::*;
 use crate::*;
 
 
-/// Zone Function
+/// Create & Commit Distribution Entry.
+/// It will try to send deliveryNotice during its post_commit().
 #[hdk_extern]
 pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash> {
    debug!("distribute_parcel() START: {:?}", input);
@@ -41,7 +42,8 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    /// Commit Distribution
    let eh = hash_entry(distribution.clone())?;
    debug!("distribute_parcel() eh: {}", eh);
-   let _hh = create_entry_relaxed(DeliveryEntry::Distribution(distribution))?;
+   let _hh = create_entry(DeliveryEntry::Distribution(distribution))?;
+   //let _hh = create_entry_relaxed(DeliveryEntry::Distribution(distribution))?;
    /// Done
    Ok(eh)
 }

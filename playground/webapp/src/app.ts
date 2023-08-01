@@ -85,7 +85,8 @@ export class SecretApp extends HappElement {
     let page;
     switch (this._pageDisplayIndex) {
       case 0: page = html`<secret-page style="flex: 1;"></secret-page>` ; break;
-      case 1: page = html`<agent-directory-list style="flex: 1;"></agent-directory-list>`; break;
+      case 1: page = html`<delivery-dashboard style="flex: 1;"></delivery-dashboard>`; break;
+      case 2: page = html`<agent-directory-list style="flex: 1;"></agent-directory-list>`; break;
 
       default: page = html`unknown page index`;
     };
@@ -96,7 +97,8 @@ export class SecretApp extends HappElement {
         <div>
           <view-cell-context></view-cell-context>
           <input type="button" value="Secret" @click=${() => {this._pageDisplayIndex = 0; this.requestUpdate()}} >
-          <input type="button" value="Agent Directory" @click=${() => {this._pageDisplayIndex = 1; this.requestUpdate()}} >
+          <input type="button" value="Delivery" @click=${() => {this._pageDisplayIndex = 1; this.requestUpdate()}} >          
+          <input type="button" value="Agent Directory" @click=${() => {this._pageDisplayIndex = 2; this.requestUpdate()}} >
         </div>
         <button type="button" @click=${this.refresh}>Refresh</button>
         <span><b>Agent:</b> ${this.secret.cell.agentPubKey}</span>

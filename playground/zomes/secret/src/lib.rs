@@ -5,6 +5,9 @@
 #![allow(unused_attributes)]
 
 
+mod callbacks;
+
+
 use hdk::prelude::*;
 use zome_utils::*;
 
@@ -148,7 +151,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
 
 
 /// Zome Function
-/// Return list of parcels' EntryHash
+/// Return list of parcels' EntryHash from a particular Agent
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
    debug!("get_secrets_from() START - pull_inbox");

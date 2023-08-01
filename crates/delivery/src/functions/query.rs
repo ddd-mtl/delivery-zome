@@ -4,6 +4,18 @@ use zome_delivery_integrity::*;
 use crate::*;
 use zome_delivery_types::*;
 
+///Find DeliveryNotice with field with given value
+#[hdk_extern]
+pub fn query_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Distribution)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create Distribution Elements with query
+   let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
+   let res = tuples.into_iter().map((|(ah, create, distrib)| {
+      let eh = hash_entry(distrib.clone()).unwrap();
+      (eh, distrib)
+   })).collect();
+   Ok(res)
+}
 
 
 ///Find DeliveryNotice with field with given value
@@ -47,7 +59,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 
 
 
-///Find NoticeReceived with field with given value
+/// Find NoticeReceived with field with given value
 #[hdk_extern]
 pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec<NoticeReceived>> {
    //debug!("*** query_NoticeReceived() CALLED with {:?}", field);

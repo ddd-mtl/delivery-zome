@@ -188,16 +188,16 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('commit_ParcelReceived', input);
   }
 
+  async getDistributionState(distributionEh: EntryHash): Promise<DistributionState> {
+    return this.call('get_distribution_state', distributionEh);
+  }
+
   async getNotice(distributionEh: EntryHash): Promise<GetNoticeOutput | null> {
     return this.call('get_notice', distributionEh);
   }
 
   async getParcelNotice(parcelEh: EntryHash): Promise<DeliveryNotice | null> {
     return this.call('get_parcel_notice', parcelEh);
-  }
-
-  async getDistributionState(distributionEh: EntryHash): Promise<DistributionState> {
-    return this.call('get_distribution_state', distributionEh);
   }
 
   async getNoticeState(noticeEh: EntryHash): Promise<NoticeState> {
@@ -218,6 +218,10 @@ export class DeliveryProxy extends ZomeProxy {
 
   async pullInbox(): Promise<ActionHash[]> {
     return this.call('pull_inbox', null);
+  }
+
+  async queryDistribution(): Promise<[EntryHash, Distribution][]> {
+    return this.call('query_Distribution', null);
   }
 
   async queryDeliveryNotice(queryField: DeliveryNoticeQueryField): Promise<DeliveryNotice[]> {

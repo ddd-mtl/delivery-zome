@@ -5,12 +5,12 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 use crate::*;
 
-/// Zone Function
-/// Return DeliveryNotice from which we received a Parcel
+
+/// Return DeliveryNotice (& state) from which we received a Parcel
 #[hdk_extern]
 pub fn get_notice(distribution_eh: EntryHash) -> ExternResult<Option<GetNoticeOutput>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("get_notice() CALLED");
+   debug!("get_notice()");
    let field = DeliveryNoticeQueryField::Distribution(distribution_eh.clone());
    let maybe_notices = query_DeliveryNotice(field)?;
    if maybe_notices.is_empty() {
@@ -24,17 +24,14 @@ pub fn get_notice(distribution_eh: EntryHash) -> ExternResult<Option<GetNoticeOu
    };
    /// Done
    Ok(Some(output))
-
-
 }
 
 
-/// Zone Function
 /// Return DeliveryNotice from which we received a Parcel
 #[hdk_extern]
 pub fn get_parcel_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("get_parcel_notice() CALLED");
+   debug!("get_parcel_notice()");
    let field = ParcelReceivedQueryField::Parcel(parcel_eh.clone());
    let maybe_receipt = query_ParcelReceived(field)?;
    if maybe_receipt.is_none() {

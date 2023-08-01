@@ -15,9 +15,9 @@ pub struct CommitParcelInput {
    pub maybe_link_ah: Option<ActionHash>,
 }
 
-/// Zome Function Callback required by delivery-zome
-/// Should not be called directly. Only via remote call to self
-/// Name of this function must equal COMMIT_PARCEL_CALLBACK_NAME global constant
+/// Zome Function Callback required by delivery-zome.
+/// Should not be called directly. Only via remote call to self.
+/// Name of this function must equal COMMIT_PARCEL_CALLBACK_NAME global constant.
 #[hdk_extern]
 fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
    debug!("commit_parcel() entry_def_id = {:?} | {}", input.entry_index, zome_info()?.name);
