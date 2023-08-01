@@ -20,14 +20,14 @@
     "devtest"                : "npm run build:all && concurrently \"npm run build:watch -w webcomponents\" \"npm run build:watch -w playground/webapp\" \"npm run start\"",
     "watch:webcomponents"    : "npm run build:watch -w webcomponents",
 
-    "start:happ:mdns"        : "RUST_LOG=warn echo \"pass\" | hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network mdns",
-    "start:happ:proxied"     : "RUST_LOG=trace WASM_LOG=trace echo \"pass\" | hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network --bootstrap https://bootstrap-staging.holo.host/ quic -p=kitsune-proxy://SYVd4CF3BdJ4DS7KwLLgeU3_DbHoZ34Y-qroZ79DOs8/kitsune-quic/h/165.22.32.11/p/5779/--",
+    "start:happ:mem"        : "RUST_LOG=warn echo \"pass\" | hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network mem",
+    "start:happ:proxied"     : "RUST_LOG=trace WASM_LOG=trace echo \"pass\" | hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network --bootstrap https://bootstrap.holo.host/ webrtc wss://signal.holo.host",
     "start"                  : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run start:happ:proxied\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
-    "start:mdns"             : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run start:happ:mdns\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
+    "start:mem"             : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run start:happ:mem\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
     "start:hc-playground"    : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run hc-playground\" \"npm run start:happ:proxied\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
 
     "network"                : "concurrently-repeat \"npm run start\"",
-    "network:mdns"           : "concurrently-repeat \"npm run start:mdns\"",
+    "network:mem"           : "concurrently-repeat \"npm run start:mem\"",
     "network:hc-playground"  : "concurrently-repeat \"npm run start:hc-playground\"",
 
     "hc-playground"          : "run-singleton \"holochain-playground\"",
