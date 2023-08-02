@@ -3,14 +3,7 @@ use zome_utils::*;
 
 use zome_delivery_integrity::*;
 use zome_delivery_types::*;
-
-
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct CommitPendingItemInput {
-   pub item: PendingItem,
-   pub recipient: AgentPubKey,
-}
+use zome_delivery_common::*;
 
 
 #[hdk_extern]

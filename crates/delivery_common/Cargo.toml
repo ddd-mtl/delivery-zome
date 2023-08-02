@@ -1,5 +1,5 @@
 [package]
-name = "zome_delivery"
+name = "zome_delivery_common"
 version.workspace = true
 rust-version.workspace = true
 edition.workspace = true
@@ -15,5 +15,5 @@ hdk.workspace = true
 zome_utils.workspace = true
 
 zome_delivery_types = { path = "../delivery_types" }
-zome_delivery_integrity = { path = "../delivery_integrity" }
+#zome_delivery_integrity = { path = "../delivery_integrity" }
 

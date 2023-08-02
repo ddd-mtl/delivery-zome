@@ -3,16 +3,11 @@ use zome_utils::*;
 
 use zome_delivery_integrity::*;
 use zome_delivery_types::*;
+use zome_delivery_common::*;
 
 use crate::*;
 
 
-///
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct DirectMessage {
-    pub from: AgentPubKey,
-    pub msg: DeliveryProtocol,
-}
 
 /// Starting point for any remote call in this zome (i.e. sending a dm)
 /// Name of this function must match REMOTE_ENDPOINT value

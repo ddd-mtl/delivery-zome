@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use zome_utils::*;
-use zome_delivery_integrity::*;
+//use zome_delivery_integrity::*;
 use zome_delivery_types::*;
 
 
@@ -14,7 +14,7 @@ fn create_PendingItem<T>(
    where
       T: serde::Serialize + Clone + Sized + std::fmt::Debug
 {
-   debug!("create_pending_item() {:?} for {}", kind, snip(&recipient));
+   //debug!("create_pending_item() {:?} for {}", kind, snip(&recipient));
    assert!(kind != ItemKind::AppEntryBytes);
    let me = agent_info()?.agent_latest_pubkey;
    /// Sign content

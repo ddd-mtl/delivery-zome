@@ -1,14 +1,14 @@
-mod distribution;
+//mod distribution;
 mod delivery_reply;
 mod parcel_chunk;
 mod parcel_manifest;
 mod parcel_received;
 mod reply_received;
-mod delivery_notice;
+//mod delivery_notice;
 
 
-pub use delivery_notice::*;
-pub use distribution::*;
+//pub use delivery_notice::*;
+//pub use distribution::*;
 pub use delivery_reply::*;
 pub use parcel_chunk::*;
 pub use parcel_manifest::*;
@@ -19,6 +19,7 @@ pub use reply_received::*;
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::*;
+use zome_delivery_common::*;
 
 
 
@@ -66,7 +67,7 @@ fn post_commit_app_entry(eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternR
    let Entry::App(ref entry_bytes) = entry
       else {
          return zome_error!("EntryHash has already been filtered as an App type");
-      };
+   };
 
    // let entry_kind = EntryKind::from_index(&app_entry_def.id());
 

@@ -23,6 +23,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         this._initialized = true;
     }
 
+
+    /** */
     render() {
         console.log("<delivery-dashboard> render()", this._initialized);
         if (!this._initialized) {

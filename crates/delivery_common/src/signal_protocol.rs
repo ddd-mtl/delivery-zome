@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 
-use zome_delivery_integrity::*;
 use zome_delivery_types::*;
+//use zome_delivery_integrity::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalKind {

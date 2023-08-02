@@ -1,7 +1,15 @@
 use std::fmt;
 use hdk::prelude::*;
-use zome_delivery_integrity::*;
+//use zome_delivery_integrity::*;
 use zome_delivery_types::*;
+
+
+///
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct DirectMessage {
+    pub from: AgentPubKey,
+    pub msg: DeliveryProtocol,
+}
 
 
 ///
