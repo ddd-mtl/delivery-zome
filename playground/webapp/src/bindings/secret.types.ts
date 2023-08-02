@@ -351,6 +351,11 @@ export type NoticeReceivedQueryFieldVariantDistribution = {Distribution: EntryHa
 export type NoticeReceivedQueryField = 
  | NoticeReceivedQueryFieldVariantRecipient | NoticeReceivedQueryFieldVariantDistribution;
 
+export interface CommitPendingItemInput {
+  item: PendingItem
+  recipient: AgentPubKey
+}
+
 export interface SendSecretInput {
   secret_eh: EntryHash
   strategy: DistributionStrategy

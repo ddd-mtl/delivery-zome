@@ -3,7 +3,6 @@ resolver = "2"
 members = [
   "crates/delivery_types",
   "crates/delivery_integrity",
-  "crates/delivery_common",
   "crates/delivery_coordinator",
   "crates/delivery_api",
   "playground/zomes/secret_integrity",

@@ -354,6 +354,11 @@ export type NoticeReceivedQueryFieldVariantDistribution = {Distribution: EntryHa
 export type NoticeReceivedQueryField = 
  | NoticeReceivedQueryFieldVariantRecipient | NoticeReceivedQueryFieldVariantDistribution;
 
+export interface CommitPendingItemInput {
+  item: PendingItem
+  recipient: AgentPubKey
+}
+
 /** List of all Link kinds handled by this Zome */
 export type LinkTypes =
   | {EncKey: null} | {Members: null} | {Inbox: null} | {Pendings: null};
@@ -396,6 +401,16 @@ export interface PubEncKey {
   value: Uint8Array
 }
 
+export const COMMIT_PARCEL_CALLBACK_NAME = "commit_parcel";
+
+export interface CommitParcelInput {
+  zome_index: number
+  entry_index: number
+  entry_visibility: EntryVisibility
+  entry: Entry
+  maybe_link_ah?: ActionHash
+}
+
 /**  */
 export interface DirectMessage {
   from: AgentPubKey
@@ -425,11 +440,6 @@ export type DeliveryProtocolVariantPong = {Pong: null}
 export type DeliveryProtocol = 
  | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
 
-export interface CommitPendingItemInput {
-  item: PendingItem
-  recipient: AgentPubKey
-}
-
 export type SignalKind =
   | {ReceivedNotice: null} | {ReceivedReply: null} | {ReceivedParcel: null} | {ReceivedReceipt: null};
 export enum SignalKindType {
@@ -451,13 +461,3 @@ export type SignalProtocolVariantReceivedParcel = {ReceivedParcel: ParcelReceive
 export type SignalProtocolVariantReceivedReceipt = {ReceivedReceipt: DeliveryReceipt}
 export type SignalProtocol = 
  | SignalProtocolVariantReceivedNotice | SignalProtocolVariantReceivedReply | SignalProtocolVariantReceivedParcel | SignalProtocolVariantReceivedReceipt;
-
-export const COMMIT_PARCEL_CALLBACK_NAME = "commit_parcel";
-
-export interface CommitParcelInput {
-  zome_index: number
-  entry_index: number
-  entry_visibility: EntryVisibility
-  entry: Entry
-  maybe_link_ah?: ActionHash
-}

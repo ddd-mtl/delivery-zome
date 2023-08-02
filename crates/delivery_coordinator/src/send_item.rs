@@ -6,7 +6,6 @@ use zome_delivery_types::*;
 
 use crate::{
    send_dm, DeliveryProtocol,
-   CommitPendingItemInput,
 };
 
 

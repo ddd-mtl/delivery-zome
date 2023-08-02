@@ -53,3 +53,11 @@ pub enum NoticeReceivedQueryField {
    Recipient(AgentPubKey),
    Distribution(EntryHash)
 }
+
+
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct CommitPendingItemInput {
+   pub item: PendingItem,
+   pub recipient: AgentPubKey,
+}

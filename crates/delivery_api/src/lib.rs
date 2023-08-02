@@ -55,14 +55,14 @@ pub fn call_delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> E
       if let EntryType::App(app_entry_def) = entry_type {
          let zome_index: usize = app_entry_def.zome_index.0.into();
          let zome_name: &str = &zome_names[zome_index].0;
-         debug!(" >> post_commit() called for a {}", zome_name);
+         //debug!(" >> post_commit() called for a {}", zome_name);
          if zome_name == DELIVERY_INTERGRITY_ZOME_NAME {
-            debug!("its for zome_delivery_integrity {:?}", app_entry_def.entry_index);
+            //debug!("its for zome_delivery_integrity {:?}", app_entry_def.entry_index);
             let response = call_remote_delivery_zome(
                "post_commit",
                vec![signedAction],
             )?;
-            debug!("post_commit() response: {:?}", response);
+            //debug!("post_commit() response: {:?}", response);
             decode_response::<()>(response)?;
          }
       }

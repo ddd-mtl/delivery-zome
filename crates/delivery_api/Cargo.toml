@@ -15,4 +15,3 @@ hdk.workspace = true
 zome_utils.workspace = true
 
 zome_delivery_types = { path = "../delivery_types" }
-zome_delivery_common = { path = "../delivery_common" }

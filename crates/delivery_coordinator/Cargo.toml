@@ -16,5 +16,3 @@ zome_utils.workspace = true
 
 zome_delivery_types = { path = "../delivery_types" }
 zome_delivery_integrity = { path = "../delivery_integrity" }
-zome_delivery_common = { path = "../delivery_common" }
-
