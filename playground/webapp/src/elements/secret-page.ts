@@ -133,7 +133,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     let agents: AgentPubKeyB64[] = this._dvm.AgentDirectoryZvm.perspective.agents;
 
     const AgentOptions = Object.entries(agents).map(
-        ([index, agentIdB64]) => {
+        ([_index, agentIdB64]) => {
           //console.log("" + index + ". " + agentIdB64)
           return html `<option value="${agentIdB64}">${agentIdB64.substring(0, 12)}</option>`
         }
@@ -141,7 +141,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
 
     return html`
       <div>
-        <h1>Playground: secret</h1>
+        <h1>Playground: secret <button type="button" @click=${() => {this._dvm.dumpLogs();}}>dump</button></h1>
           <label for="listTitleInput">Send secret:</label>
           <input type="text" id="secretInput" name="content">
           <select name="selectedAgent" id="selectedAgent">
