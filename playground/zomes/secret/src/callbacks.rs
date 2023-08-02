@@ -1,7 +1,6 @@
 use hdk::prelude::*;
-use zome_utils::*;
+//use zome_utils::*;
 use zome_delivery_api::*;
-use zome_delivery_types::DELIVERY_INTERGRITY_ZOME_NAME;
 
 
 /// Zome Callback

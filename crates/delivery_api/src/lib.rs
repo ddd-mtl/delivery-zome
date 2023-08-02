@@ -51,7 +51,7 @@ pub fn call_delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> E
       if action.entry_type().is_none() {
          continue;
       }
-      let (eh, entry_type) = action.entry_data().unwrap();
+      let (_eh, entry_type) = action.entry_data().unwrap();
       if let EntryType::App(app_entry_def) = entry_type {
          let zome_index: usize = app_entry_def.zome_index.0.into();
          let zome_name: &str = &zome_names[zome_index].0;

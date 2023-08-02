@@ -30,10 +30,10 @@
 
     "serve:run"              : "hc run-local-services --bootstrap-port $BOOT_PORT --signal-port $SIGNAL_PORT",
     "serve"                  : "cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:happ:local\"",
+    "network:local2"         : "npm run clean:hc & cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:local\" \"sleep 1 && npm run start:local\"",
+    "network:local3"         : "npm run clean:hc & cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:local\" \"npm run start:local\" \"npm run start:local\"",
 
     "network"                : "concurrently-repeat \"npm run start\"",
-    "network:local-n"        : "concurrently-repeat \"npm run start:local\"",
-    "network:local2"         : "npm run clean:hc & cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:local\" \"npm run start:local\"",
     "network:mem"            : "concurrently-repeat \"npm run start:mem\"",
     "network:hc-playground"  : "concurrently-repeat \"npm run start:hc-playground\"",
 
@@ -55,8 +55,8 @@
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@ddd-qc/cell-proxy"            : "0.19.4",
-    "@ddd-qc/lit-happ"              : "0.19.4",
+    "@ddd-qc/cell-proxy"            : "=0.19.6",
+    "@ddd-qc/lit-happ"              : "=0.19.6",
     "@holochain-open-dev/core-types": "^0.6.3",
     "@holochain/client"             : "=0.14.1",
     "@lit-labs/context"             : "0.2.0",
