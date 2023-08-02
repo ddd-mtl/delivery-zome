@@ -12,6 +12,7 @@ mod pub_enc_key;
 mod query;
 mod get_distribution_state;
 mod get_notice_state;
+mod commit_chunks;
 
 
 pub use get_distribution_state::*;

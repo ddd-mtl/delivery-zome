@@ -12,8 +12,8 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"commit_parcel",
 
 
-	"commit_chunks",
 	"check_manifest",
+	"commit_chunks",
 	"commit_parcel_chunk",
 	"commit_parcel_manifest",
 	"commit_pending_item",

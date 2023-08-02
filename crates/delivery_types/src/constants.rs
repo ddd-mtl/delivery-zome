@@ -11,3 +11,8 @@ pub const NAME_MIN_LENGTH: usize = 2;
 
 /// Listing all Holochain Path used in this DNA
 pub const DIRECTORY_PATH: &'static str = "directory";
+
+
+/// WARNING Must use these names in the dna definition file
+pub const DELIVERY_ZOME_NAME: &'static str = "zDelivery";
+pub const DELIVERY_INTERGRITY_ZOME_NAME: &'static str = "zDeliveryIntegrity";

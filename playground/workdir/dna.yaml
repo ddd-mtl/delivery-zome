@@ -6,7 +6,7 @@ integrity:
   zomes:
     - name: secret_integrity
       bundled: ../../target/wasm32-unknown-unknown/release/zome_secret_integrity.wasm
-    - name: zome_delivery_integrity
+    - name: zDeliveryIntegrity
       bundled: ../../target/wasm32-unknown-unknown/release/zome_delivery_integrity.wasm
     - name: agent_directory_integrity
       bundled: ../../target/wasm32-unknown-unknown/release/agent_directory_integrity.wasm
@@ -19,7 +19,7 @@ coordinator:
     - name: zDelivery
       bundled: ../../target/wasm32-unknown-unknown/release/zome_delivery.wasm
       dependencies:
-        - name: zome_delivery_integrity
+        - name: zDeliveryIntegrity
     - name: zAgentDirectory
       bundled: ../../target/wasm32-unknown-unknown/release/agent_directory.wasm
       dependencies:

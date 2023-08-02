@@ -1,7 +1,6 @@
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::*;
-use crate::*;
 use zome_delivery_types::*;
 
 ///Find DeliveryNotice with field with given value
@@ -10,10 +9,10 @@ pub fn query_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Distribution)>>
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Distribution Elements with query
    let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
-   let res = tuples.into_iter().map((|(ah, create, distrib)| {
+   let res = tuples.into_iter().map(|(_ah, _create, distrib)| {
       let eh = hash_entry(distrib.clone()).unwrap();
       (eh, distrib)
-   })).collect();
+   }).collect();
    Ok(res)
 }
 

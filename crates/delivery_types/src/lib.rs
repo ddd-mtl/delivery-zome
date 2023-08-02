@@ -13,10 +13,3 @@ pub use delivery::*;
 pub use constants::*;
 pub use entry_types::*;
 pub use inputs::*;
-
-
-///----------------------------------------------------------------------------------------
-/// API
-
-pub const DELIVERY_ZOME_NAME: &'static str = "zDelivery";
-

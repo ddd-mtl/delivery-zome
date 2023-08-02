@@ -149,6 +149,11 @@ export const NAME_MIN_LENGTH = 2;
 /** Listing all Holochain Path used in this DNA */
 export const DIRECTORY_PATH = "directory";
 
+/** WARNING Must use these names in the dna definition file */
+export const DELIVERY_ZOME_NAME = "zDelivery";
+
+export const DELIVERY_INTERGRITY_ZOME_NAME = "zDeliveryIntegrity";
+
 /** State of a single delivery of a mail or ack to a unique recipient */
 export type DeliveryState =
   | {Unsent: null} | {PendingNotice: null} | {NoticeDelivered: null} | {ParcelRefused: null} | {ParcelAccepted: null} | {PendingParcel: null} | {ParcelDelivered: null};
@@ -348,12 +353,6 @@ export type NoticeReceivedQueryFieldVariantRecipient = {Recipient: AgentPubKey}
 export type NoticeReceivedQueryFieldVariantDistribution = {Distribution: EntryHash}
 export type NoticeReceivedQueryField = 
  | NoticeReceivedQueryFieldVariantRecipient | NoticeReceivedQueryFieldVariantDistribution;
-
-/**
- * ----------------------------------------------------------------------------------------
- * API
- */
-export const DELIVERY_ZOME_NAME = "zDelivery";
 
 /** List of all Link kinds handled by this Zome */
 export type LinkTypes =
