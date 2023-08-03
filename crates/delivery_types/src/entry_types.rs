@@ -51,8 +51,8 @@ pub struct Distribution {
 pub struct NoticeReceived {
    pub distribution_eh: EntryHash,
    pub recipient: AgentPubKey,
-   pub recipient_manifest_signature: Signature,
-   pub date_of_reception: u64,
+   pub recipient_summary_signature: Signature,
+   pub date_of_reception: Timestamp,
 }
 
 
@@ -90,6 +90,7 @@ pub struct ParcelReceived {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ItemKind {
    /// Sent by recipient
+   NoticeReceived,
    DeliveryReply,
    ParcelReceived,
    /// Sent by sender

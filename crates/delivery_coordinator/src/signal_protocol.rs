@@ -14,6 +14,7 @@ pub enum SignalKind {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
     ReceivedNotice((EntryHash, DeliveryNotice)),
+    ReceivedAck(NoticeReceived),
     ReceivedReply(ReplyReceived),
     ReceivedParcel(ParcelReceived),
     ReceivedReceipt(DeliveryReceipt),

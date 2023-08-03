@@ -23,12 +23,12 @@ pub fn post_commit_DeliveryReply(entry: Entry, reply_eh: &EntryHash) -> ExternRe
     if let Err(e) = res {
         warn!("send_item() during DeliveryReply::post_commit() failed: {}", e);
     }
-    /// Try to retrieve parcel if it has been accepted
-    if delivery_reply.has_accepted {
-        let response = call_self("fetch_parcel", delivery_reply.notice_eh.clone())?;
-        debug!("fetch_parcel() response: {:?}", response);
-        assert!(matches!(response, ZomeCallResponse::Ok { .. }));
-    }
+    // /// Try to retrieve parcel if it has been accepted
+    // if delivery_reply.has_accepted {
+    //     let response = call_self("fetch_parcel", delivery_reply.notice_eh.clone())?;
+    //     debug!("fetch_parcel() response: {:?}", response);
+    //     assert!(matches!(response, ZomeCallResponse::Ok { .. }));
+    // }
     /// Done
     Ok(())
 }

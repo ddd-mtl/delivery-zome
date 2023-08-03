@@ -98,6 +98,10 @@ pub fn pack_notice(notice: DeliveryNotice, recipient: AgentPubKey) -> ExternResu
    create_PendingItem::<DeliveryNotice>(ItemKind::DeliveryNotice, notice.clone(), notice.distribution_eh.clone(), recipient)
 }
 /// called from post_commit()
+pub fn pack_notice_received(ack: NoticeReceived, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<NoticeReceived>(ItemKind::NoticeReceived, ack.clone(), ack.distribution_eh.clone(), recipient)
+}
+/// called from post_commit()
 pub fn pack_reply(reply: DeliveryReply, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
    create_PendingItem::<DeliveryReply>(ItemKind::DeliveryReply, reply.clone(), distribution_eh, recipient)
 }

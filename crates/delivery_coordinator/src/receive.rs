@@ -25,6 +25,7 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
                 /// Sent by recipient
                 ItemKind::DeliveryReply  => receive_reply(dm.from, pending_item).into(),
                 ItemKind::ParcelReceived => receive_reception(dm.from, pending_item).into(),
+                ItemKind::NoticeReceived => receive_ack(dm.from, pending_item).into(),
                 /// Sent by sender
                 ItemKind::DeliveryNotice => receive_notice(dm.from, pending_item).into(),
                 ItemKind::AppEntryBytes => {
@@ -138,10 +139,8 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> 
     if maybe_already.is_some() {
         return zome_error!("Already have this Notice");
     }
-
     /// Commit DeliveryNotice
     let _hh = create_entry_relaxed(DeliveryEntry::DeliveryNotice(notice.clone()))?;
-
     // /// Emit Signal
     // let res = emit_signal(&SignalProtocol::ReceivedNotice(notice));
     // if let Err(err) = res {
@@ -150,6 +149,23 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> 
     /// Done
     Ok(())
 }
+
+/// Commit received DeliveryNotice from sender
+pub fn receive_ack(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
+    let maybe_ack: Option<NoticeReceived> = unpack_item(item, from.clone())?;
+    let Some(ack) = maybe_ack
+       else { return zome_error!("Failed deserializing NoticeReceived"); };
+    // /// Check for duplicate DeliveryNotice
+    // let maybe_already = find_notice(ack.summary.parcel_reference.entry_address())?;
+    // if maybe_already.is_some() {
+    //     return zome_error!("Already have this Notice");
+    // }
+    /// Commit DeliveryNotice
+    let _hh = create_entry_relaxed(DeliveryEntry::NoticeReceived(ack.clone()))?;
+    /// Done
+    Ok(())
+}
+
 
 /// Create and commit a ReplyReceived from a DeliveryReply
 pub fn receive_reply(from: AgentPubKey, pending_item: PendingItem) -> ExternResult<()> {

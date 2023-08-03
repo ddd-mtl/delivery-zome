@@ -17,7 +17,7 @@ coordinator:
       dependencies:
         - name: secret_integrity
     - name: zDelivery
-      bundled: ../../target/wasm32-unknown-unknown/release/zome_delivery_coordinator.wasm
+      bundled: ../../target/wasm32-unknown-unknown/release/delivery.wasm
       dependencies:
         - name: zDeliveryIntegrity
     - name: zAgentDirectory

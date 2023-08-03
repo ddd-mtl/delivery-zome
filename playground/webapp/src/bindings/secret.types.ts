@@ -242,8 +242,8 @@ export interface Distribution {
 export interface NoticeReceived {
   distribution_eh: EntryHash
   recipient: AgentPubKey
-  recipient_manifest_signature: Signature
-  date_of_reception: number
+  recipient_summary_signature: Signature
+  date_of_reception: Timestamp
 }
 
 /** Entry representing a file chunk. */
@@ -270,8 +270,9 @@ export interface ParcelReceived {
 
 /** List of structs that PendingItem can embed */
 export type ItemKind =
-  | {DeliveryReply: null} | {ParcelReceived: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
+  | {NoticeReceived: null} | {DeliveryReply: null} | {ParcelReceived: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
 export enum ItemKindType {
+	NoticeReceived = 'NoticeReceived',
 	DeliveryReply = 'DeliveryReply',
 	ParcelReceived = 'ParcelReceived',
 	DeliveryNotice = 'DeliveryNotice',

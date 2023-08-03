@@ -5,6 +5,8 @@ mod parcel_manifest;
 mod parcel_received;
 mod reply_received;
 mod delivery_notice;
+mod notice_received;
+
 
 pub use delivery_notice::*;
 pub use distribution::*;
@@ -13,6 +15,7 @@ pub use parcel_chunk::*;
 pub use parcel_manifest::*;
 pub use parcel_received::*;
 pub use reply_received::*;
+pub use notice_received::*;
 
 //----------------------------------------------------------------------------------------
 
@@ -73,6 +76,8 @@ fn post_commit_app_entry(eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternR
    match variant {
       DeliveryEntryTypes::Distribution => post_commit_Distribution(entry, eh),
       DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(entry, eh),
+      DeliveryEntryTypes::NoticeReceived => post_commit_NoticeReceived(entry, eh),
+      DeliveryEntryTypes::DeliveryReply => post_commit_DeliveryReply(entry, eh),
       DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(entry, eh),
       DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(entry, eh),
       _ => Ok(()),

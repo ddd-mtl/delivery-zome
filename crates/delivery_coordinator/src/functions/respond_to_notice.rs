@@ -9,6 +9,7 @@ use zome_delivery_integrity::*;
 #[hdk_extern]
 pub fn respond_to_notice(input: RespondToNoticeInput) -> ExternResult<EntryHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));
+   debug!("Notice reponse: {:?}", input.has_accepted);
    /// Make sure its a DeliveryNotification
    let _: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Create DeliveryReply
@@ -18,6 +19,7 @@ pub fn respond_to_notice(input: RespondToNoticeInput) -> ExternResult<EntryHash>
    };
    let eh = hash_entry(reply.clone())?;
    /// Commit DeliveryReply
+   debug!("Creating reply...");
    let _hh = create_entry_relaxed(DeliveryEntry::DeliveryReply(reply))?;
    /// Done
    Ok(eh)

@@ -90,6 +90,15 @@ export class DeliveryZvm extends ZomeViewModel {
             const noticeEh = encodeHashToBase64(deliverySignal.ReceivedNotice[0]);
             this._perspective.newDeliveryNotices[noticeEh] = deliverySignal.ReceivedNotice[1];
         }
+        if (SignalProtocolType.ReceivedReply in deliverySignal) {
+            console.log("ADDING ReplyReceived", deliverySignal.ReceivedReply);
+        }
+        if (SignalProtocolType.ReceivedParcel in deliverySignal) {
+            console.log("ADDING ParcelReceived", deliverySignal.ReceivedParcel);
+        }
+        if (SignalProtocolType.ReceivedReceipt in deliverySignal) {
+            console.log("ADDING DeliveryReceipt", deliverySignal.ReceivedReceipt);
+        }
     }
 
 

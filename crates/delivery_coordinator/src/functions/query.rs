@@ -61,10 +61,11 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 /// Find NoticeReceived with field with given value
 #[hdk_extern]
 pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec<NoticeReceived>> {
-   //debug!("*** query_NoticeReceived() CALLED with {:?}", field);
+   //debug!("query_NoticeReceived() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create NoticeReceived Elements with query
    let tuples = get_all_typed_local::<NoticeReceived>(DeliveryEntryTypes::NoticeReceived.try_into().unwrap())?;
+   //debug!(" - tuples len: {:?}", tuples.len());
    /// Search through query result
    let mut res = Vec::new();
    match field {

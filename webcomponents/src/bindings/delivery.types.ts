@@ -245,8 +245,8 @@ export interface Distribution {
 export interface NoticeReceived {
   distribution_eh: EntryHash
   recipient: AgentPubKey
-  recipient_manifest_signature: Signature
-  date_of_reception: number
+  recipient_summary_signature: Signature
+  date_of_reception: Timestamp
 }
 
 /** Entry representing a file chunk. */
@@ -273,8 +273,9 @@ export interface ParcelReceived {
 
 /** List of structs that PendingItem can embed */
 export type ItemKind =
-  | {DeliveryReply: null} | {ParcelReceived: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
+  | {NoticeReceived: null} | {DeliveryReply: null} | {ParcelReceived: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
 export enum ItemKindType {
+	NoticeReceived = 'NoticeReceived',
 	DeliveryReply = 'DeliveryReply',
 	ParcelReceived = 'ParcelReceived',
 	DeliveryNotice = 'DeliveryNotice',
@@ -456,13 +457,15 @@ export enum SignalKindType {
 
 export enum SignalProtocolType {
 	ReceivedNotice = 'ReceivedNotice',
+	ReceivedAck = 'ReceivedAck',
 	ReceivedReply = 'ReceivedReply',
 	ReceivedParcel = 'ReceivedParcel',
 	ReceivedReceipt = 'ReceivedReceipt',
 }
 export type SignalProtocolVariantReceivedNotice = {ReceivedNotice: [EntryHash, DeliveryNotice]}
+export type SignalProtocolVariantReceivedAck = {ReceivedAck: NoticeReceived}
 export type SignalProtocolVariantReceivedReply = {ReceivedReply: ReplyReceived}
 export type SignalProtocolVariantReceivedParcel = {ReceivedParcel: ParcelReceived}
 export type SignalProtocolVariantReceivedReceipt = {ReceivedReceipt: DeliveryReceipt}
 export type SignalProtocol = 
- | SignalProtocolVariantReceivedNotice | SignalProtocolVariantReceivedReply | SignalProtocolVariantReceivedParcel | SignalProtocolVariantReceivedReceipt;
+ | SignalProtocolVariantReceivedNotice | SignalProtocolVariantReceivedAck | SignalProtocolVariantReceivedReply | SignalProtocolVariantReceivedParcel | SignalProtocolVariantReceivedReceipt;

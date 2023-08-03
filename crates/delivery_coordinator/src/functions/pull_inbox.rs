@@ -23,6 +23,13 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
       debug!("pull_inbox() inbox item: {:?}", pending_item.kind);
       match pending_item.kind {
          /// Same behavior as if received via DM
+         ItemKind::NoticeReceived => {
+            let res = receive_ack(pending_item.author.clone(), pending_item);
+            match res {
+               Err(e) => warn!("{}", e),
+               Ok(_) => { let _res = delete_link_relaxed(link.create_link_hash); },
+            }
+         },
          ItemKind::DeliveryReply => {
             let res = receive_reply(pending_item.author.clone(), pending_item);
             match res {
