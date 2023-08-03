@@ -15,7 +15,6 @@ pub struct DistributeParcelInput {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct RespondToNoticeInput {
    pub notice_eh: EntryHash,
    pub has_accepted: bool,
@@ -23,14 +22,12 @@ pub struct RespondToNoticeInput {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct FetchChunkInput {
    pub chunk_eh: EntryHash,
    pub notice_eh: EntryHash,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct GetNoticeOutput {
    pub notice: DeliveryNotice,
    pub state: NoticeState,
@@ -38,7 +35,6 @@ pub struct GetNoticeOutput {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub enum DeliveryNoticeQueryField {
    Sender(AgentPubKey),
    Distribution(EntryHash),
@@ -46,7 +42,6 @@ pub enum DeliveryNoticeQueryField {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub enum ParcelReceivedQueryField {
    Notice(EntryHash),
    Parcel(EntryHash)
@@ -54,7 +49,6 @@ pub enum ParcelReceivedQueryField {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub enum NoticeReceivedQueryField {
    Recipient(AgentPubKey),
    Distribution(EntryHash)
@@ -63,7 +57,6 @@ pub enum NoticeReceivedQueryField {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct CommitPendingItemInput {
    pub item: PendingItem,
    pub recipient: AgentPubKey,
@@ -71,7 +64,6 @@ pub struct CommitPendingItemInput {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct GetDeliveryStateInput {
    pub distribution_eh: EntryHash,
    pub recipient: AgentPubKey,

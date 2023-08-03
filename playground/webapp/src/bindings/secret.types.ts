@@ -189,9 +189,9 @@ export enum NoticeStateType {
 
 /** Shared data between a Distribution and a DeliveryNotice */
 export interface DeliverySummary {
-  distributionStrategy: DistributionStrategy
-  parcelSize: number
-  parcelReference: ParcelReference
+  distribution_strategy: DistributionStrategy
+  parcel_size: number
+  parcel_reference: ParcelReference
 }
 
 /** A Parcel is a generic Entry or a ParcelManifest */
@@ -212,38 +212,38 @@ export enum DistributionStrategyType {
 
 /** Entry representing a received Manifest */
 export interface DeliveryNotice {
-  distributionEh: EntryHash
+  distribution_eh: EntryHash
   summary: DeliverySummary
   sender: AgentPubKey
-  senderSummarySignature: Signature
+  sender_summary_signature: Signature
 }
 
 /** Entry for confirming a delivery has been well received or refused by a recipient */
 export interface DeliveryReceipt {
-  distributionEh: EntryHash
+  distribution_eh: EntryHash
   recipient: AgentPubKey
-  recipientSignature: Signature
+  recipient_signature: Signature
 }
 
 /** Entry for confirming a delivery has been well received or refused by a recipient */
 export interface DeliveryReply {
-  noticeEh: EntryHash
-  hasAccepted: boolean
+  notice_eh: EntryHash
+  has_accepted: boolean
 }
 
 /** Entry representing a request to send a Parcel to one or multiple recipients */
 export interface Distribution {
   recipients: AgentPubKey[]
-  deliverySummary: DeliverySummary
-  summarySignature: Signature
+  delivery_summary: DeliverySummary
+  summary_signature: Signature
 }
 
 /** Entry for confirming a manifest has been well received by a recipient */
 export interface NoticeReceived {
-  distributionEh: EntryHash
+  distribution_eh: EntryHash
   recipient: AgentPubKey
-  recipientManifestSignature: Signature
-  dateOfReception: number
+  recipient_manifest_signature: Signature
+  date_of_reception: number
 }
 
 /** Entry representing a file chunk. */
@@ -254,7 +254,7 @@ export interface ParcelChunk {
 /** WARN : Change MANIFEST_ENTRY_NAME const when renaming */
 export interface ParcelManifest {
   name: string
-  custumEntryType: string
+  custum_entry_type: string
   size: number
   chunks: EntryHash[]
 }
@@ -264,8 +264,8 @@ export interface ParcelManifest {
  * TODO: This should be a private link instead of an entry
  */
 export interface ParcelReceived {
-  noticeEh: EntryHash
-  parcelEh: EntryHash
+  notice_eh: EntryHash
+  parcel_eh: EntryHash
 }
 
 /** List of structs that PendingItem can embed */
@@ -288,17 +288,17 @@ export enum ItemKindType {
 export interface PendingItem {
   kind: ItemKind
   author: AgentPubKey
-  authorSignature: Signature
-  encryptedData: unknown
-  distributionEh: EntryHash
+  author_signature: Signature
+  encrypted_data: unknown
+  distribution_eh: EntryHash
 }
 
 /** Entry for confirming a delivery has been well received or refused by a recipient */
 export interface ReplyReceived {
-  distributionEh: EntryHash
+  distribution_eh: EntryHash
   recipient: AgentPubKey
-  hasAccepted: boolean
-  recipientSignature: Signature
+  has_accepted: boolean
+  recipient_signature: Signature
 }
 
 export interface DistributeParcelInput {
@@ -308,13 +308,13 @@ export interface DistributeParcelInput {
 }
 
 export interface RespondToNoticeInput {
-  noticeEh: EntryHash
-  hasAccepted: boolean
+  notice_eh: EntryHash
+  has_accepted: boolean
 }
 
 export interface FetchChunkInput {
-  chunkEh: EntryHash
-  noticeEh: EntryHash
+  chunk_eh: EntryHash
+  notice_eh: EntryHash
 }
 
 export interface GetNoticeOutput {
@@ -327,9 +327,9 @@ export enum DeliveryNoticeQueryFieldType {
 	Distribution = 'Distribution',
 	Parcel = 'Parcel',
 }
-export type DeliveryNoticeQueryFieldVariantSender = {sender: AgentPubKey}
-export type DeliveryNoticeQueryFieldVariantDistribution = {distribution: EntryHash}
-export type DeliveryNoticeQueryFieldVariantParcel = {parcel: EntryHash}
+export type DeliveryNoticeQueryFieldVariantSender = {Sender: AgentPubKey}
+export type DeliveryNoticeQueryFieldVariantDistribution = {Distribution: EntryHash}
+export type DeliveryNoticeQueryFieldVariantParcel = {Parcel: EntryHash}
 export type DeliveryNoticeQueryField = 
  | DeliveryNoticeQueryFieldVariantSender | DeliveryNoticeQueryFieldVariantDistribution | DeliveryNoticeQueryFieldVariantParcel;
 
@@ -337,8 +337,8 @@ export enum ParcelReceivedQueryFieldType {
 	Notice = 'Notice',
 	Parcel = 'Parcel',
 }
-export type ParcelReceivedQueryFieldVariantNotice = {notice: EntryHash}
-export type ParcelReceivedQueryFieldVariantParcel = {parcel: EntryHash}
+export type ParcelReceivedQueryFieldVariantNotice = {Notice: EntryHash}
+export type ParcelReceivedQueryFieldVariantParcel = {Parcel: EntryHash}
 export type ParcelReceivedQueryField = 
  | ParcelReceivedQueryFieldVariantNotice | ParcelReceivedQueryFieldVariantParcel;
 
@@ -346,8 +346,8 @@ export enum NoticeReceivedQueryFieldType {
 	Recipient = 'Recipient',
 	Distribution = 'Distribution',
 }
-export type NoticeReceivedQueryFieldVariantRecipient = {recipient: AgentPubKey}
-export type NoticeReceivedQueryFieldVariantDistribution = {distribution: EntryHash}
+export type NoticeReceivedQueryFieldVariantRecipient = {Recipient: AgentPubKey}
+export type NoticeReceivedQueryFieldVariantDistribution = {Distribution: EntryHash}
 export type NoticeReceivedQueryField = 
  | NoticeReceivedQueryFieldVariantRecipient | NoticeReceivedQueryFieldVariantDistribution;
 
@@ -357,7 +357,7 @@ export interface CommitPendingItemInput {
 }
 
 export interface GetDeliveryStateInput {
-  distributionEh: EntryHash
+  distribution_eh: EntryHash
   recipient: AgentPubKey
 }
 

@@ -78,7 +78,6 @@ pub enum NoticeState {
 
 /// Shared data between a Distribution and a DeliveryNotice
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(rename_all = "camelCase")]
 pub struct DeliverySummary {
    pub distribution_strategy: DistributionStrategy,
    pub parcel_size: usize,

@@ -166,7 +166,7 @@ export class DeliveryZvm extends ZomeViewModel {
     async queryDistribution(eh: EntryHash, distrib: Distribution): Promise<Dictionary<DeliveryState>> {
         let deliveryPromises = [];
         for (const recipient of distrib.recipients) {
-            const p = this.zomeProxy.getDeliveryState({distributionEh: eh, recipient});
+            const p = this.zomeProxy.getDeliveryState({distribution_eh: eh, recipient});
             deliveryPromises.push(p);
         }
         const deliveryPromisesResult = await Promise.allSettled(deliveryPromises);
@@ -188,16 +188,16 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** */
     async acceptDelivery(noticeEh: EntryHashB64) {
-        this.zomeProxy.respondToNotice({noticeEh: decodeHashFromBase64(noticeEh), hasAccepted: true});
+        this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: true});
     }
 
     /** */
     async declineDelivery(noticeEh: EntryHashB64) {
-        this.zomeProxy.respondToNotice({noticeEh: decodeHashFromBase64(noticeEh), hasAccepted: false});
+        this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: false});
     }
 
     /** */
     async getDeliveryState(distribEh: EntryHashB64, recipient: AgentPubKeyB64) {
-        this.zomeProxy.getDeliveryState({distributionEh: decodeHashFromBase64(distribEh), recipient: decodeHashFromBase64(recipient)});
+        this.zomeProxy.getDeliveryState({distribution_eh: decodeHashFromBase64(distribEh), recipient: decodeHashFromBase64(recipient)});
     }
 }

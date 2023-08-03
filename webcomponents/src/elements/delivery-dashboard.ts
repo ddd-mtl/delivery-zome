@@ -65,7 +65,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         const newNoticesLi =
         Object.entries(this.perspective.newDeliveryNotices).map(
             ([noticeEh, notice]) => {
-                const distribEh = encodeHashToBase64(notice.distributionEh);
+                const distribEh = encodeHashToBase64(notice.distribution_eh);
                 //console.log("MembraneLi", MembraneLi)
                 return html `
               <li style="margin-top:10px;" title=${noticeEh}>
