@@ -6,12 +6,22 @@ import {
     AgentPubKey,
     AgentPubKeyB64, AppSignalCb,
     decodeHashFromBase64,
-    encodeHashToBase64, EntryHashB64
+    encodeHashToBase64, EntryHash, EntryHashB64
 } from "@holochain/client";
-import {Distribution, DistributionState} from "../bindings/delivery.types";
+import {
+    DeliveryNotice, DeliveryState,
+    Distribution,
+    DistributionState,
+    SignalKind, SignalProtocol, SignalProtocolType,
+    SignalProtocolVariantReceivedNotice
+} from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 
 
+/** [DistributionState, AgentPubKey -> DeliveryState] */
+export type FullDistributionState = [DistributionState, Dictionary<DeliveryState>];
+
+/** */
 export interface DeliveryPerspective {
     /** -- Encrytion -- */
     myPubEncKey: Uint8Array,
@@ -21,11 +31,16 @@ export interface DeliveryPerspective {
     /** -- -- */
     inbox: ActionHashB64[],
 
-    /** -- Distributions -- */
-    /** DistributionEh -> state */
-    myDistributions: Dictionary<DistributionState>
+    newDeliveryNotices: Dictionary<DeliveryNotice>,
 
+    /** -- Distributions -- */
+
+    /** DistributionEh -> [DistributionState, AgentPubKey -> DeliveryState] */
+    myDistributions: Dictionary<FullDistributionState>,
+
+    //incomingDistributions: Dictionary<DistributionState>,
 }
+
 
 /**
  *
@@ -44,6 +59,7 @@ export class DeliveryZvm extends ZomeViewModel {
         myPubEncKey: new Uint8Array(),
         encKeys: {},
         inbox: [],
+        newDeliveryNotices: {},
         myDistributions: {},
     };
 
@@ -68,6 +84,12 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     mySignalHandler(signal: AppSignal): void {
         console.log("DELIVERY received signal", signal);
+        const deliverySignal = signal.payload as SignalProtocol;
+        if (SignalProtocolType.ReceivedNotice in deliverySignal) {
+            console.log("ADDING DeliveryNotice", deliverySignal.ReceivedNotice);
+            const noticeEh = encodeHashToBase64(deliverySignal.ReceivedNotice[0]);
+            this._perspective.newDeliveryNotices[noticeEh] = deliverySignal.ReceivedNotice[1];
+        }
     }
 
 
@@ -111,7 +133,7 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async queryDistributions(): Promise<Dictionary<DistributionState>> {
+    async queryDistributions(): Promise<Dictionary<FullDistributionState>> {
         //console.log("queryDistributions()", this._perspective.myDistributions);
         const distribs = await this.zomeProxy.queryDistribution();
         let promises = [];
@@ -119,17 +141,63 @@ export class DeliveryZvm extends ZomeViewModel {
             const p = this.zomeProxy.getDistributionState(eh);
             promises.push(p);
         }
-        const res = await Promise.allSettled(promises);
-        let myDistributions: Dictionary<DistributionState> = {};
+        const distribPromisesResult = await Promise.allSettled(promises);
+        let myDistributions: Dictionary<FullDistributionState> = {};
         let i = 0;
-        for (const [eh, _distrib] of distribs) {
-            if (res[i].status == "fulfilled") {
-                myDistributions[encodeHashToBase64(eh)] = (res[i] as PromiseFulfilledResult<DistributionState>).value;
+        for (const [eh, distrib] of distribs) {
+            if (distribPromisesResult[i].status == "fulfilled") {
+                const distribState = (distribPromisesResult[i] as PromiseFulfilledResult<DistributionState>).value;
+                const deliveryStates = await this.queryDistribution(eh, distrib);
+                myDistributions[encodeHashToBase64(eh)] = [distribState, deliveryStates];
+            }
+            else {
+                console.warn("getDistributionState() failed:", (distribPromisesResult[i] as PromiseRejectedResult).reason);
             }
             i += 1;
         }
+        console.log("queryDistributions() result", myDistributions);
         this._perspective.myDistributions = myDistributions;
         this.notifySubscribers();
         return myDistributions;
+    }
+
+
+    /** */
+    async queryDistribution(eh: EntryHash, distrib: Distribution): Promise<Dictionary<DeliveryState>> {
+        let deliveryPromises = [];
+        for (const recipient of distrib.recipients) {
+            const p = this.zomeProxy.getDeliveryState({distributionEh: eh, recipient});
+            deliveryPromises.push(p);
+        }
+        const deliveryPromisesResult = await Promise.allSettled(deliveryPromises);
+        let deliveryStates: Dictionary<DeliveryState> = {};
+        let j = 0;
+        for (const recipient of distrib.recipients) {
+            if (deliveryPromisesResult[j].status == "fulfilled") {
+                deliveryStates[encodeHashToBase64(recipient)] = (deliveryPromisesResult[j] as PromiseFulfilledResult<DeliveryState>).value;
+            } else {
+                console.warn("getDeliveryState() failed:", (deliveryPromisesResult[j] as PromiseRejectedResult).reason);
+            }
+            j += 1;
+        }
+        return deliveryStates;
+    }
+
+
+    /** -- API Sugar -- */
+
+    /** */
+    async acceptDelivery(noticeEh: EntryHashB64) {
+        this.zomeProxy.respondToNotice({noticeEh: decodeHashFromBase64(noticeEh), hasAccepted: true});
+    }
+
+    /** */
+    async declineDelivery(noticeEh: EntryHashB64) {
+        this.zomeProxy.respondToNotice({noticeEh: decodeHashFromBase64(noticeEh), hasAccepted: false});
+    }
+
+    /** */
+    async getDeliveryState(distribEh: EntryHashB64, recipient: AgentPubKeyB64) {
+        this.zomeProxy.getDeliveryState({distributionEh: decodeHashFromBase64(distribEh), recipient: decodeHashFromBase64(recipient)});
     }
 }

@@ -21,6 +21,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"fetch_chunk",
 	"fetch_parcel",
 	"commit_ParcelReceived",
+	"get_delivery_state",
 	"get_distribution_state",
 	"get_notice",
 	"get_parcel_notice",

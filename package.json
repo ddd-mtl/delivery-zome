@@ -30,7 +30,7 @@
 
     "serve:run"              : "hc run-local-services --bootstrap-port $BOOT_PORT --signal-port $SIGNAL_PORT",
     "serve"                  : "cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:happ:local\"",
-    "network:local2"         : "npm run clean:hc & cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:local\" \"sleep 1 && npm run start:local\"",
+    "network:local2"         : "npm run clean:hc & npm run build:all && cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:local\" \"sleep 1 && npm run start:local\"",
     "network:local3"         : "npm run clean:hc & cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:local\" \"npm run start:local\" \"npm run start:local\"",
 
     "network"                : "concurrently-repeat \"npm run start\"",

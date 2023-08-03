@@ -2,6 +2,7 @@ import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import { ZomeElement } from "@ddd-qc/lit-happ";
 import {DeliveryPerspective, DeliveryZvm} from "../viewModels/delivery.zvm";
+import {decodeHashFromBase64, encodeHashToBase64} from "@holochain/client";
 
 
 /**
@@ -34,11 +35,26 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         /* Li */
         console.log("myDistributions", this.perspective.myDistributions);
         const distribsLi = Object.entries(this.perspective.myDistributions).map(
-            ([eh, state]) => {
+            ([distribEh, fullState]) => {
                 //console.log("MembraneLi", MembraneLi)
-                return html `
-              <li style="margin-top:10px;" title=${eh}>
-                  <b>${eh}</b>: ${JSON.stringify(state)}
+              const deliveryLi = Object.entries(fullState[1]).map(
+                  ([agent, deliveryState]) => {
+                      return html `
+                      <li style="margin-top:10px;" title=${agent}>
+                          ${JSON.stringify(deliveryState)} <b>; Recipient:</b>${agent}
+                          <button type="button" @click=${() => {this._zvm.getDeliveryState(distribEh, agent)}}>refresh</button>
+                      </li>`
+                  }
+              );
+
+              /** */
+              return html `
+              <li style="margin-top:10px;" title=${distribEh}>
+                  <b>${distribEh}</b>: ${JSON.stringify(fullState[0])}
+                  <button type="button" @click=${() => {this._zvm.zomeProxy.getDistributionState(decodeHashFromBase64(distribEh))}}>refresh</button>
+                  <ul>
+                      ${deliveryLi}
+                  </ul>
               </li>`
             }
         )
@@ -46,27 +62,54 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
         /* Li */
         //console.log("signals", this.perspective.myDistributions);
-        const signalsLi = {}
-        // Object.entries(this.si.myDistributions).map(
-        //     ([eh, state]) => {
-        //         //console.log("MembraneLi", MembraneLi)
-        //         return html `
-        //       <li style="margin-top:10px;" title=${eh}>
-        //           <b>${eh}</b>: ${JSON.stringify(state)}
+        const newNoticesLi =
+        Object.entries(this.perspective.newDeliveryNotices).map(
+            ([noticeEh, notice]) => {
+                const distribEh = encodeHashToBase64(notice.distributionEh);
+                //console.log("MembraneLi", MembraneLi)
+                return html `
+              <li style="margin-top:10px;" title=${noticeEh}>
+                  <b>${distribEh}</b> from ${encodeHashToBase64(notice.sender)}
+                  <button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
+                  <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
+                  <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>
+
+              </li>`
+            }
+        )
+
+        const unansweredNoticesLi = html``;
+        //     Object.entries(this.perspective.incomingDistributions).map(
+        //         ([distribEh, state]) => {
+        //             if (state !== ) {
+        //                 continue;
+        //             }
+        //             //console.log("MembraneLi", MembraneLi)
+        //             return html `
+        //       <li style="margin-top:10px;" title=${distribEh}>
+        //           <b>${distribEh}</b> from ${encodeHashToBase64(notice.sender)}
+        //           <button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
+        //           <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
+        //           <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>
+        //
         //       </li>`
-        //     }
-        // )
+        //         }
+        //     )
 
 
         /** render all */
         return html`
-      <div>
-        <h1>Delivery Dashboard</h1>
-        <h2>My Distributions</h2>
-        <ul>${distribsLi}</ul>
-        <h2>Signals</h2>
-        <ul>${signalsLi}</ul>          
-      </div>
-    `;
+          <div>
+            <h1>Delivery Dashboard</h1>
+            <h2>Outgoing Deliveries</h2>
+            <ul>${distribsLi}</ul>
+            <hr />
+            <h2>Incoming Deliveries</h2>
+            <h3>New Delivery Notices</h3>
+            <ul>${newNoticesLi}</ul>
+            <h3>Unanswered notices</h3>
+            <ul>${unansweredNoticesLi}</ul>
+          </div>
+        `;
     }
 }

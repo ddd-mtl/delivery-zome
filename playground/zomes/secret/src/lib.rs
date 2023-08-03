@@ -143,7 +143,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
       strategy: input.strategy,
       parcel_ref,
    };
-   debug!("send_secret() call distribute_parcel...");
+   debug!("send_secret() calling distribute_parcel() with: {:?}", distribution);
    let response = call_delivery_zome("distribute_parcel", distribution)?;
    // distribute_parcel(distribution)?;
    let eh: EntryHash = decode_response(response)?;

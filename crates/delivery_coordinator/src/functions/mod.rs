@@ -13,6 +13,7 @@ mod query;
 mod get_distribution_state;
 mod get_notice_state;
 mod commit_chunks;
+mod get_delivery_state;
 
 
 pub use get_distribution_state::*;
@@ -34,4 +35,5 @@ pub use self::{
    pull_inbox::*,
    query::*,
    respond_to_notice::*,
+   get_delivery_state::*,
 };

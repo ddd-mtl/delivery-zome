@@ -9,7 +9,7 @@ pub fn post_commit_DeliveryNotice(entry: Entry, eh: &EntryHash) -> ExternResult<
     debug!("post_commit_DeliveryNotice() {:?}", eh);
     let notice = DeliveryNotice::try_from(entry)?;
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedNotice(notice));
+    let res = emit_signal(&SignalProtocol::ReceivedNotice((eh.to_owned(), notice)));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {

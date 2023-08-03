@@ -13,7 +13,7 @@ pub enum SignalKind {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
-    ReceivedNotice(DeliveryNotice),
+    ReceivedNotice((EntryHash, DeliveryNotice)),
     ReceivedReply(ReplyReceived),
     ReceivedParcel(ParcelReceived),
     ReceivedReceipt(DeliveryReceipt),
@@ -23,7 +23,7 @@ impl SignalProtocol {
     pub fn is(&self, kind: &SignalKind, eh: &EntryHash) -> bool {
         match kind {
             SignalKind::ReceivedNotice => {
-                if let SignalProtocol::ReceivedNotice(notice) = self {
+                if let SignalProtocol::ReceivedNotice((_notice_eh, notice)) = self {
                     return &notice.distribution_eh == eh;
                 }
                 false

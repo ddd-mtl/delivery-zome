@@ -8,6 +8,7 @@ use crate::*;
 /// Entry representing a received Manifest
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct DeliveryNotice {
    pub distribution_eh: EntryHash,
    pub summary: DeliverySummary,
@@ -19,6 +20,7 @@ pub struct DeliveryNotice {
 /// Entry for confirming a delivery has been well received or refused by a recipient
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct DeliveryReceipt {
    pub distribution_eh: EntryHash,
    pub recipient: AgentPubKey,
@@ -30,6 +32,7 @@ pub struct DeliveryReceipt {
 /// Entry for confirming a delivery has been well received or refused by a recipient
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct DeliveryReply {
    pub notice_eh: EntryHash,
    pub has_accepted: bool,
@@ -38,6 +41,7 @@ pub struct DeliveryReply {
 /// Entry representing a request to send a Parcel to one or multiple recipients
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct Distribution {
    pub recipients: Vec<AgentPubKey>,
    pub delivery_summary: DeliverySummary,
@@ -48,6 +52,7 @@ pub struct Distribution {
 /// Entry for confirming a manifest has been well received by a recipient
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct NoticeReceived {
    pub distribution_eh: EntryHash,
    pub recipient: AgentPubKey,
@@ -66,6 +71,7 @@ pub struct ParcelChunk {
 /// WARN : Change MANIFEST_ENTRY_NAME const when renaming
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct ParcelManifest {
    pub name: String,
    pub custum_entry_type: String,
@@ -79,6 +85,7 @@ pub struct ParcelManifest {
 /// TODO: This should be a private link instead of an entry
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct ParcelReceived {
    pub notice_eh: EntryHash,
    pub parcel_eh: EntryHash,
@@ -117,6 +124,7 @@ impl ItemKind {
 /// The recipient is the agentId where the entry is linked from.
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct PendingItem {
    pub kind: ItemKind,
    pub author: AgentPubKey,
@@ -129,6 +137,7 @@ pub struct PendingItem {
 /// Entry for confirming a delivery has been well received or refused by a recipient
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct ReplyReceived {
    pub distribution_eh: EntryHash,
    pub recipient: AgentPubKey,

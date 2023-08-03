@@ -154,7 +154,7 @@ export const DELIVERY_ZOME_NAME = "zDelivery";
 
 export const DELIVERY_INTERGRITY_ZOME_NAME = "zDeliveryIntegrity";
 
-/** State of a single delivery of a mail or ack to a unique recipient */
+/** State of a single delivery of an item to a unique recipient */
 export type DeliveryState =
   | {Unsent: null} | {PendingNotice: null} | {NoticeDelivered: null} | {ParcelRefused: null} | {ParcelAccepted: null} | {PendingParcel: null} | {ParcelDelivered: null};
 export enum DeliveryStateType {
@@ -192,9 +192,9 @@ export enum NoticeStateType {
 
 /** Shared data between a Distribution and a DeliveryNotice */
 export interface DeliverySummary {
-  distribution_strategy: DistributionStrategy
-  parcel_size: number
-  parcel_reference: ParcelReference
+  distributionStrategy: DistributionStrategy
+  parcelSize: number
+  parcelReference: ParcelReference
 }
 
 /** A Parcel is a generic Entry or a ParcelManifest */
@@ -215,38 +215,38 @@ export enum DistributionStrategyType {
 
 /** Entry representing a received Manifest */
 export interface DeliveryNotice {
-  distribution_eh: EntryHash
+  distributionEh: EntryHash
   summary: DeliverySummary
   sender: AgentPubKey
-  sender_summary_signature: Signature
+  senderSummarySignature: Signature
 }
 
 /** Entry for confirming a delivery has been well received or refused by a recipient */
 export interface DeliveryReceipt {
-  distribution_eh: EntryHash
+  distributionEh: EntryHash
   recipient: AgentPubKey
-  recipient_signature: Signature
+  recipientSignature: Signature
 }
 
 /** Entry for confirming a delivery has been well received or refused by a recipient */
 export interface DeliveryReply {
-  notice_eh: EntryHash
-  has_accepted: boolean
+  noticeEh: EntryHash
+  hasAccepted: boolean
 }
 
 /** Entry representing a request to send a Parcel to one or multiple recipients */
 export interface Distribution {
   recipients: AgentPubKey[]
-  delivery_summary: DeliverySummary
-  summary_signature: Signature
+  deliverySummary: DeliverySummary
+  summarySignature: Signature
 }
 
 /** Entry for confirming a manifest has been well received by a recipient */
 export interface NoticeReceived {
-  distribution_eh: EntryHash
+  distributionEh: EntryHash
   recipient: AgentPubKey
-  recipient_manifest_signature: Signature
-  date_of_reception: number
+  recipientManifestSignature: Signature
+  dateOfReception: number
 }
 
 /** Entry representing a file chunk. */
@@ -257,7 +257,7 @@ export interface ParcelChunk {
 /** WARN : Change MANIFEST_ENTRY_NAME const when renaming */
 export interface ParcelManifest {
   name: string
-  custum_entry_type: string
+  custumEntryType: string
   size: number
   chunks: EntryHash[]
 }
@@ -267,8 +267,8 @@ export interface ParcelManifest {
  * TODO: This should be a private link instead of an entry
  */
 export interface ParcelReceived {
-  notice_eh: EntryHash
-  parcel_eh: EntryHash
+  noticeEh: EntryHash
+  parcelEh: EntryHash
 }
 
 /** List of structs that PendingItem can embed */
@@ -291,17 +291,17 @@ export enum ItemKindType {
 export interface PendingItem {
   kind: ItemKind
   author: AgentPubKey
-  author_signature: Signature
-  encrypted_data: unknown
-  distribution_eh: EntryHash
+  authorSignature: Signature
+  encryptedData: unknown
+  distributionEh: EntryHash
 }
 
 /** Entry for confirming a delivery has been well received or refused by a recipient */
 export interface ReplyReceived {
-  distribution_eh: EntryHash
+  distributionEh: EntryHash
   recipient: AgentPubKey
-  has_accepted: boolean
-  recipient_signature: Signature
+  hasAccepted: boolean
+  recipientSignature: Signature
 }
 
 export interface DistributeParcelInput {
@@ -311,13 +311,13 @@ export interface DistributeParcelInput {
 }
 
 export interface RespondToNoticeInput {
-  notice_eh: EntryHash
-  has_accepted: boolean
+  noticeEh: EntryHash
+  hasAccepted: boolean
 }
 
 export interface FetchChunkInput {
-  chunk_eh: EntryHash
-  notice_eh: EntryHash
+  chunkEh: EntryHash
+  noticeEh: EntryHash
 }
 
 export interface GetNoticeOutput {
@@ -330,9 +330,9 @@ export enum DeliveryNoticeQueryFieldType {
 	Distribution = 'Distribution',
 	Parcel = 'Parcel',
 }
-export type DeliveryNoticeQueryFieldVariantSender = {Sender: AgentPubKey}
-export type DeliveryNoticeQueryFieldVariantDistribution = {Distribution: EntryHash}
-export type DeliveryNoticeQueryFieldVariantParcel = {Parcel: EntryHash}
+export type DeliveryNoticeQueryFieldVariantSender = {sender: AgentPubKey}
+export type DeliveryNoticeQueryFieldVariantDistribution = {distribution: EntryHash}
+export type DeliveryNoticeQueryFieldVariantParcel = {parcel: EntryHash}
 export type DeliveryNoticeQueryField = 
  | DeliveryNoticeQueryFieldVariantSender | DeliveryNoticeQueryFieldVariantDistribution | DeliveryNoticeQueryFieldVariantParcel;
 
@@ -340,8 +340,8 @@ export enum ParcelReceivedQueryFieldType {
 	Notice = 'Notice',
 	Parcel = 'Parcel',
 }
-export type ParcelReceivedQueryFieldVariantNotice = {Notice: EntryHash}
-export type ParcelReceivedQueryFieldVariantParcel = {Parcel: EntryHash}
+export type ParcelReceivedQueryFieldVariantNotice = {notice: EntryHash}
+export type ParcelReceivedQueryFieldVariantParcel = {parcel: EntryHash}
 export type ParcelReceivedQueryField = 
  | ParcelReceivedQueryFieldVariantNotice | ParcelReceivedQueryFieldVariantParcel;
 
@@ -349,13 +349,18 @@ export enum NoticeReceivedQueryFieldType {
 	Recipient = 'Recipient',
 	Distribution = 'Distribution',
 }
-export type NoticeReceivedQueryFieldVariantRecipient = {Recipient: AgentPubKey}
-export type NoticeReceivedQueryFieldVariantDistribution = {Distribution: EntryHash}
+export type NoticeReceivedQueryFieldVariantRecipient = {recipient: AgentPubKey}
+export type NoticeReceivedQueryFieldVariantDistribution = {distribution: EntryHash}
 export type NoticeReceivedQueryField = 
  | NoticeReceivedQueryFieldVariantRecipient | NoticeReceivedQueryFieldVariantDistribution;
 
 export interface CommitPendingItemInput {
   item: PendingItem
+  recipient: AgentPubKey
+}
+
+export interface GetDeliveryStateInput {
+  distributionEh: EntryHash
   recipient: AgentPubKey
 }
 
@@ -455,7 +460,7 @@ export enum SignalProtocolType {
 	ReceivedParcel = 'ReceivedParcel',
 	ReceivedReceipt = 'ReceivedReceipt',
 }
-export type SignalProtocolVariantReceivedNotice = {ReceivedNotice: DeliveryNotice}
+export type SignalProtocolVariantReceivedNotice = {ReceivedNotice: [EntryHash, DeliveryNotice]}
 export type SignalProtocolVariantReceivedReply = {ReceivedReply: ReplyReceived}
 export type SignalProtocolVariantReceivedParcel = {ReceivedParcel: ParcelReceived}
 export type SignalProtocolVariantReceivedReceipt = {ReceivedReceipt: DeliveryReceipt}
