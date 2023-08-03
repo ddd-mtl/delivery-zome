@@ -15,7 +15,6 @@ mod utils_parcel;
 mod unpack_item;
 mod pack_item;
 mod signal_protocol;
-mod call_delivery_zome;
 
 pub use dm_protocol::*;
 pub use receive::*;
@@ -27,4 +26,3 @@ pub use functions::*;
 pub use pack_item::*;
 
 pub use callbacks::*;
-pub use call_delivery_zome::*;

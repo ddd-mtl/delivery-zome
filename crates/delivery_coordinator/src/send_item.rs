@@ -13,7 +13,7 @@ use crate::{
 #[derive(Clone, PartialEq, Debug)]
 pub enum SendSuccessKind {
    OK_SELF,
-   OK_DIRECT,
+   OK_DIRECT(Signature),
    OK_PENDING,
 }
 
@@ -34,8 +34,8 @@ pub fn send_item(
          DeliveryProtocol::Item(pending_item.clone())
       ,)?;
       debug!("send_item_by_dm() response_dm = {}", response_dm);
-      if let DeliveryProtocol::Success = response_dm {
-         return Ok(SendSuccessKind::OK_DIRECT);
+      if let DeliveryProtocol::Success(signature) = response_dm {
+         return Ok(SendSuccessKind::OK_DIRECT(signature));
       } else {
          debug!("send_item() failed: {}", response_dm);
       }

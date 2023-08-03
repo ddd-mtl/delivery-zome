@@ -7,12 +7,13 @@ use crate::*;
 ///
 pub fn post_commit_ReplyReceived(entry: Entry, reply_eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ReplyReceived() {:?}", reply_eh);
-   let _ = ReplyReceived::try_from(entry)?;
+   let reply = ReplyReceived::try_from(entry)?;
 
    /// Get ReplyReceived
-   let reply: ReplyReceived = get_typed_from_eh(reply_eh.clone())?;
+   //let reply: ReplyReceived = get_typed_from_eh(reply_eh.clone())?;
    /// Check signature
    // FIXME
+   //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
    /// Bail if delivery refused
    if !reply.has_accepted {
       info!("Delivery {} refused by {}", reply.distribution_eh, reply.recipient);

@@ -435,7 +435,7 @@ export enum DeliveryProtocolType {
 	Pong = 'Pong',
 }
 export type DeliveryProtocolVariantFailure = {Failure: string}
-export type DeliveryProtocolVariantSuccess = {Success: null}
+export type DeliveryProtocolVariantSuccess = {Success: Signature}
 export type DeliveryProtocolVariantItem = {Item: PendingItem}
 export type DeliveryProtocolVariantParcelRequest = {ParcelRequest: EntryHash}
 export type DeliveryProtocolVariantParcelResponse = {ParcelResponse: Entry}

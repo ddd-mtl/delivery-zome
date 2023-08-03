@@ -8,9 +8,9 @@ use crate::*;
 ///
 pub fn send_dm(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<DeliveryProtocol> {
    /// Pre-conditions: Don't call yourself (otherwise we get concurrency issues)
-   let me = agent_info().unwrap().agent_latest_pubkey;
+   let me = agent_info()?.agent_latest_pubkey;
    if destination == me {
-      return error("send_dm() aborted. Can't send to self.");
+      return zome_error!("send_dm() aborted. Can't send to self.");
    }
    /// Prepare payload
    let dm_packet = DirectMessage { from: me, msg: msg.clone() };

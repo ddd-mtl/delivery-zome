@@ -23,16 +23,37 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         DeliveryProtocol::Item(pending_item) => {
             match pending_item.kind {
                 /// Sent by recipient
-                ItemKind::DeliveryReply  => receive_reply(dm.from, pending_item).into(),
-                ItemKind::ParcelReceived => receive_reception(dm.from, pending_item).into(),
-                ItemKind::NoticeReceived => receive_ack(dm.from, pending_item).into(),
+                ItemKind::DeliveryReply => {
+                    let _ = receive_reply(dm.from, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    DeliveryProtocol::Success(signature)
+                },
+                ItemKind::ParcelReceived => {
+                    let _ = receive_reception(dm.from, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    DeliveryProtocol::Success(signature)
+                },
+                ItemKind::NoticeReceived => {
+                    let _ = receive_ack(dm.from, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    DeliveryProtocol::Success(signature)
+                },
                 /// Sent by sender
-                ItemKind::DeliveryNotice => receive_notice(dm.from, pending_item).into(),
+                ItemKind::DeliveryNotice => {
+                    let notice = receive_notice(dm.from, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_latest_pubkey, notice.summary)?;
+                    DeliveryProtocol::Success(signature)
+                },
                 ItemKind::AppEntryBytes => {
                     // let result = receive_entry(dm.from, pending_item).into();
-                    DeliveryProtocol::Success
+                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    DeliveryProtocol::Success(signature)
                 },
-                ItemKind::ParcelChunk => receive_chunk(dm.from, pending_item).into(),
+                ItemKind::ParcelChunk => {
+                    let _ = receive_chunk(dm.from, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    DeliveryProtocol::Success(signature)
+                },
                 //_ => panic!("ItemKind '{:?}' should not be received via DM", item.kind),
             }
         },
@@ -130,7 +151,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) 
 
 
 /// Commit received DeliveryNotice from sender
-pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
+pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<DeliveryNotice> {
     let maybe_notice: Option<DeliveryNotice> = unpack_item(item, from.clone())?;
     let Some(notice) = maybe_notice
        else { return zome_error!("Failed deserializing DeliveryNotice (2)"); };
@@ -141,13 +162,8 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<()> 
     }
     /// Commit DeliveryNotice
     let _hh = create_entry_relaxed(DeliveryEntry::DeliveryNotice(notice.clone()))?;
-    // /// Emit Signal
-    // let res = emit_signal(&SignalProtocol::ReceivedNotice(notice));
-    // if let Err(err) = res {
-    //     error!("Emit signal failed: {}", err);
-    // }
     /// Done
-    Ok(())
+    Ok(notice)
 }
 
 /// Commit received DeliveryNotice from sender
@@ -206,11 +222,6 @@ pub fn receive_reception(from: AgentPubKey, pending_item: PendingItem) -> Extern
     };
     /// Commit DeliveryReceipt
     let _hh = create_entry_relaxed(DeliveryEntry::DeliveryReceipt(receipt.clone()))?;
-    /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedReceipt(receipt));
-    if let Err(err) = res {
-        error!("Emit signal failed: {}", err);
-    }
     /// Done
     Ok(())
 }

@@ -6,6 +6,7 @@ mod parcel_received;
 mod reply_received;
 mod delivery_notice;
 mod notice_received;
+mod delivery_receipt;
 
 
 pub use delivery_notice::*;
@@ -16,6 +17,7 @@ pub use parcel_manifest::*;
 pub use parcel_received::*;
 pub use reply_received::*;
 pub use notice_received::*;
+pub use delivery_receipt::*;
 
 //----------------------------------------------------------------------------------------
 
@@ -74,12 +76,20 @@ fn post_commit_app_entry(eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternR
    // let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes.clone())?;
    let variant = entry_index_to_variant(app_entry_def.entry_index)?;
    match variant {
+      /// Send/Receive/Ack Notice
       DeliveryEntryTypes::Distribution => post_commit_Distribution(entry, eh),
       DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(entry, eh),
       DeliveryEntryTypes::NoticeReceived => post_commit_NoticeReceived(entry, eh),
+      /// Send/Receive Reply
       DeliveryEntryTypes::DeliveryReply => post_commit_DeliveryReply(entry, eh),
+      DeliveryEntryTypes::ReplyReceived => post_commit_ReplyReceived(entry, eh),
+      /// Send/Receive Parcel
       DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(entry, eh),
       DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(entry, eh),
+      /// Send/Receive Receipt
+      DeliveryEntryTypes::ParcelReceived => post_commit_ParcelReceived(entry, eh),
+      DeliveryEntryTypes::DeliveryReceipt => post_commit_DeliveryReceipt(entry, eh),
+      ///
       _ => Ok(()),
    }
 }

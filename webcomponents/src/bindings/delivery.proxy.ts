@@ -150,6 +150,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('commit_parcel', input);
   }
 
+  async commitNoticeReceived(ack: NoticeReceived): Promise<ActionHash> {
+    return this.call('commit_NoticeReceived', ack);
+  }
+
 
 
   async checkManifest(chunkEh: EntryHash): Promise<EntryHash | null> {

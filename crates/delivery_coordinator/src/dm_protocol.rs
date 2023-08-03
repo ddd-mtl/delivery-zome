@@ -30,7 +30,7 @@ pub fn failure_err(reason: &str, err: WasmError) -> DeliveryProtocol {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, SerializedBytes)]
 pub enum DeliveryProtocol {
     Failure(String),
-    Success,
+    Success(Signature),
     Item(PendingItem),
     ParcelRequest(EntryHash),
     ParcelResponse(Entry),
@@ -45,7 +45,7 @@ impl fmt::Display for DeliveryProtocol {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let str: String = match self {
             DeliveryProtocol::Failure(str) => format!("Failure: {}", str),
-            DeliveryProtocol::Success => "Success".to_owned(),
+            DeliveryProtocol::Success(_) => "Success".to_owned(),
             DeliveryProtocol::Item(item) => format!("Item: {:?}", item.kind),
             DeliveryProtocol::ParcelRequest(eh) => format!("ParcelRequest: {}", eh),
             DeliveryProtocol::ParcelResponse(_entry) => format!("ParcelResponse"),
@@ -60,11 +60,11 @@ impl fmt::Display for DeliveryProtocol {
     }
 }
 
-impl From<ExternResult<()>> for DeliveryProtocol {
-    fn from(result: ExternResult<()>) -> Self {
-        match result {
-            Err(err) => failure_err("", err),
-            Ok(_) => DeliveryProtocol::Success,
-        }
-    }
-}
+// impl From<ExternResult<()>> for DeliveryProtocol {
+//     fn from(result: ExternResult<()>) -> Self {
+//         match result {
+//             Err(err) => failure_err("", err),
+//             Ok(_) => DeliveryProtocol::Success,
+//         }
+//     }
+// }

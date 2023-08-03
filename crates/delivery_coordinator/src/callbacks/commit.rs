@@ -3,6 +3,9 @@
 use hdk::prelude::*;
 
 use zome_utils::*;
+use zome_delivery_integrity::DeliveryEntry;
+use zome_delivery_types::NoticeReceived;
+
 
 pub const COMMIT_PARCEL_CALLBACK_NAME: &'static str = "commit_parcel";
 
@@ -53,4 +56,11 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
    }
    /// Done
    Ok(parcel_ah)
+}
+
+
+
+#[hdk_extern]
+fn commit_NoticeReceived(ack: NoticeReceived) -> ExternResult<ActionHash> {
+   return create_entry_relaxed(DeliveryEntry::NoticeReceived(ack));
 }
