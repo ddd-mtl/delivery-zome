@@ -4,7 +4,7 @@ use hdk::prelude::*;
 
 use zome_utils::*;
 use zome_delivery_integrity::DeliveryEntry;
-use zome_delivery_types::NoticeReceived;
+use zome_delivery_types::{NoticeReceived, ParcelReceived};
 
 
 pub const COMMIT_PARCEL_CALLBACK_NAME: &'static str = "commit_parcel";
@@ -17,6 +17,7 @@ pub struct CommitParcelInput {
    pub entry: Entry,
    pub maybe_link_ah: Option<ActionHash>,
 }
+
 
 /// Zome Function Callback required by delivery-zome.
 /// Should not be called directly. Only via remote call to self.
@@ -59,8 +60,20 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
 }
 
 
-
+///
 #[hdk_extern]
 fn commit_NoticeReceived(ack: NoticeReceived) -> ExternResult<ActionHash> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
    return create_entry_relaxed(DeliveryEntry::NoticeReceived(ack));
+}
+
+
+
+///
+#[hdk_extern]
+fn commit_ParcelReceived(pr: ParcelReceived) -> ExternResult<EntryHash> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   let eh = hash_entry(pr.clone())?;
+   let _hh = create_entry_relaxed(DeliveryEntry::ParcelReceived(pr))?;
+   return Ok(eh);
 }

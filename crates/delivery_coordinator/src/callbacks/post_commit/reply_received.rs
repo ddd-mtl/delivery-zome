@@ -19,6 +19,8 @@ pub fn post_commit_ReplyReceived(entry: Entry, reply_eh: &EntryHash) -> ExternRe
       info!("Delivery {} refused by {}", reply.distribution_eh, reply.recipient);
       return Ok(());
    }
+
+
    /// - Send Parcel
    /// Get Distribution
    let distribution: Distribution = get_typed_from_eh(reply.distribution_eh.clone())?;
@@ -45,7 +47,8 @@ pub fn post_commit_ReplyReceived(entry: Entry, reply_eh: &EntryHash) -> ExternRe
          )?;
       }
    }
-   /// - Send AppEntry Parcel
+
+   /// - Send AppEntry Parcel Entry or ParcelManifest
    debug!("Delivery accepted ; sending item {:?}", distribution.delivery_summary.parcel_reference);
    /// Get Entry
    let record = get_local_from_eh(distribution.delivery_summary.parcel_reference.entry_address().clone())?;

@@ -29,6 +29,8 @@ pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(Pe
 pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: Option<ActionHash>)
     -> ExternResult<ActionHash>
 {
+    debug!("call_commit_parcel(): zome name: {:?}", notice.summary.parcel_reference.entry_zome_name());
+    debug!("call_commit_parcel(): known zomes: {:?}", dna_info()?.zome_names);
     let input = CommitParcelInput {
         zome_index: get_zome_index(notice.summary.parcel_reference.entry_zome_name())?,
         entry_index: notice.summary.parcel_reference.entry_index().0,

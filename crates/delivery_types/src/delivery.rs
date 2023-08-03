@@ -103,7 +103,7 @@ impl ParcelReference {
 
    pub fn entry_index(&self) -> EntryDefIndex {
       match self {
-         ParcelReference::Manifest(_) => EntryDefIndex::from(6), // FIXME should not be hardcoded
+         ParcelReference::Manifest(_) => EntryDefIndex::from(6), // FIXME should not be hardcoded: DeliveryEntryTypes::ParcelManifest
          ParcelReference::AppEntry(_, id, _, _) => id.to_owned(),
       }
    }

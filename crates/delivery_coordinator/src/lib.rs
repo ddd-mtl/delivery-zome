@@ -6,6 +6,7 @@
 
 mod callbacks;
 mod functions;
+mod self_call;
 
 mod dm_protocol;
 mod receive;
@@ -26,3 +27,4 @@ pub use functions::*;
 pub use pack_item::*;
 
 pub use callbacks::*;
+pub use self_call::*;

@@ -29,7 +29,7 @@ use zome_delivery_integrity::*;
 /// Zome Callback
 #[hdk_extern(infallible)]
 fn post_commit(signedActionList: Vec<SignedActionHashed>) {
-   debug!("DELIVERY post_commit() called for {} actions", signedActionList.len());
+   //debug!("DELIVERY post_commit() called for {} actions", signedActionList.len());
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each Action
    for signedAction in signedActionList {

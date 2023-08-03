@@ -45,7 +45,7 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
                     DeliveryProtocol::Success(signature)
                 },
                 ItemKind::AppEntryBytes => {
-                    // let result = receive_entry(dm.from, pending_item).into();
+                    let _ = receive_entry(dm.from, pending_item.clone())?;
                     let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
                 },
@@ -70,7 +70,7 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
 fn receive_entry(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     let maybe_entry: Option<Entry> = unpack_entry(item.clone(), from.clone())?;
     if maybe_entry.is_none() {
-        return error("Failed deserializing Entry");
+        return zome_error!("Failed deserializing Entry");
     }
     let parcel = maybe_entry.unwrap();
 
@@ -81,7 +81,7 @@ fn receive_entry(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     let parcel_eh = hash_entry(parcel.clone())?;
     let maybe_notice = find_notice(parcel_eh)?;
     if maybe_notice.is_none() {
-        return error("Failed finding DeliveryNotice for received parcel");
+        return zome_error!("Failed finding DeliveryNotice for received parcel");
     }
     /// Commit Entry
     let _hh = call_commit_parcel(parcel, &maybe_notice.unwrap(), None)?;
@@ -94,7 +94,7 @@ fn receive_entry(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
 pub fn receive_chunk(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     let maybe_chunk: Option<ParcelChunk> = unpack_item(item.clone(), from.clone())?;
     if maybe_chunk.is_none() {
-        return error("Failed deserializing ParcelChunk");
+        return zome_error!("Failed deserializing ParcelChunk");
     }
     /// Make sure we accepted to receive this chunk
     // FIXME

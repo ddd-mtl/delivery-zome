@@ -3,7 +3,6 @@ mod commit_parcel_manifest;
 mod distribute_parcel;
 mod respond_to_notice;
 mod pull_inbox;
-mod fetch_parcel;
 mod fetch_chunk;
 mod check_manifest;
 mod get_notice;
@@ -30,7 +29,6 @@ pub use self::{
    pub_enc_key::*,
    distribute_parcel::*,
    fetch_chunk::*,
-   fetch_parcel::*,
    get_notice::*,
    pull_inbox::*,
    query::*,
