@@ -135,7 +135,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     const AgentOptions = Object.entries(agents).map(
         ([_index, agentIdB64]) => {
           //console.log("" + index + ". " + agentIdB64)
-          return html `<option value="${agentIdB64}">${agentIdB64.substring(0, 12)}</option>`
+          return html `<option value="${agentIdB64}">${agentIdB64.slice(-5)}</option>`
         }
     )
 
@@ -151,6 +151,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
         <h2>
           Received secrets:
           <select name="listSelector" id="listSelector" @click=${this.onListSelect}>
+            ${AgentOptions}
           </select>
         </h2>        
       </div>

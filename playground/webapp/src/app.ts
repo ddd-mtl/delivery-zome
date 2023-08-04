@@ -101,7 +101,7 @@ export class SecretApp extends HappElement {
           <input type="button" value="Agent Directory" @click=${() => {this._pageDisplayIndex = 2; this.requestUpdate()}} >
         </div>
         <button type="button" @click=${this.refresh}>Refresh</button>
-        <span><b>Agent:</b> ${this.secret.cell.agentPubKey}</span>
+        <span><abbr title=${this.secret.cell.agentPubKey}>Agent</abbr>: <b>${this.secret.cell.agentPubKey.slice(-5)}</b></span>
         <hr class="solid">      
         ${page}
       </cell-context>        

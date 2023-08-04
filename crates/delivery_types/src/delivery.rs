@@ -108,9 +108,27 @@ impl ParcelReference {
       }
    }
 
-   pub fn entry_zome_name(&self) -> ZomeName {
+   pub fn zome_index(&self) -> ZomeIndex {
+      let izn = self.entry_integrity_zome_name();
+      /// Search for zome_index
+      let mut i: u8 = 0;
+      for zome_name in dna_info().unwrap().zome_names {
+         if zome_name == izn {
+            break;
+         }
+         i += 1;
+      }
+      if i == dna_info().unwrap().zome_names.len() as u8 {
+         debug!("Zome index not found for {:?}", izn);
+         panic!("ZOME INDEX NOT FOUND");
+      }
+      /// Return found value
+      ZomeIndex::from(i)
+   }
+
+   pub fn entry_integrity_zome_name(&self) -> ZomeName {
       match self {
-         ParcelReference::Manifest(_) => crate::DELIVERY_ZOME_NAME.to_string().into(),
+         ParcelReference::Manifest(_) => crate::DELIVERY_INTERGRITY_ZOME_NAME.to_string().into(),
          ParcelReference::AppEntry(zn,_, _, _) => zn.clone(),
       }
    }

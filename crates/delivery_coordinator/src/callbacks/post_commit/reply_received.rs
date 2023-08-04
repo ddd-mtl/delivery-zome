@@ -8,20 +8,22 @@ use crate::*;
 pub fn post_commit_ReplyReceived(entry: Entry, reply_eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ReplyReceived() {:?}", reply_eh);
    let reply = ReplyReceived::try_from(entry)?;
-
-   /// Get ReplyReceived
-   //let reply: ReplyReceived = get_typed_from_eh(reply_eh.clone())?;
    /// Check signature
    // FIXME
    //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
-   /// Bail if delivery refused
-   if !reply.has_accepted {
+   /// Send it immediately if it has been accepted
+   if reply.has_accepted {
+      //let _ = send_parcel(reply)?;
+   } else {
       info!("Delivery {} refused by {}", reply.distribution_eh, reply.recipient);
-      return Ok(());
    }
+   /// Done
+   Ok(())
+}
 
 
-   /// - Send Parcel
+/// Send Parcel
+fn send_parcel(reply: ReplyReceived) -> ExternResult<()> {
    /// Get Distribution
    let distribution: Distribution = get_typed_from_eh(reply.distribution_eh.clone())?;
    /// - Send Chunks if Manifest

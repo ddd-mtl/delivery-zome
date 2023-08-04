@@ -122,12 +122,16 @@ pub struct SendSecretInput {
 /// Zome Function
 #[hdk_extern]
 pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
-   debug!("send_secret() START - {:?}", input.secret_eh);
+   debug!("send_secret() START {:?}", input.secret_eh);
+   debug!("send_secret() zome_names: {:?}", dna_info()?.zome_names);
+   debug!("send_secret() zome_index: {:?}", zome_info()?.id);
+   debug!("send_secret()  zome_name: {:?}", zome_info()?.name);
+
    /// Determine parcel type depending on Entry
    let maybe_secret: ExternResult<Secret> = get_typed_from_eh(input.secret_eh.clone());
    let parcel_ref = if let Ok(_secret) = maybe_secret {
       ParcelReference::AppEntry(
-         zome_info()?.name,
+         ZomeName::from("secret_integrity"),
          EntryDefIndex::from(get_variant_index::<SecretEntry>(SecretEntryTypes::Secret)?),
          input.secret_eh,
          EntryVisibility::Private,

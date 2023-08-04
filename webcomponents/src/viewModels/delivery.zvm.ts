@@ -6,14 +6,13 @@ import {
     AgentPubKey,
     AgentPubKeyB64, AppSignalCb,
     decodeHashFromBase64,
-    encodeHashToBase64, EntryHash, EntryHashB64
+    encodeHashToBase64, EntryHash, EntryHashB64, Timestamp
 } from "@holochain/client";
 import {
-    DeliveryNotice, DeliveryState,
+    DeliveryNotice, DeliveryReceipt, DeliveryReply, DeliveryState,
     Distribution,
-    DistributionState,
+    DistributionState, NoticeReceived, ParcelReceived, ReplyReceived,
     SignalKind, SignalProtocol, SignalProtocolType,
-    SignalProtocolVariantReceivedNotice
 } from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 
@@ -33,12 +32,27 @@ export interface DeliveryPerspective {
 
     newDeliveryNotices: Dictionary<DeliveryNotice>,
 
-    /** -- Distributions -- */
-
     /** DistributionEh -> [DistributionState, AgentPubKey -> DeliveryState] */
     myDistributions: Dictionary<FullDistributionState>,
 
     //incomingDistributions: Dictionary<DistributionState>,
+
+
+    /** -- OUTBOUND -- */
+    allDistributions: Dictionary<[Timestamp, Distribution]>,
+    /** distrib_eh -> NoticeReceived */
+    allReceivedNotices: Dictionary<NoticeReceived>,
+    /** distrib_eh -> ReplyReceived */
+    allReceivedReplies: Dictionary<ReplyReceived>,
+    /** distrib_eh -> DeliveryReceipt */
+    allReceipts: Dictionary<DeliveryReceipt>,
+
+    /** -- INBOUND -- */
+    allNotices: Dictionary<[Timestamp, DeliveryNotice]>,
+    /** notice_eh -> DeliveryReply */
+    allReplies: Dictionary<DeliveryReply>,
+    /** notice_eh -> ParcelReceived */
+    allReceivedParcels: Dictionary<ParcelReceived>,
 }
 
 
@@ -61,6 +75,16 @@ export class DeliveryZvm extends ZomeViewModel {
         inbox: [],
         newDeliveryNotices: {},
         myDistributions: {},
+
+        allDistributions: {},
+        allReceivedNotices: {},
+        allReceivedReplies: {},
+        allReceipts: {},
+
+        allNotices: {},
+        allReplies: {},
+        allReceivedParcels: {},
+
     };
 
 
@@ -108,6 +132,7 @@ export class DeliveryZvm extends ZomeViewModel {
     async probeAll(): Promise<void> {
         this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
         await this.probeInbox();
+        await this.queryAll();
         await this.queryDistributions();
         this.notifySubscribers();
     }
@@ -193,6 +218,45 @@ export class DeliveryZvm extends ZomeViewModel {
     }
 
 
+    /** */
+    async queryAll(): Promise<null> {
+        let pairs = [];
+        this._perspective.allDistributions = {};
+        pairs = await this.zomeProxy.queryAllDistribution();
+        Object.values(pairs).map(([eh, ts, typed]) => this._perspective.allDistributions[encodeHashToBase64(eh)] = [ts, typed]);
+        console.log("queryAll() distribs: " + pairs.length);
+
+
+        this._perspective.allReceivedNotices = {};
+        pairs = await this.zomeProxy.queryAllNoticeReceived();
+        Object.values(pairs).map(([eh, typed]) => this._perspective.allReceivedNotices[encodeHashToBase64(eh)] = typed);
+
+        this._perspective.allReceivedReplies = {};
+        pairs = await this.zomeProxy.queryAllReplyReceived();
+        Object.values(pairs).map(([eh, typed]) => this._perspective.allReceivedReplies[encodeHashToBase64(eh)] = typed);
+
+        this._perspective.allReceipts = {};
+        pairs = await this.zomeProxy.queryAllDeliveryReceipt();
+        Object.values(pairs).map(([eh, typed]) => this._perspective.allReceipts[encodeHashToBase64(eh)] = typed);
+
+
+        this._perspective.allNotices = {};
+        pairs = await this.zomeProxy.queryAllDeliveryNotice();
+        Object.values(pairs).map(([eh, ts, typed]) => this._perspective.allNotices[encodeHashToBase64(eh)] = [ts, typed]);
+        console.log("queryAll() notices: " + pairs.length);
+
+        this._perspective.allReplies = {};
+        pairs = await this.zomeProxy.queryAllDeliveryReply();
+        Object.values(pairs).map(([eh, typed]) => this._perspective.allReplies[encodeHashToBase64(eh)] = typed);
+
+        this._perspective.allReceivedParcels = {};
+        pairs = await this.zomeProxy.queryAllParcelReceived();
+        Object.values(pairs).map(([eh, typed]) => this._perspective.allReceivedParcels[encodeHashToBase64(eh)] = typed);
+
+        return null;
+    }
+
+
     /** -- API Sugar -- */
 
     /** */
@@ -209,4 +273,5 @@ export class DeliveryZvm extends ZomeViewModel {
     async getDeliveryState(distribEh: EntryHashB64, recipient: AgentPubKeyB64) {
         this.zomeProxy.getDeliveryState({distribution_eh: decodeHashFromBase64(distribEh), recipient: decodeHashFromBase64(recipient)});
     }
+
 }

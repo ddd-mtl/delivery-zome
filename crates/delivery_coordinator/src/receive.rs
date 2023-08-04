@@ -136,17 +136,13 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) 
     if let Err(err) = maybe_maybe_element {
         return failure_err("Failed to get Parcel Element", err);
     }
-    let element = match maybe_maybe_element.unwrap() {
-        None => return failure("Parcel Element not found"),
-        Some(el) => el,
-    };
+    let Some(element) = maybe_maybe_element.unwrap()
+       else { return failure("Parcel Element not found"); };
     /// Return Entry
     debug!("Parcel Element found: {:?}", element);
-    let maybe_entry = element.entry().as_option();
-    if maybe_entry.is_none() {
-        return failure("Parcel Entry not found in Parcel Element");
-    }
-    return DeliveryProtocol::ParcelResponse(maybe_entry.unwrap().to_owned());
+    let Some(entry) = element.entry().as_option()
+        else { return failure("Parcel Entry not found in Parcel Element"); };
+    return DeliveryProtocol::ParcelResponse(entry.to_owned());
 }
 
 

@@ -1,5 +1,8 @@
 import {HoloHash, Timestamp} from "@holochain/client";
-import {ZomeIndex} from "@ddd-qc/cell-proxy";
+//import {ZomeIndex} from "@ddd-qc/cell-proxy";
+
+export type ZomeIndex = number;
+export type EntryDefIndex = number;
 
 /** Link defs from holochain */
 

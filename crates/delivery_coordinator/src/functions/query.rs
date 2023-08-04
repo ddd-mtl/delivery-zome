@@ -3,6 +3,20 @@ use zome_utils::*;
 use zome_delivery_integrity::*;
 use zome_delivery_types::*;
 
+
+///
+#[hdk_extern]
+pub fn query_all_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, Distribution)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+                   .collect();
+   /// Done
+   Ok(res)
+}
+
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]
 pub fn query_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Distribution)>> {
@@ -13,6 +27,20 @@ pub fn query_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Distribution)>>
       let eh = hash_entry(distrib.clone()).unwrap();
       (eh, distrib)
    }).collect();
+   Ok(res)
+}
+
+
+///
+#[hdk_extern]
+pub fn query_all_DeliveryNotice(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, DeliveryNotice)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<DeliveryNotice>(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap())?;
+   let res = tuples.into_iter()
+      .map(|(_, create, notice)| (create.entry_hash, create.timestamp, notice))
+      .collect();
+   /// Done
    Ok(res)
 }
 
@@ -57,6 +85,19 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 }
 
 
+///
+#[hdk_extern]
+pub fn query_all_NoticeReceived(_: ()) -> ExternResult<Vec<(EntryHash, NoticeReceived)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<NoticeReceived>(DeliveryEntryTypes::NoticeReceived.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .collect();
+   /// Done
+   Ok(res)
+}
+
 
 /// Find NoticeReceived with field with given value
 #[hdk_extern]
@@ -89,6 +130,19 @@ pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec
 }
 
 
+///
+#[hdk_extern]
+pub fn query_all_DeliveryReply(_: ()) -> ExternResult<Vec<(EntryHash, DeliveryReply)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<DeliveryReply>(DeliveryEntryTypes::DeliveryReply.try_into().unwrap())?;
+   let res = tuples.into_iter()
+       .map(|(_, create, typed)| (create.entry_hash, typed))
+       .collect();
+   /// Done
+   Ok(res)
+}
+
 
 ///Find DeliveryReply with given notice_eh value
 pub fn query_DeliveryReply(notice_eh: EntryHash) -> ExternResult<Option<DeliveryReply>> {
@@ -104,6 +158,20 @@ pub fn query_DeliveryReply(notice_eh: EntryHash) -> ExternResult<Option<Delivery
    }
    /// Done
    Ok(None)
+}
+
+
+///
+#[hdk_extern]
+pub fn query_all_ReplyReceived(_: ()) -> ExternResult<Vec<(EntryHash, ReplyReceived)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<ReplyReceived>(DeliveryEntryTypes::ReplyReceived.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .collect();
+   /// Done
+   Ok(res)
 }
 
 
@@ -124,6 +192,21 @@ pub fn query_ReplyReceived(maybe_distribution: Option<EntryHash>, maybe_recipien
    }
    /// Done
    Ok(typeds)
+}
+
+
+///
+#[hdk_extern]
+pub fn query_all_ParcelReceived(_: ()) -> ExternResult<Vec<(EntryHash, ParcelReceived)>> {
+   //debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<ParcelReceived>(DeliveryEntryTypes::ParcelReceived.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .collect();
+   /// Done
+   Ok(res)
 }
 
 
@@ -155,6 +238,20 @@ pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Opt
    }
    /// Done
    Ok(None)
+}
+
+
+///
+#[hdk_extern]
+pub fn query_all_DeliveryReceipt(_: ()) -> ExternResult<Vec<(EntryHash, DeliveryReceipt)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<DeliveryReceipt>(DeliveryEntryTypes::DeliveryReceipt.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .collect();
+   /// Done
+   Ok(res)
 }
 
 

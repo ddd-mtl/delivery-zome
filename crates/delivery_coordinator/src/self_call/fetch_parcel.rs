@@ -17,10 +17,8 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
    /// Look for Parcel
    let maybe_parcel = request_parcel(notice.clone())?;
-   if maybe_parcel.is_none() {
-      return Ok(None);
-   };
-   let (parcel, maybe_link) = maybe_parcel.unwrap();
+   let Some((parcel, maybe_link)) = maybe_parcel
+      else { return Ok(None); };
    debug!("fetch_parcel() Parcel found.");
    let parcel_eh = hash_entry(parcel.clone())?;
    debug!("fetch_parcel() parcel_eh = {:?}", parcel_eh);
@@ -38,7 +36,7 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
 
 /// Try to retrieve the parcel entry
 pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Option<Link>)>> {
-   debug!("pull_parcel() {:?}", notice.summary.parcel_reference.entry_address());
+   debug!("request_parcel() {:?}", notice.summary.parcel_reference.entry_address());
    /// Request Parcel
    /// Check Inbox first
    if notice.summary.distribution_strategy.can_dht() {
@@ -60,7 +58,7 @@ pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Opt
    if notice.summary.distribution_strategy.can_dm() {
       let dm = DeliveryProtocol::ParcelRequest(notice.distribution_eh);
       let response = send_dm(notice.sender, dm)?;
-      debug!("pull_parcel() dm response: {:?}", response);
+      debug!("dm response: {:?}", response);
       if let DeliveryProtocol::ParcelResponse(entry) = response {
          /// Check entry
          let received_eh = hash_entry(entry.clone())?;
