@@ -130,11 +130,12 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
    /// Determine parcel type depending on Entry
    let maybe_secret: ExternResult<Secret> = get_typed_from_eh(input.secret_eh.clone());
    let parcel_ref = if let Ok(_secret) = maybe_secret {
-      ParcelReference::AppEntry(
-         ZomeName::from("secret_integrity"),
-         EntryDefIndex::from(get_variant_index::<SecretEntry>(SecretEntryTypes::Secret)?),
-         input.secret_eh,
-         EntryVisibility::Private,
+      ParcelReference::AppEntry(EntryReference {
+         eh: input.secret_eh,
+         zome_name: ZomeName::from("secret_integrity"),
+         entry_index: EntryDefIndex::from(get_variant_index:: < SecretEntry>(SecretEntryTypes::Secret)?),
+         visibility: EntryVisibility::Private,
+         }
       )
    } else {
       /// Should be a Manifest

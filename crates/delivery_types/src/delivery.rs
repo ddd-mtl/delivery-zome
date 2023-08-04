@@ -74,6 +74,14 @@ pub enum NoticeState {
    Deleted,
 }
 
+/// Shared data between a Distribution and a DeliveryNotice
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct EntryReference {
+   pub eh: EntryHash,
+   pub zome_name: ZomeName,
+   pub entry_index: EntryDefIndex,
+   pub visibility: EntryVisibility,
+}
 
 
 /// Shared data between a Distribution and a DeliveryNotice
@@ -88,7 +96,7 @@ pub struct DeliverySummary {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ParcelReference {
    /// Any Entry type
-   AppEntry(ZomeName, EntryDefIndex, EntryHash, EntryVisibility),
+   AppEntry(EntryReference),
    /// A ParcelManifest
    Manifest(EntryHash),
 }
@@ -97,14 +105,14 @@ impl ParcelReference {
    pub fn entry_address(&self) -> EntryHash {
       match self {
          ParcelReference::Manifest(eh) => eh.clone(),
-         ParcelReference::AppEntry(_,_, eh,_) => eh.clone(),
+         ParcelReference::AppEntry(eref) => eref.eh.clone(),
       }
    }
 
    pub fn entry_index(&self) -> EntryDefIndex {
       match self {
          ParcelReference::Manifest(_) => EntryDefIndex::from(6), // FIXME should not be hardcoded: DeliveryEntryTypes::ParcelManifest
-         ParcelReference::AppEntry(_, id, _, _) => id.to_owned(),
+         ParcelReference::AppEntry(eref) => eref.entry_index.to_owned(),
       }
    }
 
@@ -129,14 +137,14 @@ impl ParcelReference {
    pub fn entry_integrity_zome_name(&self) -> ZomeName {
       match self {
          ParcelReference::Manifest(_) => crate::DELIVERY_INTERGRITY_ZOME_NAME.to_string().into(),
-         ParcelReference::AppEntry(zn,_, _, _) => zn.clone(),
+         ParcelReference::AppEntry(eref) => eref.zome_name.clone(),
       }
    }
 
    pub fn entry_visibility(&self) -> EntryVisibility {
       match self {
          ParcelReference::Manifest(_) => EntryVisibility::Private,
-         ParcelReference::AppEntry(_,_, _, viz) => viz.clone(),
+         ParcelReference::AppEntry(eref) => eref.visibility.clone(),
       }
    }
 }

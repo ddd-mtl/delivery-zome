@@ -131,6 +131,9 @@ ValidationStatus,
 ValidationReceipt,
    } from '@holochain-open-dev/core-types';
 
+/** User defined external dependencies */
+export type EntryDefIndex = number;
+
 export const REMOTE_ENDPOINT = "receive_delivery_dm";
 
 export const DIRECT_SEND_TIMEOUT_MS = 1000;
@@ -188,6 +191,14 @@ export enum NoticeStateType {
 }
 
 /** Shared data between a Distribution and a DeliveryNotice */
+export interface EntryReference {
+  eh: EntryHash
+  zome_name: ZomeName
+  entry_index: EntryDefIndex
+  visibility: EntryVisibility
+}
+
+/** Shared data between a Distribution and a DeliveryNotice */
 export interface DeliverySummary {
   distribution_strategy: DistributionStrategy
   parcel_size: number
@@ -199,7 +210,10 @@ export enum ParcelReferenceType {
 	AppEntry = 'AppEntry',
 	Manifest = 'Manifest',
 }
-export type ParcelReference = unknown
+export type ParcelReferenceVariantAppEntry = {AppEntry: EntryReference}
+export type ParcelReferenceVariantManifest = {Manifest: EntryHash}
+export type ParcelReference = 
+ | ParcelReferenceVariantAppEntry | ParcelReferenceVariantManifest;
 
 /**  */
 export type DistributionStrategy =
