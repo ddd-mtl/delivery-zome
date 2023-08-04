@@ -3,6 +3,7 @@ import {property, state, customElement} from "lit/decorators.js";
 import { DnaElement } from "@ddd-qc/lit-happ";
 import { SecretDvm } from "../viewModels/secret.dvm";
 import {AgentPubKeyB64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
+import {SecretPerspective} from "../viewModels/secret.zvm";
 
 
 /**
@@ -17,14 +18,17 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
 
   /** -- Fields -- */
   @state() private _initialized = false;
-  @state() private _selectedListEh?: EntryHashB64;
+  @state() private _sender?: AgentPubKeyB64;
+  @state() private _selectedSecretEh?: EntryHashB64;
+  @state() private _senderSecrets: EntryHashB64[] = [];
+
 
   @property({ type: Boolean, attribute: 'debug' })
   debugMode: boolean = false;
 
 
   @property({type: Object, attribute: false, hasChanged: (_v, _old) => true})
-  secretPerspective!: unknown;
+  secretPerspective!: SecretPerspective;
 
   /** -- Methods -- */
 
@@ -37,7 +41,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     newDvm.secretZvm.subscribe(this, 'secretPerspective');
     console.log("\t Subscribed secretZvm's roleName = ", newDvm.secretZvm.cell.name)
     newDvm.probeAll();
-    this._selectedListEh = undefined;
+    this._sender = undefined;
     //this.taskerPerspective = emptyTaskerPerspective;
     this._initialized = true;
   }
@@ -60,7 +64,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
   /** */
   async onSendSecret(e: any) {
     const textInput = this.shadowRoot!.getElementById("secretInput") as HTMLInputElement;
-    const agentSelect = this.shadowRoot!.getElementById("selectedAgent") as HTMLSelectElement;
+    const agentSelect = this.shadowRoot!.getElementById("recipientSelector") as HTMLSelectElement;
     let res = await this._dvm.secretZvm.sendSecretToOne(textInput.value, agentSelect.value);
     console.log("onSendSecret() res:", res)
     textInput.value = "";
@@ -89,42 +93,36 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
 
 
   /** */
-  async onListSelect(e: any) {
-    console.log("onListSelect() CALLED", e)
-    const selector = this.shadowRoot!.getElementById("listSelector") as HTMLSelectElement;
+  async onSenderSelected(e: any) {
+    console.log("onSenderSelected() CALLED", e)
+    const selector = this.shadowRoot!.getElementById("senderSelector") as HTMLSelectElement;
     if (!selector || !selector.value) {
       console.warn("No list selector value", selector);
       return;
     }
-    console.log("onListSelect() value", selector.value)
-    this._selectedListEh = selector.value;
-    this.requestUpdate();
+    console.log("onSenderSelected() value", selector.value)
+    this._senderSecrets = await this._dvm.secretZvm.getSecretsFrom(selector.value);
+    this._sender = selector.value;
   }
 
 
-  // /** */
-  // async onSubmitCompletion(selectedList: null) {
-  //   //console.log("onSubmitCompletion() CALLED", e)
-  //   if (!selectedList) {
-  //     return;
-  //   }
-  //   for (const [ehb64, taskItem] of selectedList.items) {
-  //     const checkbox = this.shadowRoot!.getElementById(ehb64) as HTMLInputElement;
-  //     //console.log("" + checkbox.checked + ". checkbox " + ehb64)
-  //     if (checkbox.checked) {
-  //       await this._dvm.taskerZvm.completeTask(ehb64)
-  //     }
-  //   }
-  //
-  //   this._dvm.taskerZvm.probeAll();
-  //   //this.requestUpdate();
-  // }
+  /** */
+  async onSecretSelected(e: any) {
+    console.log("onSecretSelected() CALLED", e)
+    const selector = this.shadowRoot!.getElementById("secretSelector") as HTMLSelectElement;
+    if (!selector || !selector.value) {
+      console.warn("No list selector value", selector);
+      return;
+    }
+    console.log("onSenderSelected() value", selector.value)
+    this._selectedSecretEh = selector.value;
+  }
 
 
 
   /** */
   render() {
-    console.log("<secret-page.render()> render()", this._initialized, this._selectedListEh);
+    console.log("<secret-page.render()> render()", this._initialized, this._sender);
     if (!this._initialized) {
       return html`<span>Loading...</span>`;
     }
@@ -139,20 +137,33 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
         }
     )
 
+    const secretOptions = Object.values(this._senderSecrets).map(
+        (secretEh) => {
+          //console.log("" + index + ". " + agentIdB64)
+          return html `<option value="${secretEh}">${secretEh.slice(-5)}</option>`
+        }
+    )
+
     return html`
       <div>
         <h1>Playground: secret <button type="button" @click=${() => {this._dvm.dumpLogs();}}>dump</button></h1>
-          <label for="listTitleInput">Send secret:</label>
+          <label>Send secret:</label>
           <input type="text" id="secretInput" name="content">
-          <select name="selectedAgent" id="selectedAgent">
+          to: <select id="recipientSelector">
             ${AgentOptions}
           </select>        
-          <input type="button" value="create" @click=${this.onSendSecret}>
+          <input type="button" value="send" @click=${this.onSendSecret}>
         <h2>
-          Received secrets:
-          <select name="listSelector" id="listSelector" @click=${this.onListSelect}>
+          Secrets received:
+          From: <select id="senderSelector" @click=${this.onSenderSelected}>
             ${AgentOptions}
           </select>
+          <select id="secretSelector" @click=${this.onSecretSelected}>
+            ${secretOptions}
+          </select>
+          <div style="margin-top:15px;">
+            ${this._selectedSecretEh? this.secretPerspective.secrets[this._selectedSecretEh] : "n/a"}
+          </div>
         </h2>        
       </div>
     `;

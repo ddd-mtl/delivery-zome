@@ -13,7 +13,7 @@ import {
 /** */
 export interface SecretPerspective {
   /** AgentPubKey -> secret_eh */
-  parcelsByAgent: Record<AgentPubKeyB64, EntryHashB64>,
+  secretsByAgent: Record<AgentPubKeyB64, EntryHashB64[]>,
  /** secret_eh -> Value */
   secrets: Record<EntryHashB64, string>,
 }
@@ -31,7 +31,7 @@ export class SecretZvm extends ZomeViewModel {
 
   /** -- ViewModel -- */
 
-  private _perspective: SecretPerspective = {parcelsByAgent: {}, secrets: {}}
+  private _perspective: SecretPerspective = {secretsByAgent: {}, secrets: {}}
 
   /* */
   get perspective(): SecretPerspective {return this._perspective}
@@ -69,4 +69,19 @@ export class SecretZvm extends ZomeViewModel {
   // async probeSecrets(): Promise<AgentPubKeyB64[]> {
   //   const secret_eh = await this.zomeProxy.createSecret(text);
   // }
+
+  /** */
+  async getSecretsFrom(sender: AgentPubKeyB64): Promise<EntryHashB64[]> {
+    console.log("getSecretsFrom()", sender);
+    const res = await this.zomeProxy.getSecretsFrom(decodeHashFromBase64(sender));
+
+    for (const secretEh of res) {
+      this._perspective.secrets[encodeHashToBase64(secretEh)] = await this.zomeProxy.getSecret(secretEh);
+    }
+
+    const final = Object.values(res).map((eh) => encodeHashToBase64(eh));
+    console.log(" - final", final);
+    this._perspective.secretsByAgent[sender] = final;
+    return final;
+  }
 }
