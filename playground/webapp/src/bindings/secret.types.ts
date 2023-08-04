@@ -190,12 +190,19 @@ export enum NoticeStateType {
 	Deleted = 'Deleted',
 }
 
-/** Shared data between a Distribution and a DeliveryNotice */
+/** Information for commiting Entry */
 export interface EntryReference {
   eh: EntryHash
   zome_name: ZomeName
   entry_index: EntryDefIndex
   visibility: EntryVisibility
+}
+
+/** Informantion about where the data is from */
+export interface ManifestReference {
+  manifest_eh: EntryHash
+  entry_zome_name: ZomeName
+  entry_type_name: string
 }
 
 /** Shared data between a Distribution and a DeliveryNotice */
@@ -211,7 +218,7 @@ export enum ParcelReferenceType {
 	Manifest = 'Manifest',
 }
 export type ParcelReferenceVariantAppEntry = {AppEntry: EntryReference}
-export type ParcelReferenceVariantManifest = {Manifest: EntryHash}
+export type ParcelReferenceVariantManifest = {Manifest: ManifestReference}
 export type ParcelReference = 
  | ParcelReferenceVariantAppEntry | ParcelReferenceVariantManifest;
 

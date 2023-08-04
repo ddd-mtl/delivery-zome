@@ -74,13 +74,21 @@ pub enum NoticeState {
    Deleted,
 }
 
-/// Shared data between a Distribution and a DeliveryNotice
+/// Information for commiting Entry
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct EntryReference {
    pub eh: EntryHash,
    pub zome_name: ZomeName,
    pub entry_index: EntryDefIndex,
    pub visibility: EntryVisibility,
+}
+
+/// Informantion about where the data is from
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct ManifestReference {
+   pub manifest_eh: EntryHash,
+   pub entry_zome_name: ZomeName,
+   pub entry_type_name: String,
 }
 
 
@@ -98,13 +106,13 @@ pub enum ParcelReference {
    /// Any Entry type
    AppEntry(EntryReference),
    /// A ParcelManifest
-   Manifest(EntryHash),
+   Manifest(ManifestReference),
 }
 
 impl ParcelReference {
    pub fn entry_address(&self) -> EntryHash {
       match self {
-         ParcelReference::Manifest(eh) => eh.clone(),
+         ParcelReference::Manifest(mref) => mref.manifest_eh.clone(),
          ParcelReference::AppEntry(eref) => eref.eh.clone(),
       }
    }

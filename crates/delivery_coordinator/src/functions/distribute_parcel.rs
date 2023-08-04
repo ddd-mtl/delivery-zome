@@ -20,8 +20,8 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    /// Create ParcelSummary
    let size = match input.parcel_ref.clone() {
       ParcelReference::AppEntry(eref) => get_app_entry_size(eref.eh)?,
-      ParcelReference::Manifest(eh) => {
-         let manifest: ParcelManifest = get_typed_from_eh(eh.clone())?;
+      ParcelReference::Manifest(mref) => {
+         let manifest: ParcelManifest = get_typed_from_eh(mref.manifest_eh.clone())?;
          manifest.size
       }
    };

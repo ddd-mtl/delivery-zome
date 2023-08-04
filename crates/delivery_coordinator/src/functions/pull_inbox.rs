@@ -103,8 +103,8 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
          let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
          unreceived_entries.insert(notice.summary.parcel_reference.entry_address(), notice.clone());
          /// Get unreceived chunks
-         if let ParcelReference::Manifest(manifest_eh) = notice.summary.parcel_reference {
-            let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(manifest_eh);
+         if let ParcelReference::Manifest(mref) = notice.summary.parcel_reference {
+            let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(mref.manifest_eh);
             /// Manifest might not have been received yet
             if let Ok(manifest) = maybe_manifest {
                for chunk_eh in manifest.chunks {

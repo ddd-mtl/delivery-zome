@@ -27,9 +27,9 @@ fn send_parcel(reply: ReplyReceived) -> ExternResult<()> {
    /// Get Distribution
    let distribution: Distribution = get_typed_from_eh(reply.distribution_eh.clone())?;
    /// - Send Chunks if Manifest
-   if let ParcelReference::Manifest(manifest_eh) = distribution.delivery_summary.parcel_reference.clone() {
+   if let ParcelReference::Manifest(mref) = distribution.delivery_summary.parcel_reference.clone() {
       /// Get manifest
-      let manifest: ParcelManifest = get_typed_from_eh(manifest_eh.clone())?;
+      let manifest: ParcelManifest = get_typed_from_eh(mref.manifest_eh.clone())?;
       /// pack each chunk
       for chunk_eh in manifest.chunks {
          /// Get chunk

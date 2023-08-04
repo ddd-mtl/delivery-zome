@@ -50,6 +50,10 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
      if ("secret_integrity" === deliverySignal.ReceivedNotice[1].summary.parcel_reference.AppEntry.zome_name) {
       this.deliveryZvm.acceptDelivery(noticeEh);
      }
+   } else {
+    if ("secret_integrity" === deliverySignal.ReceivedNotice[1].summary.parcel_reference.Manifest.entry_zome_name) {
+     this.deliveryZvm.acceptDelivery(noticeEh);
+    }
    }
   }
   if (SignalProtocolType.ReceivedReply in deliverySignal) {
