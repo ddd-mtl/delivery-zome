@@ -48,7 +48,6 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
    const noticeEh = encodeHashToBase64(deliverySignal.ReceivedNotice[0]);
    if ("AppEntry" in deliverySignal.ReceivedNotice[1].summary.parcel_reference) {
      if ("secret_integrity" === deliverySignal.ReceivedNotice[1].summary.parcel_reference.AppEntry.zome_name) {
-      console.log(this)
       this.deliveryZvm.acceptDelivery(noticeEh);
      }
    }

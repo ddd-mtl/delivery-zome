@@ -54,9 +54,17 @@ export class SecretZvm extends ZomeViewModel {
   }
 
 
+  // /** */
+  // async probeSecrets(): Promise<AgentPubKeyB64[]> {
+  //   const secret_eh = await this.zomeProxy.createSecret(text);
+  // }
+
+
   /** */
-  async sendSecretToOne(text: string, recipient: AgentPubKeyB64): Promise<EntryHashB64> {
-    const secret_eh = await this.zomeProxy.createSecret(text);
+  async sendSecretToOne(text: string, recipient: AgentPubKeyB64, canSplit: boolean): Promise<EntryHashB64> {
+    const secret_eh = canSplit
+        ? await this.zomeProxy.createSplitSecret(text)
+        : await this.zomeProxy.createSecret(text)
     const input = {
       secret_eh,
       strategy: {NORMAL: null},
@@ -66,9 +74,6 @@ export class SecretZvm extends ZomeViewModel {
     return encodeHashToBase64(res);
   }
 
-  // async probeSecrets(): Promise<AgentPubKeyB64[]> {
-  //   const secret_eh = await this.zomeProxy.createSecret(text);
-  // }
 
   /** */
   async getSecretsFrom(sender: AgentPubKeyB64): Promise<EntryHashB64[]> {

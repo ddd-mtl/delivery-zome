@@ -65,8 +65,13 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
   async onSendSecret(e: any) {
     const textInput = this.shadowRoot!.getElementById("secretInput") as HTMLInputElement;
     const agentSelect = this.shadowRoot!.getElementById("recipientSelector") as HTMLSelectElement;
-    let res = await this._dvm.secretZvm.sendSecretToOne(textInput.value, agentSelect.value);
-    console.log("onSendSecret() res:", res)
+    const canSplitChk = this.shadowRoot!.getElementById("splitChk") as HTMLInputElement;
+    if (textInput.value.length == 0) {
+      alert("secret string is empty");
+      return;
+    }
+    let res = await this._dvm.secretZvm.sendSecretToOne(textInput.value, agentSelect.value, canSplitChk.checked);
+    console.log("onSendSecret() res:", res);
     textInput.value = "";
   }
 
@@ -151,8 +156,9 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
           <input type="text" id="secretInput" name="content">
           to: <select id="recipientSelector">
             ${AgentOptions}
-          </select>        
+          </select>
           <input type="button" value="send" @click=${this.onSendSecret}>
+            split:<input type="checkbox" id="splitChk"">
         <h2>
           Secrets received:
           From: <select id="senderSelector" @click=${this.onSenderSelected}>
