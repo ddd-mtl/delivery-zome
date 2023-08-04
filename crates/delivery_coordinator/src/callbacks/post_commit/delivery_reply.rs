@@ -31,7 +31,7 @@ fn send_reply(delivery_reply: DeliveryReply) -> ExternResult<()> {
         warn!("send_item() during DeliveryReply::post_commit() failed: {}", e);
     } else {
         /// Try to retrieve parcel if it has been accepted by recipient
-        if let SendSuccessKind::OK_DIRECT(signature) = res.unwrap() {
+        if let SendSuccessKind::OK_DIRECT(_signature) = res.unwrap() {
             // FIXME
             // let valid = verify_signature(recipient.clone(), signature.clone(), pending_item.clone())?;
             // if !valid {

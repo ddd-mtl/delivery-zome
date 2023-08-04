@@ -52,7 +52,6 @@ pub struct NoticeReceived {
    pub distribution_eh: EntryHash,
    pub recipient: AgentPubKey,
    pub recipient_summary_signature: Signature,
-   pub date_of_reception: Timestamp,
 }
 
 

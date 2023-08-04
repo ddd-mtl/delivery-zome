@@ -4,7 +4,6 @@ use zome_utils::*;
 use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 
-use crate::*;
 
 ///
 pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {

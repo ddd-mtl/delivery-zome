@@ -13,7 +13,7 @@ pub fn post_commit_ReplyReceived(entry: Entry, reply_eh: &EntryHash) -> ExternRe
    //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
    /// Send it immediately if it has been accepted
    if reply.has_accepted {
-      //let _ = send_parcel(reply)?;
+      //FIXME: let _ = send_parcel(reply)?;
    } else {
       info!("Delivery {} refused by {}", reply.distribution_eh, reply.recipient);
    }

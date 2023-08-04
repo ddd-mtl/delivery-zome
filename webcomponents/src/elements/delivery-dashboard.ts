@@ -72,7 +72,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             ([eh, received]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
-              ${this.distrib2str(encodeHashToBase64(received.distribution_eh))}: ${encodeHashToBase64(received.recipient).slice(-5)} ${received.date_of_reception}
+              ${this.distrib2str(encodeHashToBase64(received.distribution_eh))}: ${encodeHashToBase64(received.recipient).slice(-5)}
           </li>`
             }
         )

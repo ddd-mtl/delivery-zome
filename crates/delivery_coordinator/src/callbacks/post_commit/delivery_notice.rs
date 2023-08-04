@@ -15,7 +15,7 @@ pub fn post_commit_DeliveryNotice(entry: Entry, eh: &EntryHash) -> ExternResult<
         distribution_eh: notice.distribution_eh.clone(),
         recipient: me,
         recipient_summary_signature: signature,
-        date_of_reception: sys_time()?,
+        //date_of_reception: sys_time()?,
     };
     let pending_item = pack_notice_received(ack, notice.sender.clone())?;
     /// Send NoticeReceived to sender

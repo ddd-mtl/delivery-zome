@@ -257,7 +257,6 @@ export interface NoticeReceived {
   distribution_eh: EntryHash
   recipient: AgentPubKey
   recipient_summary_signature: Signature
-  date_of_reception: Timestamp
 }
 
 /** Entry representing a file chunk. */

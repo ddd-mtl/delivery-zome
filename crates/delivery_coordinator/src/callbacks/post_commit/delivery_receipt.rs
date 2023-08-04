@@ -1,12 +1,10 @@
 use hdk::prelude::*;
-use zome_utils::*;
-
 use zome_delivery_types::*;
 use crate::*;
 
 
 ///
-pub fn post_commit_DeliveryReceipt(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_DeliveryReceipt(entry: Entry, _eh: &EntryHash) -> ExternResult<()> {
    let receipt = DeliveryReceipt::try_from(entry)?;
    /// Emit Signal
    let res = emit_signal(&SignalProtocol::ReceivedReceipt(receipt));

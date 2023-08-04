@@ -55,7 +55,6 @@ fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_stra
             distribution_eh: notice.distribution_eh.clone(),
             recipient: recipient.clone(),
             recipient_summary_signature: signature.clone(),
-            date_of_reception: sys_time()?,
         };
         let _ = call_self("commit_NoticeReceived", ack)?;
     }
