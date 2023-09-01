@@ -84,10 +84,8 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
    debug!("get_secret() - Secret Entry not found, could be a ParcelManifest");
    /// Not a Secret Entry, could be a Manifest
    let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(eh);
-   if maybe_manifest.is_err() {
-      return error("No entry found at given EntryHash");
-   }
-   let manifest = maybe_manifest.unwrap();
+   let Ok(manifest) = maybe_manifest
+      else { return error("No entry found at given EntryHash"); };
    /// Get all chunks
    let set: HashSet<_> = manifest.chunks.clone().drain(..).collect(); // dedup
    let query_args = ChainQueryFilter::default()

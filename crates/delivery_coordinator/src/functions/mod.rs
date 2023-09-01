@@ -13,6 +13,7 @@ mod get_distribution_state;
 mod get_notice_state;
 mod commit_chunks;
 mod get_delivery_state;
+mod get_all_local_parcels;
 
 
 pub use get_distribution_state::*;
