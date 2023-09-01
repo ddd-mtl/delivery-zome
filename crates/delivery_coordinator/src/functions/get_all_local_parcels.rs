@@ -3,7 +3,6 @@ use zome_utils::*;
 use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 
-use crate::*;
 
 /// Return ehs of all ParcelManifest for type FILE_TYPE_NAME
 #[hdk_extern]
@@ -15,10 +14,10 @@ pub fn get_all_local_parcels(_:()) -> ExternResult<Vec<(EntryHash, ParcelManifes
       .entry_type(DeliveryEntryTypes::ParcelManifest.try_into().unwrap());
    let records = query(query_args)?;
    /// Convert records to ParcelManifests
-   let manifests = records.into_iter().map(|record| {
-      let manifest: ParcelManifest = get_typed_from_record(record).unwrap();
-      (record.action().entry_hash().unwrap(), manifest)
+   let pairs = records.into_iter().map(|record| {
+      let manifest: ParcelManifest = get_typed_from_record(record.clone()).unwrap();
+      (record.action().entry_hash().unwrap().to_owned(), manifest)
    }).collect();
    /// Done
-   Ok(manifests)
+   Ok(pairs)
 }
