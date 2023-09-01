@@ -176,6 +176,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('fetch_chunk', input);
   }
 
+  async getAllLocalParcels(): Promise<[EntryHash, ParcelManifest][]> {
+    return this.call('get_all_local_parcels', null);
+  }
+
   async getDeliveryState(input: GetDeliveryStateInput): Promise<DeliveryState> {
     return this.call('get_delivery_state', input);
   }

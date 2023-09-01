@@ -18,6 +18,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"commit_pending_item",
 	"distribute_parcel",
 	"fetch_chunk",
+	"get_all_local_parcels",
 	"get_delivery_state",
 	"get_distribution_state",
 	"get_notice",

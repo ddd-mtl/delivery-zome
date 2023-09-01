@@ -1,5 +1,5 @@
 import { DnaViewModel, ZvmDef } from "@ddd-qc/lit-happ";
-import {DeliveryZvm, SignalProtocol, SignalProtocolType} from "@delivery/elements";
+import {DeliveryZvm, SignalProtocol, SignalProtocolType} from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
 import {AppSignalCb, encodeHashToBase64} from "@holochain/client";

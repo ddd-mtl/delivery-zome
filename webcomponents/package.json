@@ -1,15 +1,29 @@
 {
-  "name": "@delivery/elements",
+  "name": "@ddd-qc/delivery",
   "version": "0.1.0",
+  "description": "Delivery zome webcomponents",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "typings": "./dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch --preserveWatchOutput",
     "analyze": "lit-analyzer src --failFast"
   },
-  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddd-mtl/delivery-zome.git"
+  },
+  "author": "",
+  "license": "CAL-1.0",
+  "bugs": {
+    "url": "https://github.com/ddd-mtl/delivery-zome/issues"
+  },
+  "homepage": "https://github.com/ddd-mtl/delivery-zome#readme",
   "devDependencies": {
     "@types/ws": "^8.5.3",
     "lit-analyzer": "^1.2.1",

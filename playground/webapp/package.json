@@ -34,6 +34,6 @@
   },
   "dependencies": {
     "@ddd-qc/agent-directory": "6.0.0",
-    "@delivery/elements": "file:../../webcomponents"
+    "@ddd-qc/delivery": "file:../../webcomponents"
   }
 }
