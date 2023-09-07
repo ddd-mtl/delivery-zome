@@ -9,7 +9,7 @@ pub fn create_enc_key() -> ExternResult<()> {
    let key_eh = hash_entry(&new_key)?;
    let key_hh = create_entry(DeliveryEntry::PubEncKey(new_key))?;
    let my_agent_address = agent_info()?.agent_latest_pubkey;
-   debug !("key_hh = {:?}", key_hh);
+   debug!("key_hh = {:?}", key_hh);
    let _ = create_link(
       EntryHash::from(my_agent_address),
       key_eh.clone(),

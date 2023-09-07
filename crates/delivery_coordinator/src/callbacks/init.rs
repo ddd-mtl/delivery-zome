@@ -23,7 +23,7 @@ fn init_caps(_: ()) -> ExternResult<()> {
 /// Zome Callback
 #[hdk_extern]
 fn init(_: ()) -> ExternResult<InitCallbackResult> {
-   debug!("*** init() callback START");
+   debug!("*** zDelivery.init() callback START");
    /// Set Global Anchors
    Path::from(DIRECTORY_PATH).typed(LinkTypes::Members)?.ensure()?;
    /// Setup initial capabilities
@@ -31,6 +31,6 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    /// Create public encryption key and broadcast it
    create_enc_key()?;
    /// Done
-   debug!("*** init() callback DONE");
+   debug!("*** zDelivery.init() callback DONE");
    Ok(InitCallbackResult::Pass)
 }
