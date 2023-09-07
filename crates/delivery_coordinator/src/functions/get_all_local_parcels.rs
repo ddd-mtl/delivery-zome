@@ -16,7 +16,7 @@ pub fn get_all_local_parcels(_:()) -> ExternResult<Vec<(EntryHash, ParcelManifes
    let records = query(query_args)?;
    debug!("local parcels found: {}", records.len());
    /// Convert records to ParcelManifests
-   let pairs = records.into_iter().map(|record| {
+   let pairs: Vec<(EntryHash, ParcelManifest)> = records.into_iter().map(|record| {
       let manifest: ParcelManifest = get_typed_from_record(record.clone()).unwrap();
       (record.action().entry_hash().unwrap().to_owned(), manifest)
    }).collect();
