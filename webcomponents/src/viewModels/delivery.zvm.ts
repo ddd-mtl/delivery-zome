@@ -113,6 +113,7 @@ export class DeliveryZvm extends ZomeViewModel {
             console.log("ADDING DeliveryNotice", deliverySignal.ReceivedNotice);
             const noticeEh = encodeHashToBase64(deliverySignal.ReceivedNotice[0]);
             this._perspective.newDeliveryNotices[noticeEh] = deliverySignal.ReceivedNotice[1];
+            this._perspective.allNotices[noticeEh] = [0, deliverySignal.ReceivedNotice[1]];
         }
         if (SignalProtocolType.ReceivedReply in deliverySignal) {
             console.log("ADDING ReplyReceived", deliverySignal.ReceivedReply);
@@ -260,18 +261,24 @@ export class DeliveryZvm extends ZomeViewModel {
     /** -- API Sugar -- */
 
     /** */
-    async acceptDelivery(noticeEh: EntryHashB64) {
-        this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: true});
+    async acceptDelivery(noticeEh: EntryHashB64): Promise<EntryHashB64> {
+        const eh = await this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: true});
+        return encodeHashToBase64(eh);
     }
 
     /** */
-    async declineDelivery(noticeEh: EntryHashB64) {
-        this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: false});
+    async declineDelivery(noticeEh: EntryHashB64): Promise<EntryHashB64> {
+        const eh = await this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: false});
+        return encodeHashToBase64(eh);
     }
 
     /** */
-    async getDeliveryState(distribEh: EntryHashB64, recipient: AgentPubKeyB64) {
-        this.zomeProxy.getDeliveryState({distribution_eh: decodeHashFromBase64(distribEh), recipient: decodeHashFromBase64(recipient)});
+    async getDeliveryState(distribEh: EntryHashB64, recipient: AgentPubKeyB64): Promise<DeliveryState> {
+        return this.zomeProxy.getDeliveryState({distribution_eh: decodeHashFromBase64(distribEh), recipient: decodeHashFromBase64(recipient)});
     }
 
+    /** */
+    async getDistributionState(distribEh: EntryHashB64): Promise<DistributionState> {
+        return this.zomeProxy.getDistributionState(decodeHashFromBase64(distribEh));
+    }
 }
