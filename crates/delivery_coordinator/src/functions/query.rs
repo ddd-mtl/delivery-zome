@@ -265,16 +265,16 @@ pub fn query_DeliveryReceipt(maybe_distribution: Option<EntryHash>, maybe_recipi
    /// Get all Create DeliveryReceipt Elements with query
    let tuples = get_all_typed_local::<DeliveryReceipt>(DeliveryEntryTypes::DeliveryReceipt.try_into().unwrap())?;
    let mut receipts: Vec<DeliveryReceipt> = tuples.into_iter().map(|(_,_,x)| x).collect();
-   debug!("*** query_DeliveryReceipt() receipts count: {}", receipts.len());
+   //debug!("*** query_DeliveryReceipt() receipts count: {}", receipts.len());
    /// Search through query result
    if let Some(distrib_eh) = maybe_distribution {
       receipts.retain(|r| r.distribution_eh == distrib_eh);
    }
-   debug!("*** query_DeliveryReceipt() receipts distrib: {}", receipts.len());
+   //debug!("*** query_DeliveryReceipt() receipts distrib: {}", receipts.len());
    if let Some(recipient) = maybe_recipient {
       receipts.retain(|r| r.recipient == recipient);
    }
-   debug!("*** query_DeliveryReceipt() receipts recipient: {}", receipts.len());
+   //debug!("*** query_DeliveryReceipt() receipts recipient: {}", receipts.len());
    /// Done
    Ok(receipts)
 }

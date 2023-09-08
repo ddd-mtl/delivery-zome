@@ -11,7 +11,7 @@ import {
 import {
     DeliveryNotice, DeliveryReceipt, DeliveryReply, DeliveryState,
     Distribution,
-    DistributionState, NoticeReceived, ParcelReceived, ReplyReceived,
+    DistributionState, NoticeReceived, NoticeState, ParcelReceived, ReplyReceived,
     SignalKind, SignalProtocol, SignalProtocolType,
 } from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
@@ -280,5 +280,10 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     async getDistributionState(distribEh: EntryHashB64): Promise<DistributionState> {
         return this.zomeProxy.getDistributionState(decodeHashFromBase64(distribEh));
+    }
+
+    /** */
+    async getNoticeState(noticeEh: EntryHashB64): Promise<NoticeState> {
+        return this.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh));
     }
 }
