@@ -107,6 +107,7 @@ pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec
    /// Get all Create NoticeReceived Elements with query
    let tuples = get_all_typed_local::<NoticeReceived>(DeliveryEntryTypes::NoticeReceived.try_into().unwrap())?;
    //debug!(" - tuples len: {:?}", tuples.len());
+   debug!("*** query_NoticeReceived() tuples count: {}", tuples.len());
    /// Search through query result
    let mut res = Vec::new();
    match field {
@@ -125,6 +126,7 @@ pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec
          }
       },
    }
+   debug!("*** query_NoticeReceived() res count: {}", res.len());
    /// Done
    Ok(res)
 }
@@ -255,7 +257,7 @@ pub fn query_all_DeliveryReceipt(_: ()) -> ExternResult<Vec<(EntryHash, Delivery
 }
 
 
-///Find NoticeReceived with field with given value
+/// Find NoticeReceived with field with given value
 pub fn query_DeliveryReceipt(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
    -> ExternResult<Vec<DeliveryReceipt>> {
    //std::panic::set_hook(Box::new(zome_panic_hook));

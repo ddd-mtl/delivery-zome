@@ -9,7 +9,7 @@ use crate::*;
 #[hdk_extern]
 pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<DeliveryState> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("recipient: {}", input.recipient);
+   debug!("recipient: {} || distrib: {}", input.recipient, input.distribution_eh);
    /// Look for DeliveryReceipt
    let receipts = query_DeliveryReceipt(
       Some(input.distribution_eh.clone()),
@@ -39,8 +39,9 @@ pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<Delivery
    }
    /// Look for NoticeReceived
    let mut receiveds = query_NoticeReceived(NoticeReceivedQueryField::Distribution(input.distribution_eh.clone()))?;
-   //debug!("receiveds len: {}", receiveds.len());
+   debug!("receiveds len1: {}", receiveds.len());
    receiveds.retain(|received| &received.recipient == &input.recipient);
+   debug!("receiveds len2: {}", receiveds.len());
    if receiveds.is_empty() {
       // Look for PendingNotice
       let maybe_pending = find_PendingItem(input.distribution_eh, input.recipient.clone(), ItemKind::DeliveryNotice)?;
