@@ -403,6 +403,9 @@ export class DeliveryZvm extends ZomeViewModel {
         const ts = this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)][noticeEh];
         const sender = encodeHashToBase64(notice.sender);
         delete this._perspective.unrepliedInbounds[sender][noticeEh];
+        if (!this._perspective.pendingInbounds[sender]) {
+            this._perspective.pendingInbounds[sender] = {};
+        }
         this._perspective.pendingInbounds[sender][noticeEh] = ts;
         this.notifySubscribers();
         return encodeHashToBase64(eh);
