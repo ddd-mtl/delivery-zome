@@ -10,6 +10,8 @@ use crate::*;
 pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<DeliveryState> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("recipient: {} || distrib: {}", input.recipient, input.distribution_eh);
+   /// Make sure input is correct
+   let _distribution: Distribution = get_typed_from_eh(input.distribution_eh.clone())?;
    /// Look for DeliveryReceipt
    let receipts = query_DeliveryReceipt(
       Some(input.distribution_eh.clone()),

@@ -44,14 +44,14 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
 
   /** Automatically accept parcel from secret zome */
   if (SignalProtocolType.ReceivedNotice in deliverySignal) {
-   console.log("ADDING DeliveryNotice. parcel_reference:", deliverySignal.ReceivedNotice[1].summary.parcel_reference);
+   console.log("ADDING DeliveryNotice. parcel_reference:", deliverySignal.ReceivedNotice[2].summary.parcel_reference);
    const noticeEh = encodeHashToBase64(deliverySignal.ReceivedNotice[0]);
-   if ("AppEntry" in deliverySignal.ReceivedNotice[1].summary.parcel_reference) {
-     if ("secret_integrity" === deliverySignal.ReceivedNotice[1].summary.parcel_reference.AppEntry.zome_name) {
+   if ("AppEntry" in deliverySignal.ReceivedNotice[2].summary.parcel_reference) {
+     if ("secret_integrity" === deliverySignal.ReceivedNotice[2].summary.parcel_reference.AppEntry.zome_name) {
       this.deliveryZvm.acceptDelivery(noticeEh);
      }
    } else {
-    if ("secret_integrity" === deliverySignal.ReceivedNotice[1].summary.parcel_reference.Manifest.entry_zome_name) {
+    if ("secret_integrity" === deliverySignal.ReceivedNotice[2].summary.parcel_reference.Manifest.entry_zome_name) {
      this.deliveryZvm.acceptDelivery(noticeEh);
     }
    }

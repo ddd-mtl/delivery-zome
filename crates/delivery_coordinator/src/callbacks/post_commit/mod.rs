@@ -78,7 +78,7 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
    match variant {
       /// Send/Receive/Ack Notice
       DeliveryEntryTypes::Distribution => post_commit_Distribution(sah, entry, eh),
-      DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(entry, eh),
+      DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(sah, entry, eh),
       DeliveryEntryTypes::NoticeReceived => post_commit_NoticeReceived(entry, eh),
       /// Send/Receive Reply
       DeliveryEntryTypes::DeliveryReply => post_commit_DeliveryReply(entry, eh),

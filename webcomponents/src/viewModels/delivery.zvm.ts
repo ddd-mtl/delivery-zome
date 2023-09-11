@@ -1,4 +1,4 @@
-import {Dictionary, ZomeViewModel} from "@ddd-qc/lit-happ";
+import {delay, Dictionary, ZomeViewModel} from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {
     ActionHash,
@@ -66,8 +66,10 @@ export interface DeliveryPerspective {
 
     //incomingDistributions: Dictionary<DistributionState>,
 
-    /** AgentPubKey -> notice_eh */
-    unrepliedInbounds: Record<AgentPubKeyB64, EntryHashB64>,
+    /** AgentPubKey -> (notice_eh -> distrib_eh) */
+    unrepliedInbounds: Record<AgentPubKeyB64, Record<EntryHashB64, Timestamp>>,
+    /** AgentPubKey -> (notice_eh -> distrib_eh) */
+    pendingInbounds: Record<AgentPubKeyB64, Record<EntryHashB64, Timestamp>>,
     /** distrib_eh -> [Timestamp , AgentPubKey -> DeliveryState] */
     unrepliedOutbounds: Record<EntryHashB64, [Timestamp, Record<AgentPubKeyB64, DeliveryState>]>,
 
@@ -104,6 +106,7 @@ export class DeliveryZvm extends ZomeViewModel {
         newDeliveryNotices: {},
         myDistributions: {},
         unrepliedInbounds: {},
+        pendingInbounds: {},
         unrepliedOutbounds: {}
     };
 
@@ -147,35 +150,53 @@ export class DeliveryZvm extends ZomeViewModel {
         console.log("DELIVERY received signal", signal);
         const deliverySignal = signal.payload as SignalProtocol;
         if (SignalProtocolType.DistributionCreated in deliverySignal) {
-            console.log("ADDING DistributionCreated", deliverySignal.DistributionCreated);
+            console.log("signal DistributionCreated", deliverySignal.DistributionCreated);
             this.onDistributionCreated(deliverySignal);
         }
         if (SignalProtocolType.ReceivedNotice in deliverySignal) {
-            console.log("ADDING DeliveryNotice", deliverySignal.ReceivedNotice);
+            console.log("signal DeliveryNotice", deliverySignal.ReceivedNotice);
             const noticeEh = encodeHashToBase64(deliverySignal.ReceivedNotice[0]);
-            const notice = deliverySignal.ReceivedNotice[1]
+            const ts = deliverySignal.ReceivedNotice[1];
+            const notice = deliverySignal.ReceivedNotice[2];
+            const sender = encodeHashToBase64(notice.sender);
             this._perspective.newDeliveryNotices[noticeEh] = notice;
             this._perspective.allNotices[noticeEh] = [0, notice];
-            this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)] = noticeEh;
+            if (!this._perspective.unrepliedInbounds[sender]) {
+                this._perspective.unrepliedInbounds[sender] = {};
+            }
+            if (!(noticeEh in this._perspective.unrepliedInbounds[sender])) {
+                this._perspective.unrepliedInbounds[sender][noticeEh] = ts;
+            }
+
         }
         if (SignalProtocolType.ReceivedAck in deliverySignal) {
-            console.log("ADDING ReceivedAck", deliverySignal.ReceivedAck);
+            console.log("signal ReceivedAck", deliverySignal.ReceivedAck);
             const ack = deliverySignal.ReceivedAck;
             const distribEh = encodeHashToBase64(ack.distribution_eh);
-            this._perspective.unrepliedOutbounds[distribEh][1][encodeHashToBase64(ack.recipient)] = {NoticeDelivered: null};
+            if (!this._perspective.unrepliedOutbounds[distribEh]) {
+                delay(200).then(() => {
+                    this._perspective.unrepliedOutbounds[distribEh][1][encodeHashToBase64(ack.recipient)] = {NoticeDelivered: null};
+                })
+            } else {
+                this._perspective.unrepliedOutbounds[distribEh][1][encodeHashToBase64(ack.recipient)] = {NoticeDelivered: null};
+            }
         }
         if (SignalProtocolType.ReceivedReply in deliverySignal) {
-            console.log("ADDING ReceivedReply", deliverySignal.ReceivedReply);
+            console.log("signal ReceivedReply", deliverySignal.ReceivedReply);
             const reply = deliverySignal.ReceivedReply;
             const distribEh = encodeHashToBase64(reply.distribution_eh);
             this._perspective.unrepliedOutbounds[distribEh][1][encodeHashToBase64(reply.recipient)] = reply.has_accepted? {ParcelAccepted: null} : {ParcelRefused: null};
             // TODO maybe do a getDeliveryState here as the state could be "PendingParcel"
         }
         if (SignalProtocolType.ReceivedParcel in deliverySignal) {
-            console.log("ADDING ReceivedParcel", deliverySignal.ReceivedParcel);
+            console.log("signal ReceivedParcel", deliverySignal.ReceivedParcel);
+            const noticeEh = encodeHashToBase64(deliverySignal.ReceivedParcel.notice_eh);
+            const notice = this._perspective.allNotices[noticeEh][1];
+            delete this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)][noticeEh];
+
         }
         if (SignalProtocolType.ReceivedReceipt in deliverySignal) {
-            console.log("ADDING DeliveryReceipt", deliverySignal.ReceivedReceipt);
+            console.log("signal DeliveryReceipt", deliverySignal.ReceivedReceipt);
             const receipt = deliverySignal.ReceivedReceipt;
             const distribEh = encodeHashToBase64(receipt.distribution_eh);
             this._perspective.unrepliedOutbounds[distribEh][1][encodeHashToBase64(receipt.recipient)] = {ParcelDelivered: null};
@@ -322,12 +343,23 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     async determineUnrepliedInbounds(): Promise<void> {
         this._perspective.unrepliedInbounds = {};
+        this._perspective.pendingInbounds = {};
         console.log("determineUnrepliedInbounds() allNotices count", Object.entries(this._perspective.allNotices).length);
-        for (const [eh, [_ts, notice]] of Object.entries(this._perspective.allNotices)) {
-            const state = await this.getNoticeState(encodeHashToBase64(notice.distribution_eh));
+        for (const [noticeEh, [ts, notice]] of Object.entries(this._perspective.allNotices)) {
+            const state = await this.getNoticeState(noticeEh);
+            const sender = encodeHashToBase64(notice.sender);
             console.log("determineUnrepliedInbounds() state", state);
             if (NoticeStateType.Unreplied in state) {
-                this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)] = eh;
+                if (!this._perspective.unrepliedInbounds[sender]) {
+                    this._perspective.unrepliedInbounds[sender] = {};
+                }
+                this._perspective.unrepliedInbounds[sender][noticeEh] = ts;
+            }
+            if (NoticeStateType.Accepted in state) {
+                if (!this._perspective.pendingInbounds[sender]) {
+                    this._perspective.pendingInbounds[sender] = {};
+                }
+                this._perspective.pendingInbounds[sender][noticeEh] = ts;
             }
         }
         console.log("determineUnrepliedInbounds() count", Object.values(this._perspective.unrepliedInbounds));
@@ -368,7 +400,10 @@ export class DeliveryZvm extends ZomeViewModel {
             console.error("Accepting unknown notice");
         }
         const eh = await this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: true});
-        delete this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)];
+        const ts = this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)][noticeEh];
+        const sender = encodeHashToBase64(notice.sender);
+        delete this._perspective.unrepliedInbounds[sender][noticeEh];
+        this._perspective.pendingInbounds[sender][noticeEh] = ts;
         this.notifySubscribers();
         return encodeHashToBase64(eh);
     }
@@ -380,7 +415,7 @@ export class DeliveryZvm extends ZomeViewModel {
             console.error("Declining unknown notice");
         }
         const eh = await this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: false});
-        delete this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)];
+        delete this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)][noticeEh];
         this.notifySubscribers();
         return encodeHashToBase64(eh);
     }

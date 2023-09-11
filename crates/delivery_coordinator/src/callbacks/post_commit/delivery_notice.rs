@@ -5,7 +5,7 @@ use crate::*;
 
 
 ///
-pub fn post_commit_DeliveryNotice(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, eh: &EntryHash) -> ExternResult<()> {
     debug!("post_commit_DeliveryNotice() {:?}", eh);
     let me = agent_info()?.agent_latest_pubkey;
     let notice = DeliveryNotice::try_from(entry)?;
@@ -28,7 +28,7 @@ pub fn post_commit_DeliveryNotice(entry: Entry, eh: &EntryHash) -> ExternResult<
         warn!("send_item() during DeliveryNotice::post_commit() failed: {}", e);
     }
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedNotice((eh.to_owned(), notice)));
+    let res = emit_signal(&SignalProtocol::ReceivedNotice((eh.to_owned(), sah.hashed.content.timestamp(), notice)));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {

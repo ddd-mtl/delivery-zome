@@ -481,7 +481,7 @@ export enum SignalProtocolType {
 	ReceivedReceipt = 'ReceivedReceipt',
 	DistributionCreated = 'DistributionCreated',
 }
-export type SignalProtocolVariantReceivedNotice = {ReceivedNotice: [EntryHash, DeliveryNotice]}
+export type SignalProtocolVariantReceivedNotice = {ReceivedNotice: [EntryHash, Timestamp, DeliveryNotice]}
 export type SignalProtocolVariantReceivedAck = {ReceivedAck: NoticeReceived}
 export type SignalProtocolVariantReceivedReply = {ReceivedReply: ReplyReceived}
 export type SignalProtocolVariantReceivedParcel = {ReceivedParcel: ParcelReceived}

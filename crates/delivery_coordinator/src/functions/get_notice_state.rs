@@ -10,6 +10,8 @@ use crate::*;
 pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<NoticeState> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("get_notice_state() CALLED");
+   /// Make sure EntryHash is correct
+   let _notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
    /// look for reply
    let maybe_reply = query_DeliveryReply(notice_eh.clone())?;
    if maybe_reply.is_none() {
