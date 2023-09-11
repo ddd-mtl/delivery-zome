@@ -32,9 +32,9 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
    //debug!("DELIVERY post_commit() called for {} actions", signedActionList.len());
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each Action
-   for signedAction in signedActionList {
-      debug!(" - {:?}", signedAction.action().entry_type());
-      let action = signedAction.action();
+   for sah in signedActionList {
+      debug!(" - {:?}", sah.action().entry_type());
+      let action = sah.action();
       if action.entry_type().is_none() {
          continue;
       }
@@ -44,7 +44,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
          EntryType::CapClaim => {},
          EntryType::CapGrant => {},
          EntryType::App(app_entry_def) => {
-            let result = post_commit_app_entry(eh, app_entry_def);
+            let result = post_commit_app_entry(&sah, eh, app_entry_def);
             debug!(" << post_commit() result = {:?}", result);
          },
       }
@@ -53,7 +53,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
 
 
 ///
-fn post_commit_app_entry(eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
+fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
    debug!(" >> post_commit() called for a {:?}", app_entry_def);
    /// Get Entry from local chain
    let monad: HashSet<EntryHash> = HashSet::from([eh.clone()]);
@@ -77,7 +77,7 @@ fn post_commit_app_entry(eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternR
    let variant = entry_index_to_variant(app_entry_def.entry_index)?;
    match variant {
       /// Send/Receive/Ack Notice
-      DeliveryEntryTypes::Distribution => post_commit_Distribution(entry, eh),
+      DeliveryEntryTypes::Distribution => post_commit_Distribution(sah, entry, eh),
       DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(entry, eh),
       DeliveryEntryTypes::NoticeReceived => post_commit_NoticeReceived(entry, eh),
       /// Send/Receive Reply

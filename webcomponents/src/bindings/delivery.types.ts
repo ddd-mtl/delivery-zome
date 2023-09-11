@@ -479,11 +479,13 @@ export enum SignalProtocolType {
 	ReceivedReply = 'ReceivedReply',
 	ReceivedParcel = 'ReceivedParcel',
 	ReceivedReceipt = 'ReceivedReceipt',
+	DistributionCreated = 'DistributionCreated',
 }
 export type SignalProtocolVariantReceivedNotice = {ReceivedNotice: [EntryHash, DeliveryNotice]}
 export type SignalProtocolVariantReceivedAck = {ReceivedAck: NoticeReceived}
 export type SignalProtocolVariantReceivedReply = {ReceivedReply: ReplyReceived}
 export type SignalProtocolVariantReceivedParcel = {ReceivedParcel: ParcelReceived}
 export type SignalProtocolVariantReceivedReceipt = {ReceivedReceipt: DeliveryReceipt}
+export type SignalProtocolVariantDistributionCreated = {DistributionCreated: [EntryHash, Timestamp, Distribution]}
 export type SignalProtocol = 
- | SignalProtocolVariantReceivedNotice | SignalProtocolVariantReceivedAck | SignalProtocolVariantReceivedReply | SignalProtocolVariantReceivedParcel | SignalProtocolVariantReceivedReceipt;
+ | SignalProtocolVariantReceivedNotice | SignalProtocolVariantReceivedAck | SignalProtocolVariantReceivedReply | SignalProtocolVariantReceivedParcel | SignalProtocolVariantReceivedReceipt | SignalProtocolVariantDistributionCreated;

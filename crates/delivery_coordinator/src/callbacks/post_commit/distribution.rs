@@ -6,7 +6,7 @@ use crate::*;
 
 
 ///
-pub fn post_commit_Distribution(entry: Entry, distribution_eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribution_eh: &EntryHash) -> ExternResult<()> {
     debug!("post_commit_distribution() {:?}", distribution_eh);
     let distribution = Distribution::try_from(entry)?;
     /// Create DeliveryNotice
@@ -20,6 +20,13 @@ pub fn post_commit_Distribution(entry: Entry, distribution_eh: &EntryHash) -> Ex
     for recipient in distribution.recipients.clone() {
         /// FIXME: accumulate failed recipients to final error return value
         let _ = send_notice(notice.clone(), recipient, distribution.delivery_summary.distribution_strategy.clone());
+    }
+    /// Emit Signal
+    let res = emit_signal(&SignalProtocol::DistributionCreated((distribution_eh.to_owned(), sah.hashed.content.timestamp(), distribution)));
+    if let Err(err) = res.clone() {
+        error!("Emit signal failed: {}", err);
+    } else {
+        debug!("Emit signal successful!");
     }
     /// Done
     Ok(())

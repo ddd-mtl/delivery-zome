@@ -6,6 +6,7 @@ use zome_delivery_types::*;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalKind {
     ReceivedNotice,
+    //ReceivedAck,
     ReceivedReply,
     ReceivedParcel,
     ReceivedReceipt,
@@ -18,8 +19,10 @@ pub enum SignalProtocol {
     ReceivedReply(ReplyReceived),
     ReceivedParcel(ParcelReceived),
     ReceivedReceipt(DeliveryReceipt),
+    DistributionCreated((EntryHash, Timestamp, Distribution)),
 }
 
+/// For sweettest?
 impl SignalProtocol {
     pub fn is(&self, kind: &SignalKind, eh: &EntryHash) -> bool {
         match kind {
