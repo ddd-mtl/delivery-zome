@@ -192,7 +192,7 @@ export class DeliveryZvm extends ZomeViewModel {
             console.log("signal ReceivedParcel", deliverySignal.ReceivedParcel);
             const noticeEh = encodeHashToBase64(deliverySignal.ReceivedParcel.notice_eh);
             const notice = this._perspective.allNotices[noticeEh][1];
-            delete this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)][noticeEh];
+            delete this._perspective.pendingInbounds[encodeHashToBase64(notice.sender)][noticeEh];
 
         }
         if (SignalProtocolType.ReceivedReceipt in deliverySignal) {
