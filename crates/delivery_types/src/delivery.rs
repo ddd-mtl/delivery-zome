@@ -87,8 +87,8 @@ pub struct EntryReference {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ManifestReference {
    pub manifest_eh: EntryHash,
-   pub entry_zome_name: ZomeName,
-   pub entry_type_name: String,
+   pub data_type: String,
+   pub from_zome: ZomeName,
 }
 
 
@@ -98,6 +98,7 @@ pub struct DeliverySummary {
    pub distribution_strategy: DistributionStrategy,
    pub parcel_size: usize,
    pub parcel_reference: ParcelReference,
+   pub parcel_name: String,
 }
 
 /// A Parcel is a generic Entry or a ParcelManifest

@@ -4,7 +4,7 @@ import {
     DeliveryState,
     Distribution,
     DistributionState, FullDistributionState, NoticeAck,
-    NoticeReceived, NoticeReply, NoticeState, ParcelReceived, ReceptionAck, ReceptionProof, ReplyAck,
+    NoticeReceived, NoticeReply, NoticeState, ParcelManifest, ParcelReceived, ReceptionAck, ReceptionProof, ReplyAck,
     ReplyReceived
 } from "../bindings/delivery.types";
 import {Dictionary} from "@ddd-qc/lit-happ";
@@ -32,6 +32,9 @@ export interface DeliveryPerspective {
     /** -- -- */
     inbox: ActionHashB64[],
 
+    /** Parcels */
+    manifests: Dictionary<ParcelManifest>,
+
     /** -- OUTBOUND -- */
     /** distrib_eh -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
     distributions: Dictionary<[Distribution, Timestamp, DistributionState, Dictionary<DeliveryState>]>,
@@ -43,8 +46,8 @@ export interface DeliveryPerspective {
     receptionAcks: Dictionary<ReceptionAck>,
 
     /** -- INBOUND -- */
-    /** notice_eh -> Timestamp, Notice, State */
-    notices: Dictionary<[Timestamp, DeliveryNotice, NoticeState]>,
+    /** notice_eh -> Timestamp, Notice, State, Download Percentage */
+    notices: Dictionary<[Timestamp, DeliveryNotice, NoticeState, number]>,
     /** notice_eh -> NoticeReply */
     replies: Dictionary<NoticeReply>,
     /** notice_eh -> ReceptionProof */

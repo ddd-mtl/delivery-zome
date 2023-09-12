@@ -56,7 +56,7 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    /// Commit Manifest
    let manifest = ParcelManifest {
       name: "dummy".to_string(),
-      custum_entry_type: "split_secret".to_owned(),
+      data_type: "split_secret".to_owned(),
       size: value.len(),
       chunks,
    };
@@ -96,7 +96,7 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
       return error("Not all chunks have been found on chain");
    }
    /// Concat all chunks
-   if manifest.custum_entry_type != "split_secret".to_owned() {
+   if manifest.data_type != "split_secret".to_owned() {
       return error("Manifest of an unknown entry type");
    }
    let mut secret = String::new();
@@ -132,17 +132,16 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
       ParcelReference::AppEntry(EntryReference {
          eh: input.secret_eh,
          zome_name,
-         entry_index: EntryDefIndex::from(get_variant_index:: < SecretEntry>(SecretEntryTypes::Secret)?),
+         entry_index: EntryDefIndex::from(get_variant_index::<SecretEntry>(SecretEntryTypes::Secret)?),
          visibility: EntryVisibility::Private,
          }
       )
    } else {
-      /// Should be a Manifest
       let _: ParcelManifest = get_typed_from_eh(input.secret_eh.clone())?;
       let mref = ManifestReference {
          manifest_eh: input.secret_eh,
-         entry_zome_name: zome_name,
-         entry_type_name: "secret".to_string(),
+         from_zome: zome_name,
+         data_type: "secret".to_string(),
       };
       ParcelReference::Manifest(mref)
    };

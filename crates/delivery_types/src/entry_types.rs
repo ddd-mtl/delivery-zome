@@ -67,12 +67,12 @@ pub struct ParcelChunk {
 
 /// Entry for holding arbitrary data for a Parcel.
 /// Used as a universel way to send data.
-/// WARN : Change MANIFEST_ENTRY_NAME const when renaming
+/// WARN: Change MANIFEST_ENTRY_NAME const when renaming
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelManifest {
    pub name: String,
-   pub custum_entry_type: String,
+   pub data_type: String,
    //pub data_hash: String,
    pub size: usize,
    pub chunks: Vec<EntryHash>,

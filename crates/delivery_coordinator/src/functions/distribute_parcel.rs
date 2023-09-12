@@ -18,17 +18,20 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    recipients.extend(set.into_iter());
    debug!("recipients: {}", recipients.len());
    /// Create ParcelSummary
-   let size = match input.parcel_ref.clone() {
+   let mut parcel_name = String::new();
+   let parcel_size = match input.parcel_ref.clone() {
       ParcelReference::AppEntry(eref) => get_app_entry_size(eref.eh)?,
       ParcelReference::Manifest(mref) => {
          let manifest: ParcelManifest = get_typed_from_eh(mref.manifest_eh.clone())?;
+         parcel_name = manifest.name;
          manifest.size
       }
    };
    let delivery_summary = DeliverySummary {
-      parcel_size: size,
       distribution_strategy: input.strategy,
       parcel_reference: input.parcel_ref,
+      parcel_size,
+      parcel_name,
    };
    debug!("delivery_summary: {:?}", delivery_summary);
    /// Sign summary

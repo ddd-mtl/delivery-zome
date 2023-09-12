@@ -316,14 +316,14 @@ export interface PendingItem {
 
 /** List of structs that PendingItem can embed */
 export type ItemKind =
-  | {NoticeAck: null} | {NoticeReply: null} | {ReceptionProof: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
+  | {NoticeAck: null} | {NoticeReply: null} | {ReceptionProof: null} | {DeliveryNotice: null} | {ParcelChunk: null} | {AppEntryBytes: null};
 export enum ItemKindType {
 	NoticeAck = 'NoticeAck',
 	NoticeReply = 'NoticeReply',
 	ReceptionProof = 'ReceptionProof',
 	DeliveryNotice = 'DeliveryNotice',
-	AppEntryBytes = 'AppEntryBytes',
 	ParcelChunk = 'ParcelChunk',
+	AppEntryBytes = 'AppEntryBytes',
 }
 
 export interface DistributeParcelInput {
@@ -358,23 +358,23 @@ export type DeliveryNoticeQueryFieldVariantParcel = {Parcel: EntryHash}
 export type DeliveryNoticeQueryField = 
  | DeliveryNoticeQueryFieldVariantSender | DeliveryNoticeQueryFieldVariantDistribution | DeliveryNoticeQueryFieldVariantParcel;
 
-export enum ParcelReceivedQueryFieldType {
+export enum ReceptionProofQueryFieldType {
 	Notice = 'Notice',
 	Parcel = 'Parcel',
 }
-export type ParcelReceivedQueryFieldVariantNotice = {Notice: EntryHash}
-export type ParcelReceivedQueryFieldVariantParcel = {Parcel: EntryHash}
-export type ParcelReceivedQueryField = 
- | ParcelReceivedQueryFieldVariantNotice | ParcelReceivedQueryFieldVariantParcel;
+export type ReceptionProofQueryFieldVariantNotice = {Notice: EntryHash}
+export type ReceptionProofQueryFieldVariantParcel = {Parcel: EntryHash}
+export type ReceptionProofQueryField = 
+ | ReceptionProofQueryFieldVariantNotice | ReceptionProofQueryFieldVariantParcel;
 
-export enum NoticeReceivedQueryFieldType {
+export enum NoticeAckQueryFieldType {
 	Recipient = 'Recipient',
 	Distribution = 'Distribution',
 }
-export type NoticeReceivedQueryFieldVariantRecipient = {Recipient: AgentPubKey}
-export type NoticeReceivedQueryFieldVariantDistribution = {Distribution: EntryHash}
-export type NoticeReceivedQueryField = 
- | NoticeReceivedQueryFieldVariantRecipient | NoticeReceivedQueryFieldVariantDistribution;
+export type NoticeAckQueryFieldVariantRecipient = {Recipient: AgentPubKey}
+export type NoticeAckQueryFieldVariantDistribution = {Distribution: EntryHash}
+export type NoticeAckQueryField = 
+ | NoticeAckQueryFieldVariantRecipient | NoticeAckQueryFieldVariantDistribution;
 
 export interface CommitPendingItemInput {
   item: PendingItem
