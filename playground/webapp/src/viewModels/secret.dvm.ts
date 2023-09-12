@@ -43,27 +43,18 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
   const deliverySignal = signal.payload as SignalProtocol;
 
   /** Automatically accept parcel from secret zome */
-  if (SignalProtocolType.ReceivedNotice in deliverySignal) {
-   console.log("ADDING DeliveryNotice. parcel_reference:", deliverySignal.ReceivedNotice[2].summary.parcel_reference);
-   const noticeEh = encodeHashToBase64(deliverySignal.ReceivedNotice[0]);
-   if ("AppEntry" in deliverySignal.ReceivedNotice[2].summary.parcel_reference) {
-     if ("secret_integrity" === deliverySignal.ReceivedNotice[2].summary.parcel_reference.AppEntry.zome_name) {
+  if (SignalProtocolType.NewNotice in deliverySignal) {
+   console.log("ADDING DeliveryNotice. parcel_reference:", deliverySignal.NewNotice[1].summary.parcel_reference);
+   const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
+   if ("AppEntry" in deliverySignal.NewNotice[1].summary.parcel_reference) {
+     if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.AppEntry.zome_name) {
       this.deliveryZvm.acceptDelivery(noticeEh);
      }
    } else {
-    if ("secret_integrity" === deliverySignal.ReceivedNotice[2].summary.parcel_reference.Manifest.entry_zome_name) {
+    if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
      this.deliveryZvm.acceptDelivery(noticeEh);
     }
    }
-  }
-  if (SignalProtocolType.ReceivedReply in deliverySignal) {
-   //console.log("ADDING ReplyReceived", deliverySignal.ReceivedReply);
-  }
-  if (SignalProtocolType.ReceivedParcel in deliverySignal) {
-   //console.log("ADDING ParcelReceived", deliverySignal.ReceivedParcel);
-  }
-  if (SignalProtocolType.ReceivedReceipt in deliverySignal) {
-   //console.log("ADDING DeliveryReceipt", deliverySignal.ReceivedReceipt);
   }
  }
 

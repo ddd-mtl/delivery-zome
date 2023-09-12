@@ -11,7 +11,7 @@ use crate::*;
 /// Return ActionHashs of parcels committed during the pull
 #[hdk_extern]
 pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
-   debug!("pull_inbox() START");
+   debug!("START");
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all inbox items
    let pending_pairs = get_all_inbox_items(None)?;
@@ -20,7 +20,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    let mut manifest_map = HashMap::new();
    let mut chunk_map = HashMap::new();
    for (pending_item, link) in pending_pairs {
-      debug!("pull_inbox() inbox item: {:?}", pending_item.kind);
+      debug!("inbox item: {:?}", pending_item.kind);
       match pending_item.kind {
          /// Same behavior as if received via DM
          ItemKind::NoticeAck => {
@@ -76,10 +76,10 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    /// Bail if no parcel received
    let parcel_count = entry_map.len() + manifest_map.len() + chunk_map.len();
    if parcel_count == 0 {
-      debug!("pull_inbox() END - No parcel received");
+      debug!("END - No parcel received");
       return Ok(Vec::new())
    }
-   debug!("pull_inbox() parcels found: {} {} {}", entry_map.len(), manifest_map.len(), chunk_map.len());
+   debug!("parcels found: {} {} {}", entry_map.len(), manifest_map.len(), chunk_map.len());
 
    /// Some parcel received
    /// Check if we accepted them
@@ -96,7 +96,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    let tuples = get_all_typed_local::<ReceptionProof>(EntryType::App(DeliveryEntryTypes::ReceptionProof.try_into().unwrap()))?;
    let received_parcel_ehs: Vec<EntryHash> = tuples.iter().map(|(_, _, x)| x.notice_eh.clone()).collect();
    let replies_tuples = get_all_typed_local::<NoticeReply>(EntryType::App(DeliveryEntryTypes::NoticeReply.try_into().unwrap()))?;
-   debug!("pull_inbox() my_replies: {}", replies_tuples.len());
+   debug!("my_replies: {}", replies_tuples.len());
    for (_, _, reply) in replies_tuples {
       //debug!("pull_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
@@ -116,18 +116,18 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
          }
       }
    }
-   debug!("pull_inbox() unreceived entries: {}", unreceived_entries.len());
+   debug!("unreceived entries: {}", unreceived_entries.len());
    /// Commit received parcels
    let mut ahs = Vec::new();
    /// Process entries
    for (eh, (entry, link)) in entry_map.iter() {
       if let Some(notice) = unreceived_entries.get(eh) {
-         println!("pull_inbox() commit parcel from link: {:?}", link.create_link_hash.clone());
+         println!("commit parcel from link: {:?}", link.create_link_hash.clone());
 
          /// Make sure CreateLink exists
          let maybe_el = get(link.create_link_hash.clone(), GetOptions::default())?;
          if maybe_el.is_none() {
-            warn!("pull_inbox(): CreateLink not found.");
+            warn!("CreateLink not found.");
             // return Err(WasmError::Guest("pull_inbox(): CreateLink not found.".to_string()));
             continue;
          }
@@ -148,7 +148,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
          manifest.chunks.iter().for_each(|x|unreceived_chunks.push(x.clone()));
       }
    }
-   debug!("pull_inbox() unreceived_chunks entries: {}", unreceived_chunks.len());
+   debug!("unreceived_chunks entries: {}", unreceived_chunks.len());
    /// Process chunks
    for (eh, (entry, link)) in chunk_map.iter() {
       if unreceived_chunks.contains(eh) {
@@ -158,6 +158,6 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
       }
    }
    /// Done
-   debug!("pull_inbox() END - Received {} parcels ({})", parcel_count, ahs.len());
+   debug!("END - Received {} parcels ({})", parcel_count, ahs.len());
    Ok(ahs)
 }

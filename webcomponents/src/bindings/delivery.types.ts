@@ -201,8 +201,8 @@ export interface EntryReference {
 /** Informantion about where the data is from */
 export interface ManifestReference {
   manifest_eh: EntryHash
-  entry_zome_name: ZomeName
-  entry_type_name: string
+  data_type: string
+  from_zome: ZomeName
 }
 
 /** Shared data between a Distribution and a DeliveryNotice */
@@ -210,6 +210,7 @@ export interface DeliverySummary {
   distribution_strategy: DistributionStrategy
   parcel_size: number
   parcel_reference: ParcelReference
+  parcel_name: string
 }
 
 /** A Parcel is a generic Entry or a ParcelManifest */
@@ -274,12 +275,12 @@ export interface ParcelChunk {
 
 /**
  * Entry for holding arbitrary data for a Parcel.
- * Used as an universel way to send data.
- * WARN : Change MANIFEST_ENTRY_NAME const when renaming
+ * Used as a universel way to send data.
+ * WARN: Change MANIFEST_ENTRY_NAME const when renaming
  */
 export interface ParcelManifest {
   name: string
-  custum_entry_type: string
+  data_type: string
   size: number
   chunks: EntryHash[]
 }
@@ -344,7 +345,7 @@ export interface FetchChunkInput {
 
 export interface GetNoticeOutput {
   notice: DeliveryNotice
-  state: NoticeState
+  state: [NoticeState, number]
 }
 
 export enum DeliveryNoticeQueryFieldType {
@@ -476,8 +477,8 @@ export interface CommitParcelInput {
 
 /** Protocol for notifying the ViewModel (UI) */
 export enum SignalProtocolType {
-	NewChunk = 'NewChunk',
 	NewManifest = 'NewManifest',
+	ReceivedChunk = 'ReceivedChunk',
 	NewDistribution = 'NewDistribution',
 	NewNotice = 'NewNotice',
 	NewNoticeAck = 'NewNoticeAck',
@@ -487,18 +488,18 @@ export enum SignalProtocolType {
 	NewReceptionAck = 'NewReceptionAck',
 	NewPendingItem = 'NewPendingItem',
 }
-export type SignalProtocolVariantNewChunk = {NewChunk: [EntryHash, number]}
-export type SignalProtocolVariantNewManifest = {NewManifest: ParcelManifest}
-export type SignalProtocolVariantNewDistribution = {NewDistribution: [EntryHash, Timestamp, Distribution]}
-export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, Timestamp, DeliveryNotice]}
-export type SignalProtocolVariantNewNoticeAck = {NewNoticeAck: NoticeAck}
-export type SignalProtocolVariantNewReply = {NewReply: NoticeReply}
-export type SignalProtocolVariantNewReplyAck = {NewReplyAck: ReplyAck}
-export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: ReceptionProof}
-export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: ReceptionAck}
-export type SignalProtocolVariantNewPendingItem = {NewPendingItem: PendingItem}
+export type SignalProtocolVariantNewManifest = {NewManifest: [EntryHash, ParcelManifest]}
+export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash, number]}
+export type SignalProtocolVariantNewDistribution = {NewDistribution: [EntryHash, Distribution, Timestamp]}
+export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, DeliveryNotice, Timestamp]}
+export type SignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, NoticeAck]}
+export type SignalProtocolVariantNewReply = {NewReply: [EntryHash, NoticeReply]}
+export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, ReplyAck]}
+export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, ReceptionProof]}
+export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, ReceptionAck]}
+export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
 export type SignalProtocol = 
- | SignalProtocolVariantNewChunk | SignalProtocolVariantNewManifest | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem;
+ | SignalProtocolVariantNewManifest | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem;
 
 /**
  * ---------------------------------------------------------------------------------------

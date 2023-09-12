@@ -148,7 +148,7 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
-  async checkManifest(chunkEh: EntryHash): Promise<[EntryHash, EntryHash | number]> {
+  async checkManifest(chunkEh: EntryHash): Promise<[EntryHash, EntryHash | number] | null> {
     return this.call('check_manifest', chunkEh);
   }
 
@@ -196,7 +196,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_parcel_notice', parcelEh);
   }
 
-  async getNoticeState(noticeEh: EntryHash): Promise<NoticeState> {
+  async getNoticeState(noticeEh: EntryHash): Promise<[NoticeState, number]> {
     return this.call('get_notice_state', noticeEh);
   }
 
@@ -258,6 +258,10 @@ export class DeliveryProxy extends ZomeProxy {
 
   async queryAllReceptionAck(): Promise<[EntryHash, ReceptionAck][]> {
     return this.call('query_all_ReceptionAck', null);
+  }
+
+  async queryAllManifest(): Promise<[EntryHash, ParcelManifest][]> {
+    return this.call('query_all_Manifest', null);
   }
 
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {

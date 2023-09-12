@@ -28,7 +28,7 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, eh: &E
         warn!("send_item() during DeliveryNotice::post_commit() failed: {}", e);
     }
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::NewNotice((eh.to_owned(), sah.hashed.content.timestamp(), notice)));
+    let res = emit_signal(&SignalProtocol::NewNotice((eh.to_owned(), notice, sah.hashed.content.timestamp())));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {

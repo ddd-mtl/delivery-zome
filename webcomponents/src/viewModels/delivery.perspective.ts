@@ -1,11 +1,9 @@
 import {
     DeliveryNotice,
-    DeliveryReceipt, DeliveryReply,
     DeliveryState,
     Distribution,
     DistributionState, FullDistributionState, NoticeAck,
-    NoticeReceived, NoticeReply, NoticeState, ParcelManifest, ParcelReceived, ReceptionAck, ReceptionProof, ReplyAck,
-    ReplyReceived
+    NoticeReply, NoticeState, ParcelManifest, ReceptionAck, ReceptionProof, ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary} from "@ddd-qc/lit-happ";
 import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, EntryHashB64, Timestamp} from "@holochain/client";
@@ -14,12 +12,12 @@ import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, EntryHashB64, Timesta
 //export type FullDistributionState = [DistributionState, Dictionary<DeliveryState>];
 
 
-/** */
-export function createFds(distribution: Distribution): FullDistributionState {
-    let delivery_states: Dictionary<DeliveryState> = {};
-    distribution.recipients.map((recipient) => delivery_states[encodeHashToBase64(recipient)] = {Unsent: null});
-    return {distribution_state: {Unsent: null}, delivery_states];
-}
+// /** */
+// export function createFds(distribution: Distribution): FullDistributionState {
+//     let delivery_states: Dictionary<DeliveryState> = {};
+//     distribution.recipients.map((recipient) => delivery_states[encodeHashToBase64(recipient)] = {Unsent: null});
+//     return {distribution_state: {Unsent: null}, delivery_states];
+// }
 
 
 /** */
@@ -33,6 +31,7 @@ export interface DeliveryPerspective {
     inbox: ActionHashB64[],
 
     /** Parcels */
+    /** manifest_eh -> ParcelManifest */
     manifests: Dictionary<ParcelManifest>,
 
     /** -- OUTBOUND -- */
@@ -47,7 +46,7 @@ export interface DeliveryPerspective {
 
     /** -- INBOUND -- */
     /** notice_eh -> Timestamp, Notice, State, Download Percentage */
-    notices: Dictionary<[Timestamp, DeliveryNotice, NoticeState, number]>,
+    notices: Dictionary<[DeliveryNotice, Timestamp, NoticeState, number]>,
     /** notice_eh -> NoticeReply */
     replies: Dictionary<NoticeReply>,
     /** notice_eh -> ReceptionProof */
@@ -72,22 +71,23 @@ export interface DeliveryPerspective {
 export function createDeliveryPerspective(): DeliveryPerspective {
     return {
         myPubEncKey: new Uint8Array(),
-            encKeys: {},
+        encKeys: {},
         inbox: [],
-            /** Inbound */
-            distributions: {},
+        manifests: {},
+        /** Inbound */
+        distributions: {},
         noticeAcks: {},
         replyAcks: {},
         receptionAcks: {},
         /** Outbound */
         notices: {},
         replies: {},
-        receptions: {},
+        receptions: {}
         /** Extra logic */
-        newDeliveryNotices: {},
-        //myDistributions: {},
-        unrepliedInbounds: {},
-        pendingInbounds: {},
-        unrepliedOutbounds: {}
+        // newDeliveryNotices: {},
+        // //myDistributions: {},
+        // unrepliedInbounds: {},
+        // pendingInbounds: {},
+        // unrepliedOutbounds: {}
     };
 }

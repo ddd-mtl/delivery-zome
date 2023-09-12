@@ -278,3 +278,18 @@ pub fn query_ReceptionAck(maybe_distribution: Option<EntryHash>, maybe_recipient
    /// Done
    Ok(receipts)
 }
+
+
+///
+#[hdk_extern]
+pub fn query_all_Manifest(_: ()) -> ExternResult<Vec<(EntryHash, ParcelManifest)>> {
+   //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create Elements with query
+   let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::ParcelManifest.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .collect();
+   /// Done
+   Ok(res)
+}

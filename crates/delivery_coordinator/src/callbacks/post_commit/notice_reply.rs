@@ -11,7 +11,7 @@ pub fn post_commit_NoticeReply(entry: Entry, reply_eh: &EntryHash) -> ExternResu
     debug!("post_commit_NoticeReply() {:?}", reply_eh);
     let reply = NoticeReply::try_from(entry)?;
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::NewReply(reply.clone()));
+    let res = emit_signal(&SignalProtocol::NewReply((reply_eh.to_owned(), reply.clone())));
     if let Err(err) = res {
         error!("Emit signal failed: {}", err);
     }
@@ -27,7 +27,7 @@ fn send_reply(delivery_reply: NoticeReply) -> ExternResult<()> {
     let notice: DeliveryNotice = get_typed_from_eh(delivery_reply.notice_eh.clone())?;
     /// Create PendingItem from NoticeReply
     let pending_item = pack_reply(delivery_reply.clone(), notice.distribution_eh.clone(), notice.sender.clone())?;
-    /// Send it to recipient
+    /// Send it to sender
     let res = send_item(
         notice.sender,
         pending_item,

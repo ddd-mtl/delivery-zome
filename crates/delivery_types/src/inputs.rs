@@ -30,7 +30,7 @@ pub struct FetchChunkInput {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GetNoticeOutput {
    pub notice: DeliveryNotice,
-   pub state: NoticeState,
+   pub state: (NoticeState, usize),
 }
 
 

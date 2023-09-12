@@ -9,7 +9,7 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
    debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
    let manifest = ParcelManifest::try_from(entry)?;
    /// Emit signal
-   let res = emit_signal(&SignalProtocol::NewManifest(manifest.clone()));
+   let res = emit_signal(&SignalProtocol::NewManifest((manifest_eh.to_owned(), manifest.clone())));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }
@@ -17,7 +17,7 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
    let notices = query_DeliveryNotice(DeliveryNoticeQueryField::Parcel(manifest_eh.clone()))?;
    if notices.is_empty() {
       warn!("No DeliveryNotice found for post-committed ParcelManifest");
-      /// Normal if it is its owners
+      /// Normal if agent is original creator of ParcelManifest
       return Ok(())
    }
    let notice_eh = hash_entry(notices[0].clone())?;

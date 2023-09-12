@@ -1,8 +1,9 @@
 import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import { ZomeElement } from "@ddd-qc/lit-happ";
-import {DeliveryPerspective, DeliveryZvm} from "../viewModels/delivery.zvm";
+import {DeliveryZvm} from "../viewModels/delivery.zvm";
 import {decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
+import {DeliveryPerspective} from "../viewModels/delivery.perspective";
 
 
 /**
@@ -33,8 +34,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         }
 
         /* Li */
-        console.log("myDistributions", this.perspective.myDistributions);
-        const myDistribsLi = Object.entries(this.perspective.myDistributions).map(
+        console.log("myDistributions", this.perspective.distributions);
+        const myDistribsLi = Object.entries(this.perspective.distributions).map(
             ([distribEh, fullState]) => {
                 //console.log("MembraneLi", MembraneLi)
               const deliveryLi = Object.entries(fullState[1]).map(
@@ -87,7 +88,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
 
-        const receiptsLi = Object.entries(this.perspective.receipts).map(
+        const receptionAcksLi = Object.entries(this.perspective.receptionAcks).map(
             ([eh, receipt]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -99,21 +100,21 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
         /* Li */
         //console.log("signals", this.perspective.myDistributions);
-        const newNoticesLi =
-        Object.entries(this.perspective.newDeliveryNotices).map(
-            ([noticeEh, notice]) => {
-                const distribEh = encodeHashToBase64(notice.distribution_eh);
-                //console.log("MembraneLi", MembraneLi)
-                return html `
-              <li style="margin-top:10px;" title=${noticeEh}>
-                  ${this.notice2str(noticeEh)}
-                  <button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
-                  <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
-                  <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>
-
-              </li>`
-            }
-        )
+        const newNoticesLi = html``
+        // Object.entries(this.perspective.newDeliveryNotices).map(
+        //     ([noticeEh, notice]) => {
+        //         const distribEh = encodeHashToBase64(notice.distribution_eh);
+        //         //console.log("MembraneLi", MembraneLi)
+        //         return html `
+        //       <li style="margin-top:10px;" title=${noticeEh}>
+        //           ${this.notice2str(noticeEh)}
+        //           <button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
+        //           <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
+        //           <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>
+        //
+        //       </li>`
+        //     }
+        // )
 
         const noticesLi = Object.entries(this.perspective.notices).map(
             ([eh, _pair]) => {
@@ -134,7 +135,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const receivedLi = Object.entries(this.perspective.parcelAcks).map(
+        const receptionsLi = Object.entries(this.perspective.receptions).map(
             ([eh, received]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -157,7 +158,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             <ul>${repliesLi}</ul>
 
             <h3>Received Parcels</h3>
-            <ul>${receivedLi}</ul>
+            <ul>${receptionsLi}</ul>
             
             <hr style="border: dotted 1px grey"/>
               
@@ -179,7 +180,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             <ul>${receivedRepliesLi}</ul>
 
             <h3>Receipts</h3>
-            <ul>${receiptsLi}</ul>
+            <ul>${receptionAcksLi}</ul>
             
             <hr style="border: dotted 1px grey"/>
 
@@ -195,26 +196,26 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
     /** */
     distrib2str(distribEh: EntryHashB64): string {
-        const pair = this.perspective.distributions[distribEh];
-        if (!pair) {
+        const tuple = this.perspective.distributions[distribEh];
+        if (!tuple) {
             return "unknown";
         }
-        const date = new Date(pair[0] / 1000); // Holochain timestamp is in micro-seconds, Date wants milliseconds
+        const date = new Date(tuple[1] / 1000); // Holochain timestamp is in micro-seconds, Date wants milliseconds
         const date_str = date.toLocaleString('en-US', {hour12: false});
-        const agent_str = encodeHashToBase64(pair[1].recipients[0]).slice(-5);
-        return "[" + date_str + "] to " + agent_str + " (" + pair[1].recipients.length + ")";
+        const agent_str = encodeHashToBase64(tuple[0].recipients[0]).slice(-5);
+        return "[" + date_str + "] to " + agent_str + " (" + tuple[0].recipients.length + ")";
     }
 
 
     /** */
     notice2str(noticeEh: EntryHashB64): string {
-        const pair = this.perspective.notices[noticeEh];
-        if (!pair) {
+        const tuple = this.perspective.notices[noticeEh];
+        if (!tuple) {
             return "unknown";
         }
-        const date = new Date(pair[0] / 1000); // Holochain timestamp is in micro-seconds, Date wants milliseconds
+        const date = new Date(tuple[1] / 1000); // Holochain timestamp is in micro-seconds, Date wants milliseconds
         const date_str = date.toLocaleString('en-US', {hour12: false});
-        const agent_str = encodeHashToBase64(pair[1].sender).slice(-5);
+        const agent_str = encodeHashToBase64(tuple[0].sender).slice(-5);
         return "[" + date_str + "] from " + agent_str;
     }
 }

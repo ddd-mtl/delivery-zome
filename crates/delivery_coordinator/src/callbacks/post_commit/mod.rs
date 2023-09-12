@@ -93,7 +93,7 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
       DeliveryEntryTypes::ReceptionProof => post_commit_ReceptionProof(entry, eh),
       DeliveryEntryTypes::ReceptionAck => post_commit_ReceptionAck(entry, eh),
       /// Other
-      DeliveryEntryTypes::ParcelManifest => post_commit_PendingItem(entry, eh),
+      DeliveryEntryTypes::PendingItem => post_commit_PendingItem(entry, eh),
       ///
       _ => Ok(()),
    }

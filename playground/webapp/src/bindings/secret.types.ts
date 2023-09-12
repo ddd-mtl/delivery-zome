@@ -201,8 +201,8 @@ export interface EntryReference {
 /** Informantion about where the data is from */
 export interface ManifestReference {
   manifest_eh: EntryHash
-  entry_zome_name: ZomeName
-  entry_type_name: string
+  data_type: string
+  from_zome: ZomeName
 }
 
 /** Shared data between a Distribution and a DeliveryNotice */
@@ -210,6 +210,7 @@ export interface DeliverySummary {
   distribution_strategy: DistributionStrategy
   parcel_size: number
   parcel_reference: ParcelReference
+  parcel_name: string
 }
 
 /** A Parcel is a generic Entry or a ParcelManifest */
@@ -275,11 +276,11 @@ export interface ParcelChunk {
 /**
  * Entry for holding arbitrary data for a Parcel.
  * Used as a universel way to send data.
- * WARN : Change MANIFEST_ENTRY_NAME const when renaming
+ * WARN: Change MANIFEST_ENTRY_NAME const when renaming
  */
 export interface ParcelManifest {
   name: string
-  custum_entry_type: string
+  data_type: string
   size: number
   chunks: EntryHash[]
 }
@@ -344,7 +345,7 @@ export interface FetchChunkInput {
 
 export interface GetNoticeOutput {
   notice: DeliveryNotice
-  state: NoticeState
+  state: [NoticeState, number]
 }
 
 export enum DeliveryNoticeQueryFieldType {
