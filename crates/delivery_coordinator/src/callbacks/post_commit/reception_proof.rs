@@ -4,11 +4,11 @@ use zome_delivery_types::*;
 use crate::*;
 
 ///
-pub fn post_commit_ParcelReceived(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
-   debug!("post_commit_ParcelReceived() {:?}", eh);
-   let parcel_received = ParcelReceived::try_from(entry)?;
+pub fn post_commit_ReceptionProof(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
+   debug!("post_commit_ReceptionProof() {:?}", eh);
+   let parcel_received = ReceptionProof::try_from(entry)?;
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::ReceivedParcel(parcel_received.clone()));
+   let res = emit_signal(&SignalProtocol::CreatedReceptionProof(parcel_received.clone()));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }

@@ -22,7 +22,7 @@ pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribu
         let _ = send_notice(notice.clone(), recipient, distribution.delivery_summary.distribution_strategy.clone());
     }
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::DistributionCreated((distribution_eh.to_owned(), sah.hashed.content.timestamp(), distribution)));
+    let res = emit_signal(&SignalProtocol::CreatedDistribution((distribution_eh.to_owned(), sah.hashed.content.timestamp(), distribution)));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {
@@ -50,7 +50,7 @@ fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_stra
         warn!("send_item() failed: {}", e);
         return zome_error!("send_item() failed: {}", e);
     }
-    /// If direct-send succeeded, create NoticeReceived Entry
+    /// If direct-send succeeded, create NoticeAck Entry
     let response = res.unwrap();
     if let SendSuccessKind::OK_DIRECT(signature) = response {
         let valid = verify_signature(recipient.clone(), signature.clone(), notice.summary.clone())?;
@@ -58,12 +58,12 @@ fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_stra
             warn!("Recipient failed to sign Notice. Suspicious behavior.");
             return zome_error!("Recipient failed to sign Notice. Suspicious behavior.");
         }
-        let ack = NoticeReceived {
+        let ack = NoticeAck {
             distribution_eh: notice.distribution_eh.clone(),
             recipient: recipient.clone(),
             recipient_summary_signature: signature.clone(),
         };
-        let _ = call_self("commit_NoticeReceived", ack)?;
+        let _ = call_self("commit_NoticeAck", ack)?;
     }
     Ok(())
 }

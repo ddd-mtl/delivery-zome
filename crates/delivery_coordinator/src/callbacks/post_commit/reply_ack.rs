@@ -5,9 +5,9 @@ use crate::*;
 
 
 ///
-pub fn post_commit_ReplyReceived(entry: Entry, reply_eh: &EntryHash) -> ExternResult<()> {
-   debug!("post_commit_ReplyReceived() {:?}", reply_eh);
-   let reply = ReplyReceived::try_from(entry)?;
+pub fn post_commit_ReplyAck(entry: Entry, reply_eh: &EntryHash) -> ExternResult<()> {
+   debug!("post_commit_ReplyAck() {:?}", reply_eh);
+   let reply = ReplyAck::try_from(entry)?;
    /// Check signature
    // FIXME
    //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
@@ -23,7 +23,7 @@ pub fn post_commit_ReplyReceived(entry: Entry, reply_eh: &EntryHash) -> ExternRe
 
 
 /// Send Parcel
-fn send_parcel(reply: ReplyReceived) -> ExternResult<()> {
+fn send_parcel(reply: ReplyAck) -> ExternResult<()> {
    /// Get Distribution
    let distribution: Distribution = get_typed_from_eh(reply.distribution_eh.clone())?;
    /// - Send Chunks if Manifest

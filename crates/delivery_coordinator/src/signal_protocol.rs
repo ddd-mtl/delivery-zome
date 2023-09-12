@@ -6,20 +6,20 @@ use zome_delivery_types::*;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalKind {
     ReceivedNotice,
-    //ReceivedAck,
-    ReceivedReply,
-    ReceivedParcel,
-    ReceivedReceipt,
+    ReceivedReplyAck,
+    ReceivedReceptionProof,
+    ReceivedReceptionAck,
 }
 
+///  Protocol for sending data to the agent's UI
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
     ReceivedNotice((EntryHash, Timestamp, DeliveryNotice)),
-    ReceivedAck(NoticeReceived),
-    ReceivedReply(ReplyReceived),
-    ReceivedParcel(ParcelReceived),
-    ReceivedReceipt(DeliveryReceipt),
-    DistributionCreated((EntryHash, Timestamp, Distribution)),
+    ReceivedNoticeAck(NoticeAck),
+    ReceivedReplyAck(ReplyAck),
+    CreatedReceptionProof(ReceptionProof),
+    ReceivedReceptionAck(ReceptionAck),
+    CreatedDistribution((EntryHash, Timestamp, Distribution)),
 }
 
 /// For sweettest?
@@ -32,20 +32,20 @@ impl SignalProtocol {
                 }
                 false
             },
-            SignalKind::ReceivedReply => {
-                if let SignalProtocol::ReceivedReply(entry) = self {
+            SignalKind::ReceivedReplyAck => {
+                if let SignalProtocol::ReceivedReplyAck(entry) = self {
                     return &entry.distribution_eh == eh;
                 }
                 false
             },
-            SignalKind::ReceivedParcel => {
-                if let SignalProtocol::ReceivedParcel(received) = self {
+            SignalKind::ReceivedReceptionProof => {
+                if let SignalProtocol::CreatedReceptionProof(received) = self {
                     return &received.parcel_eh == eh;
                 }
                 false
             },
-            SignalKind::ReceivedReceipt => {
-                if let SignalProtocol::ReceivedReceipt(entry) = self {
+            SignalKind::ReceivedReceptionAck => {
+                if let SignalProtocol::ReceivedReceptionAck(entry) = self {
                     return &entry.distribution_eh == eh;
                 }
                 false

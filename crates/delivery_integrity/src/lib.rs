@@ -35,9 +35,9 @@ pub enum DeliveryEntry {
    #[entry_def(required_validations = 3, visibility = "private")]
    DeliveryNotice(DeliveryNotice),
    #[entry_def(required_validations = 3, visibility = "private")]
-   DeliveryReceipt(DeliveryReceipt),
+   ReceptionAck(ReceptionAck),
    #[entry_def(required_validations = 3, visibility = "private")]
-   DeliveryReply(DeliveryReply),
+   NoticeReply(NoticeReply),
    #[entry_def(required_validations = 1, visibility = "private")]
    Distribution(Distribution),
    #[entry_def(required_validations = 1, visibility = "private")]
@@ -45,13 +45,13 @@ pub enum DeliveryEntry {
    #[entry_def(required_validations = 1, visibility = "private")]
    ParcelManifest(ParcelManifest), // WARN. DONT MOVE THIS
    #[entry_def(required_validations = 1, visibility = "private")]
-   ParcelReceived(ParcelReceived),
+   ReceptionProof(ReceptionProof),
    #[entry_def(required_validations = 1, visibility = "private")]
-   NoticeReceived(NoticeReceived),
+   NoticeAck(NoticeAck),
    #[entry_def(required_validations = 1, visibility = "public")]
    PendingItem(PendingItem),
    #[entry_def(required_validations = 1, visibility = "private")]
-   ReplyReceived(ReplyReceived),
+   ReplyAck(ReplyAck),
 }
 
 

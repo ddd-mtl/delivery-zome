@@ -56,14 +56,14 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
    //     })?;
    // }
 
-   /// Create ParcelReceived if its an AppEntry
+   /// Create ReceptionProof if its an AppEntry
    /// (for a Manifest, we have to wait for all chunks to be received)
    if let ParcelReference::AppEntry(..) = notice.summary.parcel_reference {
-      let received = ParcelReceived {
+      let received = ReceptionProof {
          notice_eh: hash_entry(notice.clone())?,
          parcel_eh: hash_entry(entry.clone())?,
       };
-      let response = call_self("commit_ParcelReceived", received.clone())?;
+      let response = call_self("commit_ReceptionProof", received.clone())?;
       let received_eh: EntryHash = decode_response(response)?;
       debug!("call_commit_parcel() received_eh = {:?}", received_eh);
    }
@@ -127,18 +127,18 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
 
 ///
 #[hdk_extern]
-fn commit_NoticeReceived(ack: NoticeReceived) -> ExternResult<ActionHash> {
+fn commit_NoticeAck(ack: NoticeAck) -> ExternResult<ActionHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   return create_entry_relaxed(DeliveryEntry::NoticeReceived(ack));
+   return create_entry_relaxed(DeliveryEntry::NoticeAck(ack));
 }
 
 
 
 ///
 #[hdk_extern]
-fn commit_ParcelReceived(pr: ParcelReceived) -> ExternResult<EntryHash> {
+fn commit_ReceptionProof(pr: ReceptionProof) -> ExternResult<EntryHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let eh = hash_entry(pr.clone())?;
-   let _hh = create_entry_relaxed(DeliveryEntry::ParcelReceived(pr))?;
+   let _hh = create_entry_relaxed(DeliveryEntry::ReceptionProof(pr))?;
    return Ok(eh);
 }

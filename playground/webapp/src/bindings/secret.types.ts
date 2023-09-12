@@ -231,27 +231,6 @@ export enum DistributionStrategyType {
 	DhtOnly = 'DhtOnly',
 }
 
-/** Entry representing a received Manifest */
-export interface DeliveryNotice {
-  distribution_eh: EntryHash
-  summary: DeliverySummary
-  sender: AgentPubKey
-  sender_summary_signature: Signature
-}
-
-/** Entry for confirming a delivery has been well received or refused by a recipient */
-export interface DeliveryReceipt {
-  distribution_eh: EntryHash
-  recipient: AgentPubKey
-  recipient_signature: Signature
-}
-
-/** Entry for confirming a delivery has been well received or refused by a recipient */
-export interface DeliveryReply {
-  notice_eh: EntryHash
-  has_accepted: boolean
-}
-
 /** Entry representing a request to send a Parcel to one or multiple recipients */
 export interface Distribution {
   recipients: AgentPubKey[]
@@ -259,19 +238,45 @@ export interface Distribution {
   summary_signature: Signature
 }
 
-/** Entry for confirming a manifest has been well received by a recipient */
-export interface NoticeReceived {
+/** Entry representing a received delivery request */
+export interface DeliveryNotice {
+  distribution_eh: EntryHash
+  summary: DeliverySummary
+  sender: AgentPubKey
+  sender_summary_signature: Signature
+}
+
+/** Entry for confirming a request has been well received by a recipient */
+export interface NoticeAck {
   distribution_eh: EntryHash
   recipient: AgentPubKey
   recipient_summary_signature: Signature
 }
 
-/** Entry representing a file chunk. */
+/** Entry for accepting or refusing a delivery */
+export interface NoticeReply {
+  notice_eh: EntryHash
+  has_accepted: boolean
+}
+
+/** Entry for confirming a recipient's reply on the sender's side */
+export interface ReplyAck {
+  distribution_eh: EntryHash
+  recipient: AgentPubKey
+  has_accepted: boolean
+  recipient_signature: Signature
+}
+
+/** Entry representing a chunk a data (for a parcel) */
 export interface ParcelChunk {
   data: string
 }
 
-/** WARN : Change MANIFEST_ENTRY_NAME const when renaming */
+/**
+ * Entry for holding arbitrary data for a Parcel.
+ * Used as a universel way to send data.
+ * WARN : Change MANIFEST_ENTRY_NAME const when renaming
+ */
 export interface ParcelManifest {
   name: string
   custum_entry_type: string
@@ -280,24 +285,19 @@ export interface ParcelManifest {
 }
 
 /**
- * Entry for confirming a delivery has been well received or refused by a recipient
+ * Entry for confirming a delivery has been well received or refused by the recipient.
  * TODO: This should be a private link instead of an entry
  */
-export interface ParcelReceived {
+export interface ReceptionProof {
   notice_eh: EntryHash
   parcel_eh: EntryHash
 }
 
-/** List of structs that PendingItem can embed */
-export type ItemKind =
-  | {NoticeReceived: null} | {DeliveryReply: null} | {ParcelReceived: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
-export enum ItemKindType {
-	NoticeReceived = 'NoticeReceived',
-	DeliveryReply = 'DeliveryReply',
-	ParcelReceived = 'ParcelReceived',
-	DeliveryNotice = 'DeliveryNotice',
-	AppEntryBytes = 'AppEntryBytes',
-	ParcelChunk = 'ParcelChunk',
+/** Entry for confirming a delivery has been well received or refused by the recipient. */
+export interface ReceptionAck {
+  distribution_eh: EntryHash
+  recipient: AgentPubKey
+  recipient_signature: Signature
 }
 
 /**
@@ -314,12 +314,16 @@ export interface PendingItem {
   distribution_eh: EntryHash
 }
 
-/** Entry for confirming a delivery has been well received or refused by a recipient */
-export interface ReplyReceived {
-  distribution_eh: EntryHash
-  recipient: AgentPubKey
-  has_accepted: boolean
-  recipient_signature: Signature
+/** List of structs that PendingItem can embed */
+export type ItemKind =
+  | {NoticeAck: null} | {NoticeReply: null} | {ReceptionProof: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
+export enum ItemKindType {
+	NoticeAck = 'NoticeAck',
+	NoticeReply = 'NoticeReply',
+	ReceptionProof = 'ReceptionProof',
+	DeliveryNotice = 'DeliveryNotice',
+	AppEntryBytes = 'AppEntryBytes',
+	ParcelChunk = 'ParcelChunk',
 }
 
 export interface DistributeParcelInput {

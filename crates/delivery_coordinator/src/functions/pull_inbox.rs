@@ -23,27 +23,27 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
       debug!("pull_inbox() inbox item: {:?}", pending_item.kind);
       match pending_item.kind {
          /// Same behavior as if received via DM
-         ItemKind::NoticeReceived => {
+         ItemKind::NoticeAck => {
             let res = receive_ack(pending_item.author.clone(), pending_item);
             match res {
                Err(e) => warn!("{}", e),
                Ok(_) => { let _res = delete_link_relaxed(link.create_link_hash); },
             }
-         },
-         ItemKind::DeliveryReply => {
+         }
+         ItemKind::NoticeReply => {
             let res = receive_reply(pending_item.author.clone(), pending_item);
             match res {
                Err(e) => warn!("{}", e),
                Ok(_) => { let _res = delete_link_relaxed(link.create_link_hash); },
             }
-         },
-         ItemKind::ParcelReceived => {
+         }
+         ItemKind::ReceptionProof => {
             let res = receive_reception(pending_item.author.clone(), pending_item);
             match res {
                Err(e) => warn!("{}", e),
                Ok(_) => { let _res = delete_link_relaxed(link.create_link_hash); },
             }
-         },
+         }
          ItemKind::DeliveryNotice => {
             let res = receive_notice(pending_item.author.clone(), pending_item);
             match res {
@@ -93,9 +93,9 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
       let chunk_eh = hash_entry(chunk)?;
       received_chunks_ehs.push(chunk_eh);
    }
-   let tuples = get_all_typed_local::<ParcelReceived>(EntryType::App(DeliveryEntryTypes::ParcelReceived.try_into().unwrap()))?;
+   let tuples = get_all_typed_local::<ReceptionProof>(EntryType::App(DeliveryEntryTypes::ReceptionProof.try_into().unwrap()))?;
    let received_parcel_ehs: Vec<EntryHash> = tuples.iter().map(|(_, _, x)| x.notice_eh.clone()).collect();
-   let replies_tuples = get_all_typed_local::<DeliveryReply>(EntryType::App(DeliveryEntryTypes::DeliveryReply.try_into().unwrap()))?;
+   let replies_tuples = get_all_typed_local::<NoticeReply>(EntryType::App(DeliveryEntryTypes::NoticeReply.try_into().unwrap()))?;
    debug!("pull_inbox() my_replies: {}", replies_tuples.len());
    for (_, _, reply) in replies_tuples {
       //debug!("pull_inbox() reply: {:?}", reply);

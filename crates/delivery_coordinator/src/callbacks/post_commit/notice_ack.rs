@@ -5,10 +5,10 @@ use crate::*;
 
 
 ///
-pub fn post_commit_NoticeReceived(entry: Entry, _eh: &EntryHash) -> ExternResult<()> {
-    let ack = NoticeReceived::try_from(entry)?;
+pub fn post_commit_NoticeAck(entry: Entry, _eh: &EntryHash) -> ExternResult<()> {
+    let ack = NoticeAck::try_from(entry)?;
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedAck(ack));
+    let res = emit_signal(&SignalProtocol::ReceivedNoticeAck(ack));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {

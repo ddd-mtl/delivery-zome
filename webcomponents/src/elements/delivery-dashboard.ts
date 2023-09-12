@@ -59,7 +59,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const distribsLi = Object.entries(this.perspective.allDistributions).map(
+        const distribsLi = Object.entries(this.perspective.distributions).map(
             ([eh, _pair]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -68,7 +68,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const receivedNoticesLi = Object.entries(this.perspective.allReceivedNotices).map(
+        const receivedNoticesLi = Object.entries(this.perspective.noticeAcks).map(
             ([eh, received]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -77,7 +77,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const receivedRepliesLi = Object.entries(this.perspective.allReceivedReplies).map(
+        const receivedRepliesLi = Object.entries(this.perspective.replyAcks).map(
             ([eh, received]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -87,7 +87,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
 
-        const receiptsLi = Object.entries(this.perspective.allReceipts).map(
+        const receiptsLi = Object.entries(this.perspective.receipts).map(
             ([eh, receipt]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -115,7 +115,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const noticesLi = Object.entries(this.perspective.allNotices).map(
+        const noticesLi = Object.entries(this.perspective.notices).map(
             ([eh, _pair]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -125,7 +125,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
 
-        const repliesLi = Object.entries(this.perspective.allReplies).map(
+        const repliesLi = Object.entries(this.perspective.replies).map(
             ([eh, reply]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -134,7 +134,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const receivedLi = Object.entries(this.perspective.allReceivedParcels).map(
+        const receivedLi = Object.entries(this.perspective.parcelAcks).map(
             ([eh, received]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
@@ -195,7 +195,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
     /** */
     distrib2str(distribEh: EntryHashB64): string {
-        const pair = this.perspective.allDistributions[distribEh];
+        const pair = this.perspective.distributions[distribEh];
         if (!pair) {
             return "unknown";
         }
@@ -208,7 +208,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
     /** */
     notice2str(noticeEh: EntryHashB64): string {
-        const pair = this.perspective.allNotices[noticeEh];
+        const pair = this.perspective.notices[noticeEh];
         if (!pair) {
             return "unknown";
         }

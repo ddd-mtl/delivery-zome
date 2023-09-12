@@ -5,36 +5,6 @@ use hdi::prelude::*;
 use crate::*;
 
 
-/// Entry representing a received Manifest
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct DeliveryNotice {
-   pub distribution_eh: EntryHash,
-   pub summary: DeliverySummary,
-   pub sender: AgentPubKey,
-   pub sender_summary_signature: Signature,
-}
-
-
-/// Entry for confirming a delivery has been well received or refused by a recipient
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct DeliveryReceipt {
-   pub distribution_eh: EntryHash,
-   pub recipient: AgentPubKey,
-   pub recipient_signature: Signature,
-   //pub date_of_reception: u64,
-}
-
-
-/// Entry for confirming a delivery has been well received or refused by a recipient
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct DeliveryReply {
-   pub notice_eh: EntryHash,
-   pub has_accepted: bool,
-}
-
 /// Entry representing a request to send a Parcel to one or multiple recipients
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
@@ -45,23 +15,58 @@ pub struct Distribution {
 }
 
 
-/// Entry for confirming a manifest has been well received by a recipient
+/// Entry representing a received delivery request
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
-pub struct NoticeReceived {
+pub struct DeliveryNotice {
+   pub distribution_eh: EntryHash,
+   pub summary: DeliverySummary,
+   pub sender: AgentPubKey,
+   pub sender_summary_signature: Signature,
+}
+
+
+/// Entry for confirming a request has been well received by a recipient
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct NoticeAck {
    pub distribution_eh: EntryHash,
    pub recipient: AgentPubKey,
    pub recipient_summary_signature: Signature,
 }
 
 
-/// Entry representing a file chunk.
+/// Entry for accepting or refusing a delivery
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct NoticeReply {
+   pub notice_eh: EntryHash,
+   pub has_accepted: bool,
+}
+
+
+/// Entry for confirming a recipient's reply on the sender's side
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct ReplyAck {
+   pub distribution_eh: EntryHash,
+   pub recipient: AgentPubKey,
+   pub has_accepted: bool,
+   pub recipient_signature: Signature,
+   //pub date_of_reply: u64,
+}
+
+
+/// Entry representing a chunk a data (for a parcel)
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelChunk {
    pub data: String,
 }
 
+
+/// Entry for holding arbitrary data for a Parcel.
+/// Used as a universel way to send data.
 /// WARN : Change MANIFEST_ENTRY_NAME const when renaming
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
@@ -74,14 +79,40 @@ pub struct ParcelManifest {
 }
 
 
-/// Entry for confirming a delivery has been well received or refused by a recipient
+/// Entry for confirming a delivery has been well received or refused by the recipient.
 /// TODO: This should be a private link instead of an entry
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
-pub struct ParcelReceived {
+pub struct ReceptionProof {
    pub notice_eh: EntryHash,
    pub parcel_eh: EntryHash,
    //pub signed_parcel: SignedActionHashed, // signed Action of parcel's record
+}
+
+
+/// Entry for confirming a delivery has been well received or refused by the recipient.
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct ReceptionAck {
+   pub distribution_eh: EntryHash,
+   pub recipient: AgentPubKey,
+   pub recipient_signature: Signature,
+   //pub date_of_reception: u64,
+}
+
+
+/// A Public Entry representing an encrypted private Entry on the DHT
+/// waiting to be received by some recipient.
+/// The Entry is encrypted with the recipient's public encryption key.
+/// The recipient is the agentId where the entry is linked from.
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct PendingItem {
+   pub kind: ItemKind,
+   pub author: AgentPubKey,
+   pub author_signature: Signature, // Signature of the Entry's author
+   pub encrypted_data: XSalsa20Poly1305EncryptedData,
+   pub distribution_eh: EntryHash,
 }
 
 
@@ -89,9 +120,9 @@ pub struct ParcelReceived {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ItemKind {
    /// Sent by recipient
-   NoticeReceived,
-   DeliveryReply,
-   ParcelReceived,
+   NoticeAck,
+   NoticeReply,
+   ReceptionProof,
    /// Sent by sender
    DeliveryNotice,
    AppEntryBytes,
@@ -111,28 +142,5 @@ impl ItemKind {
    }
 }
 
-/// A Public Entry representing an encrypted private Entry on the DHT
-/// waiting to be received by some recipient.
-/// The Entry is encrypted with the recipient's public encryption key.
-/// The recipient is the agentId where the entry is linked from.
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct PendingItem {
-   pub kind: ItemKind,
-   pub author: AgentPubKey,
-   pub author_signature: Signature, // Signature of the Entry's author
-   pub encrypted_data: XSalsa20Poly1305EncryptedData,
-   pub distribution_eh: EntryHash,
-}
 
 
-/// Entry for confirming a delivery has been well received or refused by a recipient
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct ReplyReceived {
-   pub distribution_eh: EntryHash,
-   pub recipient: AgentPubKey,
-   pub has_accepted: bool,
-   pub recipient_signature: Signature,
-   //pub date_of_reply: u64,
-}

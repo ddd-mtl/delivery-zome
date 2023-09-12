@@ -29,8 +29,8 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    }
    let notice = maybe_notice.unwrap();
    let notice_eh = hash_entry(notice)?;
-   /// Must not already have a ParcelReceived
-   let maybe_receipt = query_ParcelReceived(ParcelReceivedQueryField::Notice(notice_eh.clone()))?;
+   /// Must not already have a ReceptionProof
+   let maybe_receipt = query_ReceptionProof(ReceptionProofQueryField::Notice(notice_eh.clone()))?;
    if let Some(receipt) = maybe_receipt {
       return Ok(Some(receipt.parcel_eh));
    }
@@ -40,15 +40,15 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
       trace!("check_manifest() ABORT - Missing chunks");
       return Ok(None);
    }
-   /// All chunks found. Create ParcelReceived
-   let received = ParcelReceived {
+   /// All chunks found. Create ReceptionProof
+   let received = ReceptionProof {
       notice_eh,
       parcel_eh: manifest_eh,
    };
    let received_eh = hash_entry(received.clone())?;
-   let _hh = create_entry_relaxed(DeliveryEntry::ParcelReceived(received.clone()))?;
+   let _hh = create_entry_relaxed(DeliveryEntry::ReceptionProof(received.clone()))?;
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::ReceivedParcel(received));
+   let res = emit_signal(&SignalProtocol::CreatedReceptionProof(received));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }

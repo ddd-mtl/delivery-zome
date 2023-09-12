@@ -98,16 +98,16 @@ pub fn pack_notice(notice: DeliveryNotice, recipient: AgentPubKey) -> ExternResu
    create_PendingItem::<DeliveryNotice>(ItemKind::DeliveryNotice, notice.clone(), notice.distribution_eh.clone(), recipient)
 }
 /// called from post_commit()
-pub fn pack_notice_received(ack: NoticeReceived, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<NoticeReceived>(ItemKind::NoticeReceived, ack.clone(), ack.distribution_eh.clone(), recipient)
+pub fn pack_notice_received(ack: NoticeAck, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<NoticeAck>(ItemKind::NoticeAck, ack.clone(), ack.distribution_eh.clone(), recipient)
 }
 /// called from post_commit()
-pub fn pack_reply(reply: DeliveryReply, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<DeliveryReply>(ItemKind::DeliveryReply, reply.clone(), distribution_eh, recipient)
+pub fn pack_reply(reply: NoticeReply, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<NoticeReply>(ItemKind::NoticeReply, reply.clone(), distribution_eh, recipient)
 }
 /// called from post_commit()
-pub fn pack_reception(reception: ParcelReceived, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<ParcelReceived>(ItemKind::ParcelReceived, reception, distribution_eh, recipient)
+pub fn pack_reception(reception: ReceptionProof, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<ReceptionProof>(ItemKind::ReceptionProof, reception, distribution_eh, recipient)
 }
 /// called from post_commit()
 pub fn pack_entry(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {

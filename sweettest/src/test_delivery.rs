@@ -98,7 +98,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    billy.drain_signals().await;
    billy.print_signals().await;
 
-   /// Check A's chain for a DeliveryReceipt
+   /// Check A's chain for a ReceptionAck
    alex.pull_and_wait_for_signal(SignalKind::ReceivedReceipt, &distribution_eh).await.expect("Should have received receipt");
    alex.print_chain(0).await;
    alex.print_signals().await;
@@ -154,7 +154,7 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    billy.drain_signals().await;
    billy.print_signals().await;
 
-   /// Check A's chain for a DeliveryReceipt
+   /// Check A's chain for a ReceptionAck
    alex.pull_and_wait_for_signal(SignalKind::ReceivedReceipt, &distribution_eh).await.expect("Should have received receipt");
    alex.print_chain(0).await;
    alex.print_signals().await;

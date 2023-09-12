@@ -23,21 +23,21 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         DeliveryProtocol::Item(pending_item) => {
             match pending_item.kind {
                 /// Sent by recipient
-                ItemKind::DeliveryReply => {
+                ItemKind::NoticeReply => {
                     let _ = receive_reply(dm.from, pending_item.clone())?;
                     let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
-                },
-                ItemKind::ParcelReceived => {
+                }
+                ItemKind::ReceptionProof => {
                     let _ = receive_reception(dm.from, pending_item.clone())?;
                     let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
-                },
-                ItemKind::NoticeReceived => {
+                }
+                ItemKind::NoticeAck => {
                     let _ = receive_ack(dm.from, pending_item.clone())?;
                     let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
-                },
+                }
                 /// Sent by sender
                 ItemKind::DeliveryNotice => {
                     let notice = receive_notice(dm.from, pending_item.clone())?;
@@ -164,39 +164,39 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<Deli
 
 /// Commit received DeliveryNotice from sender
 pub fn receive_ack(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
-    let maybe_ack: Option<NoticeReceived> = unpack_item(item, from.clone())?;
+    let maybe_ack: Option<NoticeAck> = unpack_item(item, from.clone())?;
     let Some(ack) = maybe_ack
-       else { return zome_error!("Failed deserializing NoticeReceived"); };
+       else { return zome_error!("Failed deserializing NoticeAck"); };
     // /// Check for duplicate DeliveryNotice
     // let maybe_already = find_notice(ack.summary.parcel_reference.entry_address())?;
     // if maybe_already.is_some() {
     //     return zome_error!("Already have this Notice");
     // }
     /// Commit DeliveryNotice
-    let _hh = create_entry_relaxed(DeliveryEntry::NoticeReceived(ack.clone()))?;
+    let _hh = create_entry_relaxed(DeliveryEntry::NoticeAck(ack.clone()))?;
     /// Done
     Ok(())
 }
 
 
-/// Create and commit a ReplyReceived from a DeliveryReply
+/// Create and commit a ReplyAck from a NoticeReply
 pub fn receive_reply(from: AgentPubKey, pending_item: PendingItem) -> ExternResult<()> {
-    let maybe_reply: Option<DeliveryReply> = unpack_item(pending_item.clone(), from.clone())?;
+    let maybe_reply: Option<NoticeReply> = unpack_item(pending_item.clone(), from.clone())?;
     if maybe_reply.is_none() {
-        return error("Failed deserializing DeliveryReply");
+        return error("Failed deserializing NoticeReply");
     }
-    /// Create ReplyReceived
-    let receipt = ReplyReceived {
+    /// Create ReplyAck
+    let receipt = ReplyAck {
         distribution_eh: pending_item.distribution_eh,
         recipient: from,
         recipient_signature: pending_item.author_signature,
         has_accepted: maybe_reply.unwrap().has_accepted,
         //date: now(),
     };
-    /// Commit ReplyReceived
-    let _hh = create_entry_relaxed(DeliveryEntry::ReplyReceived(receipt.clone()))?;
+    /// Commit ReplyAck
+    let _hh = create_entry_relaxed(DeliveryEntry::ReplyAck(receipt.clone()))?;
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedReply(receipt));
+    let res = emit_signal(&SignalProtocol::ReceivedReplyAck(receipt));
     if let Err(err) = res {
         error!("Emit signal failed: {}", err);
     }
@@ -205,19 +205,19 @@ pub fn receive_reply(from: AgentPubKey, pending_item: PendingItem) -> ExternResu
 }
 
 
-/// Create and commit a DeliveryReceipt from a ParcelReceived
+/// Create and commit a ReceptionAck from a ReceptionProof
 pub fn receive_reception(from: AgentPubKey, pending_item: PendingItem) -> ExternResult<()> {
     /// Make sure it unpacks correctly
-    let _received: Option<ParcelReceived> = unpack_item(pending_item.clone(),from.clone())?;
-    /// Create DeliveryReceipt
-    let receipt = DeliveryReceipt {
+    let _received: Option<ReceptionProof> = unpack_item(pending_item.clone(), from.clone())?;
+    /// Create ReceptionAck
+    let receipt = ReceptionAck {
         distribution_eh: pending_item.distribution_eh,
         recipient: from,
         recipient_signature: pending_item.author_signature,
         //date_of_response: now(),
     };
-    /// Commit DeliveryReceipt
-    let _hh = create_entry_relaxed(DeliveryEntry::DeliveryReceipt(receipt.clone()))?;
+    /// Commit ReceptionAck
+    let _hh = create_entry_relaxed(DeliveryEntry::ReceptionAck(receipt.clone()))?;
     /// Done
     Ok(())
 }

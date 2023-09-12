@@ -231,27 +231,6 @@ export enum DistributionStrategyType {
 	DhtOnly = 'DhtOnly',
 }
 
-/** Entry representing a received Manifest */
-export interface DeliveryNotice {
-  distribution_eh: EntryHash
-  summary: DeliverySummary
-  sender: AgentPubKey
-  sender_summary_signature: Signature
-}
-
-/** Entry for confirming a delivery has been well received or refused by a recipient */
-export interface DeliveryReceipt {
-  distribution_eh: EntryHash
-  recipient: AgentPubKey
-  recipient_signature: Signature
-}
-
-/** Entry for confirming a delivery has been well received or refused by a recipient */
-export interface DeliveryReply {
-  notice_eh: EntryHash
-  has_accepted: boolean
-}
-
 /** Entry representing a request to send a Parcel to one or multiple recipients */
 export interface Distribution {
   recipients: AgentPubKey[]
@@ -259,19 +238,45 @@ export interface Distribution {
   summary_signature: Signature
 }
 
-/** Entry for confirming a manifest has been well received by a recipient */
-export interface NoticeReceived {
+/** Entry representing a received delivery request */
+export interface DeliveryNotice {
+  distribution_eh: EntryHash
+  summary: DeliverySummary
+  sender: AgentPubKey
+  sender_summary_signature: Signature
+}
+
+/** Entry for confirming a request has been well received by a recipient */
+export interface NoticeAck {
   distribution_eh: EntryHash
   recipient: AgentPubKey
   recipient_summary_signature: Signature
 }
 
-/** Entry representing a file chunk. */
+/** Entry for accepting or refusing a delivery */
+export interface NoticeReply {
+  notice_eh: EntryHash
+  has_accepted: boolean
+}
+
+/** Entry for confirming a recipient's reply on the sender's side */
+export interface ReplyAck {
+  distribution_eh: EntryHash
+  recipient: AgentPubKey
+  has_accepted: boolean
+  recipient_signature: Signature
+}
+
+/** Entry representing a chunk a data (for a parcel) */
 export interface ParcelChunk {
   data: string
 }
 
-/** WARN : Change MANIFEST_ENTRY_NAME const when renaming */
+/**
+ * Entry for holding arbitrary data for a Parcel.
+ * Used as a universel way to send data.
+ * WARN : Change MANIFEST_ENTRY_NAME const when renaming
+ */
 export interface ParcelManifest {
   name: string
   custum_entry_type: string
@@ -280,24 +285,19 @@ export interface ParcelManifest {
 }
 
 /**
- * Entry for confirming a delivery has been well received or refused by a recipient
+ * Entry for confirming a delivery has been well received or refused by the recipient.
  * TODO: This should be a private link instead of an entry
  */
-export interface ParcelReceived {
+export interface ReceptionProof {
   notice_eh: EntryHash
   parcel_eh: EntryHash
 }
 
-/** List of structs that PendingItem can embed */
-export type ItemKind =
-  | {NoticeReceived: null} | {DeliveryReply: null} | {ParcelReceived: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
-export enum ItemKindType {
-	NoticeReceived = 'NoticeReceived',
-	DeliveryReply = 'DeliveryReply',
-	ParcelReceived = 'ParcelReceived',
-	DeliveryNotice = 'DeliveryNotice',
-	AppEntryBytes = 'AppEntryBytes',
-	ParcelChunk = 'ParcelChunk',
+/** Entry for confirming a delivery has been well received or refused by the recipient. */
+export interface ReceptionAck {
+  distribution_eh: EntryHash
+  recipient: AgentPubKey
+  recipient_signature: Signature
 }
 
 /**
@@ -314,12 +314,16 @@ export interface PendingItem {
   distribution_eh: EntryHash
 }
 
-/** Entry for confirming a delivery has been well received or refused by a recipient */
-export interface ReplyReceived {
-  distribution_eh: EntryHash
-  recipient: AgentPubKey
-  has_accepted: boolean
-  recipient_signature: Signature
+/** List of structs that PendingItem can embed */
+export type ItemKind =
+  | {NoticeAck: null} | {NoticeReply: null} | {ReceptionProof: null} | {DeliveryNotice: null} | {AppEntryBytes: null} | {ParcelChunk: null};
+export enum ItemKindType {
+	NoticeAck = 'NoticeAck',
+	NoticeReply = 'NoticeReply',
+	ReceptionProof = 'ReceptionProof',
+	DeliveryNotice = 'DeliveryNotice',
+	AppEntryBytes = 'AppEntryBytes',
+	ParcelChunk = 'ParcelChunk',
 }
 
 export interface DistributeParcelInput {
@@ -407,15 +411,15 @@ export enum DeliveryEntryType {
 }
 export type DeliveryEntryVariantPubEncKey = {PubEncKey: PubEncKey}
 export type DeliveryEntryVariantDeliveryNotice = {DeliveryNotice: DeliveryNotice}
-export type DeliveryEntryVariantDeliveryReceipt = {DeliveryReceipt: DeliveryReceipt}
-export type DeliveryEntryVariantDeliveryReply = {DeliveryReply: DeliveryReply}
+export type DeliveryEntryVariantDeliveryReceipt = {DeliveryReceipt: ReceptionAck}
+export type DeliveryEntryVariantDeliveryReply = {DeliveryReply: NoticeReply}
 export type DeliveryEntryVariantDistribution = {Distribution: Distribution}
 export type DeliveryEntryVariantParcelChunk = {ParcelChunk: ParcelChunk}
 export type DeliveryEntryVariantParcelManifest = {ParcelManifest: ParcelManifest}
-export type DeliveryEntryVariantParcelReceived = {ParcelReceived: ParcelReceived}
-export type DeliveryEntryVariantNoticeReceived = {NoticeReceived: NoticeReceived}
+export type DeliveryEntryVariantParcelReceived = {ParcelReceived: ReceptionProof}
+export type DeliveryEntryVariantNoticeReceived = {NoticeReceived: NoticeAck}
 export type DeliveryEntryVariantPendingItem = {PendingItem: PendingItem}
-export type DeliveryEntryVariantReplyReceived = {ReplyReceived: ReplyReceived}
+export type DeliveryEntryVariantReplyReceived = {ReplyReceived: ReplyAck}
 export type DeliveryEntry = 
  | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantDeliveryReceipt | DeliveryEntryVariantDeliveryReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantParcelChunk | DeliveryEntryVariantParcelManifest | DeliveryEntryVariantParcelReceived | DeliveryEntryVariantNoticeReceived | DeliveryEntryVariantPendingItem | DeliveryEntryVariantReplyReceived;
 
@@ -430,6 +434,7 @@ export interface DirectMessage {
   msg: DeliveryProtocol
 }
 
+/** Protocol for sending data between agents */
 export enum DeliveryProtocolType {
 	Failure = 'Failure',
 	Success = 'Success',
@@ -453,6 +458,11 @@ export type DeliveryProtocolVariantPong = {Pong: null}
 export type DeliveryProtocol = 
  | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
 
+export interface FullDistributionState {
+  distribution_state: DistributionState
+  delivery_states: DeliveryState[]
+}
+
 export const COMMIT_PARCEL_CALLBACK_NAME = "commit_parcel";
 
 /**  */
@@ -465,27 +475,28 @@ export interface CommitParcelInput {
 }
 
 export type SignalKind =
-  | {ReceivedNotice: null} | {ReceivedReply: null} | {ReceivedParcel: null} | {ReceivedReceipt: null};
+  | {ReceivedNotice: null} | {ReceivedReplyAck: null} | {ReceivedReceptionProof: null} | {ReceivedReceptionAck: null};
 export enum SignalKindType {
 	ReceivedNotice = 'ReceivedNotice',
-	ReceivedReply = 'ReceivedReply',
-	ReceivedParcel = 'ReceivedParcel',
-	ReceivedReceipt = 'ReceivedReceipt',
+	ReceivedReplyAck = 'ReceivedReplyAck',
+	ReceivedReceptionProof = 'ReceivedReceptionProof',
+	ReceivedReceptionAck = 'ReceivedReceptionAck',
 }
 
+/** Protocol for sending data to the agent's UI */
 export enum SignalProtocolType {
 	ReceivedNotice = 'ReceivedNotice',
-	ReceivedAck = 'ReceivedAck',
-	ReceivedReply = 'ReceivedReply',
-	ReceivedParcel = 'ReceivedParcel',
-	ReceivedReceipt = 'ReceivedReceipt',
-	DistributionCreated = 'DistributionCreated',
+	ReceivedNoticeAck = 'ReceivedNoticeAck',
+	ReceivedReplyAck = 'ReceivedReplyAck',
+	ReceivedReceptionProof = 'ReceivedReceptionProof',
+	ReceivedReceptionAck = 'ReceivedReceptionAck',
+	CreatedDistribution = 'CreatedDistribution',
 }
 export type SignalProtocolVariantReceivedNotice = {ReceivedNotice: [EntryHash, Timestamp, DeliveryNotice]}
-export type SignalProtocolVariantReceivedAck = {ReceivedAck: NoticeReceived}
-export type SignalProtocolVariantReceivedReply = {ReceivedReply: ReplyReceived}
-export type SignalProtocolVariantReceivedParcel = {ReceivedParcel: ParcelReceived}
-export type SignalProtocolVariantReceivedReceipt = {ReceivedReceipt: DeliveryReceipt}
-export type SignalProtocolVariantDistributionCreated = {DistributionCreated: [EntryHash, Timestamp, Distribution]}
+export type SignalProtocolVariantReceivedNoticeAck = {ReceivedNoticeAck: NoticeAck}
+export type SignalProtocolVariantReceivedReplyAck = {ReceivedReplyAck: ReplyAck}
+export type SignalProtocolVariantReceivedReceptionProof = {ReceivedReceptionProof: ReceptionProof}
+export type SignalProtocolVariantReceivedReceptionAck = {ReceivedReceptionAck: ReceptionAck}
+export type SignalProtocolVariantCreatedDistribution = {CreatedDistribution: [EntryHash, Timestamp, Distribution]}
 export type SignalProtocol = 
- | SignalProtocolVariantReceivedNotice | SignalProtocolVariantReceivedAck | SignalProtocolVariantReceivedReply | SignalProtocolVariantReceivedParcel | SignalProtocolVariantReceivedReceipt | SignalProtocolVariantDistributionCreated;
+ | SignalProtocolVariantReceivedNotice | SignalProtocolVariantReceivedNoticeAck | SignalProtocolVariantReceivedReplyAck | SignalProtocolVariantReceivedReceptionProof | SignalProtocolVariantReceivedReceptionAck | SignalProtocolVariantCreatedDistribution;

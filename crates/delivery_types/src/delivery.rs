@@ -32,13 +32,13 @@ pub enum DeliveryState {
    PendingNotice,
    /// NoticeDelivered committed (DeleteLink entry found)
    NoticeDelivered,
-   /// Negative ReplyReceived committed
+   /// Negative ReplyAck committed
    ParcelRefused,
-   /// positve ReplyReceived committed
+   /// Positve ReplyAck committed
    ParcelAccepted,
    /// There is a link to a PendingItem entry holding the Parcel and inbox link is alive
    PendingParcel,
-   /// DeliveryReceipt committed (DeleteLink entry found)
+   /// ReceptionAck committed (DeleteLink entry found)
    ParcelDelivered,
 }
 
@@ -68,7 +68,7 @@ pub enum NoticeState {
    Accepted,
    /// ReceptionConfirmation(no) committed
    Refused,
-   /// ParcelReceived committed
+   /// ReceptionProof committed
    Received,
    /// ??? Parcel deleted ???
    Deleted,

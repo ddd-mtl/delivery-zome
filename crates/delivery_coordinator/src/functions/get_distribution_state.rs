@@ -5,42 +5,57 @@ use zome_delivery_types::*;
 use crate::*;
 
 
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct FullDistributionState {
+   distribution_state: DistributionState,
+   delivery_states: Vec<DeliveryState>, // In the order of the distribution's recipients
+}
+
+
 ///
 #[hdk_extern]
-pub fn get_distribution_state(distribution_eh: EntryHash) -> ExternResult<DistributionState> {
+pub fn get_distribution_state(distribution_eh: EntryHash) -> ExternResult<FullDistributionState> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("distribution_eh: {}", distribution_eh.clone());
    let distribution: Distribution = get_typed_from_eh(distribution_eh.clone())?;
    /// Get delivery state for each recipient
    //let mut deliveries: HashMap<AgentPubKey, DeliveryState> = HashMap::new();
-   let mut deliveries: Vec<DeliveryState> = Vec::new();
+   let mut delivery_states: Vec<DeliveryState> = Vec::new();
    for recipient in distribution.recipients {
       let state = get_delivery_state(GetDeliveryStateInput{ distribution_eh: distribution_eh.clone(), recipient})?;
-      deliveries.push( state);
+      delivery_states.push( state);
    }
+   let distribution_state = determine_distribution_state(&delivery_states);
+   Ok(FullDistributionState {distribution_state, delivery_states})
+}
+
+
+///
+fn determine_distribution_state(delivery_states: &Vec<DeliveryState>) -> DistributionState {
    /// - Determine distribution state
    /// Return 'Unsent' if at least one delivery is unsent
-   if deliveries.contains(&DeliveryState::Unsent) {
-      return Ok(DistributionState::Unsent);
+   if delivery_states.contains(&DeliveryState::Unsent) {
+      return DistributionState::Unsent;
    }
    /// Return 'AllNoticesSent' if at least one Notice is Pending
-   if deliveries.contains(&DeliveryState::PendingNotice) {
-      return Ok(DistributionState::AllNoticesSent);
+   if delivery_states.contains(&DeliveryState::PendingNotice) {
+      return DistributionState::AllNoticesSent;
    }
    /// Return 'AllNoticeReceived' if at least one reply is missing
-   if deliveries.contains(&DeliveryState::NoticeDelivered) {
-      return Ok(DistributionState::AllNoticeReceived);
+   if delivery_states.contains(&DeliveryState::NoticeDelivered) {
+      return DistributionState::AllNoticeReceived;
    }
    /// Return 'AllRepliesReceived' if at least one ParcelDelivered is missing
-   if deliveries.contains(&DeliveryState::ParcelAccepted) {
-      return Ok(DistributionState::AllRepliesReceived);
+   if delivery_states.contains(&DeliveryState::ParcelAccepted) {
+      return DistributionState::AllRepliesReceived;
    }
    /// Return 'AllRepliesReceived' if at least one ParcelDelivered is missing
-   if deliveries.contains(&DeliveryState::PendingParcel) {
-      return Ok(DistributionState::AllRepliesReceived);
+   if delivery_states.contains(&DeliveryState::PendingParcel) {
+      return DistributionState::AllRepliesReceived;
    }
    /// All accepted should have been received
-   Ok(DistributionState::AllAcceptedParcelsReceived)
+   DistributionState::AllAcceptedParcelsReceived
 }
 
 

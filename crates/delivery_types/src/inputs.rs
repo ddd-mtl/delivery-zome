@@ -42,14 +42,14 @@ pub enum DeliveryNoticeQueryField {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub enum ParcelReceivedQueryField {
+pub enum ReceptionProofQueryField {
    Notice(EntryHash),
    Parcel(EntryHash)
 }
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub enum NoticeReceivedQueryField {
+pub enum NoticeAckQueryField {
    Recipient(AgentPubKey),
    Distribution(EntryHash)
 }

@@ -31,8 +31,8 @@ pub fn get_notice(distribution_eh: EntryHash) -> ExternResult<Option<GetNoticeOu
 pub fn get_parcel_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("get_parcel_notice()");
-   let field = ParcelReceivedQueryField::Parcel(parcel_eh.clone());
-   let maybe_receipt = query_ParcelReceived(field)?;
+   let field = ReceptionProofQueryField::Parcel(parcel_eh.clone());
+   let maybe_receipt = query_ReceptionProof(field)?;
    if maybe_receipt.is_none() {
       return Ok(None)
    }

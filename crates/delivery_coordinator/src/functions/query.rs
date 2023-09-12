@@ -87,10 +87,10 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 
 ///
 #[hdk_extern]
-pub fn query_all_NoticeReceived(_: ()) -> ExternResult<Vec<(EntryHash, NoticeReceived)>> {
+pub fn query_all_NoticeAck(_: ()) -> ExternResult<Vec<(EntryHash, NoticeAck)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
-   let tuples = get_all_typed_local::<NoticeReceived>(DeliveryEntryTypes::NoticeReceived.try_into().unwrap())?;
+   let tuples = get_all_typed_local::<NoticeAck>(DeliveryEntryTypes::NoticeAck.try_into().unwrap())?;
    let res = tuples.into_iter()
                    .map(|(_, create, typed)| (create.entry_hash, typed))
                    .collect();
@@ -99,26 +99,26 @@ pub fn query_all_NoticeReceived(_: ()) -> ExternResult<Vec<(EntryHash, NoticeRec
 }
 
 
-/// Find NoticeReceived with field with given value
+/// Find NoticeAck with field with given value
 #[hdk_extern]
-pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec<NoticeReceived>> {
-   //debug!("query_NoticeReceived() CALLED with {:?}", field);
+pub fn query_NoticeAck(field: NoticeAckQueryField) -> ExternResult<Vec<NoticeAck>> {
+   //debug!("query_NoticeAck() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Get all Create NoticeReceived Elements with query
-   let tuples = get_all_typed_local::<NoticeReceived>(DeliveryEntryTypes::NoticeReceived.try_into().unwrap())?;
+   /// Get all Create NoticeAck Elements with query
+   let tuples = get_all_typed_local::<NoticeAck>(DeliveryEntryTypes::NoticeAck.try_into().unwrap())?;
    //debug!(" - tuples len: {:?}", tuples.len());
-   debug!("*** query_NoticeReceived() tuples count: {}", tuples.len());
+   debug!("*** query_NoticeAck() tuples count: {}", tuples.len());
    /// Search through query result
    let mut res = Vec::new();
    match field {
-      NoticeReceivedQueryField::Recipient(agent) => {
+      NoticeAckQueryField::Recipient(agent) => {
          for (_, _, received) in tuples {
             if received.recipient == agent {
                res.push(received);
             }
          }
       },
-      NoticeReceivedQueryField::Distribution(eh) => {
+      NoticeAckQueryField::Distribution(eh) => {
          for (_, _, received) in tuples {
             if received.distribution_eh == eh {
                res.push(received);
@@ -126,7 +126,7 @@ pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec
          }
       },
    }
-   debug!("*** query_NoticeReceived() res count: {}", res.len());
+   debug!("*** query_NoticeAck() res count: {}", res.len());
    /// Done
    Ok(res)
 }
@@ -134,10 +134,10 @@ pub fn query_NoticeReceived(field: NoticeReceivedQueryField) -> ExternResult<Vec
 
 ///
 #[hdk_extern]
-pub fn query_all_DeliveryReply(_: ()) -> ExternResult<Vec<(EntryHash, DeliveryReply)>> {
+pub fn query_all_NoticeReply(_: ()) -> ExternResult<Vec<(EntryHash, NoticeReply)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
-   let tuples = get_all_typed_local::<DeliveryReply>(DeliveryEntryTypes::DeliveryReply.try_into().unwrap())?;
+   let tuples = get_all_typed_local::<NoticeReply>(DeliveryEntryTypes::NoticeReply.try_into().unwrap())?;
    let res = tuples.into_iter()
        .map(|(_, create, typed)| (create.entry_hash, typed))
        .collect();
@@ -146,11 +146,11 @@ pub fn query_all_DeliveryReply(_: ()) -> ExternResult<Vec<(EntryHash, DeliveryRe
 }
 
 
-///Find DeliveryReply with given notice_eh value
-pub fn query_DeliveryReply(notice_eh: EntryHash) -> ExternResult<Option<DeliveryReply>> {
-   //debug!("*** query_DeliveryReply() CALLED with {:?}", notice_eh);
-   /// Get all Create DeliveryReply Elements with query
-   let tuples = get_all_typed_local::<DeliveryReply>(DeliveryEntryTypes::DeliveryReply.try_into().unwrap())?;
+///Find NoticeReply with given notice_eh value
+pub fn query_NoticeReply(notice_eh: EntryHash) -> ExternResult<Option<NoticeReply>> {
+   //debug!("*** query_NoticeReply() CALLED with {:?}", notice_eh);
+   /// Get all Create NoticeReply Elements with query
+   let tuples = get_all_typed_local::<NoticeReply>(DeliveryEntryTypes::NoticeReply.try_into().unwrap())?;
    if tuples.len() > 1 {
       error!("More than one reply found for DeliveryNotice {:?}", notice_eh);
    }
@@ -165,10 +165,10 @@ pub fn query_DeliveryReply(notice_eh: EntryHash) -> ExternResult<Option<Delivery
 
 ///
 #[hdk_extern]
-pub fn query_all_ReplyReceived(_: ()) -> ExternResult<Vec<(EntryHash, ReplyReceived)>> {
+pub fn query_all_ReplyAck(_: ()) -> ExternResult<Vec<(EntryHash, ReplyAck)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
-   let tuples = get_all_typed_local::<ReplyReceived>(DeliveryEntryTypes::ReplyReceived.try_into().unwrap())?;
+   let tuples = get_all_typed_local::<ReplyAck>(DeliveryEntryTypes::ReplyAck.try_into().unwrap())?;
    let res = tuples.into_iter()
                    .map(|(_, create, typed)| (create.entry_hash, typed))
                    .collect();
@@ -177,14 +177,14 @@ pub fn query_all_ReplyReceived(_: ()) -> ExternResult<Vec<(EntryHash, ReplyRecei
 }
 
 
-///Find ReplyReceived with field with given value
-pub fn query_ReplyReceived(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
-   -> ExternResult<Vec<ReplyReceived>> {
+///Find ReplyAck with field with given value
+pub fn query_ReplyAck(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
+   -> ExternResult<Vec<ReplyAck>> {
    //std::panic::set_hook(Box::new(zome_panic_hook));
-   //debug!("*** query_ReplyReceived() CALLED");
-   /// Get all Create DeliveryReceipt Elements with query
-   let tuples = get_all_typed_local::<ReplyReceived>(DeliveryEntryTypes::ReplyReceived.try_into().unwrap())?;
-   let mut typeds: Vec<ReplyReceived> = tuples.into_iter().map(|(_,_,x)| x).collect();
+   //debug!("*** query_ReplyAck() CALLED");
+   /// Get all Create Elements with query
+   let tuples = get_all_typed_local::<ReplyAck>(DeliveryEntryTypes::ReplyAck.try_into().unwrap())?;
+   let mut typeds: Vec<ReplyAck> = tuples.into_iter().map(|(_,_,x)| x).collect();
    /// Search through query result
    if let Some(distrib_eh) = maybe_distribution {
       typeds.retain(|r| r.distribution_eh == distrib_eh);
@@ -199,11 +199,11 @@ pub fn query_ReplyReceived(maybe_distribution: Option<EntryHash>, maybe_recipien
 
 ///
 #[hdk_extern]
-pub fn query_all_ParcelReceived(_: ()) -> ExternResult<Vec<(EntryHash, ParcelReceived)>> {
-   //debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
+pub fn query_all_ReceptionProof(_: ()) -> ExternResult<Vec<(EntryHash, ReceptionProof)>> {
+   //debug!("*** query_ReceptionProof() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
-   let tuples = get_all_typed_local::<ParcelReceived>(DeliveryEntryTypes::ParcelReceived.try_into().unwrap())?;
+   let tuples = get_all_typed_local::<ReceptionProof>(DeliveryEntryTypes::ReceptionProof.try_into().unwrap())?;
    let res = tuples.into_iter()
                    .map(|(_, create, typed)| (create.entry_hash, typed))
                    .collect();
@@ -212,26 +212,26 @@ pub fn query_all_ParcelReceived(_: ()) -> ExternResult<Vec<(EntryHash, ParcelRec
 }
 
 
-///Find ParcelReceived with field with given value
+///Find ReceptionProof with field with given value
 #[hdk_extern]
-pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Option<ParcelReceived>> {
-   //debug!("*** query_ParcelReceived() CALLED with {:?}", field);
+pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Option<ReceptionProof>> {
+   //debug!("*** query_ReceptionProof() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Get all Create ParcelReceived Elements with query
-   let tuples = get_all_typed_local::<ParcelReceived>(DeliveryEntryTypes::ParcelReceived.try_into().unwrap())?;
-   //debug!("*** query_ParcelReceived() CALLED with {:?}", field);
+   /// Get all Create ReceptionProof Elements with query
+   let tuples = get_all_typed_local::<ReceptionProof>(DeliveryEntryTypes::ReceptionProof.try_into().unwrap())?;
+   //debug!("*** query_ReceptionProof() CALLED with {:?}", field);
    /// Search through query result
    match field {
-      ParcelReceivedQueryField::Notice(eh) => {
+      ReceptionProofQueryField::Notice(eh) => {
          for (_, _, receipt) in tuples {
             if receipt.notice_eh == eh {
                return Ok(Some(receipt));
             }
          }
       },
-      ParcelReceivedQueryField::Parcel(eh) => {
+      ReceptionProofQueryField::Parcel(eh) => {
          for (_, _, receipt) in tuples {
-            //debug!("*** query_ParcelReceived() Parcel  receipt.parcel_eh {:?}", receipt.parcel_eh );
+            //debug!("*** query_ReceptionProof() Parcel  receipt.parcel_eh {:?}", receipt.parcel_eh);
             if receipt.parcel_eh == eh {
                return Ok(Some(receipt));
             }
@@ -245,10 +245,10 @@ pub fn query_ParcelReceived(field: ParcelReceivedQueryField) -> ExternResult<Opt
 
 ///
 #[hdk_extern]
-pub fn query_all_DeliveryReceipt(_: ()) -> ExternResult<Vec<(EntryHash, DeliveryReceipt)>> {
+pub fn query_all_ReceptionAck(_: ()) -> ExternResult<Vec<(EntryHash, ReceptionAck)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Get all Create DeliveryNotice Elements with query
-   let tuples = get_all_typed_local::<DeliveryReceipt>(DeliveryEntryTypes::DeliveryReceipt.try_into().unwrap())?;
+   /// Get all Create ReceptionAck Elements with query
+   let tuples = get_all_typed_local::<ReceptionAck>(DeliveryEntryTypes::ReceptionAck.try_into().unwrap())?;
    let res = tuples.into_iter()
                    .map(|(_, create, typed)| (create.entry_hash, typed))
                    .collect();
@@ -257,14 +257,14 @@ pub fn query_all_DeliveryReceipt(_: ()) -> ExternResult<Vec<(EntryHash, Delivery
 }
 
 
-/// Find NoticeReceived with field with given value
-pub fn query_DeliveryReceipt(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
-   -> ExternResult<Vec<DeliveryReceipt>> {
+/// Find ReceptionAck with field with given value
+pub fn query_ReceptionAck(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
+   -> ExternResult<Vec<ReceptionAck>> {
    //std::panic::set_hook(Box::new(zome_panic_hook));
-   //debug!("*** query_DeliveryReceipt() CALLED");
-   /// Get all Create DeliveryReceipt Elements with query
-   let tuples = get_all_typed_local::<DeliveryReceipt>(DeliveryEntryTypes::DeliveryReceipt.try_into().unwrap())?;
-   let mut receipts: Vec<DeliveryReceipt> = tuples.into_iter().map(|(_,_,x)| x).collect();
+   //debug!("*** query_ReceptionAck() CALLED");
+   /// Get all Create ReceptionAck Elements with query
+   let tuples = get_all_typed_local::<ReceptionAck>(DeliveryEntryTypes::ReceptionAck.try_into().unwrap())?;
+   let mut receipts: Vec<ReceptionAck> = tuples.into_iter().map(|(_,_,x)| x).collect();
    //debug!("*** query_DeliveryReceipt() receipts count: {}", receipts.len());
    /// Search through query result
    if let Some(distrib_eh) = maybe_distribution {

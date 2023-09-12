@@ -12,22 +12,22 @@ pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<Delivery
    debug!("recipient: {} || distrib: {}", input.recipient, input.distribution_eh);
    /// Make sure input is correct
    let _distribution: Distribution = get_typed_from_eh(input.distribution_eh.clone())?;
-   /// Look for DeliveryReceipt
-   let receipts = query_DeliveryReceipt(
+   /// Look for ReceptionAck
+   let receipts = query_ReceptionAck(
       Some(input.distribution_eh.clone()),
       Some(input.recipient.clone()),
    )?;
    if !receipts.is_empty() {
-      debug!("DeliveryReceipt found");
+      debug!("ReceptionAck found");
       return Ok(DeliveryState::ParcelDelivered);
    }
-   /// Look for ReplyReceived
-   let replies = query_ReplyReceived(
+   /// Look for ReplyAck
+   let replies = query_ReplyAck(
       Some(input.distribution_eh.clone()),
       Some(input.recipient.clone()),
    )?;
    if !replies.is_empty() {
-      debug!("ReplyReceived found: {}", replies[0].has_accepted);
+      debug!("ReplyAck found: {}", replies[0].has_accepted);
       if !replies[0].has_accepted {
          return Ok(DeliveryState::ParcelRefused);
       }
@@ -39,8 +39,8 @@ pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<Delivery
       }
       return Ok(DeliveryState::ParcelAccepted);
    }
-   /// Look for NoticeReceived
-   let mut receiveds = query_NoticeReceived(NoticeReceivedQueryField::Distribution(input.distribution_eh.clone()))?;
+   /// Look for NoticeAck
+   let mut receiveds = query_NoticeAck(NoticeAckQueryField::Distribution(input.distribution_eh.clone()))?;
    debug!("receiveds len1: {}", receiveds.len());
    receiveds.retain(|received| &received.recipient == &input.recipient);
    debug!("receiveds len2: {}", receiveds.len());

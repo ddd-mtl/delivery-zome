@@ -27,6 +27,7 @@ pub fn failure_err(reason: &str, err: WasmError) -> DeliveryProtocol {
 }
 
 
+///  Protocol for sending data between agents
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, SerializedBytes)]
 pub enum DeliveryProtocol {
     Failure(String),

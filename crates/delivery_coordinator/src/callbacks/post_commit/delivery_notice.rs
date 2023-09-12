@@ -9,16 +9,16 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, eh: &E
     debug!("post_commit_DeliveryNotice() {:?}", eh);
     let me = agent_info()?.agent_latest_pubkey;
     let notice = DeliveryNotice::try_from(entry)?;
-    /// Create NoticeReceived and pack it
+    /// Create NoticeAck and pack it
     let signature = sign(me.clone(), notice.summary.clone())?;
-    let ack: NoticeReceived = NoticeReceived {
+    let ack: NoticeAck = NoticeAck {
         distribution_eh: notice.distribution_eh.clone(),
         recipient: me,
         recipient_summary_signature: signature,
         //date_of_reception: sys_time()?,
     };
     let pending_item = pack_notice_received(ack, notice.sender.clone())?;
-    /// Send NoticeReceived to sender
+    /// Send NoticeAck to sender
     let res = send_item(
         notice.sender.clone(),
         pending_item,

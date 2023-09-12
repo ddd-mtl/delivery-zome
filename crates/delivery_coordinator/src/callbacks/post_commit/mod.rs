@@ -1,23 +1,23 @@
 mod distribution;
-mod delivery_reply;
+mod notice_reply;
 mod parcel_chunk;
 mod parcel_manifest;
-mod parcel_received;
-mod reply_received;
+mod reception_proof;
+mod reply_ack;
 mod delivery_notice;
-mod notice_received;
-mod delivery_receipt;
+mod notice_ack;
+mod reception_ack;
 
 
 pub use delivery_notice::*;
 pub use distribution::*;
-pub use delivery_reply::*;
+pub use notice_reply::*;
 pub use parcel_chunk::*;
 pub use parcel_manifest::*;
-pub use parcel_received::*;
-pub use reply_received::*;
-pub use notice_received::*;
-pub use delivery_receipt::*;
+pub use reception_proof::*;
+pub use reply_ack::*;
+pub use notice_ack::*;
+pub use reception_ack::*;
 
 //----------------------------------------------------------------------------------------
 
@@ -79,16 +79,16 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
       /// Send/Receive/Ack Notice
       DeliveryEntryTypes::Distribution => post_commit_Distribution(sah, entry, eh),
       DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(sah, entry, eh),
-      DeliveryEntryTypes::NoticeReceived => post_commit_NoticeReceived(entry, eh),
+      DeliveryEntryTypes::NoticeAck => post_commit_NoticeAck(entry, eh),
       /// Send/Receive Reply
-      DeliveryEntryTypes::DeliveryReply => post_commit_DeliveryReply(entry, eh),
-      DeliveryEntryTypes::ReplyReceived => post_commit_ReplyReceived(entry, eh),
+      DeliveryEntryTypes::NoticeReply => post_commit_NoticeReply(entry, eh),
+      DeliveryEntryTypes::ReplyAck => post_commit_ReplyAck(entry, eh),
       /// Send/Receive Parcel
       DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(entry, eh),
       DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(entry, eh),
       /// Send/Receive Receipt
-      DeliveryEntryTypes::ParcelReceived => post_commit_ParcelReceived(entry, eh),
-      DeliveryEntryTypes::DeliveryReceipt => post_commit_DeliveryReceipt(entry, eh),
+      DeliveryEntryTypes::ReceptionProof => post_commit_ReceptionProof(entry, eh),
+      DeliveryEntryTypes::ReceptionAck => post_commit_ReceptionAck(entry, eh),
       ///
       _ => Ok(()),
    }
