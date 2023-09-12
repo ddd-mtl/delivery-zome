@@ -7,6 +7,7 @@ mod reply_ack;
 mod delivery_notice;
 mod notice_ack;
 mod reception_ack;
+mod pending_item;
 
 
 pub use delivery_notice::*;
@@ -18,6 +19,8 @@ pub use reception_proof::*;
 pub use reply_ack::*;
 pub use notice_ack::*;
 pub use reception_ack::*;
+pub use pending_item::*;
+
 
 //----------------------------------------------------------------------------------------
 
@@ -86,9 +89,11 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
       /// Send/Receive Parcel
       DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(entry, eh),
       DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(entry, eh),
-      /// Send/Receive Receipt
+      /// Send/Receive ReceptionProof
       DeliveryEntryTypes::ReceptionProof => post_commit_ReceptionProof(entry, eh),
       DeliveryEntryTypes::ReceptionAck => post_commit_ReceptionAck(entry, eh),
+      /// Other
+      DeliveryEntryTypes::ParcelManifest => post_commit_PendingItem(entry, eh),
       ///
       _ => Ok(()),
    }

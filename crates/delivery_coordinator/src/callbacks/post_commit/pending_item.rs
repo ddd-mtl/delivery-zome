@@ -4,10 +4,10 @@ use crate::*;
 
 
 ///
-pub fn post_commit_ReceptionAck(entry: Entry, _eh: &EntryHash) -> ExternResult<()> {
-   let receipt = ReceptionAck::try_from(entry)?;
+pub fn post_commit_PendingItem(entry: Entry, _eh: &EntryHash) -> ExternResult<()> {
+   let item = PendingItem::try_from(entry)?;
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::NewReceptionAck(receipt));
+   let res = emit_signal(&SignalProtocol::NewPendingItem(item));
    if let Err(err) = res.clone() {
       error!("Emit signal failed: {}", err);
    } else {

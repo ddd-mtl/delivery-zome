@@ -17,7 +17,7 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, eh: &E
         recipient_summary_signature: signature,
         //date_of_reception: sys_time()?,
     };
-    let pending_item = pack_notice_received(ack, notice.sender.clone())?;
+    let pending_item = pack_notice_ack(ack, notice.sender.clone())?;
     /// Send NoticeAck to sender
     let res = send_item(
         notice.sender.clone(),
@@ -28,7 +28,7 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, eh: &E
         warn!("send_item() during DeliveryNotice::post_commit() failed: {}", e);
     }
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedNotice((eh.to_owned(), sah.hashed.content.timestamp(), notice)));
+    let res = emit_signal(&SignalProtocol::NewNotice((eh.to_owned(), sah.hashed.content.timestamp(), notice)));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {

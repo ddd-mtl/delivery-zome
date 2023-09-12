@@ -195,11 +195,6 @@ pub fn receive_reply(from: AgentPubKey, pending_item: PendingItem) -> ExternResu
     };
     /// Commit ReplyAck
     let _hh = create_entry_relaxed(DeliveryEntry::ReplyAck(receipt.clone()))?;
-    /// Emit Signal
-    let res = emit_signal(&SignalProtocol::ReceivedReplyAck(receipt));
-    if let Err(err) = res {
-        error!("Emit signal failed: {}", err);
-    }
     /// Done
     Ok(())
 }

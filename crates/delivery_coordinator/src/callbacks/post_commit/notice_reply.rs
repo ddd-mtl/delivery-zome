@@ -9,8 +9,14 @@ use crate::*;
 /// Once committed, send reply to sender
 pub fn post_commit_NoticeReply(entry: Entry, reply_eh: &EntryHash) -> ExternResult<()> {
     debug!("post_commit_NoticeReply() {:?}", reply_eh);
-    let delivery_reply = NoticeReply::try_from(entry)?;
-    let _ = send_reply(delivery_reply)?;
+    let reply = NoticeReply::try_from(entry)?;
+    /// Emit Signal
+    let res = emit_signal(&SignalProtocol::NewReply(reply.clone()));
+    if let Err(err) = res {
+        error!("Emit signal failed: {}", err);
+    }
+    /// Send reply to sender
+    let _ = send_reply(reply)?;
     Ok(())
 }
 

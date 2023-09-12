@@ -6,17 +6,17 @@ use crate::*;
 ///
 pub fn post_commit_ReceptionProof(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ReceptionProof() {:?}", eh);
-   let parcel_received = ReceptionProof::try_from(entry)?;
+   let reception_proof = ReceptionProof::try_from(entry)?;
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::CreatedReceptionProof(parcel_received.clone()));
+   let res = emit_signal(&SignalProtocol::NewReceptionProof(reception_proof.clone()));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }
    /// Get DeliveryNotice
-   let notice: DeliveryNotice = get_typed_from_eh(parcel_received.notice_eh.clone())?;
+   let notice: DeliveryNotice = get_typed_from_eh(reception_proof.notice_eh.clone())?;
    /// Create PendingItem
-   let pending_item = pack_reception(
-      parcel_received.clone(),
+   let pending_item = pack_reception_proof(
+      reception_proof.clone(),
       notice.distribution_eh.clone(),
       notice.sender.clone(),
    )?;

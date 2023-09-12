@@ -125,9 +125,8 @@ pub enum ItemKind {
    ReceptionProof,
    /// Sent by sender
    DeliveryNotice,
-   AppEntryBytes,
    ParcelChunk,
-   // ParcelManifest
+   AppEntryBytes, // ParcelManifest is sent as AppEntryBytes
 }
 
 impl ItemKind {

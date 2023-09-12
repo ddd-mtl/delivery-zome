@@ -7,15 +7,20 @@ use crate::*;
 ///
 pub fn post_commit_ReplyAck(entry: Entry, reply_eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ReplyAck() {:?}", reply_eh);
-   let reply = ReplyAck::try_from(entry)?;
+   let reply_ack = ReplyAck::try_from(entry)?;
    /// Check signature
    // FIXME
    //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
+   /// Emit Signal
+   let res = emit_signal(&SignalProtocol::NewReplyAck(reply_ack.clone()));
+   if let Err(err) = res {
+      error!("Emit signal failed: {}", err);
+   }
    /// Send it immediately if it has been accepted
-   if reply.has_accepted {
+   if reply_ack.has_accepted {
       //FIXME: let _ = send_parcel(reply)?;
    } else {
-      info!("Delivery {} refused by {}", reply.distribution_eh, reply.recipient);
+      info!("Delivery {} refused by {}", reply_ack.distribution_eh, reply_ack.recipient);
    }
    /// Done
    Ok(())

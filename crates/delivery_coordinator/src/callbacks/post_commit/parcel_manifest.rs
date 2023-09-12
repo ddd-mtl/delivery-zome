@@ -7,7 +7,12 @@ use crate::*;
 /// Try to retrieve every chunk
 pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
-   let parcel_manifest = ParcelManifest::try_from(entry)?;
+   let manifest = ParcelManifest::try_from(entry)?;
+   /// Emit signal
+   let res = emit_signal(&SignalProtocol::NewManifest(manifest.clone()));
+   if let Err(err) = res {
+      error!("Emit signal failed: {}", err);
+   }
    /// Find notice
    let notices = query_DeliveryNotice(DeliveryNoticeQueryField::Parcel(manifest_eh.clone()))?;
    if notices.is_empty() {
@@ -18,7 +23,7 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
    let notice_eh = hash_entry(notices[0].clone())?;
    /// Try to retrieve parcel if it has been accepted
    let mut pairs = Vec::new();
-   for chunk_eh in parcel_manifest.chunks.clone() {
+   for chunk_eh in manifest.chunks.clone() {
       let input = FetchChunkInput {
          chunk_eh,
          notice_eh: notice_eh.clone(),

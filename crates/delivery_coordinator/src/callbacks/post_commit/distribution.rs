@@ -22,7 +22,7 @@ pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribu
         let _ = send_notice(notice.clone(), recipient, distribution.delivery_summary.distribution_strategy.clone());
     }
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::CreatedDistribution((distribution_eh.to_owned(), sah.hashed.content.timestamp(), distribution)));
+    let res = emit_signal(&SignalProtocol::NewDistribution((distribution_eh.to_owned(), sah.hashed.content.timestamp(), distribution)));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {
