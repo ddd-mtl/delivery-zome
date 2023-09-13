@@ -28,13 +28,13 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
     /** */
     render() {
-        console.log("<delivery-dashboard> render()", this._initialized);
+        console.log("<delivery-dashboard> render()", this._initialized, this.perspective);
         if (!this._initialized) {
             return html`<span>Loading...</span>`;
         }
 
         /* Li */
-        console.log("myDistributions", this.perspective.distributions);
+        console.log("distributions", this.perspective.distributions);
         const myDistribsLi = Object.entries(this.perspective.distributions).map(
             ([distribEh, fullState]) => {
                 //console.log("MembraneLi", MembraneLi)
@@ -99,26 +99,29 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
         /* Li */
-        //console.log("signals", this.perspective.myDistributions);
-        const newNoticesLi = html``
-        // Object.entries(this.perspective.newDeliveryNotices).map(
-        //     ([noticeEh, notice]) => {
-        //         const distribEh = encodeHashToBase64(notice.distribution_eh);
-        //         //console.log("MembraneLi", MembraneLi)
-        //         return html `
-        //       <li style="margin-top:10px;" title=${noticeEh}>
-        //           ${this.notice2str(noticeEh)}
-        //           <button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
-        //           <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
-        //           <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>
-        //
-        //       </li>`
-        //     }
-        // )
+        const inbounds = this._zvm.inbounds();
+        console.log("inbounds", inbounds);
+        const newNoticesLi = Object.entries(inbounds).map(
+            ([noticeEh, [_notice, _ts, pct]]) => {
+                let content = html`retrieving... ${pct}%`;
+                if (pct == -1) {
+                    content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
+                        <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
+                        <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>`;
+                }
+                //const distribEh = encodeHashToBase64(notice.distribution_eh);
+                //console.log("MembraneLi", MembraneLi)
+                return html `
+              <li style="margin-top:10px;" title=${noticeEh}>
+                  ${this.notice2str(noticeEh)}
+                  ${content}
+              </li>`
+            }
+        )
 
         const noticesLi = Object.entries(this.perspective.notices).map(
             ([eh, _pair]) => {
-                return html `
+                return html`
           <li style="margin-top:10px;" title=${eh}>
               ${this.notice2str(eh)}
           </li>`
@@ -157,15 +160,13 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             <h3>Replies</h3>
             <ul>${repliesLi}</ul>
 
-            <h3>Received Parcels</h3>
+            <h3>Receptions</h3>
             <ul>${receptionsLi}</ul>
             
             <hr style="border: dotted 1px grey"/>
-              
-            <h3>New Delivery Notices</h3>
+            
+            <h3>Unreplied</h3>
             <ul>${newNoticesLi}</ul>
-            <h3>Unanswered notices</h3>
-
             <hr />
             
             <h2>OUTBOUND</h2>
@@ -173,13 +174,13 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             <h3>Distributions</h3>
             <ul>${distribsLi}</ul>
 
-            <h3>Received Notices</h3>
+            <h3>NoticeAcks</h3>
             <ul>${receivedNoticesLi}</ul>
 
-            <h3>Received Replies</h3>
+            <h3>ReplyAcks</h3>
             <ul>${receivedRepliesLi}</ul>
 
-            <h3>Receipts</h3>
+            <h3>ReceptionAcks</h3>
             <ul>${receptionAcksLi}</ul>
             
             <hr style="border: dotted 1px grey"/>

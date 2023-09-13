@@ -51,9 +51,10 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
       this.deliveryZvm.acceptDelivery(noticeEh);
      }
    } else {
-    if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
-     this.deliveryZvm.acceptDelivery(noticeEh);
-    }
+    /// split_secret is a Manifest reference
+    // if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
+    //  this.deliveryZvm.acceptDelivery(noticeEh);
+    // }
    }
   }
  }
