@@ -163,6 +163,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             <h2>Local Parcels</h2>
             <ul>${manifestsLi}</ul>
             
+            <hr />
             <h2>INBOUND</h2>
 
             <h3>Delivery Notices</h3>

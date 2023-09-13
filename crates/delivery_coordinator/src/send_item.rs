@@ -23,34 +23,34 @@ pub fn send_item(
    pending_item: PendingItem,
    strategy: DistributionStrategy,
 ) -> ExternResult<SendSuccessKind> {
-   debug!("send_item() START - '{:?}' to {}", pending_item.kind, snip(&recipient));
+   debug!("START - '{:?}' to {}", pending_item.kind, snip(&recipient));
    /// Try with DM
    if strategy.can_dm() {
-      debug!("send_item() DM - {:?}", strategy);
+      debug!("DM - {:?}", strategy);
       /// Try sending directly to other Agent if Online
       // let result = send_item_by_dm(recipient, distribution_ah, pending_item.clone(), signed_item);
       let response_dm = send_dm(
          recipient.clone(),
          DeliveryProtocol::Item(pending_item.clone())
       ,)?;
-      debug!("send_item_by_dm() response_dm = {}", response_dm);
+      debug!("response_dm = {}", response_dm);
       if let DeliveryProtocol::Success(signature) = response_dm {
          return Ok(SendSuccessKind::OK_DIRECT(signature));
       } else {
-         debug!("send_item() failed: {}", response_dm);
+         debug!("failed: {}", response_dm);
       }
    }
    /// Try with DHT by committing public PendingItem
    if strategy.can_dht() {
-      debug!("send_item() DHT - {:?}", strategy);
-      debug!("send_item() - Commit PendingItem...");
+      debug!("DHT - {:?}", strategy);
+      debug!("Commit PendingItem...");
       /// DM failed, send to DHT instead by creating a PendingItem
       /// Create and commit PendingItem with remote call to self
       let input = CommitPendingItemInput {
          item: pending_item,
          recipient: recipient.clone(),
       };
-      debug!("send_item() - calling commit_pending_item()");
+      debug!("calling commit_pending_item()");
       let response = call_self("commit_pending_item", input)?;
       //debug!("send_item() - commit_pending_item() response: {:?}", response);
       return match response {

@@ -26,13 +26,13 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<(EntryHash, Re
    }
    /// Find notice with that manifest
    let manifest_eh = hash_entry(maybe_manifest.unwrap())?;
-   let maybe_notice = find_notice(manifest_eh.clone())?;
-   if maybe_notice.is_none() {
+   let notices = find_notice_with_parcel(manifest_eh.clone())?;
+   if notices.is_empty() {
       debug!("ABORT - Notice not found for manifest {}", manifest_eh);
       /// Excepted if agent is original creator of ParcelManifest
       return Ok(None);
    }
-   let notice = maybe_notice.unwrap();
+   let notice = notices[0].clone(); // Take the first one ¯\_(ツ)_/¯
    let notice_eh = hash_entry(notice)?;
    /// Must not already have a ReceptionProof
    let maybe_reception_proof = query_ReceptionProof(ReceptionProofQueryField::Notice(notice_eh.clone()))?;
@@ -78,23 +78,36 @@ pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelMan
 }
 
 
+/// Check if an entry is present in source-chain
+pub fn has_entry(eh: EntryHash) -> ExternResult<bool> {
+   let mut set: HashSet<EntryHash> = HashSet::new();
+   set.insert(eh);
+   let query_args = ChainQueryFilter::default()
+      .include_entries(false)
+      .entry_hashes(set);
+   let parcels = query(query_args)?;
+   Ok(!parcels.is_empty())
+}
+
+
 /// Find manifest with that chunk_eh
-pub fn find_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
+pub fn find_notice_with_parcel(parcel_eh: EntryHash) -> ExternResult<Vec<DeliveryNotice>> {
    /// Get all Create DeliveryNotice Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
       .action_type(ActionType::Create)
       .entry_type(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap());
    let notices = query(query_args)?;
+   let mut res = Vec::new();
    for notice_el in notices {
       let notice: DeliveryNotice = get_typed_from_record(notice_el)?;
       let summary_eh = notice.summary.parcel_reference.entry_address();
       if summary_eh == parcel_eh {
-         return Ok(Some(notice));
+         res.push(notice);
       }
    }
    /// Done
-   Ok(None)
+   Ok(res)
 }
 
 

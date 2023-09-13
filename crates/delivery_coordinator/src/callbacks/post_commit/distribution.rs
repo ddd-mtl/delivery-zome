@@ -6,8 +6,8 @@ use crate::*;
 
 
 ///
-pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribution_eh: &EntryHash) -> ExternResult<()> {
-    debug!("post_commit_distribution() {:?}", distribution_eh);
+pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, _distribution_eh: &EntryHash) -> ExternResult<()> {
+    debug!("post_commit_distribution() {:?}", sah.action_address());
     let distribution = Distribution::try_from(entry)?;
     /// Create DeliveryNotice
     let notice = DeliveryNotice {
@@ -25,8 +25,6 @@ pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribu
     let res = emit_signal(&SignalProtocol::NewDistribution((sah.action_address().to_owned(), distribution, sah.hashed.content.timestamp())));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
-    } else {
-        debug!("Emit signal successful!");
     }
     /// Done
     Ok(())
@@ -35,6 +33,7 @@ pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribu
 
 ///
 fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_strategy: DistributionStrategy) -> ExternResult<()> {
+    debug!("send_notice() for: {}", notice.summary.parcel_name);
     /// Create PendingItem
     let pending_item= pack_notice(
         notice.clone(),
@@ -47,7 +46,7 @@ fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_stra
         distribution_strategy,
     );
     if let Err(e) = res {
-        warn!("send_item() failed: {}", e);
+        debug!("send_item() failed: {}", e);
         return zome_error!("send_item() failed: {}", e);
     }
     /// If direct-send succeeded, create NoticeAck Entry

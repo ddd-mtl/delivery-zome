@@ -79,12 +79,20 @@ fn receive_entry(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
 
     /// Get notice
     let parcel_eh = hash_entry(parcel.clone())?;
-    let maybe_notice = find_notice(parcel_eh)?;
-    if maybe_notice.is_none() {
+    let notices = find_notice_with_parcel(parcel_eh)?;
+    if notices.is_empty() {
         return zome_error!("Failed finding DeliveryNotice for received parcel");
     }
+    /// Grab first one or one from dm sender
+    let mut notice = notices[0].clone();
+    for n in notices {
+        if n.sender == from {
+            notice = n;
+            break;
+        }
+    }
     /// Commit Entry
-    let _hh = call_commit_parcel(parcel, &maybe_notice.unwrap(), None)?;
+    let _hh = call_commit_parcel(parcel, &notice, None)?;
     /// Done
     Ok(())
 }
@@ -151,13 +159,8 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<Deli
     let maybe_notice: Option<DeliveryNotice> = unpack_item(item, from.clone())?;
     let Some(notice) = maybe_notice
        else { return zome_error!("Failed deserializing DeliveryNotice (2)"); };
-    /// Check for duplicate DeliveryNotice
-    let maybe_already = find_notice(notice.summary.parcel_reference.entry_address())?;
-    if maybe_already.is_some() {
-        return zome_error!("Already have this Notice");
-    }
     /// Commit DeliveryNotice
-    let _hh = create_entry_relaxed(DeliveryEntry::DeliveryNotice(notice.clone()))?;
+    let _ah = create_entry_relaxed(DeliveryEntry::DeliveryNotice(notice.clone()))?;
     /// Done
     Ok(notice)
 }
@@ -168,7 +171,7 @@ pub fn receive_ack(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     let Some(ack) = maybe_ack
        else { return zome_error!("Failed deserializing NoticeAck"); };
     // /// Check for duplicate DeliveryNotice
-    // let maybe_already = find_notice(ack.summary.parcel_reference.entry_address())?;
+    // let maybe_already = find_notice_for_parcel(ack.summary.parcel_reference.entry_address())?;
     // if maybe_already.is_some() {
     //     return zome_error!("Already have this Notice");
     // }
