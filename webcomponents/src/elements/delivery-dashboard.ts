@@ -147,11 +147,24 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
+        const manifestsLi = Object.entries(this.perspective.manifestByData).map(
+            ([dataHash, manifestEh]) => {
+                const manifest = this.perspective.manifests[manifestEh];
+                return html `
+          <li style="margin-top:10px;" title=${dataHash}>
+              ${manifest.name}: ${dataHash} | ${manifest.size} octets
+          </li>`
+            }
+        )
+
         /** render all */
         return html`
         <div>
             <h1 style="text-decoration:underline;">Delivery Dashboard</h1>
 
+            <h2>Local Parcels</h2>
+            <ul>${manifestsLi}</ul>
+            
             <h2>INBOUND</h2>
 
             <h3>Delivery Notices</h3>

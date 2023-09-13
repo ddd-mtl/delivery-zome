@@ -281,6 +281,7 @@ export interface ParcelChunk {
 export interface ParcelManifest {
   name: string
   data_type: string
+  data_hash: string
   size: number
   chunks: EntryHash[]
 }

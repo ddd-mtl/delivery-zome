@@ -18,31 +18,17 @@ use zome_delivery_api::*;
 use zome_secret_integrity::*;
 
 
-/// Zome Function
+///
 #[hdk_extern]
 pub fn create_secret(value: String) -> ExternResult<EntryHash> {
    let secret = Secret { value };
    let eh = hash_entry(secret.clone())?;
-   let _hh = create_entry(SecretEntry::Secret(secret))?;
+   let _ah = create_entry(SecretEntry::Secret(secret))?;
    return Ok(eh);
 }
 
-// /// Zome Function
-// #[hdk_extern]
-// pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
-//    let set: HashSet<_> = vec![eh].drain(..).collect(); // dedup
-//    let query_args = ChainQueryFilter::default()
-//       .include_entries(true)
-//       .entry_hashes(set);
-//    let entries = query(query_args)?;
-//    if entries.len() != 1 {
-//       return Err(WasmError::Guest(String::from("No Secret found at given EntryHash")));
-//    }
-//    let secret: Secret = get_typed_from_el(entries[0].clone())?;
-//    return Ok(secret.value);
-// }
 
-/// Zome Function
+///
 #[hdk_extern]
 pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    let split = value.split_whitespace();
@@ -57,6 +43,7 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    let manifest = ParcelManifest {
       name: "dummy".to_string(),
       data_type: "split_secret".to_owned(),
+      data_hash: value.clone(), // Should be a hash but we dont really care as its just an example playground
       size: value.len(),
       chunks,
    };
@@ -67,14 +54,9 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
 }
 
 
-/// Zome Function
+///
 #[hdk_extern]
 pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
-   ///// Check inbox first
-   // debug!("get_secret() - pull_inbox");
-   // let response = call_delivery_zome("pull_inbox", ())?;
-   // let inbox_items: Vec<ActionHash> = decode_response(response)?;
-   // debug!("get_secret() - inbox_items: {}", inbox_items.len());
    /// Try to get Secret
    let maybe_secret: ExternResult<Secret> = get_typed_from_eh(eh.clone());
    if let Ok(secret) = maybe_secret {

@@ -32,6 +32,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
 
   /** -- Methods -- */
 
+  /** */
   protected async dvmUpdated(newDvm: SecretDvm, oldDvm?: SecretDvm): Promise<void> {
     console.log("<secret-page>.dvmUpdated()");
     if (oldDvm) {
@@ -127,7 +128,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
 
   /** */
   render() {
-    console.log("<secret-page.render()> render()", this._initialized, this._sender);
+    console.log("<secret-page.render()> render()", this._initialized, this._sender, this.secretPerspective);
     if (!this._initialized) {
       return html`<span>Loading...</span>`;
     }

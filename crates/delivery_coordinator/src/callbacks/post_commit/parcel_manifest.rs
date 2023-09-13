@@ -29,7 +29,6 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
          notice_eh: notice_eh.clone(),
       };
       let response = call_self("fetch_chunk", input)?;
-      debug!("fetch_chunk() response: {:?}", response);
       let output: Option<(ParcelChunk, Option<Link>)> = decode_response(response)?;
       //assert!(matches!(response, ZomeCallResponse::Ok { .. }));
       if let Some(pair) = output {

@@ -59,7 +59,10 @@ export class DeliveryZvm extends ZomeViewModel {
         const deliverySignal = signal.payload as SignalProtocol;
         if (SignalProtocolType.NewManifest in deliverySignal) {
             console.log("signal NewManifest", deliverySignal.NewManifest);
-            this._perspective.manifests[encodeHashToBase64(deliverySignal.NewManifest[0])] = deliverySignal.NewManifest[1];
+            const manifestEh = encodeHashToBase64(deliverySignal.NewManifest[0]);
+            const manifest = deliverySignal.NewManifest[1];
+            this._perspective.manifests[manifestEh] = manifest;
+            this._perspective.manifestByData[manifest.data_hash] = manifestEh;
         }
         if (SignalProtocolType.ReceivedChunk in deliverySignal) {
             console.log("signal ReceivedChunk", deliverySignal.ReceivedChunk);
@@ -305,7 +308,11 @@ export class DeliveryZvm extends ZomeViewModel {
 
         this._perspective.manifests = {};
         pairs = await this.zomeProxy.queryAllManifest();
-        Object.values(pairs).map(([eh, typed]) => this._perspective.manifests[encodeHashToBase64(eh)] = typed);
+        Object.values(pairs).map(([eh, manifest]) => {
+            const manifestEh = encodeHashToBase64(eh);
+            this._perspective.manifests[manifestEh] = manifest;
+            this._perspective.manifestByData[manifest.data_hash] = manifestEh;
+        });
 
 
         return null;

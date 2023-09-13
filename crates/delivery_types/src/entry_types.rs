@@ -73,7 +73,7 @@ pub struct ParcelChunk {
 pub struct ParcelManifest {
    pub name: String,
    pub data_type: String,
-   //pub data_hash: String,
+   pub data_hash: String,
    pub size: usize,
    pub chunks: Vec<EntryHash>,
 }

@@ -37,26 +37,30 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
   get perspective(): void {return}
 
 
- /** */
- mySignalHandler(signal: AppSignal): void {
-  console.log("secretDvm received signal", signal);
-  const deliverySignal = signal.payload as SignalProtocol;
+  /** */
+  mySignalHandler(signal: AppSignal): void {
+   console.log("secretDvm received signal", signal);
+   const deliverySignal = signal.payload as SignalProtocol;
 
-  /** Automatically accept parcel from secret zome */
-  if (SignalProtocolType.NewNotice in deliverySignal) {
-   console.log("ADDING DeliveryNotice. parcel_reference:", deliverySignal.NewNotice[1].summary.parcel_reference);
-   const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
-   if ("AppEntry" in deliverySignal.NewNotice[1].summary.parcel_reference) {
-     if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.AppEntry.zome_name) {
-      this.deliveryZvm.acceptDelivery(noticeEh);
-     }
-   } else {
-    /// split_secret is a Manifest reference
-    // if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
-    //  this.deliveryZvm.acceptDelivery(noticeEh);
-    // }
+   /** Automatically accept parcel from secret zome */
+   if (SignalProtocolType.NewNotice in deliverySignal) {
+    console.log("ADDING DeliveryNotice. parcel_reference:", deliverySignal.NewNotice[1].summary.parcel_reference);
+    const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
+    if ("AppEntry" in deliverySignal.NewNotice[1].summary.parcel_reference) {
+      if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.AppEntry.zome_name) {
+       this.deliveryZvm.acceptDelivery(noticeEh);
+      }
+    } else {
+     /// split_secret is a Manifest reference
+     // if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
+     //  this.deliveryZvm.acceptDelivery(noticeEh);
+     // }
+    }
+   }
+
+   if (SignalProtocolType.NewReceptionProof in deliverySignal) {
+    console.log("ADDING NewReceptionProof. parcel_eh:", encodeHashToBase64(deliverySignal.NewReceptionProof[1].parcel_eh));
    }
   }
- }
 
 }
