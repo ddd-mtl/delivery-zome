@@ -14,6 +14,7 @@ pub fn post_commit_ParcelChunk(entry: Entry, chunk_eh: &EntryHash) -> ExternResu
     let maybe_result: ExternResult<Option<(EntryHash, Result<EntryHash, usize>)>> = decode_response(response);
     /// Notify UI of completion status
     if let Ok(Some(result)) = maybe_result {
+        //debug!("result = {:?}", result);
         if let Err(pct) = result.1 {
             let res = emit_signal(&SignalProtocol::ReceivedChunk((result.0, pct)));
             if let Err(err) = res {

@@ -15,12 +15,12 @@ use crate::*;
 /// Otherwise return download completion percentage.
 #[hdk_extern]
 pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<(EntryHash, Result<EntryHash, usize>)>> {
-   trace!("START {}", chunk_eh);
+   debug!("START {}", chunk_eh);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Find manifest with that chunk_eh
    let maybe_manifest = find_ParcelManifest(chunk_eh)?;
    if maybe_manifest.is_none() {
-      trace!("ABORT - Manifest not found");
+      debug!("ABORT - Manifest not found");
       return Ok(None);
       //return error("Manifest not found for chunk");
    }
@@ -28,7 +28,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<(EntryHash, Re
    let manifest_eh = hash_entry(maybe_manifest.unwrap())?;
    let maybe_notice = find_notice(manifest_eh.clone())?;
    if maybe_notice.is_none() {
-      //trace!("ABORT - Notice not found for manifest {}", manifest_eh);
+      debug!("ABORT - Notice not found for manifest {}", manifest_eh);
       /// Excepted if agent is original creator of ParcelManifest
       return Ok(None);
    }
@@ -36,13 +36,15 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<(EntryHash, Re
    let notice_eh = hash_entry(notice)?;
    /// Must not already have a ReceptionProof
    let maybe_reception_proof = query_ReceptionProof(ReceptionProofQueryField::Notice(notice_eh.clone()))?;
-   if let Some(receipt) = maybe_reception_proof {
-      return Ok(Some((notice_eh, Ok(receipt.parcel_eh))));
+   if let Some(reception) = maybe_reception_proof {
+      debug!("ABORT - ReceptionProof found");
+      return Ok(Some((notice_eh, Ok(reception.parcel_eh))));
    }
    /// Matching notice found. Check if we have all chunks
    let received_pct = count_chunks_received(manifest_eh.clone())?;
+   debug!("received_pct = {}", received_pct);
    if received_pct != 100 {
-      trace!("ABORT - Missing chunks");
+      debug!("ABORT - Missing chunks");
       return Ok(Some((notice_eh, Err(received_pct))));
    }
    /// All chunks found. Create ReceptionProof
@@ -109,8 +111,9 @@ pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
       .entry_hashes(chunks_set);
    let chunk_els = query(query_args)?;
    /// Check if all found
-   trace!("has_all_chunks: {} == {} ?", chunk_els.len(), len);
+   debug!("has_all_chunks: {} == {} ?", chunk_els.len(), len);
    let pct: f32 = chunk_els.len() as f32 / len as f32;
    let iPct: usize = (pct * 100_f32).ceil() as usize;
+   debug!("pct == {} ?", pct);
    Ok(iPct)
 }

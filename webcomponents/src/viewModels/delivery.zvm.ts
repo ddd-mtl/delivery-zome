@@ -62,7 +62,7 @@ export class DeliveryZvm extends ZomeViewModel {
             this._perspective.manifests[encodeHashToBase64(deliverySignal.NewManifest[0])] = deliverySignal.NewManifest[1];
         }
         if (SignalProtocolType.ReceivedChunk in deliverySignal) {
-            console.log("signal NewChunk", deliverySignal.ReceivedChunk);
+            console.log("signal ReceivedChunk", deliverySignal.ReceivedChunk);
             const noticeEh = encodeHashToBase64(deliverySignal.ReceivedChunk[0]);
             const completion_pct = deliverySignal.ReceivedChunk[1];
             const noticeTuple = this._perspective.notices[noticeEh];
