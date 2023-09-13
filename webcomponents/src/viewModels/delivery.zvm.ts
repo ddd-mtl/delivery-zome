@@ -1,27 +1,25 @@
 import {delay, Dictionary, ZomeViewModel} from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {
-    ActionHash,
     ActionHashB64,
-    AgentPubKey,
     AgentPubKeyB64, AppSignalCb,
     decodeHashFromBase64,
-    encodeHashToBase64, EntryHash, EntryHashB64, Timestamp
+    encodeHashToBase64, EntryHashB64, Timestamp
 } from "@holochain/client";
 import {
     DeliveryNotice,
     DeliveryState, DeliveryStateType,
     Distribution,
     DistributionState,
-    DistributionStateType, FullDistributionState,
+    DistributionStateType,
     NoticeState,
     NoticeStateType,
-    SignalKind,
     SignalProtocol,
-    SignalProtocolType, SignalProtocolVariantNewDistribution,
+    SignalProtocolType,
 } from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 import {createDeliveryPerspective, DeliveryPerspective} from "./delivery.perspective";
+
 
 /**
  *
@@ -290,8 +288,9 @@ export class DeliveryZvm extends ZomeViewModel {
         this._perspective.notices = {};
         pairs = await this.zomeProxy.queryAllDeliveryNotice();
         Object.values(pairs).map(async([eh, ts, notice]) => {
-            const [state, pct] = await this.getNoticeState(encodeHashToBase64(eh));
-            this._perspective.notices[encodeHashToBase64(notice.distribution_eh)] = [notice, ts, state, pct];
+            const noticeEh = encodeHashToBase64(eh);
+            const [state, pct] = await this.getNoticeState(noticeEh);
+            this._perspective.notices[noticeEh] = [notice, ts, state, pct];
         });
         console.log("queryAll() notices: " + pairs.length);
 
@@ -311,7 +310,6 @@ export class DeliveryZvm extends ZomeViewModel {
 
         return null;
     }
-
 
 
     /** Return notice_eh -> [notice, Timestamp, Percentage]  */
@@ -357,57 +355,6 @@ export class DeliveryZvm extends ZomeViewModel {
     }
 
 
-    // /** */
-    // async determineUnrepliedInbounds(): Promise<void> {
-    //     this._perspective.unrepliedInbounds = {};
-    //     this._perspective.pendingInbounds = {};
-    //     console.log("determineUnrepliedInbounds() allNotices count", Object.entries(this._perspective.notices).length);
-    //     for (const [noticeEh, [ts, notice]] of Object.entries(this._perspective.notices)) {
-    //         const state = await this.getNoticeState(noticeEh);
-    //         const sender = encodeHashToBase64(notice.sender);
-    //         console.log("determineUnrepliedInbounds() state", state);
-    //         if (NoticeStateType.Unreplied in state) {
-    //             if (!this._perspective.unrepliedInbounds[sender]) {
-    //                 this._perspective.unrepliedInbounds[sender] = {};
-    //             }
-    //             this._perspective.unrepliedInbounds[sender][noticeEh] = ts;
-    //         }
-    //         if (NoticeStateType.Accepted in state) {
-    //             if (!this._perspective.pendingInbounds[sender]) {
-    //                 this._perspective.pendingInbounds[sender] = {};
-    //             }
-    //             this._perspective.pendingInbounds[sender][noticeEh] = ts;
-    //         }
-    //     }
-    //     console.log("determineUnrepliedInbounds() count", Object.values(this._perspective.unrepliedInbounds));
-    //     this.notifySubscribers();
-    // }
-
-
-    // /** */
-    // async determineUnrepliedOutbounds(): Promise<void> {
-    //     this._perspective.unrepliedOutbounds = {};
-    //     console.log("determineUnrepliedOutbounds() allDistributions count", Object.entries(this._perspective.distributions).length);
-    //     for (const [eh, [ts, distrib]] of Object.entries(this._perspective.distributions)) {
-    //         const state = await this.getDistributionState(eh);
-    //         console.log("determineUnrepliedOutbounds() distrib state", state);
-    //         if (DistributionStateType.Unsent in state || DistributionStateType.AllNoticesSent in state || DistributionStateType.AllNoticeReceived in state) {
-    //             console.log("determineUnrepliedOutbounds() recipients", distrib.recipients.length);
-    //             let deliveries: Record<AgentPubKeyB64, DeliveryState> = {};
-    //             for (const recipient of distrib.recipients) {
-    //                 const agentB64 = encodeHashToBase64(recipient);
-    //                 const deliveryState = await this.getDeliveryState(eh, agentB64);
-    //                 console.log("determineUnrepliedOutbounds() state", deliveryState, agentB64);
-    //                 deliveries[agentB64] = deliveryState;
-    //             }
-    //             this._perspective.unrepliedOutbounds[eh] = [ts, deliveries];
-    //         }
-    //     }
-    //     console.log("determineUnrepliedOutbounds() count", Object.values(this._perspective.unrepliedOutbounds));
-    //     this.notifySubscribers();
-    // }
-
-
     /** -- API Sugar -- */
 
     /** */
@@ -416,16 +363,8 @@ export class DeliveryZvm extends ZomeViewModel {
         if (!notice) {
             console.error("Accepting unknown notice");
         }
-        const eh = await this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: true});
-        // const ts = this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)][noticeEh];
-        // const sender = encodeHashToBase64(notice.sender);
-        // delete this._perspective.unrepliedInbounds[sender][noticeEh];
-        // if (!this._perspective.pendingInbounds[sender]) {
-        //     this._perspective.pendingInbounds[sender] = {};
-        // }
-        // this._perspective.pendingInbounds[sender][noticeEh] = ts;
-        // this.notifySubscribers();
-        return encodeHashToBase64(eh);
+        const replyEh = await this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: true});
+        return encodeHashToBase64(replyEh);
     }
 
     /** */
@@ -435,8 +374,6 @@ export class DeliveryZvm extends ZomeViewModel {
             console.error("Declining unknown notice");
         }
         const eh = await this.zomeProxy.respondToNotice({notice_eh: decodeHashFromBase64(noticeEh), has_accepted: false});
-        // delete this._perspective.unrepliedInbounds[encodeHashToBase64(notice.sender)][noticeEh];
-        // this.notifySubscribers();
         return encodeHashToBase64(eh);
     }
 
