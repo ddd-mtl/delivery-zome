@@ -61,27 +61,27 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
         const distribsLi = Object.entries(this.perspective.distributions).map(
-            ([eh, _pair]) => {
+            ([distribAh, _pair]) => {
                 return html `
-          <li style="margin-top:10px;" title=${eh}>
-              ${this.distrib2str(eh)}
+          <li style="margin-top:10px;" title=${distribAh}>
+              ${this.distrib2str(distribAh)}
           </li>`
             }
         )
 
         const receivedNoticesLi = Object.entries(this.perspective.noticeAcks).map(
-            ([distrib_ah, received]) => {
+            ([distribAh, received]) => {
                 return html `
-          <li style="margin-top:10px;" title=${distrib_ah}>
+          <li style="margin-top:10px;" title=${distribAh}>
               ${this.distrib2str(encodeHashToBase64(received.distribution_ah))}: ${encodeHashToBase64(received.recipient).slice(-5)}
           </li>`
             }
         )
 
         const receivedRepliesLi = Object.entries(this.perspective.replyAcks).map(
-            ([distrib_ah, received]) => {
+            ([distribAh, received]) => {
                 return html `
-          <li style="margin-top:10px;" title=${distrib_ah}>
+          <li style="margin-top:10px;" title=${distribAh}>
               ${this.distrib2str(encodeHashToBase64(received.distribution_ah))}: ${encodeHashToBase64(received.recipient).slice(-5)} ${received.has_accepted? "accepted" : "declined"}
           </li>`
             }
@@ -89,9 +89,9 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
         const receptionAcksLi = Object.entries(this.perspective.receptionAcks).map(
-            ([distrib_ah, receipt]) => {
+            ([distribAh, receipt]) => {
                 return html `
-          <li style="margin-top:10px;" title=${distrib_ah}>
+          <li style="margin-top:10px;" title=${distribAh}>
               ${this.distrib2str(encodeHashToBase64(receipt.distribution_ah))}: ${encodeHashToBase64(receipt.recipient).slice(-5)}
           </li>`
             }

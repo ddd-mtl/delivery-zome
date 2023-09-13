@@ -29,7 +29,6 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"test_encryption",
 	"pull_inbox",
 	"query_all_Distribution",
-	"query_Distribution",
 	"query_all_DeliveryNotice",
 	"query_DeliveryNotice",
 	"query_all_NoticeAck",

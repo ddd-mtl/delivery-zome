@@ -245,49 +245,49 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** */
     async queryAll(): Promise<null> {
-        let pairs = [];
+        let tuples = [];
         this._perspective.distributions = {};
-        pairs = await this.zomeProxy.queryAllDistribution();
-        Object.values(pairs).map(async([eh, ts, typed]) => {
-            const [fullState, deliveryStates] = await this.getDistributionState(encodeHashToBase64(eh), typed);
-            this._perspective.distributions[encodeHashToBase64(eh)] = [typed, ts, fullState, deliveryStates];
+        tuples = await this.zomeProxy.queryAllDistribution();
+        Object.values(tuples).map(async([ah, ts, typed]) => {
+            const [fullState, deliveryStates] = await this.getDistributionState(encodeHashToBase64(ah), typed);
+            this._perspective.distributions[encodeHashToBase64(ah)] = [typed, ts, fullState, deliveryStates];
         });
-        console.log("queryAll() distribs: " + pairs.length);
+        console.log("queryAll() distribs: " + tuples.length);
 
         this._perspective.noticeAcks = {};
-        pairs = await this.zomeProxy.queryAllNoticeAck();
-        Object.values(pairs).map(([_eh, typed]) => this._perspective.noticeAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
+        tuples = await this.zomeProxy.queryAllNoticeAck();
+        Object.values(tuples).map(([_eh, typed]) => this._perspective.noticeAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
 
         this._perspective.replyAcks = {};
-        pairs = await this.zomeProxy.queryAllReplyAck();
-        Object.values(pairs).map(([_eh, typed]) => this._perspective.replyAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
+        tuples = await this.zomeProxy.queryAllReplyAck();
+        Object.values(tuples).map(([_eh, typed]) => this._perspective.replyAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
 
         this._perspective.receptionAcks = {};
-        pairs = await this.zomeProxy.queryAllReceptionAck();
-        Object.values(pairs).map(([_eh, typed]) => this._perspective.receptionAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
+        tuples = await this.zomeProxy.queryAllReceptionAck();
+        Object.values(tuples).map(([_eh, typed]) => this._perspective.receptionAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
 
 
         this._perspective.notices = {};
-        pairs = await this.zomeProxy.queryAllDeliveryNotice();
-        Object.values(pairs).map(async([eh, ts, notice]) => {
+        tuples = await this.zomeProxy.queryAllDeliveryNotice();
+        Object.values(tuples).map(async([eh, ts, notice]) => {
             const noticeEh = encodeHashToBase64(eh);
             const [state, pct] = await this.getNoticeState(noticeEh);
             this._perspective.notices[noticeEh] = [notice, ts, state, pct];
         });
-        console.log("queryAll() notices: " + pairs.length);
+        console.log("queryAll() notices: " + tuples.length);
 
         this._perspective.replies = {};
-        pairs = await this.zomeProxy.queryAllNoticeReply();
-        Object.values(pairs).map(([_eh, reply]) => this._perspective.replies[encodeHashToBase64(reply.notice_eh)] = reply);
+        tuples = await this.zomeProxy.queryAllNoticeReply();
+        Object.values(tuples).map(([_eh, reply]) => this._perspective.replies[encodeHashToBase64(reply.notice_eh)] = reply);
 
         this._perspective.receptions = {};
-        pairs = await this.zomeProxy.queryAllReceptionProof();
-        Object.values(pairs).map(([_eh, recepetion]) => this._perspective.receptions[encodeHashToBase64(recepetion.notice_eh)] = recepetion);
+        tuples = await this.zomeProxy.queryAllReceptionProof();
+        Object.values(tuples).map(([_eh, recepetion]) => this._perspective.receptions[encodeHashToBase64(recepetion.notice_eh)] = recepetion);
 
 
         this._perspective.manifests = {};
-        pairs = await this.zomeProxy.queryAllManifest();
-        Object.values(pairs).map(([eh, manifest]) => {
+        tuples = await this.zomeProxy.queryAllManifest();
+        Object.values(tuples).map(([eh, manifest]) => {
             const manifestEh = encodeHashToBase64(eh);
             this._perspective.manifests[manifestEh] = manifest;
             this._perspective.manifestByData[manifest.data_hash] = manifestEh;

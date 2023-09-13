@@ -6,29 +6,30 @@ use zome_delivery_types::*;
 
 ///
 #[hdk_extern]
-pub fn query_all_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, Distribution)>> {
+pub fn query_all_Distribution(_: ()) -> ExternResult<Vec<(ActionHash, Timestamp, Distribution)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
    let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+                   .map(|(ah, create, typed)| (ah, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)
 }
 
-///Find DeliveryNotice with field with given value
-#[hdk_extern]
-pub fn query_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Distribution)>> {
-   std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Get all Create Distribution Elements with query
-   let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
-   let res = tuples.into_iter().map(|(_ah, _create, distrib)| {
-      let eh = hash_entry(distrib.clone()).unwrap();
-      (eh, distrib)
-   }).collect();
-   Ok(res)
-}
+
+// ///Find Distribution with field with given value
+// #[hdk_extern]
+// pub fn query_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Distribution)>> {
+//    std::panic::set_hook(Box::new(zome_panic_hook));
+//    /// Get all Create Distribution Elements with query
+//    let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
+//    let res = tuples.into_iter().map(|(_ah, _create, distrib)| {
+//       let eh = hash_entry(distrib.clone()).unwrap();
+//       (eh, distrib)
+//    }).collect();
+//    Ok(res)
+// }
 
 
 ///

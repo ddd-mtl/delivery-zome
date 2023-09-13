@@ -216,12 +216,8 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('pull_inbox', null);
   }
 
-  async queryAllDistribution(): Promise<[EntryHash, Timestamp, Distribution][]> {
+  async queryAllDistribution(): Promise<[ActionHash, Timestamp, Distribution][]> {
     return this.call('query_all_Distribution', null);
-  }
-
-  async queryDistribution(): Promise<[EntryHash, Distribution][]> {
-    return this.call('query_Distribution', null);
   }
 
   async queryAllDeliveryNotice(): Promise<[EntryHash, Timestamp, DeliveryNotice][]> {
