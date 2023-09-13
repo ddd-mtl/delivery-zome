@@ -6,7 +6,7 @@ use zome_delivery_types::*;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
     NewManifest((EntryHash, ParcelManifest)),
-    ReceivedChunk((EntryHash, usize)), // EntryHash of DeliveryNotice for the Chunk
+    ReceivedChunk((Vec<EntryHash>, usize)), // EntryHash of DeliveryNotice for the Chunk
     NewDistribution((ActionHash, Distribution, Timestamp)),
     NewNotice((EntryHash, DeliveryNotice, Timestamp)),
     NewNoticeAck((EntryHash, NoticeAck)),

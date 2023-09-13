@@ -11,8 +11,6 @@ pub fn post_commit_NoticeAck(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
     let res = emit_signal(&SignalProtocol::NewNoticeAck((eh.to_owned(), ack)));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
-    } else {
-        debug!("Emit signal successful!");
     }
     /// Done
     Ok(())

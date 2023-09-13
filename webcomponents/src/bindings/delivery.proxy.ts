@@ -148,7 +148,7 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
-  async checkManifest(chunkEh: EntryHash): Promise<[EntryHash, EntryHash | number] | null> {
+  async checkManifest(chunkEh: EntryHash): Promise<[EntryHash, EntryHash | number][] | null> {
     return this.call('check_manifest', chunkEh);
   }
 

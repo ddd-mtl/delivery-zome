@@ -10,8 +10,6 @@ pub fn post_commit_PendingItem(entry: Entry, eh: &EntryHash) -> ExternResult<()>
    let res = emit_signal(&SignalProtocol::NewPendingItem((eh.to_owned(), item)));
    if let Err(err) = res.clone() {
       error!("Emit signal failed: {}", err);
-   } else {
-      debug!("Emit signal successful!");
    }
    /// Done
    Ok(())

@@ -66,14 +66,16 @@ export class DeliveryZvm extends ZomeViewModel {
         }
         if (SignalProtocolType.ReceivedChunk in deliverySignal) {
             console.log("signal ReceivedChunk", deliverySignal.ReceivedChunk);
-            const noticeEh = encodeHashToBase64(deliverySignal.ReceivedChunk[0]);
-            const completion_pct = deliverySignal.ReceivedChunk[1];
-            const noticeTuple = this._perspective.notices[noticeEh];
-            if (!noticeTuple) {
-                console.error("Notice not found for chunk", noticeEh);
-                return;
+            for (const notice_eh of deliverySignal.ReceivedChunk[0]) {
+                const noticeEh = encodeHashToBase64(notice_eh);
+                const completion_pct = deliverySignal.ReceivedChunk[1];
+                const noticeTuple = this._perspective.notices[noticeEh];
+                if (!noticeTuple) {
+                    console.error("Notice not found for chunk", noticeEh);
+                    return;
+                }
+                this._perspective.notices[noticeEh][3] = completion_pct;
             }
-            this._perspective.notices[noticeEh][3] = completion_pct;
         }
         if (SignalProtocolType.NewDistribution in deliverySignal) {
             console.log("signal NewDistribution", deliverySignal.NewDistribution);

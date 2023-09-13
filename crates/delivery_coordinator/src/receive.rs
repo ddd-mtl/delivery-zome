@@ -45,7 +45,7 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
                     DeliveryProtocol::Success(signature)
                 },
                 ItemKind::AppEntryBytes => {
-                    let _ = receive_entry(dm.from, pending_item.clone())?;
+                    let _ = receive_parcel(dm.from, pending_item.clone())?;
                     let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
                 },
@@ -67,7 +67,7 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
 
 
 ///
-fn receive_entry(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
+fn receive_parcel(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     let maybe_entry: Option<Entry> = unpack_entry(item.clone(), from.clone())?;
     if maybe_entry.is_none() {
         return zome_error!("Failed deserializing Entry");
@@ -84,15 +84,19 @@ fn receive_entry(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
         return zome_error!("Failed finding DeliveryNotice for received parcel");
     }
     /// Grab first one or one from dm sender
-    let mut notice = notices[0].clone();
-    for n in notices {
-        if n.sender == from {
-            notice = n;
+    let mut maybe_notice = None;
+    for notice in notices {
+        if notice.distribution_ah == item.distribution_ah {
+            maybe_notice = Some(notice);
             break;
         }
     }
+    let Some(notice) = maybe_notice else {
+        debug!("No notice found for this distribution");
+        return error("No notice found for this distribution");
+    };
     /// Commit Entry
-    let _hh = call_commit_parcel(parcel, &notice, None)?;
+    let _ah = call_commit_parcel(parcel, &notice, None)?;
     /// Done
     Ok(())
 }

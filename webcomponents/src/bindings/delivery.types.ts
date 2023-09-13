@@ -490,7 +490,7 @@ export enum SignalProtocolType {
 	NewPendingItem = 'NewPendingItem',
 }
 export type SignalProtocolVariantNewManifest = {NewManifest: [EntryHash, ParcelManifest]}
-export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash, number]}
+export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
 export type SignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Distribution, Timestamp]}
 export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, DeliveryNotice, Timestamp]}
 export type SignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, NoticeAck]}
