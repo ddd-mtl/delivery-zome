@@ -17,11 +17,11 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    //let secret4_eh: EntryHash = billy.call_zome("create_secret", "B eats cereals").await;
 
    /// A sends secrets
-   let distribution1_eh: EntryHash = alex.send(secret1_eh.clone(), billy.key()).await;
-   let distribution2_eh: EntryHash = alex.send_multiple(secret2_eh.clone(), vec![billy.key(), camille.key()]).await;
+   let distribution1_ah: EntryHash = alex.send(secret1_eh.clone(), billy.key()).await;
+   let distribution2_ah: EntryHash = alex.send_multiple(secret2_eh.clone(), vec![billy.key(), camille.key()]).await;
    alex.print_chain(30 * 1000).await;
-   alex.assert_distribution_state(distribution1_eh.clone(), DistributionState::AllNoticesSent).await;
-   alex.assert_distribution_state(distribution2_eh.clone(), DistributionState::AllNoticesSent).await;
+   alex.assert_distribution_state(distribution1_ah.clone(), DistributionState::AllNoticesSent).await;
+   alex.assert_distribution_state(distribution2_ah.clone(), DistributionState::AllNoticesSent).await;
 
    // /// B sends secret 4 to A
    // let distribution4_eh: EntryHash = billy.send(secret4_eh.clone(), alex.key()).await;
@@ -29,10 +29,10 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    /// Check if all notices' have been received
    //alex.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution4_eh).await.expect("Should have received notice");
    //alex.print_chain(0).await;
-   billy.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution1_eh).await.expect("Should have received notice");
-   billy.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution2_eh).await.expect("Should have received notice");
+   billy.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution1_ah).await.expect("Should have received notice");
+   billy.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution2_ah).await.expect("Should have received notice");
    billy.print_chain(0).await;
-   camille.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution2_eh).await.expect("Should have received notice");
+   camille.pull_and_wait_for_signal(SignalKind::ReceivedNotice, &distribution2_ah).await.expect("Should have received notice");
    camille.print_chain(0).await;
 
    /// B checks if Notices have been received
@@ -54,8 +54,8 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
 
    /// Have A receive reply and send Parcel
    println!("\n A receive reply; pull_inbox()...\n");
-   alex.pull_and_wait_for_signal(SignalKind::ReceivedReply, &distribution1_eh).await.expect("Alex should have received reply");
-   alex.pull_and_wait_for_signals(SignalKind::ReceivedReply, &distribution2_eh, 2).await.expect("Alex should have received replies");
+   alex.pull_and_wait_for_signal(SignalKind::ReceivedReply, &distribution1_ah).await.expect("Alex should have received reply");
+   alex.pull_and_wait_for_signals(SignalKind::ReceivedReply, &distribution2_ah, 2).await.expect("Alex should have received replies");
    alex.print_chain(0).await;
 
    /// A sends secret 3 to B
@@ -77,21 +77,21 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    println!("\n B calls get_secret()...\n");
    let secret: String  = billy.call_zome("get_secret", billy_waiting_parcels[0].clone()).await;
    println!("\n B received secret 1: {:?}\n", secret);
-   billy.assert_notice_state(distribution1_eh.clone(), NoticeState::Received).await;
+   billy.assert_notice_state(distribution1_ah.clone(), NoticeState::Received).await;
    billy.print_chain(0).await;
 
    /// Have C receive parcel 2
    camille.pull_and_wait_for_signal(SignalKind::ReceivedParcel, &secret2_eh).await.expect("Should have received parcel");
    let secret: String  = camille.call_zome("get_secret", camille_waiting_parcels[0].clone()).await;
    println!("\n C received secret 2: {:?}\n", secret);
-   camille.assert_notice_state(distribution2_eh.clone(), NoticeState::Received).await;
+   camille.assert_notice_state(distribution2_ah.clone(), NoticeState::Received).await;
    camille.print_chain(0).await;
 
    /// Check A's chain for a ReceptionAck
-   alex.pull_and_wait_for_signal(SignalKind::ReceivedReceipt, &distribution1_eh).await.expect("Should have received receipt 1");
-   alex.assert_distribution_state(distribution1_eh.clone(), DistributionState::AllAcceptedParcelsReceived).await;
-   alex.pull_and_wait_for_signal(SignalKind::ReceivedReceipt, &distribution2_eh).await.expect("Should have received receipt 2");
-   alex.assert_distribution_state(distribution2_eh.clone(), DistributionState::AllAcceptedParcelsReceived).await;
+   alex.pull_and_wait_for_signal(SignalKind::ReceivedReceipt, &distribution1_ah).await.expect("Should have received receipt 1");
+   alex.assert_distribution_state(distribution1_ah.clone(), DistributionState::AllAcceptedParcelsReceived).await;
+   alex.pull_and_wait_for_signal(SignalKind::ReceivedReceipt, &distribution2_ah).await.expect("Should have received receipt 2");
+   alex.assert_distribution_state(distribution2_ah.clone(), DistributionState::AllAcceptedParcelsReceived).await;
    alex.print_chain(0).await;
 
    /// B checks if notice 3 received

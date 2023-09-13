@@ -8,7 +8,7 @@ use zome_delivery_types::*;
 fn create_PendingItem<T>(
    kind: ItemKind,
    content: T,
-   distribution_eh: EntryHash,
+   distribution_ah: ActionHash,
    recipient: AgentPubKey,
 ) -> ExternResult<PendingItem>
    where
@@ -29,7 +29,7 @@ fn create_PendingItem<T>(
       kind,
       author: me,
       encrypted_data,
-      distribution_eh,
+      distribution_ah,
       author_signature,
    };
    Ok(item)
@@ -40,7 +40,7 @@ fn create_PendingItem<T>(
 fn create_pending_parcel(
    kind: ItemKind,
    entry_bytes: AppEntryBytes,
-   distribution_eh: EntryHash,
+   distribution_ah: ActionHash,
    recipient: AgentPubKey,
 ) -> ExternResult<PendingItem>
 {
@@ -60,7 +60,7 @@ fn create_pending_parcel(
       kind,
       author: me,
       encrypted_data,
-      distribution_eh,
+      distribution_ah,
       author_signature,
    };
    Ok(item)
@@ -95,28 +95,28 @@ fn encrypt_parcel(
 
 /// called from post_commit()
 pub fn pack_notice(notice: DeliveryNotice, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<DeliveryNotice>(ItemKind::DeliveryNotice, notice.clone(), notice.distribution_eh.clone(), recipient)
+   create_PendingItem::<DeliveryNotice>(ItemKind::DeliveryNotice, notice.clone(), notice.distribution_ah.clone(), recipient)
 }
 /// called from post_commit()
 pub fn pack_notice_ack(ack: NoticeAck, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<NoticeAck>(ItemKind::NoticeAck, ack.clone(), ack.distribution_eh.clone(), recipient)
+   create_PendingItem::<NoticeAck>(ItemKind::NoticeAck, ack.clone(), ack.distribution_ah.clone(), recipient)
 }
 /// called from post_commit()
-pub fn pack_reply(reply: NoticeReply, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<NoticeReply>(ItemKind::NoticeReply, reply.clone(), distribution_eh, recipient)
+pub fn pack_reply(reply: NoticeReply, distribution_ah: ActionHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<NoticeReply>(ItemKind::NoticeReply, reply.clone(), distribution_ah, recipient)
 }
 /// called from post_commit()
-pub fn pack_reception_proof(reception: ReceptionProof, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<ReceptionProof>(ItemKind::ReceptionProof, reception, distribution_eh, recipient)
+pub fn pack_reception_proof(reception: ReceptionProof, distribution_ah: ActionHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<ReceptionProof>(ItemKind::ReceptionProof, reception, distribution_ah, recipient)
 }
 /// called from post_commit()
-pub fn pack_entry(parcel_entry: Entry, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+pub fn pack_entry(parcel_entry: Entry, distribution_ah: ActionHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
    if let Entry::App(entry_bytes) = parcel_entry {
-      return create_pending_parcel(ItemKind::AppEntryBytes, entry_bytes, distribution_eh, recipient);
+      return create_pending_parcel(ItemKind::AppEntryBytes, entry_bytes, distribution_ah, recipient);
    }
    return error("Can only pack Entry::App entries");
 }
 /// called from post_commit()
-pub fn pack_chunk(chunk: ParcelChunk, distribution_eh: EntryHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
-   create_PendingItem::<ParcelChunk>(ItemKind::ParcelChunk, chunk, distribution_eh, recipient)
+pub fn pack_chunk(chunk: ParcelChunk, distribution_ah: ActionHash, recipient: AgentPubKey) -> ExternResult<PendingItem> {
+   create_PendingItem::<ParcelChunk>(ItemKind::ParcelChunk, chunk, distribution_ah, recipient)
 }

@@ -37,7 +37,7 @@ pub struct GetNoticeOutput {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DeliveryNoticeQueryField {
    Sender(AgentPubKey),
-   Distribution(EntryHash),
+   Distribution(ActionHash),
    Parcel(EntryHash)
 }
 
@@ -51,7 +51,7 @@ pub enum ReceptionProofQueryField {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum NoticeAckQueryField {
    Recipient(AgentPubKey),
-   Distribution(EntryHash)
+   Distribution(ActionHash)
 }
 
 
@@ -65,6 +65,6 @@ pub struct CommitPendingItemInput {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GetDeliveryStateInput {
-   pub distribution_eh: EntryHash,
+   pub distribution_ah: ActionHash,
    pub recipient: AgentPubKey,
 }

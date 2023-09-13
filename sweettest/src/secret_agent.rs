@@ -128,48 +128,48 @@ impl SecretAgent {
 
 
    ///
-   pub async fn send(&self, secret_eh: EntryHash, recipient: AgentPubKey) -> EntryHash {
+   pub async fn send(&self, secret_eh: EntryHash, recipient: AgentPubKey) -> ActionHash {
       let input = SendSecretInput {
          secret_eh,
          recipients: vec![recipient],
          strategy: self.strategy.clone(),
       };
-      let distribution_eh: EntryHash = self.call_zome("send_secret", input).await;
-      return distribution_eh;
+      let distribution_ah: ActionHash = self.call_zome("send_secret", input).await;
+      return distribution_ah;
    }
 
    ///
-   pub async fn send_multiple(&self, secret_eh: EntryHash, recipients: Vec<AgentPubKey>) -> EntryHash {
+   pub async fn send_multiple(&self, secret_eh: EntryHash, recipients: Vec<AgentPubKey>) -> ActionHash {
       assert!(recipients.len() > 1);
       let input = SendSecretInput {
          secret_eh,
          recipients,
          strategy: self.strategy.clone(),
       };
-      let distribution_eh: EntryHash = self.call_zome("send_secret", input).await;
-      return distribution_eh;
+      let distribution_ah: ActionHash = self.call_zome("send_secret", input).await;
+      return distribution_ah;
    }
 
 
    ///
-   pub async fn assert_notice_state(&self, distribution_eh: EntryHash, required_state: NoticeState) {
+   pub async fn assert_notice_state(&self, distribution_ah: ActionHash, required_state: NoticeState) {
       // Make sure distribution is from this agent
-      let maybe_output: Option<GetNoticeOutput> = self.call_any_zome("delivery", "get_notice", distribution_eh.clone())
+      let maybe_output: Option<GetNoticeOutput> = self.call_any_zome("delivery", "get_notice", distribution_ah.clone())
                                                        .await;
       let notice_state = maybe_output.unwrap().state;
       if notice_state != required_state {
-         println!("\n assert_notice_state() failed for distribution: {}", distribution_eh);
+         println!("\n assert_notice_state() failed for distribution: {}", distribution_ah);
          self.print_chain(0).await;
       }
       assert_eq!(notice_state, required_state);
    }
 
    ///
-   pub async fn assert_distribution_state(&self, distribution_eh: EntryHash, required_state: DistributionState) {
-      let state: DistributionState = self.call_any_zome("delivery", "get_distribution_state", distribution_eh.clone()).await;
+   pub async fn assert_distribution_state(&self, distribution_ah: ActionHash, required_state: DistributionState) {
+      let state: DistributionState = self.call_any_zome("delivery", "get_distribution_state", distribution_ah.clone()).await;
       //println!("Distribution state: {:?}", state);
       if state != required_state {
-         println!("\n assert_distribution_state() failed for distribution: {}", distribution_eh);
+         println!("\n assert_distribution_state() failed for distribution: {}", distribution_ah);
          self.print_chain(0).await;
       }
       assert_eq!(state, required_state);
@@ -225,23 +225,4 @@ impl SecretAgent {
       Err(())
    }
 
-}
-
-
-
-fn print_signal(signal: SignalProtocol) -> String {
-   match signal {
-      SignalProtocol::ReceivedNotice(notice) => {
-         format!("ReceivedNotice for {}", notice.distribution_eh)
-      },
-      SignalProtocol::ReceivedReply(reply) => {
-         format!("ReceivedReply for {}", reply.distribution_eh)
-      },
-      SignalProtocol::ReceivedParcel(parcel) => {
-         format!("ReceivedParcel {}", parcel.parcel_eh)
-      },
-      SignalProtocol::ReceivedReceipt(receipt) => {
-         format!("ReceivedReceipt for {}", receipt.distribution_eh)
-      },
-   }
 }

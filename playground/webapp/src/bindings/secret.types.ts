@@ -241,7 +241,7 @@ export interface Distribution {
 
 /** Entry representing a received delivery request */
 export interface DeliveryNotice {
-  distribution_eh: EntryHash
+  distribution_ah: ActionHash
   summary: DeliverySummary
   sender: AgentPubKey
   sender_summary_signature: Signature
@@ -249,7 +249,7 @@ export interface DeliveryNotice {
 
 /** Entry for confirming a request has been well received by a recipient */
 export interface NoticeAck {
-  distribution_eh: EntryHash
+  distribution_ah: ActionHash
   recipient: AgentPubKey
   recipient_summary_signature: Signature
 }
@@ -262,7 +262,7 @@ export interface NoticeReply {
 
 /** Entry for confirming a recipient's reply on the sender's side */
 export interface ReplyAck {
-  distribution_eh: EntryHash
+  distribution_ah: ActionHash
   recipient: AgentPubKey
   has_accepted: boolean
   recipient_signature: Signature
@@ -297,7 +297,7 @@ export interface ReceptionProof {
 
 /** Entry for confirming a delivery has been well received or refused by the recipient. */
 export interface ReceptionAck {
-  distribution_eh: EntryHash
+  distribution_ah: ActionHash
   recipient: AgentPubKey
   recipient_signature: Signature
 }
@@ -313,7 +313,7 @@ export interface PendingItem {
   author: AgentPubKey
   author_signature: Signature
   encrypted_data: unknown
-  distribution_eh: EntryHash
+  distribution_ah: ActionHash
 }
 
 /** List of structs that PendingItem can embed */
@@ -355,7 +355,7 @@ export enum DeliveryNoticeQueryFieldType {
 	Parcel = 'Parcel',
 }
 export type DeliveryNoticeQueryFieldVariantSender = {Sender: AgentPubKey}
-export type DeliveryNoticeQueryFieldVariantDistribution = {Distribution: EntryHash}
+export type DeliveryNoticeQueryFieldVariantDistribution = {Distribution: ActionHash}
 export type DeliveryNoticeQueryFieldVariantParcel = {Parcel: EntryHash}
 export type DeliveryNoticeQueryField = 
  | DeliveryNoticeQueryFieldVariantSender | DeliveryNoticeQueryFieldVariantDistribution | DeliveryNoticeQueryFieldVariantParcel;
@@ -374,7 +374,7 @@ export enum NoticeAckQueryFieldType {
 	Distribution = 'Distribution',
 }
 export type NoticeAckQueryFieldVariantRecipient = {Recipient: AgentPubKey}
-export type NoticeAckQueryFieldVariantDistribution = {Distribution: EntryHash}
+export type NoticeAckQueryFieldVariantDistribution = {Distribution: ActionHash}
 export type NoticeAckQueryField = 
  | NoticeAckQueryFieldVariantRecipient | NoticeAckQueryFieldVariantDistribution;
 
@@ -384,7 +384,7 @@ export interface CommitPendingItemInput {
 }
 
 export interface GetDeliveryStateInput {
-  distribution_eh: EntryHash
+  distribution_ah: ActionHash
   recipient: AgentPubKey
 }
 

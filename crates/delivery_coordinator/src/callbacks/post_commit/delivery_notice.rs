@@ -12,7 +12,7 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, eh: &E
     /// Create NoticeAck and pack it
     let signature = sign(me.clone(), notice.summary.clone())?;
     let ack: NoticeAck = NoticeAck {
-        distribution_eh: notice.distribution_eh.clone(),
+        distribution_ah: notice.distribution_ah.clone(),
         recipient: me,
         recipient_summary_signature: signature,
         //date_of_reception: sys_time()?,

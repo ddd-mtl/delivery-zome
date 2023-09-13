@@ -7,10 +7,10 @@ use crate::*;
 
 /// Return DeliveryNotice (& state) from which we received a Parcel
 #[hdk_extern]
-pub fn get_notice(distribution_eh: EntryHash) -> ExternResult<Option<GetNoticeOutput>> {
+pub fn get_notice(distribution_ah: ActionHash) -> ExternResult<Option<GetNoticeOutput>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("get_notice()");
-   let field = DeliveryNoticeQueryField::Distribution(distribution_eh.clone());
+   let field = DeliveryNoticeQueryField::Distribution(distribution_ah.clone());
    let maybe_notices = query_DeliveryNotice(field)?;
    if maybe_notices.is_empty() {
       return Ok(None)

@@ -24,7 +24,7 @@ fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<ActionHash
       let tag = LinkTag::from(input.recipient.as_ref().to_vec());
       trace!("pendings tag = {:?}", tag);
       let maybe_link1_ah = create_link_relaxed(
-         input.item.distribution_eh.clone(),
+         input.item.distribution_ah.clone(),
          pending_item_eh.clone(),
          LinkTypes::Pendings,
          tag);

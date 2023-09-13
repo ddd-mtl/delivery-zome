@@ -28,7 +28,7 @@ pub fn send_item(
    if strategy.can_dm() {
       debug!("send_item() DM - {:?}", strategy);
       /// Try sending directly to other Agent if Online
-      // let result = send_item_by_dm(recipient, distribution_eh, pending_item.clone(), signed_item);
+      // let result = send_item_by_dm(recipient, distribution_ah, pending_item.clone(), signed_item);
       let response_dm = send_dm(
          recipient.clone(),
          DeliveryProtocol::Item(pending_item.clone())

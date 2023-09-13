@@ -9,7 +9,7 @@ use crate::*;
 /// Create & Commit Distribution Entry.
 /// It will try to send deliveryNotice during its post_commit().
 #[hdk_extern]
-pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash> {
+pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<ActionHash> {
    debug!("START: {:?}", input);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Remove duplicate recipients
@@ -45,8 +45,8 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<EntryHash
    /// Commit Distribution
    let eh = hash_entry(distribution.clone())?;
    debug!("eh: {}", eh);
-   let _hh = create_entry(DeliveryEntry::Distribution(distribution))?;
-   //let _hh = create_entry_relaxed(DeliveryEntry::Distribution(distribution))?;
+   let ah = create_entry(DeliveryEntry::Distribution(distribution))?;
+   //let ah = create_entry_relaxed(DeliveryEntry::Distribution(distribution))?;
    /// Done
-   Ok(eh)
+   Ok(ah)
 }

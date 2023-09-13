@@ -33,7 +33,7 @@ pub enum DeliveryProtocol {
     Failure(String),
     Success(Signature),
     Item(PendingItem),
-    ParcelRequest(EntryHash),
+    ParcelRequest(ActionHash), // distribution_ah
     ParcelResponse(Entry),
     ChunkRequest(EntryHash),
     ChunkResponse(ParcelChunk),

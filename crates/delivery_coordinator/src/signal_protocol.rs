@@ -7,7 +7,7 @@ use zome_delivery_types::*;
 pub enum SignalProtocol {
     NewManifest((EntryHash, ParcelManifest)),
     ReceivedChunk((EntryHash, usize)), // EntryHash of DeliveryNotice for the Chunk
-    NewDistribution((EntryHash, Distribution, Timestamp)),
+    NewDistribution((ActionHash, Distribution, Timestamp)),
     NewNotice((EntryHash, DeliveryNotice, Timestamp)),
     NewNoticeAck((EntryHash, NoticeAck)),
     NewReply((EntryHash, NoticeReply)),
@@ -18,46 +18,46 @@ pub enum SignalProtocol {
 }
 
 
-///---------------------------------------------------------------------------------------
-/// For sweettest
-///---------------------------------------------------------------------------------------
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum SignalKind {
-    NewNotice,
-    NewReplyAck,
-    NewReceptionProof,
-    NewReceptionAck,
-}
-
-
-impl SignalProtocol {
-    pub fn is(&self, kind: &SignalKind, eh: &EntryHash) -> bool {
-        match kind {
-            SignalKind::NewNotice => {
-                if let SignalProtocol::NewNotice((_notice_eh, notice, _ts)) = self {
-                    return &notice.distribution_eh == eh;
-                }
-                false
-            },
-            SignalKind::NewReplyAck => {
-                if let SignalProtocol::NewReplyAck((_eh, entry)) = self {
-                    return &entry.distribution_eh == eh;
-                }
-                false
-            },
-            SignalKind::NewReceptionProof => {
-                if let SignalProtocol::NewReceptionProof((_eh, received)) = self {
-                    return &received.parcel_eh == eh;
-                }
-                false
-            },
-            SignalKind::NewReceptionAck => {
-                if let SignalProtocol::NewReceptionAck((_eh, entry)) = self {
-                    return &entry.distribution_eh == eh;
-                }
-                false
-            },
-        }
-    }
-}
+// ///---------------------------------------------------------------------------------------
+// /// For sweettest
+// ///---------------------------------------------------------------------------------------
+//
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// pub enum SignalKind {
+//     NewNotice,
+//     NewReplyAck,
+//     NewReceptionProof,
+//     NewReceptionAck,
+// }
+//
+//
+// impl SignalProtocol {
+//     pub fn is(&self, kind: &SignalKind, eh: &EntryHash) -> bool {
+//         match kind {
+//             SignalKind::NewNotice => {
+//                 if let SignalProtocol::NewNotice((_notice_eh, notice, _ts)) = self {
+//                     return &notice.distribution_ah == eh;
+//                 }
+//                 false
+//             },
+//             SignalKind::NewReplyAck => {
+//                 if let SignalProtocol::NewReplyAck((_eh, entry)) = self {
+//                     return &entry.distribution_ah == eh;
+//                 }
+//                 false
+//             },
+//             SignalKind::NewReceptionProof => {
+//                 if let SignalProtocol::NewReceptionProof((_eh, received)) = self {
+//                     return &received.parcel_eh == eh;
+//                 }
+//                 false
+//             },
+//             SignalKind::NewReceptionAck => {
+//                 if let SignalProtocol::NewReceptionAck((_eh, entry)) = self {
+//                     return &entry.distribution_ah == eh;
+//                 }
+//                 false
+//             },
+//         }
+//     }
+// }

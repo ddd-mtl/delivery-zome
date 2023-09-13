@@ -26,7 +26,7 @@ fn send_reply(delivery_reply: NoticeReply) -> ExternResult<()> {
     /// Get DeliveryNotice
     let notice: DeliveryNotice = get_typed_from_eh(delivery_reply.notice_eh.clone())?;
     /// Create PendingItem from NoticeReply
-    let pending_item = pack_reply(delivery_reply.clone(), notice.distribution_eh.clone(), notice.sender.clone())?;
+    let pending_item = pack_reply(delivery_reply.clone(), notice.distribution_ah.clone(), notice.sender.clone())?;
     /// Send it to sender
     let res = send_item(
         notice.sender,

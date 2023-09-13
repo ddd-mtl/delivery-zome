@@ -30,7 +30,7 @@ fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Optio
       /// Check each Inbox link
       for (pending_chunk, link) in &pending_chunk_pairs {
          assert!(pending_chunk.kind == ItemKind::ParcelChunk);
-         if pending_chunk.distribution_eh != notice.distribution_eh {
+         if pending_chunk.distribution_ah != notice.distribution_ah {
             continue;
          }
          /// We have the chunk we are looking for, we just need to deserialize it

@@ -99,9 +99,9 @@ pub struct SendSecretInput {
    pub recipients: Vec<AgentPubKey>,
 }
 
-/// Zome Function
+/// Return Distribution ActionHash
 #[hdk_extern]
-pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
+pub fn send_secret(input: SendSecretInput) -> ExternResult<ActionHash> {
    debug!("send_secret() START {:?}", input.secret_eh);
    debug!("send_secret() zome_names: {:?}", dna_info()?.zome_names);
    debug!("send_secret() zome_index: {:?}", zome_info()?.id);
@@ -136,13 +136,12 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<EntryHash> {
    debug!("send_secret() calling distribute_parcel() with: {:?}", distribution);
    let response = call_delivery_zome("distribute_parcel", distribution)?;
    // distribute_parcel(distribution)?;
-   let eh: EntryHash = decode_response(response)?;
+   let ah: ActionHash = decode_response(response)?;
    debug!("send_secret() END");
-   Ok(eh)
+   Ok(ah)
 }
 
 
-/// Zome Function
 /// Return list of parcels' EntryHash from a particular Agent
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {

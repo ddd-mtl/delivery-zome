@@ -69,9 +69,9 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
             }
          }
       },
-      DeliveryNoticeQueryField::Distribution(distrib_eh) => {
+      DeliveryNoticeQueryField::Distribution(distrib_ah) => {
          for (_, _, notice) in tuples {
-            if notice.distribution_eh == distrib_eh {
+            if notice.distribution_ah == distrib_ah {
                res.push(notice.clone());
             }
          }
@@ -118,13 +118,13 @@ pub fn query_NoticeAck(field: NoticeAckQueryField) -> ExternResult<Vec<NoticeAck
             }
          }
       },
-      NoticeAckQueryField::Distribution(eh) => {
+      NoticeAckQueryField::Distribution(ah) => {
          for (_, _, received) in tuples {
-            if received.distribution_eh == eh {
+            if received.distribution_ah == ah {
                res.push(received);
             }
          }
-      },
+      }
    }
    debug!("*** query_NoticeAck() res count: {}", res.len());
    /// Done
@@ -178,7 +178,7 @@ pub fn query_all_ReplyAck(_: ()) -> ExternResult<Vec<(EntryHash, ReplyAck)>> {
 
 
 ///Find ReplyAck with field with given value
-pub fn query_ReplyAck(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
+pub fn query_ReplyAck(maybe_distribution: Option<ActionHash>, maybe_recipient: Option<AgentPubKey>)
    -> ExternResult<Vec<ReplyAck>> {
    //std::panic::set_hook(Box::new(zome_panic_hook));
    //debug!("*** query_ReplyAck() CALLED");
@@ -186,8 +186,8 @@ pub fn query_ReplyAck(maybe_distribution: Option<EntryHash>, maybe_recipient: Op
    let tuples = get_all_typed_local::<ReplyAck>(DeliveryEntryTypes::ReplyAck.try_into().unwrap())?;
    let mut typeds: Vec<ReplyAck> = tuples.into_iter().map(|(_,_,x)| x).collect();
    /// Search through query result
-   if let Some(distrib_eh) = maybe_distribution {
-      typeds.retain(|r| r.distribution_eh == distrib_eh);
+   if let Some(distrib_ah) = maybe_distribution {
+      typeds.retain(|r| r.distribution_ah == distrib_ah);
    }
    if let Some(recipient) = maybe_recipient {
       typeds.retain(|r| r.recipient == recipient);
@@ -258,7 +258,7 @@ pub fn query_all_ReceptionAck(_: ()) -> ExternResult<Vec<(EntryHash, ReceptionAc
 
 
 /// Find ReceptionAck with field with given value
-pub fn query_ReceptionAck(maybe_distribution: Option<EntryHash>, maybe_recipient: Option<AgentPubKey>)
+pub fn query_ReceptionAck(maybe_distribution: Option<ActionHash>, maybe_recipient: Option<AgentPubKey>)
    -> ExternResult<Vec<ReceptionAck>> {
    //std::panic::set_hook(Box::new(zome_panic_hook));
    //debug!("*** query_ReceptionAck() CALLED");
@@ -267,8 +267,8 @@ pub fn query_ReceptionAck(maybe_distribution: Option<EntryHash>, maybe_recipient
    let mut receipts: Vec<ReceptionAck> = tuples.into_iter().map(|(_,_,x)| x).collect();
    //debug!("*** query_DeliveryReceipt() receipts count: {}", receipts.len());
    /// Search through query result
-   if let Some(distrib_eh) = maybe_distribution {
-      receipts.retain(|r| r.distribution_eh == distrib_eh);
+   if let Some(distrib_ah) = maybe_distribution {
+      receipts.retain(|r| r.distribution_ah == distrib_ah);
    }
    //debug!("*** query_DeliveryReceipt() receipts distrib: {}", receipts.len());
    if let Some(recipient) = maybe_recipient {

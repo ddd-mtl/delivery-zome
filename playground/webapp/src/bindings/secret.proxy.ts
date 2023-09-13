@@ -158,7 +158,7 @@ export class SecretProxy extends ZomeProxy {
     return this.call('get_secret', eh);
   }
 
-  async sendSecret(input: SendSecretInput): Promise<EntryHash> {
+  async sendSecret(input: SendSecretInput): Promise<ActionHash> {
     return this.call('send_secret', input);
   }
 

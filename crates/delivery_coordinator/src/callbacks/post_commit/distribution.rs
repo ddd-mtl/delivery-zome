@@ -11,7 +11,7 @@ pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribu
     let distribution = Distribution::try_from(entry)?;
     /// Create DeliveryNotice
     let notice = DeliveryNotice {
-        distribution_eh: distribution_eh.clone(),
+        distribution_ah: sah.action_address().to_owned(),
         sender: agent_info()?.agent_latest_pubkey,
         summary: distribution.delivery_summary.clone(),
         sender_summary_signature: distribution.summary_signature.clone(),
@@ -22,7 +22,7 @@ pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, distribu
         let _ = send_notice(notice.clone(), recipient, distribution.delivery_summary.distribution_strategy.clone());
     }
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::NewDistribution((distribution_eh.to_owned(), distribution, sah.hashed.content.timestamp())));
+    let res = emit_signal(&SignalProtocol::NewDistribution((sah.action_address().to_owned(), distribution, sah.hashed.content.timestamp())));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     } else {
@@ -59,7 +59,7 @@ fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_stra
             return zome_error!("Recipient failed to sign Notice. Suspicious behavior.");
         }
         let ack = NoticeAck {
-            distribution_eh: notice.distribution_eh.clone(),
+            distribution_ah: notice.distribution_ah.clone(),
             recipient: recipient.clone(),
             recipient_summary_signature: signature.clone(),
         };

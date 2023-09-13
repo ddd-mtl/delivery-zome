@@ -17,9 +17,9 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         DeliveryProtocol::ChunkRequest(chunk_eh) => {
             receive_dm_chunk_request(dm.from, chunk_eh)
         },
-        DeliveryProtocol::ParcelRequest(distribution_eh) => {
-            receive_dm_parcel_request(dm.from, distribution_eh)
-        },
+        DeliveryProtocol::ParcelRequest(distribution_ah) => {
+            receive_dm_parcel_request(dm.from, distribution_ah)
+        }
         DeliveryProtocol::Item(pending_item) => {
             match pending_item.kind {
                 /// Sent by recipient
@@ -117,13 +117,13 @@ pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> Deli
 
 
 /// Returns ParcelResponse or Failure
-pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_eh: EntryHash) -> DeliveryProtocol {
+pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash) -> DeliveryProtocol {
     /// Get Distribution Entry
-    let maybe_distribution: ExternResult<Distribution> = get_typed_from_eh(distribution_eh);
+    let maybe_distribution: ExternResult<(EntryHash, Distribution)> = get_typed_from_ah(distribution_ah);
     if let Err(err) = maybe_distribution {
         return failure_err("Distribution not found", err);
     }
-    let distribution = maybe_distribution.unwrap();
+    let (_eh, distribution) = maybe_distribution.unwrap();
     /// Make sure DM is from a valid recipient
     if !distribution.recipients.contains(&from) {
         return failure("Request from invalid recipient");
@@ -187,7 +187,7 @@ pub fn receive_reply(from: AgentPubKey, pending_item: PendingItem) -> ExternResu
     }
     /// Create ReplyAck
     let receipt = ReplyAck {
-        distribution_eh: pending_item.distribution_eh,
+        distribution_ah: pending_item.distribution_ah,
         recipient: from,
         recipient_signature: pending_item.author_signature,
         has_accepted: maybe_reply.unwrap().has_accepted,
@@ -206,7 +206,7 @@ pub fn receive_reception(from: AgentPubKey, pending_item: PendingItem) -> Extern
     let _received: Option<ReceptionProof> = unpack_item(pending_item.clone(), from.clone())?;
     /// Create ReceptionAck
     let receipt = ReceptionAck {
-        distribution_eh: pending_item.distribution_eh,
+        distribution_ah: pending_item.distribution_ah,
         recipient: from,
         recipient_signature: pending_item.author_signature,
         //date_of_response: now(),

@@ -41,7 +41,7 @@ pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Opt
       /// Check each Inbox link
       for (pending_parcel, link) in &pending_parcel_pairs {
          assert!(pending_parcel.kind == ItemKind::AppEntryBytes);
-         if pending_parcel.distribution_eh != notice.distribution_eh {
+         if pending_parcel.distribution_ah != notice.distribution_ah {
             continue;
          }
          /// We have the parcel we just need to deserialize it
@@ -53,7 +53,7 @@ pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Opt
    /// Not found in Inbox
    /// Try via DM second
    if notice.summary.distribution_strategy.can_dm() {
-      let dm = DeliveryProtocol::ParcelRequest(notice.distribution_eh);
+      let dm = DeliveryProtocol::ParcelRequest(notice.distribution_ah);
       let response = send_dm(notice.sender, dm)?;
       debug!("dm response: {:?}", response);
       if let DeliveryProtocol::ParcelResponse(entry) = response {

@@ -37,13 +37,13 @@ export interface DeliveryPerspective {
     manifestByData: Dictionary<EntryHashB64>,
 
     /** -- OUTBOUND -- */
-    /** distrib_eh -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
+    /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
     distributions: Dictionary<[Distribution, Timestamp, DistributionState, Dictionary<DeliveryState>]>,
-    /** distrib_eh -> NoticeAck */
+    /** distrib_ah -> NoticeAck */
     noticeAcks: Dictionary<NoticeAck>,
-    /** distrib_eh -> ReplyAck */
+    /** distrib_ah -> ReplyAck */
     replyAcks: Dictionary<ReplyAck>,
-    /** distrib_eh -> ReceptionAck */
+    /** distrib_ah -> ReceptionAck */
     receptionAcks: Dictionary<ReceptionAck>,
 
     /** -- INBOUND -- */
@@ -53,20 +53,6 @@ export interface DeliveryPerspective {
     replies: Dictionary<NoticeReply>,
     /** notice_eh -> ReceptionProof */
     receptions: Dictionary<ReceptionProof>,
-
-    /** -- EXTRA LOGIC -- */
-
-    //newDeliveryNotices: Dictionary<DeliveryNotice>,
-
-    //incomingDistributions: Dictionary<DistributionState>,
-
-    /** AgentPubKey -> (notice_eh -> distrib_eh) */
-    //unrepliedInbounds: Record<AgentPubKeyB64, Record<EntryHashB64, Timestamp>>,
-    /** AgentPubKey -> (notice_eh -> distrib_eh) */
-    //pendingInbounds: Record<AgentPubKeyB64, Record<EntryHashB64, Timestamp>>,
-    /** distrib_eh -> [Timestamp , AgentPubKey -> DeliveryState] */
-    //unrepliedOutbounds: Record<EntryHashB64, [Timestamp, Record<AgentPubKeyB64, DeliveryState>]>,
-
 }
 
 

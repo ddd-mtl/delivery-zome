@@ -19,7 +19,7 @@ pub struct Distribution {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct DeliveryNotice {
-   pub distribution_eh: EntryHash,
+   pub distribution_ah: ActionHash,
    pub summary: DeliverySummary,
    pub sender: AgentPubKey,
    pub sender_summary_signature: Signature,
@@ -30,7 +30,7 @@ pub struct DeliveryNotice {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct NoticeAck {
-   pub distribution_eh: EntryHash,
+   pub distribution_ah: ActionHash,
    pub recipient: AgentPubKey,
    pub recipient_summary_signature: Signature,
 }
@@ -49,7 +49,7 @@ pub struct NoticeReply {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ReplyAck {
-   pub distribution_eh: EntryHash,
+   pub distribution_ah: ActionHash,
    pub recipient: AgentPubKey,
    pub has_accepted: bool,
    pub recipient_signature: Signature,
@@ -94,7 +94,7 @@ pub struct ReceptionProof {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ReceptionAck {
-   pub distribution_eh: EntryHash,
+   pub distribution_ah: ActionHash,
    pub recipient: AgentPubKey,
    pub recipient_signature: Signature,
    //pub date_of_reception: u64,
@@ -112,7 +112,7 @@ pub struct PendingItem {
    pub author: AgentPubKey,
    pub author_signature: Signature, // Signature of the Entry's author
    pub encrypted_data: XSalsa20Poly1305EncryptedData,
-   pub distribution_eh: EntryHash,
+   pub distribution_ah: ActionHash,
 }
 
 

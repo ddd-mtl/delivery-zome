@@ -17,7 +17,7 @@ pub fn post_commit_ReceptionProof(entry: Entry, eh: &EntryHash) -> ExternResult<
    /// Create PendingItem
    let pending_item = pack_reception_proof(
       reception_proof.clone(),
-      notice.distribution_eh.clone(),
+      notice.distribution_ah.clone(),
       notice.sender.clone(),
    )?;
    /// Send it to sender

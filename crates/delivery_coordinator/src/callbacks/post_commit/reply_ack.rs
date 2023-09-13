@@ -20,7 +20,7 @@ pub fn post_commit_ReplyAck(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
    if reply_ack.has_accepted {
       //FIXME: let _ = send_parcel(reply)?;
    } else {
-      info!("Delivery {} refused by {}", reply_ack.distribution_eh, reply_ack.recipient);
+      info!("Delivery {} refused by {}", reply_ack.distribution_ah, reply_ack.recipient);
    }
    /// Done
    Ok(())
