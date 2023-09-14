@@ -325,6 +325,13 @@ export enum ItemKindType {
 	AppEntryBytes = 'AppEntryBytes',
 }
 
+export interface PublishParcelInput {
+  manifest: ParcelManifest
+  zome_origin: ZomeName
+  data_type: string
+  name: string
+}
+
 export interface DistributeParcelInput {
   recipients: AgentPubKey[]
   strategy: DistributionStrategy

@@ -11,9 +11,10 @@ mod pub_enc_key;
 mod query;
 mod get_distribution_state;
 mod get_notice_state;
-mod commit_chunks;
 mod get_delivery_state;
 mod get_all_local_parcels;
+mod publish_parcel;
+mod publish_chunk;
 
 
 pub use get_distribution_state::*;
@@ -35,4 +36,6 @@ pub use self::{
    query::*,
    respond_to_notice::*,
    get_delivery_state::*,
+   publish_parcel::*,
+   publish_chunk::*,
 };

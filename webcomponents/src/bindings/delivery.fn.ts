@@ -12,7 +12,6 @@ export const deliveryFunctionNames: FunctionName[] = [
 
 
 	"check_manifest",
-	"commit_chunks",
 	"commit_parcel_chunk",
 	"commit_parcel_manifest",
 	"commit_pending_item",
@@ -27,6 +26,8 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"get_enc_key",
 	"get_my_enc_key",
 	"test_encryption",
+	"publish_chunk",
+	"publish_parcel",
 	"pull_inbox",
 	"query_all_Distribution",
 	"query_all_DeliveryNotice",
@@ -44,6 +45,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"commit_parcel",
 	"commit_NoticeAck",
 	"commit_ReceptionProof",
+	"commit_received_chunks",
 	"fetch_parcel",];
 
 

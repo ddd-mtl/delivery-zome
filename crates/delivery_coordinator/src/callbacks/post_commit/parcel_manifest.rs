@@ -36,8 +36,8 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
       }
    }
    /// Commit chunks
-   let response = call_self("commit_chunks", pairs)?;
-   debug!("commit_chunks() response: {:?}", response);
+   let response = call_self("commit_received_chunks", pairs)?;
+   debug!("commit_received_chunks() response: {:?}", response);
    assert!(matches!(response, ZomeCallResponse::Ok { .. }));
    /// Done
    Ok(())

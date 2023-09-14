@@ -1,8 +1,8 @@
 import { DnaViewModel, ZvmDef } from "@ddd-qc/lit-happ";
-import {DeliveryZvm, ParcelKindType, SignalProtocol, SignalProtocolType} from "@ddd-qc/delivery";
+import {DeliveryZvm, ParcelKindType, ParcelManifest, SignalProtocol, SignalProtocolType} from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
-import {AppSignalCb, encodeHashToBase64} from "@holochain/client";
+import {AppSignalCb, encodeHashToBase64, EntryHashB64, ZomeName} from "@holochain/client";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 
 
@@ -63,4 +63,19 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
    }
   }
 
+
+  async publishMessage(message: string): Promise<EntryHashB64> {
+   const chunk_eh = await this.deliveryZvm.zomeProxy.publishChunk(message);
+
+   const eh = await this.deliveryZvm.zomeProxy.publishParcel({
+    manifest: {
+     data_hash: "fake-hash",
+     chunks: [chunk_eh],
+    },
+    zome_origin: "secret_integrity",
+    data_type: "public_secret",
+    name: message[0],
+   });
+   return encodeHashToBase64(eh);
+  }
 }

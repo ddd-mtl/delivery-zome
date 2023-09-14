@@ -325,6 +325,13 @@ export enum ItemKindType {
 	AppEntryBytes = 'AppEntryBytes',
 }
 
+export interface PublishParcelInput {
+  manifest: ParcelManifest
+  zome_origin: ZomeName
+  data_type: string
+  name: string
+}
+
 export interface DistributeParcelInput {
   recipients: AgentPubKey[]
   strategy: DistributionStrategy
@@ -492,6 +499,7 @@ export enum SignalProtocolType {
 	NewReceptionProof = 'NewReceptionProof',
 	NewReceptionAck = 'NewReceptionAck',
 	NewPendingItem = 'NewPendingItem',
+	NewPublicParcel = 'NewPublicParcel',
 }
 export type SignalProtocolVariantNewManifest = {NewManifest: [EntryHash, ParcelManifest]}
 export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
@@ -503,5 +511,6 @@ export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, ReplyAc
 export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, ReceptionProof]}
 export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, ReceptionAck]}
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
+export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, ParcelDescription]}
 export type SignalProtocol = 
- | SignalProtocolVariantNewManifest | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem;
+ | SignalProtocolVariantNewManifest | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;

@@ -3,8 +3,8 @@ use zome_utils::*;
 use zome_delivery_integrity::*;
 use zome_delivery_types::*;
 
-/// Write base64 file as string to source chain
-/// Return EntryHash of newly created ParcelChunk
+
+/// Return EntryHash of newly created ParcelManifest
 #[hdk_extern]
 pub fn commit_parcel_manifest(manifest: ParcelManifest) -> ExternResult<EntryHash> {
    trace!(" START - {}", manifest.data_hash);

@@ -4,6 +4,14 @@ use hdi::prelude::*;
 
 use crate::*;
 
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PublishParcelInput {
+   pub manifest: ParcelManifest,
+   pub zome_origin: ZomeName,
+   pub data_type: String,
+   pub name: String,
+}
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DistributeParcelInput {
