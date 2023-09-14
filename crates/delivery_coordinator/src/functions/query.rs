@@ -65,7 +65,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
       },
       DeliveryNoticeQueryField::Parcel(parcel_eh) => {
          for (_, _, notice) in tuples {
-            if notice.summary.parcel_reference.entry_address() == parcel_eh {
+            if notice.summary.parcel_description.reference.eh == parcel_eh {
                res.push(notice.clone());
             }
          }
@@ -215,7 +215,7 @@ pub fn query_all_ReceptionProof(_: ()) -> ExternResult<Vec<(EntryHash, Reception
 
 ///Find ReceptionProof with field with given value
 #[hdk_extern]
-pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Option<ReceptionProof>> {
+pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Option<(EntryHash, ReceptionProof)>> {
    //debug!("*** query_ReceptionProof() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create ReceptionProof Elements with query
@@ -224,17 +224,17 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
    /// Search through query result
    match field {
       ReceptionProofQueryField::Notice(eh) => {
-         for (_, _, receipt) in tuples {
-            if receipt.notice_eh == eh {
-               return Ok(Some(receipt));
+         for (_ah, create, reception) in tuples {
+            if reception.notice_eh == eh {
+               return Ok(Some((create.entry_hash, reception)));
             }
          }
       },
       ReceptionProofQueryField::Parcel(eh) => {
-         for (_, _, receipt) in tuples {
+         for (_ah, create, reception) in tuples {
             //debug!("*** query_ReceptionProof() Parcel  receipt.parcel_eh {:?}", receipt.parcel_eh);
-            if receipt.parcel_eh == eh {
-               return Ok(Some(receipt));
+            if reception.parcel_eh == eh {
+               return Ok(Some((create.entry_hash, reception)));
             }
          }
       },

@@ -50,7 +50,7 @@ pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<Vec<(EntryHash
       let notice_eh = hash_entry(notice)?;
       /// Must not already have a ReceptionProof
       let maybe_reception_proof = query_ReceptionProof(ReceptionProofQueryField::Notice(notice_eh.clone()))?;
-      if let Some(reception_proof) = maybe_reception_proof {
+      if let Some((_reception_eh, reception_proof)) = maybe_reception_proof {
          debug!("ReceptionProof found for notice: {:?}", notice_eh);
          let reception_proof_eh = hash_entry(reception_proof.clone())?;
          res.push((notice_eh, Ok(reception_proof_eh)));
@@ -112,8 +112,8 @@ pub fn find_notice_with_parcel(parcel_eh: EntryHash) -> ExternResult<Vec<Deliver
    let mut res = Vec::new();
    for notice_el in notices {
       let notice: DeliveryNotice = get_typed_from_record(notice_el)?;
-      let summary_eh = notice.summary.parcel_reference.entry_address();
-      if summary_eh == parcel_eh {
+      let summary_eh = &notice.summary.parcel_description.reference.eh;
+      if summary_eh == &parcel_eh {
          res.push(notice);
       }
    }

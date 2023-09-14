@@ -18,20 +18,22 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<ActionHas
    recipients.extend(set.into_iter());
    debug!("recipients: {}", recipients.len());
    /// Create ParcelSummary
-   let mut parcel_name = String::new();
-   let parcel_size = match input.parcel_ref.clone() {
-      ParcelReference::AppEntry(eref) => get_app_entry_size(eref.eh)?,
-      ParcelReference::Manifest(mref) => {
-         let manifest: ParcelManifest = get_typed_from_eh(mref.manifest_eh.clone())?;
-         parcel_name = manifest.name;
-         manifest.size
+   let parcel_size = match input.parcel_ref.kind_info.clone() {
+      ParcelKind::AppEntry(_) => get_app_entry_size(input.parcel_ref.eh.clone())?,
+      ParcelKind::Manifest(_) => {
+         let manifest: ParcelManifest = get_typed_from_eh(input.parcel_ref.eh.clone())?;
+         manifest.chunks.len() * CHUNK_MAX_SIZE
+         //parcel_name = manifest.name;
+         //manifest.size
       }
    };
    let delivery_summary = DeliverySummary {
       distribution_strategy: input.strategy,
-      parcel_reference: input.parcel_ref,
-      parcel_size,
-      parcel_name,
+      parcel_description: ParcelDescription {
+         name: input.parcel_name,
+         size: parcel_size,
+         reference: input.parcel_ref,
+      },
    };
    debug!("delivery_summary: {:?}", delivery_summary);
    /// Sign summary
@@ -39,7 +41,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<ActionHas
    /// Create Distribution
    let distribution = Distribution {
       recipients,
-      delivery_summary: delivery_summary,
+      delivery_summary,
       summary_signature,
    };
    /// Commit Distribution

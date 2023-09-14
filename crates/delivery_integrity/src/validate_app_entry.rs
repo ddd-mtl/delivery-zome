@@ -53,13 +53,13 @@ fn validate_ParcelManifest(entry: Entry) -> ExternResult<ValidateCallbackResult>
         return Ok(ValidateCallbackResult::Invalid("Missing chunks".to_string()));
     }
     /// Must not exceed size limit
-    if parcel_manifest.size > PARCEL_MAX_SIZE {
-        return Ok(ValidateCallbackResult::Invalid(format!("Parcel is too big: {} > {}", parcel_manifest.size, PARCEL_MAX_SIZE)));
+    if parcel_manifest.chunks.len() > PARCEL_MAX_CHUNKS {
+        return Ok(ValidateCallbackResult::Invalid(format!("Parcel is too big: {} > {} chunks", parcel_manifest.chunks.len(), PARCEL_MAX_CHUNKS)));
     }
-    /// Must meet minimum name length
-    if parcel_manifest.name.len() < NAME_MIN_LENGTH {
-        return Ok(ValidateCallbackResult::Invalid(format!("Name is too small: {} > {}", parcel_manifest.name, NAME_MIN_LENGTH)));
-    }
+    // /// Must meet minimum name length
+    // if parcel_manifest.name.len() < NAME_MIN_LENGTH {
+    //     return Ok(ValidateCallbackResult::Invalid(format!("Name is too small: {} > {}", parcel_manifest.name, NAME_MIN_LENGTH)));
+    // }
     /// FIXME: Check each entry exists and is a ParcelChunk
     /// FIXME: Also check total size
     /// Done

@@ -141,7 +141,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash)
         return failure("Request from invalid recipient");
     }
     /// Get Parcel entry hash
-    let parcel_eh = distribution.delivery_summary.parcel_reference.entry_address();
+    let parcel_eh = distribution.delivery_summary.parcel_description.reference.eh.clone();
     debug!("Looking for Parcel: {:?}", parcel_eh);
     /// Get entry
     let maybe_maybe_element = get(parcel_eh, GetOptions::content());

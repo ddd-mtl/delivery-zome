@@ -9,6 +9,7 @@ use crate::*;
 pub struct DistributeParcelInput {
    pub recipients: Vec<AgentPubKey>,
    pub strategy: DistributionStrategy,
+   pub parcel_name: String,
    pub parcel_ref: ParcelReference,
 }
 

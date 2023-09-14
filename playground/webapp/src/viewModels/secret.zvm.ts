@@ -85,7 +85,7 @@ export class SecretZvm extends ZomeViewModel {
     }
 
     const final = Object.values(res).map((eh) => encodeHashToBase64(eh));
-    console.log(" - final", final);
+    console.log(" getSecretsFrom():  final", final);
     this._perspective.secretsByAgent[sender] = final;
     return final;
   }

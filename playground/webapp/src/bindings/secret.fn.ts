@@ -12,10 +12,10 @@ export const secretFunctionNames: FunctionName[] = [
 	"create_secret",
 	"create_split_secret",
 	"get_secret",
-	"send_secret",
 	"get_secrets_from",
 	"refuse_secret",
-	"accept_secret",];
+	"accept_secret",
+	"send_secret",];
 
 
 /** Generate tuple array of function names with given zomeName */

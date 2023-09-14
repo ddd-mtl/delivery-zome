@@ -1,6 +1,7 @@
 //! Delivery related types and states
 
 use hdi::prelude::*;
+use crate::ParcelDescription;
 
 
 //const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
@@ -74,54 +75,42 @@ pub enum NoticeState {
    Deleted,
 }
 
-/// Information for commiting Entry
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct EntryReference {
-   pub eh: EntryHash,
-   pub zome_name: ZomeName,
-   pub entry_index: EntryDefIndex,
-   pub visibility: EntryVisibility,
-}
-
-/// Informantion about where the data is from
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct ManifestReference {
-   pub manifest_eh: EntryHash,
-   pub data_type: String,
-   pub from_zome: ZomeName,
-}
+// /// Information for commiting Entry
+// #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+// pub struct EntryReference {
+//    pub entry_index: EntryDefIndex,
+//    pub visibility: EntryVisibility,
+// }
+//
+// /// Informantion about where the data is from
+// #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+// pub struct ManifestReference {
+//    pub data_type: String,
+// }
 
 
 /// Shared data between a Distribution and a DeliveryNotice
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct DeliverySummary {
    pub distribution_strategy: DistributionStrategy,
-   pub parcel_size: usize,
-   pub parcel_reference: ParcelReference,
-   pub parcel_name: String,
+   pub parcel_description: ParcelDescription,
 }
+
 
 /// A Parcel is a generic Entry or a ParcelManifest
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum ParcelReference {
-   /// Any Entry type
-   AppEntry(EntryReference),
-   /// A ParcelManifest
-   Manifest(ManifestReference),
+pub struct ParcelReference {
+   pub eh: EntryHash,
+   pub zome_origin: ZomeName,
+   pub visibility: EntryVisibility,
+   pub kind_info: ParcelKind,
 }
 
 impl ParcelReference {
-   pub fn entry_address(&self) -> EntryHash {
-      match self {
-         ParcelReference::Manifest(mref) => mref.manifest_eh.clone(),
-         ParcelReference::AppEntry(eref) => eref.eh.clone(),
-      }
-   }
-
-   pub fn entry_index(&self) -> EntryDefIndex {
-      match self {
-         ParcelReference::Manifest(_) => EntryDefIndex::from(6), // FIXME should not be hardcoded: DeliveryEntryTypes::ParcelManifest
-         ParcelReference::AppEntry(eref) => eref.entry_index.to_owned(),
+   pub fn entry_integrity_zome_name(&self) -> ZomeName {
+      match self.kind_info {
+         ParcelKind::Manifest(_) => crate::DELIVERY_INTERGRITY_ZOME_NAME.to_string().into(),
+         ParcelKind::AppEntry(_) => self.zome_origin.clone(),
       }
    }
 
@@ -142,18 +131,23 @@ impl ParcelReference {
       /// Return found value
       ZomeIndex::from(i)
    }
+}
 
-   pub fn entry_integrity_zome_name(&self) -> ZomeName {
-      match self {
-         ParcelReference::Manifest(_) => crate::DELIVERY_INTERGRITY_ZOME_NAME.to_string().into(),
-         ParcelReference::AppEntry(eref) => eref.zome_name.clone(),
-      }
-   }
 
-   pub fn entry_visibility(&self) -> EntryVisibility {
+/// A Parcel is a generic Entry or a ParcelManifest
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum ParcelKind {
+   /// Any Entry type
+   AppEntry(EntryDefIndex),
+   /// A ParcelManifest
+   Manifest(String), // data_type
+}
+
+impl ParcelKind {
+   pub fn entry_index(&self) -> EntryDefIndex {
       match self {
-         ParcelReference::Manifest(_) => EntryVisibility::Private,
-         ParcelReference::AppEntry(eref) => eref.visibility.clone(),
+         ParcelKind::AppEntry(entry_index) => entry_index.to_owned(),
+         ParcelKind::Manifest(_) => EntryDefIndex::from(6), // FIXME should not be hardcoded: DeliveryEntryTypes::ParcelManifest
       }
    }
 }

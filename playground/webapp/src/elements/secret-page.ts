@@ -108,6 +108,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     }
     console.log("onSenderSelected() value", selector.value)
     this._senderSecrets = await this._dvm.secretZvm.getSecretsFrom(selector.value);
+    //this._senderSecrets = this._dvm.secretZvm.perspective.secretsByAgent[selector.value];
     this._sender = selector.value;
   }
 

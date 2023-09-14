@@ -1,5 +1,5 @@
 import { DnaViewModel, ZvmDef } from "@ddd-qc/lit-happ";
-import {DeliveryZvm, SignalProtocol, SignalProtocolType} from "@ddd-qc/delivery";
+import {DeliveryZvm, ParcelKindType, SignalProtocol, SignalProtocolType} from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
 import {AppSignalCb, encodeHashToBase64} from "@holochain/client";
@@ -44,10 +44,10 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
 
    /** Automatically accept parcel from secret zome */
    if (SignalProtocolType.NewNotice in deliverySignal) {
-    console.log("ADDING DeliveryNotice. parcel_reference:", deliverySignal.NewNotice[1].summary.parcel_reference);
+    console.log("ADDING DeliveryNotice. parcel_description:", deliverySignal.NewNotice[1].summary.parcel_description);
     const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
-    if ("AppEntry" in deliverySignal.NewNotice[1].summary.parcel_reference) {
-      if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.AppEntry.zome_name) {
+    if (ParcelKindType.AppEntry in deliverySignal.NewNotice[1].summary.parcel_description.reference.kind_info) {
+      if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_description.reference.zome_origin) {
        this.deliveryZvm.acceptDelivery(noticeEh);
       }
     } else {

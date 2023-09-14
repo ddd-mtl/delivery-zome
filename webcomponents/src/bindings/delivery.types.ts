@@ -144,6 +144,8 @@ export const CHUNK_MAX_SIZE = 200 * 1024;
 
 export const PARCEL_MAX_SIZE = 10 * 1024 * 1024;
 
+export const PARCEL_MAX_CHUNKS = PARCEL_MAX_SIZE / CHUNK_MAX_SIZE + 1;
+
 export const NAME_MIN_LENGTH = 2;
 
 /** Listing all Holochain Path used in this DNA */
@@ -190,38 +192,29 @@ export enum NoticeStateType {
 	Deleted = 'Deleted',
 }
 
-/** Information for commiting Entry */
-export interface EntryReference {
-  eh: EntryHash
-  zome_name: ZomeName
-  entry_index: EntryDefIndex
-  visibility: EntryVisibility
-}
-
-/** Informantion about where the data is from */
-export interface ManifestReference {
-  manifest_eh: EntryHash
-  data_type: string
-  from_zome: ZomeName
-}
-
 /** Shared data between a Distribution and a DeliveryNotice */
 export interface DeliverySummary {
   distribution_strategy: DistributionStrategy
-  parcel_size: number
-  parcel_reference: ParcelReference
-  parcel_name: string
+  parcel_description: ParcelDescription
 }
 
 /** A Parcel is a generic Entry or a ParcelManifest */
-export enum ParcelReferenceType {
+export interface ParcelReference {
+  eh: EntryHash
+  zome_origin: ZomeName
+  visibility: EntryVisibility
+  kind_info: ParcelKind
+}
+
+/** A Parcel is a generic Entry or a ParcelManifest */
+export enum ParcelKindType {
 	AppEntry = 'AppEntry',
 	Manifest = 'Manifest',
 }
-export type ParcelReferenceVariantAppEntry = {AppEntry: EntryReference}
-export type ParcelReferenceVariantManifest = {Manifest: ManifestReference}
-export type ParcelReference = 
- | ParcelReferenceVariantAppEntry | ParcelReferenceVariantManifest;
+export type ParcelKindVariantAppEntry = {AppEntry: EntryDefIndex}
+export type ParcelKindVariantManifest = {Manifest: string}
+export type ParcelKind = 
+ | ParcelKindVariantAppEntry | ParcelKindVariantManifest;
 
 /**  */
 export type DistributionStrategy =
@@ -230,6 +223,13 @@ export enum DistributionStrategyType {
 	Normal = 'Normal',
 	DmOnly = 'DmOnly',
 	DhtOnly = 'DhtOnly',
+}
+
+/** Shared data between a Distribution and a DeliveryNotice */
+export interface ParcelDescription {
+  name: string
+  size: number
+  reference: ParcelReference
 }
 
 /** Entry representing a request to send a Parcel to one or multiple recipients */
@@ -279,10 +279,7 @@ export interface ParcelChunk {
  * WARN: Change MANIFEST_ENTRY_NAME const when renaming
  */
 export interface ParcelManifest {
-  name: string
-  data_type: string
   data_hash: string
-  size: number
   chunks: EntryHash[]
 }
 
@@ -331,6 +328,7 @@ export enum ItemKindType {
 export interface DistributeParcelInput {
   recipients: AgentPubKey[]
   strategy: DistributionStrategy
+  parcel_name: string
   parcel_ref: ParcelReference
 }
 
@@ -408,8 +406,11 @@ export enum DeliveryEntryType {
 	ParcelManifest = 'ParcelManifest',
 	ReceptionProof = 'ReceptionProof',
 	NoticeAck = 'NoticeAck',
-	PendingItem = 'PendingItem',
 	ReplyAck = 'ReplyAck',
+	PendingItem = 'PendingItem',
+	PublicManifest = 'PublicManifest',
+	PublicChunk = 'PublicChunk',
+	PublicParcel = 'PublicParcel',
 }
 export type DeliveryEntryVariantPubEncKey = {PubEncKey: PubEncKey}
 export type DeliveryEntryVariantDeliveryNotice = {DeliveryNotice: DeliveryNotice}
@@ -420,10 +421,13 @@ export type DeliveryEntryVariantParcelChunk = {ParcelChunk: ParcelChunk}
 export type DeliveryEntryVariantParcelManifest = {ParcelManifest: ParcelManifest}
 export type DeliveryEntryVariantReceptionProof = {ReceptionProof: ReceptionProof}
 export type DeliveryEntryVariantNoticeAck = {NoticeAck: NoticeAck}
-export type DeliveryEntryVariantPendingItem = {PendingItem: PendingItem}
 export type DeliveryEntryVariantReplyAck = {ReplyAck: ReplyAck}
+export type DeliveryEntryVariantPendingItem = {PendingItem: PendingItem}
+export type DeliveryEntryVariantPublicManifest = {PublicManifest: ParcelManifest}
+export type DeliveryEntryVariantPublicChunk = {PublicChunk: ParcelChunk}
+export type DeliveryEntryVariantPublicParcel = {PublicParcel: ParcelDescription}
 export type DeliveryEntry = 
- | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantParcelChunk | DeliveryEntryVariantParcelManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantReplyAck;
+ | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantParcelChunk | DeliveryEntryVariantParcelManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
 
 /** Entry representing the Public Encryption Key of an Agent */
 export interface PubEncKey {

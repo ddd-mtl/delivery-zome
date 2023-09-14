@@ -48,10 +48,16 @@ pub enum DeliveryEntry {
    ReceptionProof(ReceptionProof),
    #[entry_def(required_validations = 1, visibility = "private")]
    NoticeAck(NoticeAck),
-   #[entry_def(required_validations = 1, visibility = "public")]
-   PendingItem(PendingItem),
    #[entry_def(required_validations = 1, visibility = "private")]
    ReplyAck(ReplyAck),
+   #[entry_def(required_validations = 1, visibility = "public")]
+   PendingItem(PendingItem),
+   #[entry_def(required_validations = 1, visibility = "public")]
+   PublicManifest(ParcelManifest),
+   #[entry_def(required_validations = 1, visibility = "public")]
+   PublicChunk(ParcelChunk),
+   #[entry_def(required_validations = 1, visibility = "public")]
+   PublicParcel(ParcelDescription),
 }
 
 

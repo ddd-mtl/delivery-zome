@@ -6,6 +6,7 @@
 
 
 mod callbacks;
+mod send_secret;
 
 
 //----------------------------------------------------------------------------------------
@@ -41,10 +42,10 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    }
    /// Commit Manifest
    let manifest = ParcelManifest {
-      name: "dummy".to_string(),
-      data_type: "split_secret".to_owned(),
+      //name: "dummy".to_string(),
+      //data_type: "split_secret".to_owned(),
       data_hash: value.clone(), // Should be a hash but we dont really care as its just an example playground
-      size: value.len(),
+      //size: value.len(),
       chunks,
    };
    let response = call_delivery_zome("commit_parcel_manifest", manifest)?;
@@ -77,10 +78,10 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
    if records.len() != manifest.chunks.len() {
       return error("Not all chunks have been found on chain");
    }
-   /// Concat all chunks
-   if manifest.data_type != "split_secret".to_owned() {
-      return error("Manifest of an unknown entry type");
-   }
+   // /// Concat all chunks
+   // if manifest.data_type != "split_secret".to_owned() {
+   //    return error("Manifest of an unknown entry type");
+   // }
    let mut secret = String::new();
    for record in records {
       let chunk: ParcelChunk = get_typed_from_record(record)?;
@@ -89,56 +90,6 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
    }
    /// Done
    Ok(secret)
-}
-
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct SendSecretInput {
-   pub secret_eh: EntryHash,
-   pub strategy: DistributionStrategy,
-   pub recipients: Vec<AgentPubKey>,
-}
-
-/// Return Distribution ActionHash
-#[hdk_extern]
-pub fn send_secret(input: SendSecretInput) -> ExternResult<ActionHash> {
-   debug!("send_secret() START {:?}", input.secret_eh);
-   debug!("send_secret() zome_names: {:?}", dna_info()?.zome_names);
-   debug!("send_secret() zome_index: {:?}", zome_info()?.id);
-   debug!("send_secret()  zome_name: {:?}", zome_info()?.name);
-
-   /// Determine parcel type depending on Entry
-   let maybe_secret: ExternResult<Secret> = get_typed_from_eh(input.secret_eh.clone());
-   let zome_name =ZomeName::from("secret_integrity");
-   let parcel_ref = if let Ok(_secret) = maybe_secret {
-      ParcelReference::AppEntry(EntryReference {
-         eh: input.secret_eh,
-         zome_name,
-         entry_index: EntryDefIndex::from(get_variant_index::<SecretEntry>(SecretEntryTypes::Secret)?),
-         visibility: EntryVisibility::Private,
-         }
-      )
-   } else {
-      let _: ParcelManifest = get_typed_from_eh(input.secret_eh.clone())?;
-      let mref = ManifestReference {
-         manifest_eh: input.secret_eh,
-         from_zome: zome_name,
-         data_type: "secret".to_string(),
-      };
-      ParcelReference::Manifest(mref)
-   };
-
-   let distribution = DistributeParcelInput {
-      recipients: input.recipients,
-      strategy: input.strategy,
-      parcel_ref,
-   };
-   debug!("send_secret() calling distribute_parcel() with: {:?}", distribution);
-   let response = call_delivery_zome("distribute_parcel", distribution)?;
-   // distribute_parcel(distribution)?;
-   let ah: ActionHash = decode_response(response)?;
-   debug!("send_secret() END");
-   Ok(ah)
 }
 
 
@@ -155,7 +106,19 @@ pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
       DeliveryNoticeQueryField::Sender(sender),
    )?;
    let notices: Vec<DeliveryNotice> = decode_response(response)?;
-   let parcels: Vec<EntryHash> = notices.iter().map(|x| x.summary.parcel_reference.entry_address()).collect();
+
+   let mut parcels: Vec<EntryHash> = Vec::new();
+   for notice in notices {
+      let notice_eh = hash_entry(notice)?;
+      let response = call_delivery_zome(
+         "query_ReceptionProof",
+         ReceptionProofQueryField::Notice(notice_eh),
+      )?;
+      let maybe_reception: Option<(EntryHash, ReceptionProof)> = decode_response(response)?;
+      if let Some((_reception_eh, reception)) = maybe_reception {
+         parcels.push(reception.parcel_eh);
+      }
+   }
    debug!("get_secrets_from() END - secret parcels found: {}", parcels.len());
    Ok(parcels)
 }
