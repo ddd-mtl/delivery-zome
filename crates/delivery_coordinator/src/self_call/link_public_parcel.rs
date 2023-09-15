@@ -4,7 +4,7 @@ use crate::public_parcels_path;
 
 
 /// Called from PublicParcel post-commit since its created in a "relaxed" way
-#[ignore]
+#[ignore(zits)]
 #[hdk_extern]
 pub fn link_public_parcel(pp_eh: EntryHash) -> ExternResult<ActionHash> {
    let path = public_parcels_path();

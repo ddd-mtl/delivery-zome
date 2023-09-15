@@ -149,10 +149,6 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
-  async checkManifest(chunkEh: EntryHash): Promise<[EntryHash, EntryHash | number][] | null> {
-    return this.call('check_manifest', chunkEh);
-  }
-
   async commitParcelChunk(data: string): Promise<EntryHash> {
     return this.call('commit_parcel_chunk', data);
   }
@@ -167,10 +163,6 @@ export class DeliveryProxy extends ZomeProxy {
 
   async distributeParcel(input: DistributeParcelInput): Promise<ActionHash> {
     return this.call('distribute_parcel', input);
-  }
-
-  async fetchChunk(input: FetchChunkInput): Promise<[ParcelChunk, Link | null] | null> {
-    return this.call('fetch_chunk', input);
   }
 
   async getAllLocalParcels(): Promise<[EntryHash, ParcelManifest][]> {
@@ -203,10 +195,6 @@ export class DeliveryProxy extends ZomeProxy {
 
   async getMyEncKey(): Promise<Uint8Array> {
     return this.call('get_my_enc_key', null);
-  }
-
-  async testEncryption(to: AgentPubKey): Promise<void> {
-    return this.call('test_encryption', to);
   }
 
   async publishChunk(data: string): Promise<EntryHash> {
@@ -279,33 +267,5 @@ export class DeliveryProxy extends ZomeProxy {
 
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {
     return this.call('respond_to_notice', input);
-  }
-
-  async receiveDeliveryDm(dm: DirectMessage): Promise<DeliveryProtocol> {
-    return this.call('receive_delivery_dm', dm);
-  }
-
-  async commitParcel(input: CommitParcelInput): Promise<ActionHash> {
-    return this.call('commit_parcel', input);
-  }
-
-  async commitNoticeAck(ack: NoticeAck): Promise<ActionHash> {
-    return this.call('commit_NoticeAck', ack);
-  }
-
-  async commitReceptionProof(pr: ReceptionProof): Promise<EntryHash> {
-    return this.call('commit_ReceptionProof', pr);
-  }
-
-  async commitReceivedChunks(chunks: [ParcelChunk, Link][]): Promise<void> {
-    return this.call('commit_received_chunks', chunks);
-  }
-
-  async fetchParcel(noticeEh: EntryHash): Promise<EntryHash | null> {
-    return this.call('fetch_parcel', noticeEh);
-  }
-
-  async linkPublicParcel(ppEh: EntryHash): Promise<ActionHash> {
-    return this.call('link_public_parcel', ppEh);
   }
 }

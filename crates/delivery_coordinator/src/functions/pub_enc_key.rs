@@ -53,6 +53,7 @@ pub fn get_my_enc_key(_: ()) -> ExternResult<X25519PubKey> {
 }
 
 
+#[ignore(zits)]
 #[hdk_extern]
 fn test_encryption(to: AgentPubKey) -> ExternResult<()> {
    /// Get my key

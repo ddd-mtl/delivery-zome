@@ -83,10 +83,11 @@ pub struct CommitParcelInput {
 }
 
 
-/// Zome Function Callback required by delivery-zome.
+/// Self called Zome Function (Careful when renaming this function)
 /// Commits an arbitrary entry to source-chain.
 /// Should not be called directly. Only via remote call to self.
 /// Name of this function must equal COMMIT_PARCEL_CALLBACK_NAME global constant.
+#[ignore(zits)]
 #[hdk_extern]
 fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
    debug!("commit_parcel() entry_def_id = {:?}:{:?} | {}", input.entry_index, input.zome_index, zome_info()?.name);
@@ -126,6 +127,7 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
 
 
 ///
+#[ignore(zits)]
 #[hdk_extern]
 fn commit_NoticeAck(ack: NoticeAck) -> ExternResult<ActionHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));
@@ -135,6 +137,7 @@ fn commit_NoticeAck(ack: NoticeAck) -> ExternResult<ActionHash> {
 
 
 ///
+#[ignore(zits)]
 #[hdk_extern]
 fn commit_ReceptionProof(pr: ReceptionProof) -> ExternResult<EntryHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));

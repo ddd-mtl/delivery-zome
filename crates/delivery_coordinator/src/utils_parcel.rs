@@ -5,6 +5,61 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 
 
+
+/// Check if an entry is present in source-chain
+pub fn has_entry(eh: EntryHash) -> ExternResult<bool> {
+    let mut set: HashSet<EntryHash> = HashSet::new();
+    set.insert(eh);
+    let query_args = ChainQueryFilter::default()
+       .include_entries(false)
+       .entry_hashes(set);
+    let records = query(query_args)?;
+    Ok(!records.is_empty())
+}
+
+
+/// Find manifest with that chunk_eh
+pub fn find_notice_with_parcel(parcel_eh: EntryHash) -> ExternResult<Vec<DeliveryNotice>> {
+    /// Get all Create DeliveryNotice Elements with query
+    let query_args = ChainQueryFilter::default()
+       .include_entries(true)
+       .action_type(ActionType::Create)
+       .entry_type(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap());
+    let notices = query(query_args)?;
+    let mut res = Vec::new();
+    for notice_el in notices {
+        let notice: DeliveryNotice = get_typed_from_record(notice_el)?;
+        let summary_eh = &notice.summary.parcel_description.reference.eh;
+        if summary_eh == &parcel_eh {
+            res.push(notice);
+        }
+    }
+    /// Done
+    Ok(res)
+}
+
+
+/// Return percentage of chunks received
+/// 100 = all chunks received
+pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
+    /// Get ParcelManifest
+    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
+    let len = manifest.chunks.len();
+    let chunks_set: HashSet<EntryHash> = HashSet::from_iter(manifest.chunks);
+    /// Get all Create ParcelChunk Elements with query
+    let query_args = ChainQueryFilter::default()
+       .include_entries(false)
+       .entry_hashes(chunks_set);
+    let chunk_els = query(query_args)?;
+    /// Check if all found
+    debug!("has_all_chunks: {} == {} ?", chunk_els.len(), len);
+    let pct: f32 = chunk_els.len() as f32 / len as f32;
+    let iPct: usize = (pct * 100_f32).ceil() as usize;
+    debug!("pct == {} ?", pct);
+    Ok(iPct)
+}
+
+
 ///
 pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
     /// Get typed targets

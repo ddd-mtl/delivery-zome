@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-use std::iter::FromIterator;
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_types::*;
@@ -8,11 +6,12 @@ use zome_delivery_integrity::*;
 use crate::*;
 
 
-/// Remotely called Zome Function (Careful when renaming this function)
+/// Self called Zome Function (Careful when renaming this function)
 /// Check if all chunks have been committed for this parcel.
 /// Return EntryHash of Notice if Manifest is received from remote agent.
 /// Return EntryHash of ReceptionProof if it has been completly downloaded.
 /// Otherwise return download completion percentage.
+#[ignore(zits)]
 #[hdk_extern]
 pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<Vec<(EntryHash, Result<EntryHash, usize>)>>> {
    debug!("START {}", chunk_eh);
@@ -88,56 +87,3 @@ pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelMan
    Ok(None)
 }
 
-
-/// Check if an entry is present in source-chain
-pub fn has_entry(eh: EntryHash) -> ExternResult<bool> {
-   let mut set: HashSet<EntryHash> = HashSet::new();
-   set.insert(eh);
-   let query_args = ChainQueryFilter::default()
-      .include_entries(false)
-      .entry_hashes(set);
-   let parcels = query(query_args)?;
-   Ok(!parcels.is_empty())
-}
-
-
-/// Find manifest with that chunk_eh
-pub fn find_notice_with_parcel(parcel_eh: EntryHash) -> ExternResult<Vec<DeliveryNotice>> {
-   /// Get all Create DeliveryNotice Elements with query
-   let query_args = ChainQueryFilter::default()
-      .include_entries(true)
-      .action_type(ActionType::Create)
-      .entry_type(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap());
-   let notices = query(query_args)?;
-   let mut res = Vec::new();
-   for notice_el in notices {
-      let notice: DeliveryNotice = get_typed_from_record(notice_el)?;
-      let summary_eh = &notice.summary.parcel_description.reference.eh;
-      if summary_eh == &parcel_eh {
-         res.push(notice);
-      }
-   }
-   /// Done
-   Ok(res)
-}
-
-
-/// Return percentage of chunks received
-/// 100 = all chunks received
-pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
-   /// Get ParcelManifest
-   let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
-   let len = manifest.chunks.len();
-   let chunks_set: HashSet<EntryHash> = HashSet::from_iter(manifest.chunks);
-   /// Get all Create ParcelChunk Elements with query
-   let query_args = ChainQueryFilter::default()
-      .include_entries(false)
-      .entry_hashes(chunks_set);
-   let chunk_els = query(query_args)?;
-   /// Check if all found
-   debug!("has_all_chunks: {} == {} ?", chunk_els.len(), len);
-   let pct: f32 = chunk_els.len() as f32 / len as f32;
-   let iPct: usize = (pct * 100_f32).ceil() as usize;
-   debug!("pct == {} ?", pct);
-   Ok(iPct)
-}

@@ -6,6 +6,7 @@ use crate::*;
 
 /// Can only be called via remote call to self
 /// Return EntryHash of ParcelEntry if it has been downloaded
+#[ignore(zits)]
 #[hdk_extern]
 pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    debug!("fetch_parcel() {:?}", notice_eh);

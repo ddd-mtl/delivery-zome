@@ -9,6 +9,7 @@ use crate::*;
 
 /// Internal Zome Function
 /// Return EntryHash of ParcelEntry if it has been downloaded
+#[ignore(zits)]
 #[hdk_extern]
 fn fetch_chunk(input: FetchChunkInput) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
    trace!(" fetch_chunk() {:?}", input);

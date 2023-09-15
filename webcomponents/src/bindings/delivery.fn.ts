@@ -12,12 +12,10 @@ export const deliveryFunctionNames: FunctionName[] = [
 
 
 
-	"check_manifest",
 	"commit_parcel_chunk",
 	"commit_parcel_manifest",
 	"commit_pending_item",
 	"distribute_parcel",
-	"fetch_chunk",
 	"get_all_local_parcels",
 	"get_delivery_state",
 	"get_distribution_state",
@@ -26,7 +24,6 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"get_notice_state",
 	"get_enc_key",
 	"get_my_enc_key",
-	"test_encryption",
 	"publish_chunk",
 	"publish_parcel",
 	"pull_inbox",
@@ -44,14 +41,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"query_ReceptionProof",
 	"query_all_ReceptionAck",
 	"query_all_Manifest",
-	"respond_to_notice",
-	"receive_delivery_dm",
-	"commit_parcel",
-	"commit_NoticeAck",
-	"commit_ReceptionProof",
-	"commit_received_chunks",
-	"fetch_parcel",
-	"link_public_parcel",];
+	"respond_to_notice",];
 
 
 /** Generate tuple array of function names with given zomeName */

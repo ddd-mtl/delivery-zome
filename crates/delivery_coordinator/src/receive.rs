@@ -10,6 +10,7 @@ use crate::*;
 
 /// Starting point for any remote call in this zome (i.e. sending a dm)
 /// Name of this function must match REMOTE_ENDPOINT value
+#[ignore(zits)]
 #[hdk_extern]
 pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> {
     debug!("Received DM from: {} ; msg: {}", snip(&dm.from), dm.msg);

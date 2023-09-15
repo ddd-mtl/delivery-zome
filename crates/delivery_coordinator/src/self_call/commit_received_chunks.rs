@@ -5,6 +5,7 @@ use zome_delivery_integrity::*;
 use zome_delivery_types::*;
 
 /// Internal Zome function
+#[ignore(zits)]
 #[hdk_extern]
 fn commit_received_chunks(chunks: Vec<(ParcelChunk, Option<Link>)>) -> ExternResult<()> {
    debug!("commit_received_chunks() len = {}", chunks.len());
