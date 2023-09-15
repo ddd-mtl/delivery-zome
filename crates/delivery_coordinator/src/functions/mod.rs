@@ -15,6 +15,8 @@ mod get_delivery_state;
 mod get_all_local_parcels;
 mod publish_parcel;
 mod publish_chunk;
+mod pull_public_parcels;
+mod pull_parcel;
 
 
 pub use get_distribution_state::*;

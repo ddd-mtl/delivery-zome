@@ -395,12 +395,13 @@ export interface GetDeliveryStateInput {
 
 /** List of all Link kinds handled by this Zome */
 export type LinkTypes =
-  | {EncKey: null} | {Members: null} | {Inbox: null} | {Pendings: null};
+  | {EncKey: null} | {Members: null} | {Inbox: null} | {Pendings: null} | {PublicParcels: null};
 export enum LinkTypesType {
 	EncKey = 'EncKey',
 	Members = 'Members',
 	Inbox = 'Inbox',
 	Pendings = 'Pendings',
+	PublicParcels = 'PublicParcels',
 }
 
 export enum DeliveryEntryType {

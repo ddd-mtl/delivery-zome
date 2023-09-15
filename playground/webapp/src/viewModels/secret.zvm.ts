@@ -46,18 +46,18 @@ export class SecretZvm extends ZomeViewModel {
   /** -- Methods -- */
 
 
-  /** */
-  async probeAll() {
-    console.log("SecretViewModel.probeAll() called");
-
-    this.notifySubscribers()
-  }
+  // /** */
+  // async probeAll() {
+  //   console.log("SecretViewModel.probeAll() called");
+  //   this.notifySubscribers()
+  // }
 
 
   // /** */
   // async probeSecrets(): Promise<AgentPubKeyB64[]> {
   //   const secret_eh = await this.zomeProxy.createSecret(text);
   // }
+
 
 
   /** */

@@ -220,6 +220,18 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('pull_inbox', null);
   }
 
+  async pullManifest(manifestEh: EntryHash): Promise<ParcelManifest> {
+    return this.call('pull_manifest', manifestEh);
+  }
+
+  async pullChunk(chunkEh: EntryHash): Promise<ParcelChunk> {
+    return this.call('pull_chunk', chunkEh);
+  }
+
+  async pullPublicParcels(): Promise<[EntryHash, ParcelDescription][]> {
+    return this.call('pull_public_parcels', null);
+  }
+
   async queryAllDistribution(): Promise<[ActionHash, Timestamp, Distribution][]> {
     return this.call('query_all_Distribution', null);
   }
@@ -290,5 +302,9 @@ export class DeliveryProxy extends ZomeProxy {
 
   async fetchParcel(noticeEh: EntryHash): Promise<EntryHash | null> {
     return this.call('fetch_parcel', noticeEh);
+  }
+
+  async linkPublicParcel(ppEh: EntryHash): Promise<ActionHash> {
+    return this.call('link_public_parcel', ppEh);
   }
 }

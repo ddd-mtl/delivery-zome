@@ -24,6 +24,7 @@ pub enum LinkTypes {
    Members,
    Inbox,
    Pendings,
+   PublicParcels,
 }
 
 

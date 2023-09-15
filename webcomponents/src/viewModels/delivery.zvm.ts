@@ -13,7 +13,7 @@ import {
     DistributionState,
     DistributionStateType,
     NoticeState,
-    NoticeStateType,
+    NoticeStateType, ParcelDescription,
     SignalProtocol,
     SignalProtocolType,
 } from "../bindings/delivery.types";
@@ -145,6 +145,11 @@ export class DeliveryZvm extends ZomeViewModel {
         if (SignalProtocolType.NewPendingItem in deliverySignal) {
             console.log("signal NewPendingItem", deliverySignal.NewPendingItem);
         }
+        if (SignalProtocolType.NewPublicParcel in deliverySignal) {
+            console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
+            const pp_eh = encodeHashToBase64(deliverySignal.NewPublicParcel[0]);
+            this._perspective.publicParcels[pp_eh] = deliverySignal.NewPublicParcel[1];
+        }
         /** Done */
         this.notifySubscribers();
     }
@@ -156,6 +161,8 @@ export class DeliveryZvm extends ZomeViewModel {
     async probeAll(): Promise<void> {
         this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
         await this.queryAll();
+        const pds = await this.probePublicParcels();
+        console.log("PublicParcels count", Object.entries(pds).length);
         await this.probeInbox();
         //await this.queryDistributions();
         //await this.determineUnrepliedInbounds();
@@ -165,11 +172,36 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
+    private async probePublicParcels(): Promise<Dictionary<ParcelDescription>> {
+        const pps = await this.zomeProxy.pullPublicParcels();
+        this._perspective.publicParcels = {};
+        pps.map(([eh, pp]) => this._perspective.publicParcels[encodeHashToBase64(eh)] = pp);
+        this.notifySubscribers();
+        return this._perspective.publicParcels;
+    }
+
+    /** */
     private async probeInbox(): Promise<ActionHashB64[]> {
         const inbox = await this.zomeProxy.pullInbox();
         this._perspective.inbox = inbox.map((ah) => encodeHashToBase64(ah));
         this.notifySubscribers();
         return this._perspective.inbox;
+    }
+
+
+    /** Return base64 data string */
+    async pullParcel(ppEh: EntryHashB64): Promise<string> {
+        const pd = this._perspective.publicParcels[ppEh];
+        if (!pd) {
+            return Promise.reject("Unknown PublicParcel");
+        }
+        const manifest = await this.zomeProxy.pullManifest(pd.reference.eh);
+        let dataB64 = "";
+        for (const chunk_eh of manifest.chunks) {
+            let chunk = await this.zomeProxy.pullChunk(chunk_eh);
+            dataB64 += chunk.data;
+        }
+        return dataB64;
     }
 
 

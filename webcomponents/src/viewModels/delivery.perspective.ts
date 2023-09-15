@@ -3,7 +3,7 @@ import {
     DeliveryState,
     Distribution,
     DistributionState, FullDistributionState, NoticeAck,
-    NoticeReply, NoticeState, ParcelManifest, ReceptionAck, ReceptionProof, ReplyAck,
+    NoticeReply, NoticeState, ParcelDescription, ParcelManifest, ReceptionAck, ReceptionProof, ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary} from "@ddd-qc/lit-happ";
 import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, EntryHashB64, Timestamp} from "@holochain/client";
@@ -29,6 +29,9 @@ export interface DeliveryPerspective {
 
     /** -- -- */
     inbox: ActionHashB64[],
+
+    /** pp_eh -> ParcelDescription */
+    publicParcels: Dictionary<ParcelDescription>,
 
     /** Parcels */
     /** manifest_eh -> ParcelManifest */
@@ -61,6 +64,7 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         myPubEncKey: new Uint8Array(),
         encKeys: {},
         inbox: [],
+        publicParcels: {},
         manifests: {},
         manifestByData: {},
         /** Inbound */

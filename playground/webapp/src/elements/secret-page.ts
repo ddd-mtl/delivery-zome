@@ -59,8 +59,21 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
   async refresh(_e?: any) {
     //console.log("tasker-page.refresh() called")
     await this._dvm.probeAll();
+    await this._dvm.probePublicMessages();
   }
 
+
+  /** */
+  async onPublishMessage(e: any) {
+    const textInput = this.shadowRoot!.getElementById("messageInput") as HTMLInputElement;
+    if (textInput.value.length == 0) {
+      alert("message string is empty");
+      return;
+    }
+    let res = await this._dvm.publishMessage(textInput.value);
+    console.log("onPublishMessage() res:", res);
+    textInput.value = "";
+  }
 
   /** */
   async onSendSecret(e: any) {
@@ -138,22 +151,47 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     let agents: AgentPubKeyB64[] = this._dvm.AgentDirectoryZvm.perspective.agents;
 
     const AgentOptions = Object.entries(agents).map(
-        ([_index, agentIdB64]) => {
-          //console.log("" + index + ". " + agentIdB64)
-          return html `<option value="${agentIdB64}">${agentIdB64.slice(-5)}</option>`
-        }
+      ([_index, agentIdB64]) => {
+        //console.log("" + index + ". " + agentIdB64)
+        return html `<option value="${agentIdB64}">${agentIdB64.slice(-5)}</option>`
+      }
     )
 
     const secretOptions = Object.values(this._senderSecrets).map(
-        (secretEh) => {
-          //console.log("" + index + ". " + agentIdB64)
-          return html `<option value="${secretEh}">${secretEh.slice(-5)}</option>`
-        }
+      (secretEh) => {
+        //console.log("" + index + ". " + agentIdB64)
+        return html `<option value="${secretEh}">${secretEh.slice(-5)}</option>`
+      }
     )
 
+
+    // const ppLi = Object.values(this._dvm.deliveryZvm.perspective.publicParcels).map(
+    //   (pd) => {
+    //     return html`<li value="${pd.reference.eh}">${encodeHashToBase64(pd.reference.eh)} (${pd.size} octets)</li>`
+    //   }
+    // )
+
+    const ppLi = Object.values(this._dvm.perspective.publicMessages).map(
+      (msg) => {
+        //console.log("" + index + ". " + agentIdB64)
+        return html`<li>${msg}</li>`
+      }
+    )
+
+
+    /** render all */
     return html`
       <div>
-        <h1>Playground: secret <button type="button" @click=${() => {this._dvm.dumpLogs();}}>dump</button></h1>
+        <h1>Playground: secret 
+            <button type="button" @click=${() => {this._dvm.dumpLogs();}}>dump</button>
+            <button type="button" @click=${this.refresh}>Refresh</button>
+        </h1>
+        <div>
+          <label>Publish message:</label>
+          <input type="text" id="messageInput" name="message">
+          <input type="button" value="publish" @click=${this.onPublishMessage}>
+        </div>
+        <div style="margin-top:15px;">
           <label>Send secret:</label>
           <input type="text" id="secretInput" name="content">
           to: <select id="recipientSelector">
@@ -161,6 +199,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
           </select>
           <input type="button" value="send" @click=${this.onSendSecret}>
             split:<input type="checkbox" id="splitChk"">
+        </div>              
         <h2>
           Secrets received:
           From: <select id="senderSelector" @click=${this.onSenderSelected}>
@@ -172,7 +211,12 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
           <div style="margin-top:15px;">
             ${this._selectedSecretEh? this.secretPerspective.secrets[this._selectedSecretEh] : "n/a"}
           </div>
-        </h2>        
+        </h2>
+        <hr/>
+        <h2>Public messages</h2>
+        <ul>
+            ${ppLi}
+        </ul>  
       </div>
     `;
   }
