@@ -3,6 +3,11 @@ manifest_version: "1"
 name: dSecret
 integrity:
   origin_time: 2022-09-25T13:55:49.200Z
+  properties:
+    maxChunkSize: 1024
+    maxParcelSize: 1048576
+    maxParcelNameLength: 256
+    minParcelNameLength: 0
   zomes:
     - name: secret_integrity
       bundled: ../../target/wasm32-unknown-unknown/release/zome_secret_integrity.wasm

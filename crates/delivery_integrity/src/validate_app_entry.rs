@@ -11,12 +11,38 @@ pub(crate) fn validate_app_entry(_creation_action: EntryCreationAction, entry_in
     let variant = entry_index_to_variant(entry_index)?;
     return match variant {
         DeliveryEntryTypes::Distribution => validate_Distribution(entry),
-        DeliveryEntryTypes::ParcelChunk => validate_ParcelChunk(entry),
-        DeliveryEntryTypes::ParcelManifest => validate_ParcelManifest(entry),
+        DeliveryEntryTypes::ParcelChunk | DeliveryEntryTypes::PublicChunk => validate_ParcelChunk(entry),
+        DeliveryEntryTypes::ParcelManifest | DeliveryEntryTypes::PublicManifest => validate_ParcelManifest(entry),
+        DeliveryEntryTypes::PublicParcel => validate_PublicParcel(entry),
         _ => Ok(ValidateCallbackResult::Valid),
     }
 }
 
+
+///
+fn validate_description(pd: ParcelDescription) -> ExternResult<ValidateCallbackResult> {
+    /// Must meet name length requirements
+    if pd.name.len() < get_dna_properties().min_parcel_name_length as usize {
+        return Ok(ValidateCallbackResult::Invalid(format!("Parcel name is too small: {} < {}", pd.name.len(), get_dna_properties().min_parcel_name_length)));
+    }
+    if pd.name.len() > get_dna_properties().max_parcel_name_length as usize {
+        return Ok(ValidateCallbackResult::Invalid(format!("Parcel name is too big: {} > {}", pd.name.len(), get_dna_properties().max_parcel_name_length)));
+    }
+    /// Must meet size requirements
+    if pd.size > get_dna_properties().max_parcel_size {
+        return Ok(ValidateCallbackResult::Invalid(format!("Parcel is too big: {} > {}", pd.size, get_dna_properties().max_parcel_size)));
+    }
+    /// Done
+    Ok(ValidateCallbackResult::Valid)
+}
+
+
+///
+fn validate_PublicParcel(entry: Entry) -> ExternResult<ValidateCallbackResult> {
+    let pd = ParcelDescription::try_from(entry)?;
+    /// FIXME: validate parcel ; make sure Parcel entry has been committed
+    return validate_description(pd);
+}
 
 ///
 fn validate_Distribution(entry: Entry) -> ExternResult<ValidateCallbackResult> {
@@ -25,18 +51,22 @@ fn validate_Distribution(entry: Entry) -> ExternResult<ValidateCallbackResult> {
         return Ok(ValidateCallbackResult::Invalid("Need at least one recipient".to_string()));
     }
     /// FIXME: validate parcel ; make sure Parcel entry has been committed
-    //validate_parcel(input.parcel_description)?;
-    Ok(ValidateCallbackResult::Valid)
+    return validate_description(distribution.delivery_summary.parcel_description);
 }
 
 
 ///
 fn validate_ParcelChunk(entry: Entry) -> ExternResult<ValidateCallbackResult> {
     let parcel_chunk = ParcelChunk::try_from(entry)?;
-    /// Check size
-    if parcel_chunk.data.len() > CHUNK_MAX_SIZE {
+    /// Check data size
+    if parcel_chunk.data.is_empty() {
         return Ok(ValidateCallbackResult::Invalid(
-            format!("A chunk can't be bigger than {} KiB", CHUNK_MAX_SIZE / 1024)
+            format!("Chunk data empty. Must have at least some content")
+        ));
+    }
+    if parcel_chunk.data.len() > get_dna_properties().max_chunk_size as usize {
+        return Ok(ValidateCallbackResult::Invalid(
+            format!("A chunk can't be bigger than {} KiB", get_dna_properties().max_chunk_size / 1024)
         ));
     }
     /// Done
@@ -52,14 +82,14 @@ fn validate_ParcelManifest(entry: Entry) -> ExternResult<ValidateCallbackResult>
     if parcel_manifest.chunks.is_empty() {
         return Ok(ValidateCallbackResult::Invalid("Missing chunks".to_string()));
     }
+
+    let PARCEL_MAX_CHUNKS: usize = (get_dna_properties().max_parcel_size / get_dna_properties().max_chunk_size as u64 + 1) as usize;
+
     /// Must not exceed size limit
     if parcel_manifest.chunks.len() > PARCEL_MAX_CHUNKS {
         return Ok(ValidateCallbackResult::Invalid(format!("Parcel is too big: {} > {} chunks", parcel_manifest.chunks.len(), PARCEL_MAX_CHUNKS)));
     }
-    // /// Must meet minimum name length
-    // if parcel_manifest.name.len() < NAME_MIN_LENGTH {
-    //     return Ok(ValidateCallbackResult::Invalid(format!("Name is too small: {} > {}", parcel_manifest.name, NAME_MIN_LENGTH)));
-    // }
+
     /// FIXME: Check each entry exists and is a ParcelChunk
     /// FIXME: Also check total size
     /// Done

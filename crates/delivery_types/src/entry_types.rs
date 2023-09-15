@@ -10,7 +10,7 @@ use crate::*;
 #[derive(Clone, PartialEq)]
 pub struct ParcelDescription {
    pub name: String,
-   pub size: usize,
+   pub size: u64,
    pub reference: ParcelReference,
 }
 

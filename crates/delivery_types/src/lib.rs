@@ -8,8 +8,11 @@ mod delivery;
 mod constants;
 mod entry_types;
 mod inputs;
+mod properties;
+
 
 pub use delivery::*;
 pub use constants::*;
 pub use entry_types::*;
 pub use inputs::*;
+pub use properties::*;

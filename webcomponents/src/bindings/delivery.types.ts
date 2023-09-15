@@ -140,14 +140,6 @@ export const DIRECT_SEND_TIMEOUT_MS = 1000;
 
 export const DIRECT_SEND_CHUNK_TIMEOUT_MS = 10000;
 
-export const CHUNK_MAX_SIZE = 200 * 1024;
-
-export const PARCEL_MAX_SIZE = 10 * 1024 * 1024;
-
-export const PARCEL_MAX_CHUNKS = PARCEL_MAX_SIZE / CHUNK_MAX_SIZE + 1;
-
-export const NAME_MIN_LENGTH = 2;
-
 /** Listing all Holochain Path used in this DNA */
 export const DIRECTORY_PATH = "directory";
 
@@ -391,6 +383,14 @@ export interface CommitPendingItemInput {
 export interface GetDeliveryStateInput {
   distribution_ah: ActionHash
   recipient: AgentPubKey
+}
+
+/** Dna properties */
+export interface DeliveryProperties {
+  maxChunkSize: number
+  maxParcelSize: number
+  maxParcelNameLength: number
+  minParcelNameLength: number
 }
 
 /** List of all Link kinds handled by this Zome */

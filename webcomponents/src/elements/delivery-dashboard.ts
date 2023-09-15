@@ -4,7 +4,6 @@ import { ZomeElement } from "@ddd-qc/lit-happ";
 import {DeliveryZvm} from "../viewModels/delivery.zvm";
 import {ActionHashB64, decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {DeliveryPerspective} from "../viewModels/delivery.perspective";
-import {CHUNK_MAX_SIZE} from "../bindings/delivery.types";
 
 
 /**
@@ -151,7 +150,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
                 const manifest = this.perspective.manifests[manifestEh];
                 return html `
           <li style="margin-top:10px;" title=${dataHash}>
-              ${dataHash} | ${manifest.chunks.length * CHUNK_MAX_SIZE} octets (${manifest.chunks.length} chunks)
+              ${dataHash} | ${manifest.chunks.length} chunks
           </li>`
             }
         )
