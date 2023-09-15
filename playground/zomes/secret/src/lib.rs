@@ -40,12 +40,18 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
       let eh: EntryHash = decode_response(response)?;
       chunks.push(eh);
    }
+
+   let description = ParcelDescription {
+     name: "".to_string(),
+      size: 0,
+      zome_origin: "secret_integrity".into(),
+      visibility: EntryVisibility::Private,
+      kind_info: ParcelKind::Manifest("split_secret".to_string()),
+   };
    /// Commit Manifest
    let manifest = ParcelManifest {
-      //name: "dummy".to_string(),
-      //data_type: "split_secret".to_owned(),
       data_hash: value.clone(), // Should be a hash but we dont really care as its just an example playground
-      //size: value.len(),
+      description,
       chunks,
    };
    let response = call_delivery_zome("commit_parcel_manifest", manifest)?;

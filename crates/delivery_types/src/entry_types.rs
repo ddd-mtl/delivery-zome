@@ -5,16 +5,6 @@ use hdi::prelude::*;
 use crate::*;
 
 
-/// Shared data between a Distribution and a DeliveryNotice
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct ParcelDescription {
-   pub name: String,
-   pub size: u64,
-   pub reference: ParcelReference,
-}
-
-
 /// Entry representing a request to send a Parcel to one or multiple recipients
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
@@ -81,10 +71,8 @@ pub struct ParcelChunk {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelManifest {
-   //pub name: String,
-   //pub data_type: String,
+   pub description: ParcelDescription,
    pub data_hash: String,
-   //pub orig_size: usize,
    pub chunks: Vec<EntryHash>,
 }
 

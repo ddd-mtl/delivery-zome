@@ -65,7 +65,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
       },
       DeliveryNoticeQueryField::Parcel(parcel_eh) => {
          for (_, _, notice) in tuples {
-            if notice.summary.parcel_description.reference.eh == parcel_eh {
+            if notice.summary.parcel_reference.eh == parcel_eh {
                res.push(notice.clone());
             }
          }

@@ -6,20 +6,15 @@ use zome_delivery_integrity::DeliveryEntry;
 use zome_delivery_types::*;
 
 
-pub const COMMIT_PARCEL_CALLBACK_NAME: &'static str = "commit_parcel";
-
-
-
 /// Call The Zome owner of the entry to commit it, since only that zome is allowed to commit one of its entries?
-///
 pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: Option<ActionHash>)
    -> ExternResult<ActionHash>
 {
 
    let input = CommitParcelInput {
-      zome_index: notice.summary.parcel_description.reference.zome_index(),
-      entry_index: notice.summary.parcel_description.reference.kind_info.entry_index(),
-      entry_visibility: notice.summary.parcel_description.reference.visibility,
+      zome_index: notice.summary.parcel_reference.description.zome_index(),
+      entry_index: notice.summary.parcel_reference.description.kind_info.entry_index(),
+      entry_visibility: notice.summary.parcel_reference.description.visibility,
       entry: entry.clone(),
       maybe_link_ah: maybe_link_ah.clone(),
    };
@@ -33,12 +28,12 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
    }
 
    debug!("call_commit_parcel() zome_names = {:?}", dna_info()?.zome_names);
-   let zome_name = dna_info()?.zome_names[notice.summary.parcel_description.reference.zome_index().0 as usize].clone();
+   let zome_name = dna_info()?.zome_names[notice.summary.parcel_reference.description.zome_index().0 as usize].clone();
    debug!("call_commit_parcel()  zome_name = {}", zome_name);
    let response = call_remote(
       agent_info()?.agent_latest_pubkey,
-      DELIVERY_ZOME_NAME,//zome_name,
-      COMMIT_PARCEL_CALLBACK_NAME.into(),
+      DELIVERY_ZOME_NAME, //zome_name,
+      "commit_parcel".into(),
       None,
       input.clone(),
    )?;
@@ -58,7 +53,7 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
 
    /// Create ReceptionProof if its an AppEntry
    /// (for a Manifest, we have to wait for all chunks to be received)
-   if let ParcelKind::AppEntry(..) = notice.summary.parcel_description.reference.kind_info {
+   if let ParcelKind::AppEntry(..) = notice.summary.parcel_reference.description.kind_info {
       let received = ReceptionProof {
          notice_eh: hash_entry(notice.clone())?,
          parcel_eh: hash_entry(entry.clone())?,

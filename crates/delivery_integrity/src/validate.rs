@@ -11,8 +11,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
          let creation_action = storeEntry.action.hashed.into_inner().0;
          return validate_entry(creation_action.clone(), storeEntry.entry, Some(creation_action.entry_type()));
       },
-      Op::RegisterCreateLink(reg_create_link) => {
-         return validate_create_link(reg_create_link.create_link);
+      Op::RegisterCreateLink(_reg_create_link) => {
+         // FIXME return validate_create_link(reg_create_link.create_link);
+         Ok(ValidateCallbackResult::Valid)
       },
       Op::RegisterDeleteLink (_)=> Ok(ValidateCallbackResult::Invalid("Deleting links isn't allowed".to_string())),
       Op::RegisterUpdate { .. } => Ok(ValidateCallbackResult::Valid),

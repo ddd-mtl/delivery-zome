@@ -187,12 +187,19 @@ export enum NoticeStateType {
 /** Shared data between a Distribution and a DeliveryNotice */
 export interface DeliverySummary {
   distribution_strategy: DistributionStrategy
-  parcel_description: ParcelDescription
+  parcel_reference: ParcelReference
 }
 
-/** A Parcel is a generic Entry or a ParcelManifest */
+/**  */
 export interface ParcelReference {
   eh: EntryHash
+  description: ParcelDescription
+}
+
+/**  */
+export interface ParcelDescription {
+  name: string
+  size: number
   zome_origin: ZomeName
   visibility: EntryVisibility
   kind_info: ParcelKind
@@ -215,13 +222,6 @@ export enum DistributionStrategyType {
 	Normal = 'Normal',
 	DmOnly = 'DmOnly',
 	DhtOnly = 'DhtOnly',
-}
-
-/** Shared data between a Distribution and a DeliveryNotice */
-export interface ParcelDescription {
-  name: string
-  size: number
-  reference: ParcelReference
 }
 
 /** Entry representing a request to send a Parcel to one or multiple recipients */
@@ -271,6 +271,7 @@ export interface ParcelChunk {
  * WARN: Change MANIFEST_ENTRY_NAME const when renaming
  */
 export interface ParcelManifest {
+  description: ParcelDescription
   data_hash: string
   chunks: EntryHash[]
 }
@@ -317,18 +318,10 @@ export enum ItemKindType {
 	AppEntryBytes = 'AppEntryBytes',
 }
 
-export interface PublishParcelInput {
-  manifest: ParcelManifest
-  zome_origin: ZomeName
-  data_type: string
-  name: string
-}
-
 export interface DistributeParcelInput {
   recipients: AgentPubKey[]
   strategy: DistributionStrategy
-  parcel_name: string
-  parcel_ref: ParcelReference
+  parcel_reference: ParcelReference
 }
 
 export interface RespondToNoticeInput {
@@ -433,7 +426,7 @@ export type DeliveryEntryVariantReplyAck = {ReplyAck: ReplyAck}
 export type DeliveryEntryVariantPendingItem = {PendingItem: PendingItem}
 export type DeliveryEntryVariantPublicManifest = {PublicManifest: ParcelManifest}
 export type DeliveryEntryVariantPublicChunk = {PublicChunk: ParcelChunk}
-export type DeliveryEntryVariantPublicParcel = {PublicParcel: ParcelDescription}
+export type DeliveryEntryVariantPublicParcel = {PublicParcel: ParcelReference}
 export type DeliveryEntry = 
  | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantParcelChunk | DeliveryEntryVariantParcelManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
 
@@ -477,8 +470,6 @@ export interface FullDistributionState {
   delivery_states: DeliveryState[]
 }
 
-export const COMMIT_PARCEL_CALLBACK_NAME = "commit_parcel";
-
 /**  */
 export interface CommitParcelInput {
   zome_index: ZomeIndex
@@ -512,6 +503,6 @@ export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, ReplyAc
 export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, ReceptionProof]}
 export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, ReceptionAck]}
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, ParcelDescription]}
+export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: ParcelReference}
 export type SignalProtocol = 
  | SignalProtocolVariantNewManifest | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;

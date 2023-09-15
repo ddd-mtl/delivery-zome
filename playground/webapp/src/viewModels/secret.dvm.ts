@@ -52,10 +52,10 @@ export class SecretDvm extends DnaViewModel {
 
     /** Automatically accept parcel from secret zome */
     if (SignalProtocolType.NewNotice in deliverySignal) {
-      console.log("ADDING DeliveryNotice. parcel_description:", deliverySignal.NewNotice[1].summary.parcel_description);
+      console.log("ADDING DeliveryNotice. parcel_description:", deliverySignal.NewNotice[1].summary.parcel_reference.description);
       const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
-      if (ParcelKindType.AppEntry in deliverySignal.NewNotice[1].summary.parcel_description.reference.kind_info) {
-        if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_description.reference.zome_origin) {
+      if (ParcelKindType.AppEntry in deliverySignal.NewNotice[1].summary.parcel_reference.description.kind_info) {
+        if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.description.zome_origin) {
           this.deliveryZvm.acceptDelivery(noticeEh);
         }
       } else {
@@ -72,7 +72,7 @@ export class SecretDvm extends DnaViewModel {
 
     if (SignalProtocolType.NewPublicParcel in deliverySignal) {
       console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[0]);
+      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel.eh);
       this.deliveryZvm.pullParcel(ppEh).then((msg: string) => {
         this._perspective.publicMessages[ppEh] = msg;
         this.notifySubscribers();
@@ -99,14 +99,17 @@ export class SecretDvm extends DnaViewModel {
   async publishMessage(message: string): Promise<EntryHashB64> {
    const chunk_eh = await this.deliveryZvm.zomeProxy.publishChunk(message);
 
-   const eh = await this.deliveryZvm.zomeProxy.publishParcel({
-    manifest: {
+   const eh = await this.deliveryZvm.zomeProxy.publishParcel(
+    {
      data_hash: "fake-hash",
      chunks: [chunk_eh],
+     description: {
+       size: 0,
+       zome_origin: "secret_integrity",
+       kind_info: {Manifest: "public_secret"},
+       name: message[0],
+       visibility: {Public: null}
     },
-    zome_origin: "secret_integrity",
-    data_type: "public_secret",
-    name: message[0],
    });
    return encodeHashToBase64(eh);
   }

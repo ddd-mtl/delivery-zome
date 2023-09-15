@@ -33,7 +33,7 @@ pub fn post_commit_Distribution(sah: &SignedActionHashed, entry: Entry, _distrib
 
 ///
 fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_strategy: DistributionStrategy) -> ExternResult<()> {
-    debug!("send_notice() for: {}", notice.summary.parcel_description.name);
+    debug!("send_notice() for: {}", notice.summary.parcel_reference.description.name);
     /// Create PendingItem
     let pending_item= pack_notice(
         notice.clone(),

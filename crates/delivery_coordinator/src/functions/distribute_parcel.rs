@@ -17,23 +17,21 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<ActionHas
    let set: HashSet<_> = recipients.drain(..).collect(); // dedup
    recipients.extend(set.into_iter());
    debug!("recipients: {}", recipients.len());
-   /// Create ParcelSummary
-   let parcel_size: u64 = match input.parcel_ref.kind_info.clone() {
-      ParcelKind::AppEntry(_) => get_app_entry_size(input.parcel_ref.eh.clone())? as u64,
-      ParcelKind::Manifest(_) => {
-         let manifest: ParcelManifest = get_typed_from_eh(input.parcel_ref.eh.clone())?;
-         manifest.chunks.len() as u64 * get_dna_properties().max_chunk_size as u64
-         //parcel_name = manifest.name;
-         //manifest.size
-      }
-   };
+   /// Compute Parcel size
+   let mut parcel_reference = input.parcel_reference.clone();
+   if parcel_reference.description.size == 0 {
+      parcel_reference.description.size = match input.parcel_reference.description.kind_info.clone() {
+         ParcelKind::AppEntry(_) => get_app_entry_size(input.parcel_reference.eh.clone())? as u64,
+         ParcelKind::Manifest(_) => {
+            let manifest: ParcelManifest = get_typed_from_eh(input.parcel_reference.eh.clone())?;
+            manifest.description.size
+         }
+      };
+   }
+   /// Create DeliverySummary
    let delivery_summary = DeliverySummary {
       distribution_strategy: input.strategy,
-      parcel_description: ParcelDescription {
-         name: input.parcel_name,
-         size: parcel_size,
-         reference: input.parcel_ref,
-      },
+      parcel_reference
    };
    debug!("delivery_summary: {:?}", delivery_summary);
    /// Sign summary

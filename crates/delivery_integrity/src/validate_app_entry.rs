@@ -32,6 +32,10 @@ fn validate_description(pd: ParcelDescription) -> ExternResult<ValidateCallbackR
     if pd.size > get_dna_properties().max_parcel_size {
         return Ok(ValidateCallbackResult::Invalid(format!("Parcel is too big: {} > {}", pd.size, get_dna_properties().max_parcel_size)));
     }
+    /// Must have Size
+    if pd.size == 0 {
+        return Ok(ValidateCallbackResult::Invalid("Parcel size description is 0".to_string()));
+    }
     /// Done
     Ok(ValidateCallbackResult::Valid)
 }
@@ -39,9 +43,9 @@ fn validate_description(pd: ParcelDescription) -> ExternResult<ValidateCallbackR
 
 ///
 fn validate_PublicParcel(entry: Entry) -> ExternResult<ValidateCallbackResult> {
-    let pd = ParcelDescription::try_from(entry)?;
+    let pr = ParcelReference::try_from(entry)?;
     /// FIXME: validate parcel ; make sure Parcel entry has been committed
-    return validate_description(pd);
+    return validate_description(pr.description);
 }
 
 ///
@@ -51,7 +55,7 @@ fn validate_Distribution(entry: Entry) -> ExternResult<ValidateCallbackResult> {
         return Ok(ValidateCallbackResult::Invalid("Need at least one recipient".to_string()));
     }
     /// FIXME: validate parcel ; make sure Parcel entry has been committed
-    return validate_description(distribution.delivery_summary.parcel_description);
+    return validate_description(distribution.delivery_summary.parcel_reference.description);
 }
 
 
@@ -77,6 +81,11 @@ fn validate_ParcelChunk(entry: Entry) -> ExternResult<ValidateCallbackResult> {
 ///
 fn validate_ParcelManifest(entry: Entry) -> ExternResult<ValidateCallbackResult> {
     let parcel_manifest = ParcelManifest::try_from(entry)?;
+
+    /// Must have valid description
+    if let ValidateCallbackResult::Invalid(reason) = validate_description(parcel_manifest.description.clone())? {
+        return Ok(ValidateCallbackResult::Invalid(reason));
+    }
 
     /// Must have chunks
     if parcel_manifest.chunks.is_empty() {

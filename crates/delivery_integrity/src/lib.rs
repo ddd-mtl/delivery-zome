@@ -8,6 +8,8 @@
 
 mod pub_enc_key;
 mod validate_app_entry;
+mod validate;
+
 
 pub use pub_enc_key::*;
 
@@ -58,7 +60,7 @@ pub enum DeliveryEntry {
    #[entry_def(required_validations = 1, visibility = "public")]
    PublicChunk(ParcelChunk),
    #[entry_def(required_validations = 1, visibility = "public")]
-   PublicParcel(ParcelDescription),
+   PublicParcel(ParcelReference),
 }
 
 

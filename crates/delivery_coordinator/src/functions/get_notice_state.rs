@@ -30,8 +30,8 @@ pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, usiz
    }
    /// Count chunks if it has a manifest
    let mut pct = 0;
-   if let ParcelKind::Manifest(_) = notice.summary.parcel_description.reference.kind_info {
-      pct = count_chunks_received(notice.summary.parcel_description.reference.eh)?;
+   if let ParcelKind::Manifest(_) = notice.summary.parcel_reference.description.kind_info {
+      pct = count_chunks_received(notice.summary.parcel_reference.eh)?;
    }
    /// Done
    Ok((NoticeState::Accepted, pct))

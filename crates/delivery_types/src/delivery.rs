@@ -1,8 +1,6 @@
 //! Delivery related types and states
 
 use hdi::prelude::*;
-use crate::ParcelDescription;
-
 
 //const MANIFEST_ENTRY_NAME: &'static str = "ParcelManifest";
 
@@ -93,20 +91,31 @@ pub enum NoticeState {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct DeliverySummary {
    pub distribution_strategy: DistributionStrategy,
-   pub parcel_description: ParcelDescription,
+   pub parcel_reference: ParcelReference,
 }
 
 
-/// A Parcel is a generic Entry or a ParcelManifest
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+///
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
 pub struct ParcelReference {
    pub eh: EntryHash,
+   pub description: ParcelDescription,
+}
+
+
+///
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct ParcelDescription {
+   pub name: String,
+   pub size: u64,
    pub zome_origin: ZomeName,
    pub visibility: EntryVisibility,
    pub kind_info: ParcelKind,
 }
 
-impl ParcelReference {
+
+impl ParcelDescription {
    pub fn entry_integrity_zome_name(&self) -> ZomeName {
       match self.kind_info {
          ParcelKind::Manifest(_) => crate::DELIVERY_INTERGRITY_ZOME_NAME.to_string().into(),

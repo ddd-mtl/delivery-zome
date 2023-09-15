@@ -31,8 +31,9 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<ActionHash> {
       ParcelKind::Manifest("secret".to_string())
    };
 
-   let parcel_ref = ParcelReference {
-      eh: input.secret_eh,
+   let parcel_description = ParcelDescription {
+      name: "".to_owned(),
+      size: 0,
       zome_origin: zome_name,
       visibility: EntryVisibility::Private,
       kind_info: parcel_kind_info,
@@ -40,8 +41,10 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<ActionHash> {
    let distribution = DistributeParcelInput {
       recipients: input.recipients,
       strategy: input.strategy,
-      parcel_name: "".to_owned(),
-      parcel_ref,
+      parcel_reference: ParcelReference {
+         eh: input.secret_eh,
+         description: parcel_description,
+      },
    };
    debug!("send_secret() calling distribute_parcel() with: {:?}", distribution);
    let response = call_delivery_zome("distribute_parcel", distribution)?;

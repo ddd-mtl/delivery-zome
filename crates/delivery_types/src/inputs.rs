@@ -5,20 +5,10 @@ use hdi::prelude::*;
 use crate::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct PublishParcelInput {
-   pub manifest: ParcelManifest,
-   pub zome_origin: ZomeName,
-   pub data_type: String,
-   pub name: String,
-}
-
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DistributeParcelInput {
    pub recipients: Vec<AgentPubKey>,
    pub strategy: DistributionStrategy,
-   pub parcel_name: String,
-   pub parcel_ref: ParcelReference,
+   pub parcel_reference: ParcelReference,
 }
 
 
