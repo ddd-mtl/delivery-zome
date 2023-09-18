@@ -328,6 +328,13 @@ export class DeliveryZvm extends ZomeViewModel {
             this._perspective.localManifestByData[manifest.data_hash] = manifestEh;
         });
 
+        this._perspective.localPublicManifests = {};
+        tuples = await this.zomeProxy.queryAllPublicManifest();
+        Object.values(tuples).map(([eh, manifest]) => {
+            const manifestEh = encodeHashToBase64(eh);
+            this._perspective.localPublicManifests[manifestEh] = manifest;
+            this._perspective.localManifestByData[manifest.data_hash] = manifestEh;
+        });
 
         return null;
     }

@@ -42,6 +42,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"query_ReceptionProof",
 	"query_all_ReceptionAck",
 	"query_all_Manifest",
+	"query_all_PublicManifest",
 	"respond_to_notice",];
 
 

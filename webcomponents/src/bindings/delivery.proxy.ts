@@ -269,6 +269,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_all_Manifest', null);
   }
 
+  async queryAllPublicManifest(): Promise<[EntryHash, ParcelManifest][]> {
+    return this.call('query_all_PublicManifest', null);
+  }
+
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {
     return this.call('respond_to_notice', input);
   }

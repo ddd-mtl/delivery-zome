@@ -78,12 +78,6 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         /** Outbound */
         notices: {},
         replies: {},
-        receptions: {}
-        /** Extra logic */
-        // newDeliveryNotices: {},
-        // //myDistributions: {},
-        // unrepliedInbounds: {},
-        // pendingInbounds: {},
-        // unrepliedOutbounds: {}
+        receptions: {},
     };
 }
