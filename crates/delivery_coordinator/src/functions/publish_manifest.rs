@@ -7,7 +7,7 @@ use crate::determine_parcel_size;
 
 ///
 #[hdk_extern]
-pub fn publish_parcel(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
+pub fn publish_manifest(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
    trace!(" START - {}", manifest_arg.description.name);
    std::panic::set_hook(Box::new(zome_panic_hook));
    if manifest_arg.chunks.is_empty() {

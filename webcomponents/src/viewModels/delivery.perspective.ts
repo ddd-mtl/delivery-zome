@@ -35,9 +35,11 @@ export interface DeliveryPerspective {
 
     /** Parcels */
     /** manifest_eh -> ParcelManifest */
-    manifests: Dictionary<ParcelManifest>,
+    privateManifests: Dictionary<ParcelManifest>,
+    /** manifest_eh -> ParcelManifest */
+    localPublicManifests: Dictionary<ParcelManifest>,
     /** data_hash -> manifest_eh */
-    manifestByData: Dictionary<EntryHashB64>,
+    localManifestByData: Dictionary<EntryHashB64>,
 
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
@@ -65,8 +67,9 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         encKeys: {},
         inbox: [],
         publicParcels: {},
-        manifests: {},
-        manifestByData: {},
+        privateManifests: {},
+        localPublicManifests: {},
+        localManifestByData: {},
         /** Inbound */
         distributions: {},
         noticeAcks: {},

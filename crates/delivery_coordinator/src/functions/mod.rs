@@ -10,8 +10,8 @@ mod query;
 mod get_distribution_state;
 mod get_notice_state;
 mod get_delivery_state;
-mod get_all_local_parcels;
-mod publish_parcel;
+mod get_all_manifests;
+mod publish_manifest;
 mod publish_chunk;
 mod pull_public_parcels;
 mod pull_parcel;
@@ -34,6 +34,6 @@ pub use self::{
    query::*,
    respond_to_notice::*,
    get_delivery_state::*,
-   publish_parcel::*,
+   publish_manifest::*,
    publish_chunk::*,
 };

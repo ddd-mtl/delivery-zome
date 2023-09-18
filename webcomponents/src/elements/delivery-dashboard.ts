@@ -145,9 +145,9 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const manifestsLi = Object.entries(this.perspective.manifestByData).map(
+        const manifestsLi = Object.entries(this.perspective.localManifestByData).map(
             ([dataHash, manifestEh]) => {
-                const manifest = this.perspective.manifests[manifestEh];
+                const manifest = this.perspective.privateManifests[manifestEh];
                 return html `
           <li style="margin-top:10px;" title=${dataHash}>
               ${dataHash} | ${manifest.chunks.length} chunks

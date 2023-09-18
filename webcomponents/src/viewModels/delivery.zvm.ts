@@ -61,8 +61,8 @@ export class DeliveryZvm extends ZomeViewModel {
             console.log("signal NewManifest", deliverySignal.NewManifest);
             const manifestEh = encodeHashToBase64(deliverySignal.NewManifest[0]);
             const manifest = deliverySignal.NewManifest[1];
-            this._perspective.manifests[manifestEh] = manifest;
-            this._perspective.manifestByData[manifest.data_hash] = manifestEh;
+            this._perspective.privateManifests[manifestEh] = manifest;
+            this._perspective.localManifestByData[manifest.data_hash] = manifestEh;
         }
         if (SignalProtocolType.ReceivedChunk in deliverySignal) {
             console.log("signal ReceivedChunk", deliverySignal.ReceivedChunk);
@@ -174,9 +174,9 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** */
     private async probePublicParcels(): Promise<Dictionary<ParcelDescription>> {
-        const pps = await this.zomeProxy.pullPublicParcels();
+        const prs = await this.zomeProxy.pullPublicParcels();
         this._perspective.publicParcels = {};
-        pps.map((pr) => this._perspective.publicParcels[encodeHashToBase64(pr.eh)] = pr.description);
+        prs.map((pr) => this._perspective.publicParcels[encodeHashToBase64(pr.eh)] = pr.description);
         this.notifySubscribers();
         return this._perspective.publicParcels;
     }
@@ -191,7 +191,7 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** Return base64 data string */
-    async pullParcel(parcelEh: EntryHashB64): Promise<string> {
+    async pullParcelData(parcelEh: EntryHashB64): Promise<string> {
         // const pd = this._perspective.publicParcels[parcelEh];
         // if (!pd) {
         //     return Promise.reject("Unknown PublicParcel");
@@ -320,12 +320,12 @@ export class DeliveryZvm extends ZomeViewModel {
         Object.values(tuples).map(([_eh, recepetion]) => this._perspective.receptions[encodeHashToBase64(recepetion.notice_eh)] = recepetion);
 
 
-        this._perspective.manifests = {};
+        this._perspective.privateManifests = {};
         tuples = await this.zomeProxy.queryAllManifest();
         Object.values(tuples).map(([eh, manifest]) => {
             const manifestEh = encodeHashToBase64(eh);
-            this._perspective.manifests[manifestEh] = manifest;
-            this._perspective.manifestByData[manifest.data_hash] = manifestEh;
+            this._perspective.privateManifests[manifestEh] = manifest;
+            this._perspective.localManifestByData[manifest.data_hash] = manifestEh;
         });
 
 

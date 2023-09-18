@@ -165,8 +165,12 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('distribute_parcel', input);
   }
 
-  async getAllLocalParcels(): Promise<[EntryHash, ParcelManifest][]> {
-    return this.call('get_all_local_parcels', null);
+  async getAllPrivateManifests(): Promise<[EntryHash, ParcelManifest][]> {
+    return this.call('get_all_private_manifests', null);
+  }
+
+  async getAllLocalPublicManifests(): Promise<[EntryHash, ParcelManifest][]> {
+    return this.call('get_all_local_public_manifests', null);
   }
 
   async getDeliveryState(input: GetDeliveryStateInput): Promise<DeliveryState> {
@@ -201,8 +205,8 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('publish_chunk', data);
   }
 
-  async publishParcel(manifestArg: ParcelManifest): Promise<EntryHash> {
-    return this.call('publish_parcel', manifestArg);
+  async publishManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
+    return this.call('publish_manifest', manifestArg);
   }
 
   async pullInbox(): Promise<ActionHash[]> {
