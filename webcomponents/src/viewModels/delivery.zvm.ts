@@ -80,6 +80,9 @@ export class DeliveryZvm extends ZomeViewModel {
         if (SignalProtocolType.NewChunk in deliverySignal) {
             console.log("signal NewChunk", deliverySignal.NewChunk);
             const chunk = deliverySignal.NewChunk[1];
+            if (!this._perspective.chunkCounts[chunk.data_hash]) {
+                this._perspective.chunkCounts[chunk.data_hash] = 0;
+            }
             const chunksCount = this._perspective.chunkCounts[chunk.data_hash] + 1;
             this._perspective.chunkCounts[chunk.data_hash] = chunksCount;
             console.log("chunkCounts", chunk.data_hash, chunksCount);
@@ -94,9 +97,6 @@ export class DeliveryZvm extends ZomeViewModel {
                     if (completion_pct == 100) {
                         this.zomeProxy.completeManifest(decodeHashFromBase64(manifestEh));
                     }
-                } else {
-                    /** We are the initial creator of this Parcel */
-
                 }
             }
         }
