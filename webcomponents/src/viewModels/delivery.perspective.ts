@@ -30,7 +30,7 @@ export interface DeliveryPerspective {
     /** -- -- */
     inbox: ActionHashB64[],
 
-    /** pp_eh -> ParcelDescription */
+    /** pp_eh -> [ParcelDescription */
     publicParcels: Dictionary<ParcelDescription>,
 
     /** Parcels */
@@ -38,8 +38,8 @@ export interface DeliveryPerspective {
     privateManifests: Dictionary<ParcelManifest>,
     /** manifest_eh -> ParcelManifest */
     localPublicManifests: Dictionary<ParcelManifest>,
-    /** data_hash -> manifest_eh */
-    localManifestByData: Dictionary<EntryHashB64>,
+    /** data_hash -> [manifest_eh, isPrivate] */
+    localManifestByData: Dictionary<[EntryHashB64, boolean]>,
     /** data_hash -> number of chunks on chain */
     chunkCounts: Dictionary<number>,
 

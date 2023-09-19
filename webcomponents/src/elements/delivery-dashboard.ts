@@ -146,7 +146,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
         const manifestsLi = Object.entries(this.perspective.localManifestByData).map(
-            ([dataHash, manifestEh]) => {
+            ([dataHash, [manifestEh, _isPrivate]]) => {
                 const manifest = this.perspective.privateManifests[manifestEh];
                 return html `
           <li style="margin-top:10px;" title=${dataHash}>

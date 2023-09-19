@@ -62,7 +62,7 @@ export class DeliveryZvm extends ZomeViewModel {
             const manifestEh = encodeHashToBase64(deliverySignal.NewManifest[0]);
             const manifest = deliverySignal.NewManifest[1];
             this._perspective.privateManifests[manifestEh] = manifest;
-            this._perspective.localManifestByData[manifest.data_hash] = manifestEh;
+            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, "Private" in manifest.description.visibility];
         }
         // if (SignalProtocolType.ReceivedChunk in deliverySignal) {
         //     console.log("signal ReceivedChunk", deliverySignal.ReceivedChunk);
@@ -87,7 +87,7 @@ export class DeliveryZvm extends ZomeViewModel {
             this._perspective.chunkCounts[chunk.data_hash] = chunksCount;
             console.log("chunkCounts", chunk.data_hash, chunksCount);
             /** Update notice state */
-            const manifestEh = this._perspective.localManifestByData[chunk.data_hash];
+            const [manifestEh, _isPrivate] = this._perspective.localManifestByData[chunk.data_hash];
             if (manifestEh) {
                 const noticeEh = this._perspective.noticeByParcel[manifestEh];
                 if (noticeEh) {
@@ -291,7 +291,7 @@ export class DeliveryZvm extends ZomeViewModel {
         Object.values(tuples).map(([eh, manifest]) => {
             const manifestEh = encodeHashToBase64(eh);
             this._perspective.privateManifests[manifestEh] = manifest;
-            this._perspective.localManifestByData[manifest.data_hash] = manifestEh;
+            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, true];
         });
 
         this._perspective.localPublicManifests = {};
@@ -299,7 +299,7 @@ export class DeliveryZvm extends ZomeViewModel {
         Object.values(tuples).map(([eh, manifest]) => {
             const manifestEh = encodeHashToBase64(eh);
             this._perspective.localPublicManifests[manifestEh] = manifest;
-            this._perspective.localManifestByData[manifest.data_hash] = manifestEh;
+            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, false];
         });
 
         return null;
