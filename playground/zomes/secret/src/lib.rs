@@ -33,10 +33,11 @@ pub fn create_secret(value: String) -> ExternResult<EntryHash> {
 #[hdk_extern]
 pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    let split = value.split_whitespace();
+   let data_hash = value.clone(); // Should be a hash but we dont really care as its just an example playground
    /// Commit chunks
    let mut chunks = Vec::new();
    for word in split {
-      let response = call_delivery_zome("commit_parcel_chunk", word)?;
+      let response = call_delivery_zome("commit_parcel_chunk", ParcelChunk{data_hash: data_hash.clone(), data: word.to_string()})?;
       let eh: EntryHash = decode_response(response)?;
       chunks.push(eh);
    }
@@ -50,7 +51,7 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    };
    /// Commit Manifest
    let manifest = ParcelManifest {
-      data_hash: value.clone(), // Should be a hash but we dont really care as its just an example playground
+      data_hash,
       description,
       chunks,
    };

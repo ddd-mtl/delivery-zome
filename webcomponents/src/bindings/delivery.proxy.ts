@@ -149,8 +149,8 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
-  async commitParcelChunk(data: string): Promise<EntryHash> {
-    return this.call('commit_parcel_chunk', data);
+  async commitParcelChunk(chunk: ParcelChunk): Promise<EntryHash> {
+    return this.call('commit_parcel_chunk', chunk);
   }
 
   async commitParcelManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
@@ -159,6 +159,10 @@ export class DeliveryProxy extends ZomeProxy {
 
   async commitPendingItem(input: CommitPendingItemInput): Promise<ActionHash> {
     return this.call('commit_pending_item', input);
+  }
+
+  async completeManifest(manifestEh: EntryHash): Promise<[EntryHash, EntryHash | number][] | null> {
+    return this.call('complete_manifest', manifestEh);
   }
 
   async distributeParcel(input: DistributeParcelInput): Promise<ActionHash> {
@@ -181,6 +185,14 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_distribution_state', distributionAh);
   }
 
+  async getManifest(manifestEh: EntryHash): Promise<ParcelManifest> {
+    return this.call('get_manifest', manifestEh);
+  }
+
+  async getChunk(chunkEh: EntryHash): Promise<ParcelChunk> {
+    return this.call('get_chunk', chunkEh);
+  }
+
   async getNotice(distributionAh: ActionHash): Promise<GetNoticeOutput | null> {
     return this.call('get_notice', distributionAh);
   }
@@ -201,8 +213,8 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_my_enc_key', null);
   }
 
-  async publishChunk(data: string): Promise<EntryHash> {
-    return this.call('publish_chunk', data);
+  async publishChunk(chunk: ParcelChunk): Promise<EntryHash> {
+    return this.call('publish_chunk', chunk);
   }
 
   async publishManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
@@ -211,14 +223,6 @@ export class DeliveryProxy extends ZomeProxy {
 
   async pullInbox(): Promise<ActionHash[]> {
     return this.call('pull_inbox', null);
-  }
-
-  async pullManifest(manifestEh: EntryHash): Promise<ParcelManifest> {
-    return this.call('pull_manifest', manifestEh);
-  }
-
-  async pullChunk(chunkEh: EntryHash): Promise<ParcelChunk> {
-    return this.call('pull_chunk', chunkEh);
   }
 
   async pullPublicParcels(): Promise<ParcelReference[]> {

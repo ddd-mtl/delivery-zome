@@ -73,7 +73,7 @@ export class SecretDvm extends DnaViewModel {
     if (SignalProtocolType.NewPublicParcel in deliverySignal) {
       console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
       const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel.eh);
-      this.deliveryZvm.pullParcelData(ppEh).then((msg: string) => {
+      this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
         this._perspective.publicMessages[ppEh] = msg;
         this.notifySubscribers();
       })
@@ -87,7 +87,7 @@ export class SecretDvm extends DnaViewModel {
     const pds = Object.entries(this.deliveryZvm.perspective.publicParcels);
     console.log("probePublicMessages() PublicParcels count", Object.entries(pds).length);
     for (const [ppEh, pd] of pds) {
-      publicMessages[ppEh] = await this.deliveryZvm.pullParcelData(ppEh);
+      publicMessages[ppEh] = await this.deliveryZvm.getParcelData(ppEh);
     }
     this._perspective.publicMessages = publicMessages;
     this.notifySubscribers();
@@ -97,11 +97,12 @@ export class SecretDvm extends DnaViewModel {
 
   /** */
   async publishMessage(message: string): Promise<EntryHashB64> {
-   const chunk_eh = await this.deliveryZvm.zomeProxy.publishChunk(message);
+    const data_hash = message; // should be an actual hash but we dont care in this example code.
+   const chunk_eh = await this.deliveryZvm.zomeProxy.publishChunk({data_hash, data: message});
 
    const eh = await this.deliveryZvm.zomeProxy.publishManifest(
     {
-     data_hash: "fake-hash",
+     data_hash,
      chunks: [chunk_eh],
      description: {
        size: 0,

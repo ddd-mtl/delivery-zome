@@ -5,7 +5,7 @@ use zome_delivery_types::*;
 
 ///
 #[hdk_extern]
-pub fn pull_manifest(manifest_eh: EntryHash) -> ExternResult<ParcelManifest> {
+pub fn get_manifest(manifest_eh: EntryHash) -> ExternResult<ParcelManifest> {
    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
    Ok(manifest)
 }
@@ -13,7 +13,7 @@ pub fn pull_manifest(manifest_eh: EntryHash) -> ExternResult<ParcelManifest> {
 
 ///
 #[hdk_extern]
-pub fn pull_chunk(chunk_eh: EntryHash) -> ExternResult<ParcelChunk> {
+pub fn get_chunk(chunk_eh: EntryHash) -> ExternResult<ParcelChunk> {
    let chunk: ParcelChunk = get_typed_from_eh(chunk_eh)?;
    Ok(chunk)
 }

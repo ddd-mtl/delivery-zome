@@ -61,6 +61,7 @@ pub struct ReplyAck {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelChunk {
+   pub data_hash: String,
    pub data: String,
 }
 

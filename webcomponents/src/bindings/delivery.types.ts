@@ -262,6 +262,7 @@ export interface ReplyAck {
 
 /** Entry representing a chunk a data (for a parcel) */
 export interface ParcelChunk {
+  data_hash: string
   data: string
 }
 
@@ -482,6 +483,7 @@ export interface CommitParcelInput {
 /** Protocol for notifying the ViewModel (UI) */
 export enum SignalProtocolType {
 	NewManifest = 'NewManifest',
+	NewChunk = 'NewChunk',
 	ReceivedChunk = 'ReceivedChunk',
 	NewDistribution = 'NewDistribution',
 	NewNotice = 'NewNotice',
@@ -494,6 +496,7 @@ export enum SignalProtocolType {
 	NewPublicParcel = 'NewPublicParcel',
 }
 export type SignalProtocolVariantNewManifest = {NewManifest: [EntryHash, ParcelManifest]}
+export type SignalProtocolVariantNewChunk = {NewChunk: [EntryHash, ParcelChunk]}
 export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
 export type SignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Distribution, Timestamp]}
 export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, DeliveryNotice, Timestamp]}
@@ -505,4 +508,4 @@ export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash,
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
 export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: ParcelReference}
 export type SignalProtocol = 
- | SignalProtocolVariantNewManifest | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;
+ | SignalProtocolVariantNewManifest | SignalProtocolVariantNewChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;

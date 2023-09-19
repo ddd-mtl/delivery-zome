@@ -262,6 +262,7 @@ export interface ReplyAck {
 
 /** Entry representing a chunk a data (for a parcel) */
 export interface ParcelChunk {
+  data_hash: string
   data: string
 }
 

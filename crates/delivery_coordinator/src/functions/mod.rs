@@ -14,7 +14,8 @@ mod get_all_manifests;
 mod publish_manifest;
 mod publish_chunk;
 mod pull_public_parcels;
-mod pull_parcel;
+mod get_manifest;
+mod complete_manifest;
 
 
 pub use get_distribution_state::*;

@@ -12,7 +12,6 @@ pub struct DistributeParcelInput {
 }
 
 
-
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RespondToNoticeInput {
    pub notice_eh: EntryHash,

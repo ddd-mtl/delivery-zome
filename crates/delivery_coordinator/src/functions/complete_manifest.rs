@@ -6,25 +6,17 @@ use zome_delivery_integrity::*;
 use crate::*;
 
 
-/// Self called Zome Function (Careful when renaming this function)
 /// Check if all chunks have been committed for this parcel.
 /// Return EntryHash of Notice if Manifest is received from remote agent.
 /// Return EntryHash of ReceptionProof if it has been completly downloaded.
 /// Otherwise return download completion percentage.
-#[ignore(zits)]
 #[hdk_extern]
-pub fn check_manifest(chunk_eh: EntryHash) -> ExternResult<Option<Vec<(EntryHash, Result<EntryHash, usize>)>>> {
-   debug!("START {}", chunk_eh);
+pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(EntryHash, Result<EntryHash, usize>)>>> {
+   debug!("START {}", manifest_eh);
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Find manifest with that chunk_eh
-   let maybe_manifest = find_ParcelManifest(chunk_eh)?;
-   if maybe_manifest.is_none() {
-      debug!("ABORT - Manifest not found");
-      return Ok(None);
-      //return error("Manifest not found for chunk");
-   }
+   /// Make sure manifest exists
+   let _ = get_typed_from_eh::<ParcelManifest>(manifest_eh.clone())?;
    /// Find notice with that manifest
-   let manifest_eh = hash_entry(maybe_manifest.unwrap())?;
    let notices = find_notice_with_parcel(manifest_eh.clone())?;
    if notices.is_empty() {
       debug!("ABORT - Notice not found for manifest {}", manifest_eh);
