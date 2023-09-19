@@ -87,8 +87,9 @@ export class DeliveryZvm extends ZomeViewModel {
             this._perspective.chunkCounts[chunk.data_hash] = chunksCount;
             console.log("chunkCounts", chunk.data_hash, chunksCount);
             /** Update notice state */
-            const [manifestEh, _isPrivate] = this._perspective.localManifestByData[chunk.data_hash];
-            if (manifestEh) {
+            const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
+            if (manifestPair) {
+                const manifestEh = manifestPair[0];
                 const noticeEh = this._perspective.noticeByParcel[manifestEh];
                 if (noticeEh) {
                     const manifest = this._perspective.privateManifests[manifestEh];
