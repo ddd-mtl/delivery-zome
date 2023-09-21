@@ -152,12 +152,11 @@ pub fn query_NoticeReply(notice_eh: EntryHash) -> ExternResult<Option<NoticeRepl
    //debug!("*** query_NoticeReply() CALLED with {:?}", notice_eh);
    /// Get all Create NoticeReply Elements with query
    let tuples = get_all_typed_local::<NoticeReply>(DeliveryEntryTypes::NoticeReply.try_into().unwrap())?;
-   if tuples.len() > 1 {
-      error!("More than one reply found for DeliveryNotice {:?}", notice_eh);
-   }
    /// Search through query result
    for (_, _, reply) in tuples {
-      return Ok(Some(reply));
+      if reply.notice_eh == notice_eh {
+         return Ok(Some(reply));
+      }
    }
    /// Done
    Ok(None)
