@@ -53,6 +53,14 @@ The Delivery zome must use the name defined by `DELIVERY_ZOME_NAME` in the clien
 
 Use `playground` as an integration example. 
 
+### Zome properties
+
+A client dna must define the following dna properties:
+- `maxChunkSize`: Maximum size in octets of the content of a `ParcelChunk` entry.
+- `maxParcelSize`: Maximum size in octets allowed for a parcel.
+- `maxParcelNameLength`: Maximum length allowed for a parcel name
+- `minParcelNameLength`: Minimum length allowed for a parcel name
+
 
 ### TODO
 

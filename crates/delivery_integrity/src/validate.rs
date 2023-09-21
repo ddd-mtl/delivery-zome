@@ -15,9 +15,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
          // FIXME return validate_create_link(reg_create_link.create_link);
          Ok(ValidateCallbackResult::Valid)
       },
-      Op::RegisterDeleteLink (_)=> Ok(ValidateCallbackResult::Invalid("Deleting links isn't allowed".to_string())),
+      Op::RegisterDeleteLink (_)=> Ok(ValidateCallbackResult::Valid),
       Op::RegisterUpdate { .. } => Ok(ValidateCallbackResult::Valid),
-      Op::RegisterDelete { .. } => Ok(ValidateCallbackResult::Invalid("Deleting entries isn't allowed".to_string())),
+      Op::RegisterDelete { .. } => Ok(ValidateCallbackResult::Valid),
       Op::RegisterAgentActivity { .. } => Ok(ValidateCallbackResult::Valid),
    }
 }
