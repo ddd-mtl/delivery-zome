@@ -15,6 +15,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all inbox items
    let pending_pairs = get_all_inbox_items(None)?;
+   debug!("pending items count: {}", pending_pairs.len());
    /// Convert Each Item
    let mut entry_map = HashMap::new();
    let mut manifest_map = HashMap::new();
