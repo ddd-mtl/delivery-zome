@@ -89,10 +89,10 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
         const receptionAcksLi = Object.entries(this.perspective.receptionAcks).map(
-            ([distribAh, receipt]) => {
+            ([distribAh, [receptionAck, _ts]]) => {
                 return html `
           <li style="margin-top:10px;" title=${distribAh}>
-              ${this.distrib2str(encodeHashToBase64(receipt.distribution_ah))}: ${encodeHashToBase64(receipt.recipient).slice(-5)}
+              ${this.distrib2str(encodeHashToBase64(receptionAck.distribution_ah))}: ${encodeHashToBase64(receptionAck.recipient).slice(-5)}
           </li>`
             }
         )
@@ -137,17 +137,17 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
         const receptionsLi = Object.entries(this.perspective.receptions).map(
-            ([eh, received]) => {
+            ([eh, [receptionProof, _ts]]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
-              ${this.notice2str(encodeHashToBase64(received.notice_eh))}: ${encodeHashToBase64(received.parcel_eh).slice(-5)}
+              ${this.notice2str(encodeHashToBase64(receptionProof.notice_eh))}: ${encodeHashToBase64(receptionProof.parcel_eh).slice(-5)}
           </li>`
             }
         )
 
         const manifestsLi = Object.entries(this.perspective.localManifestByData).map(
             ([dataHash, [manifestEh, _isPrivate]]) => {
-                const manifest = this.perspective.privateManifests[manifestEh];
+                const [manifest, _ts] = this.perspective.privateManifests[manifestEh];
                 return html `
           <li style="margin-top:10px;" title=${dataHash}>
               ${dataHash} | ${manifest.chunks.length} chunks

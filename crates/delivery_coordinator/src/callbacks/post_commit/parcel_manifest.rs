@@ -5,11 +5,11 @@ use crate::*;
 
 
 /// Try to retrieve every chunk
-pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_ParcelManifest(sah: &SignedActionHashed, entry: Entry, manifest_eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
    let manifest = ParcelManifest::try_from(entry)?;
    /// Emit signal
-   let res = emit_signal(&SignalProtocol::NewManifest((manifest_eh.to_owned(), manifest.clone())));
+   let res = emit_signal(&SignalProtocol::NewManifest((manifest_eh.to_owned(), sah.hashed.content.timestamp(), manifest.clone())));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }
@@ -20,7 +20,7 @@ pub fn post_commit_ParcelManifest(entry: Entry, manifest_eh: &EntryHash) -> Exte
       /// Normal if agent is original creator of ParcelManifest
       return Ok(())
    }
-   let notice_eh = hash_entry(notices[0].clone())?;
+   let notice_eh = hash_entry(notices[0].0.clone())?;
    /// Try to retrieve parcel if it has been accepted
    let mut pairs = Vec::new();
    for chunk_eh in manifest.chunks.clone() {

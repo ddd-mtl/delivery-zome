@@ -495,17 +495,17 @@ export enum SignalProtocolType {
 	NewPendingItem = 'NewPendingItem',
 	NewPublicParcel = 'NewPublicParcel',
 }
-export type SignalProtocolVariantNewManifest = {NewManifest: [EntryHash, ParcelManifest]}
+export type SignalProtocolVariantNewManifest = {NewManifest: [EntryHash, Timestamp, ParcelManifest]}
 export type SignalProtocolVariantNewChunk = {NewChunk: [EntryHash, ParcelChunk]}
 export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
-export type SignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Distribution, Timestamp]}
-export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, DeliveryNotice, Timestamp]}
-export type SignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, NoticeAck]}
-export type SignalProtocolVariantNewReply = {NewReply: [EntryHash, NoticeReply]}
-export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, ReplyAck]}
-export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, ReceptionProof]}
-export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, ReceptionAck]}
+export type SignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Timestamp, Distribution]}
+export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, Timestamp, DeliveryNotice]}
+export type SignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, Timestamp, NoticeAck]}
+export type SignalProtocolVariantNewReply = {NewReply: [EntryHash, Timestamp, NoticeReply]}
+export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timestamp, ReplyAck]}
+export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
+export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: ParcelReference}
+export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [Timestamp, ParcelReference]}
 export type SignalProtocol = 
  | SignalProtocolVariantNewManifest | SignalProtocolVariantNewChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;

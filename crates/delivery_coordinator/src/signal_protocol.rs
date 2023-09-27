@@ -5,18 +5,18 @@ use zome_delivery_types::*;
 /// Protocol for notifying the ViewModel (UI)
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
-    NewManifest((EntryHash, ParcelManifest)),
+    NewManifest((EntryHash, Timestamp, ParcelManifest)),
     NewChunk((EntryHash, ParcelChunk)),
     ReceivedChunk((Vec<EntryHash>, usize)), // EntryHash of DeliveryNotice for the Chunk
-    NewDistribution((ActionHash, Distribution, Timestamp)),
-    NewNotice((EntryHash, DeliveryNotice, Timestamp)),
-    NewNoticeAck((EntryHash, NoticeAck)),
-    NewReply((EntryHash, NoticeReply)),
-    NewReplyAck((EntryHash, ReplyAck)),
-    NewReceptionProof((EntryHash, ReceptionProof)),
-    NewReceptionAck((EntryHash, ReceptionAck)),
+    NewDistribution((ActionHash, Timestamp, Distribution)),
+    NewNotice((EntryHash, Timestamp, DeliveryNotice)),
+    NewNoticeAck((EntryHash, Timestamp, NoticeAck)),
+    NewReply((EntryHash, Timestamp, NoticeReply)),
+    NewReplyAck((EntryHash, Timestamp, ReplyAck)),
+    NewReceptionProof((EntryHash, Timestamp, ReceptionProof)),
+    NewReceptionAck((EntryHash, Timestamp, ReceptionAck)),
     NewPendingItem((EntryHash, PendingItem)),
-    NewPublicParcel(ParcelReference),
+    NewPublicParcel((Timestamp, ParcelReference)),
 }
 
 

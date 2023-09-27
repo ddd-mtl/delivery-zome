@@ -52,10 +52,10 @@ export class SecretDvm extends DnaViewModel {
 
     /** Automatically accept parcel from secret zome */
     if (SignalProtocolType.NewNotice in deliverySignal) {
-      console.log("ADDING DeliveryNotice. parcel_description:", deliverySignal.NewNotice[1].summary.parcel_reference.description);
+      console.log("ADDING DeliveryNotice. parcel_description:", deliverySignal.NewNotice[2].summary.parcel_reference.description);
       const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
-      if (ParcelKindType.AppEntry in deliverySignal.NewNotice[1].summary.parcel_reference.description.kind_info) {
-        if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.description.zome_origin) {
+      if (ParcelKindType.AppEntry in deliverySignal.NewNotice[2].summary.parcel_reference.description.kind_info) {
+        if ("secret_integrity" === deliverySignal.NewNotice[2].summary.parcel_reference.description.zome_origin) {
           this.deliveryZvm.acceptDelivery(noticeEh);
         }
       } else {
@@ -67,12 +67,12 @@ export class SecretDvm extends DnaViewModel {
     }
 
     if (SignalProtocolType.NewReceptionProof in deliverySignal) {
-      console.log("ADDING NewReceptionProof. parcel_eh:", encodeHashToBase64(deliverySignal.NewReceptionProof[1].parcel_eh));
+      console.log("ADDING NewReceptionProof. parcel_eh:", encodeHashToBase64(deliverySignal.NewReceptionProof[2].parcel_eh));
     }
 
     if (SignalProtocolType.NewPublicParcel in deliverySignal) {
       console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel.eh);
+      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[1].eh);
       this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
         this._perspective.publicMessages[ppEh] = msg;
         this.notifySubscribers();
@@ -97,7 +97,7 @@ export class SecretDvm extends DnaViewModel {
 
   /** */
   async publishMessage(message: string): Promise<EntryHashB64> {
-    const data_hash = message; // should be an actual hash but we dont care in this example code.
+    const data_hash = message; // should be an actual hash, but we don't care in this example code.
    const chunk_eh = await this.deliveryZvm.zomeProxy.publishChunk({data_hash, data: message});
 
    const eh = await this.deliveryZvm.zomeProxy.publishManifest(

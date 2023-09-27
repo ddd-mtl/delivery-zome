@@ -8,11 +8,11 @@ use crate::*;
 ///
 /// Get All public Parcels
 #[hdk_extern]
-pub fn pull_public_parcels(_:()) -> ExternResult<Vec<ParcelReference>> {
+pub fn pull_public_parcels(_:()) -> ExternResult<Vec<(ParcelReference, Timestamp, AgentPubKey)>> {
    let anchor = public_parcels_path().path_entry_hash()?;
    let pps = get_typed_from_links::<ParcelReference>(anchor, LinkTypes::PublicParcels, None)
       .map_err(|err| wasm_error!(WasmErrorInner::Guest(err.to_string())))?
       .into_iter()
-      .map(|(pp, _link)| pp).collect();
+      .map(|(pp, link)| (pp, link.timestamp, link.author)).collect();
    Ok(pps)
 }

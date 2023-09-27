@@ -213,6 +213,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_my_enc_key', null);
   }
 
+  async testEncryption(to: AgentPubKey): Promise<void> {
+    return this.call('test_encryption', to);
+  }
+
   async publishChunk(chunk: ParcelChunk): Promise<EntryHash> {
     return this.call('publish_chunk', chunk);
   }
@@ -225,7 +229,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('pull_inbox', null);
   }
 
-  async pullPublicParcels(): Promise<ParcelReference[]> {
+  async pullPublicParcels(): Promise<[ParcelReference, Timestamp, AgentPubKey][]> {
     return this.call('pull_public_parcels', null);
   }
 
@@ -237,7 +241,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_all_DeliveryNotice', null);
   }
 
-  async queryDeliveryNotice(queryField: DeliveryNoticeQueryField): Promise<DeliveryNotice[]> {
+  async queryDeliveryNotice(queryField: DeliveryNoticeQueryField): Promise<[DeliveryNotice, Timestamp][]> {
     return this.call('query_DeliveryNotice', queryField);
   }
 
@@ -249,35 +253,67 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_NoticeAck', field);
   }
 
-  async queryAllNoticeReply(): Promise<[EntryHash, NoticeReply][]> {
+  async queryAllNoticeReply(): Promise<[EntryHash, Timestamp, NoticeReply][]> {
     return this.call('query_all_NoticeReply', null);
   }
 
-  async queryAllReplyAck(): Promise<[EntryHash, ReplyAck][]> {
+  async queryAllReplyAck(): Promise<[EntryHash, Timestamp, ReplyAck][]> {
     return this.call('query_all_ReplyAck', null);
   }
 
-  async queryAllReceptionProof(): Promise<[EntryHash, ReceptionProof][]> {
+  async queryAllReceptionProof(): Promise<[EntryHash, Timestamp, ReceptionProof][]> {
     return this.call('query_all_ReceptionProof', null);
   }
 
-  async queryReceptionProof(field: ReceptionProofQueryField): Promise<[EntryHash, ReceptionProof] | null> {
+  async queryReceptionProof(field: ReceptionProofQueryField): Promise<[EntryHash, Timestamp, ReceptionProof] | null> {
     return this.call('query_ReceptionProof', field);
   }
 
-  async queryAllReceptionAck(): Promise<[EntryHash, ReceptionAck][]> {
+  async queryAllReceptionAck(): Promise<[EntryHash, Timestamp, ReceptionAck][]> {
     return this.call('query_all_ReceptionAck', null);
   }
 
-  async queryAllManifest(): Promise<[EntryHash, ParcelManifest][]> {
+  async queryAllManifest(): Promise<[EntryHash, Timestamp, ParcelManifest][]> {
     return this.call('query_all_Manifest', null);
   }
 
-  async queryAllPublicManifest(): Promise<[EntryHash, ParcelManifest][]> {
+  async queryAllPublicManifest(): Promise<[EntryHash, Timestamp, ParcelManifest][]> {
     return this.call('query_all_PublicManifest', null);
   }
 
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {
     return this.call('respond_to_notice', input);
+  }
+
+  async receiveDeliveryDm(dm: DirectMessage): Promise<DeliveryProtocol> {
+    return this.call('receive_delivery_dm', dm);
+  }
+
+  async commitParcel(input: CommitParcelInput): Promise<ActionHash> {
+    return this.call('commit_parcel', input);
+  }
+
+  async commitNoticeAck(ack: NoticeAck): Promise<ActionHash> {
+    return this.call('commit_NoticeAck', ack);
+  }
+
+  async commitReceptionProof(pr: ReceptionProof): Promise<EntryHash> {
+    return this.call('commit_ReceptionProof', pr);
+  }
+
+  async commitReceivedChunks(chunks: [ParcelChunk, Link][]): Promise<void> {
+    return this.call('commit_received_chunks', chunks);
+  }
+
+  async fetchChunk(input: FetchChunkInput): Promise<[ParcelChunk, Link | null] | null> {
+    return this.call('fetch_chunk', input);
+  }
+
+  async fetchParcel(noticeEh: EntryHash): Promise<EntryHash | null> {
+    return this.call('fetch_parcel', noticeEh);
+  }
+
+  async linkPublicParcel(ppEh: EntryHash): Promise<ActionHash> {
+    return this.call('link_public_parcel', ppEh);
   }
 }

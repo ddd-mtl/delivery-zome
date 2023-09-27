@@ -4,7 +4,7 @@ use crate::*;
 
 
 ///
-pub fn post_commit_PendingItem(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_PendingItem(_sah: &SignedActionHashed, entry: Entry, eh: &EntryHash) -> ExternResult<()> {
    let item = PendingItem::try_from(entry)?;
    /// Emit Signal
    let res = emit_signal(&SignalProtocol::NewPendingItem((eh.to_owned(), item)));

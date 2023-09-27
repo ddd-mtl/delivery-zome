@@ -30,7 +30,7 @@ use crate::SignalProtocol;
 
 
 ///
-pub fn post_commit_ParcelChunk(entry: Entry, chunk_eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_ParcelChunk(_sah: &SignedActionHashed, entry: Entry, chunk_eh: &EntryHash) -> ExternResult<()> {
     debug!("post_commit_ParcelChunk() {:?}", chunk_eh);
     let chunk = ParcelChunk::try_from(entry)?;
     /// Emit signal

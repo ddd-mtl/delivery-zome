@@ -87,21 +87,21 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
       /// Send/Receive/Ack Notice
       DeliveryEntryTypes::Distribution => post_commit_Distribution(sah, entry, eh),
       DeliveryEntryTypes::DeliveryNotice => post_commit_DeliveryNotice(sah, entry, eh),
-      DeliveryEntryTypes::NoticeAck => post_commit_NoticeAck(entry, eh),
+      DeliveryEntryTypes::NoticeAck => post_commit_NoticeAck(sah, entry, eh),
       /// Send/Receive Reply
-      DeliveryEntryTypes::NoticeReply => post_commit_NoticeReply(entry, eh),
-      DeliveryEntryTypes::ReplyAck => post_commit_ReplyAck(entry, eh),
+      DeliveryEntryTypes::NoticeReply => post_commit_NoticeReply(sah, entry, eh),
+      DeliveryEntryTypes::ReplyAck => post_commit_ReplyAck(sah, entry, eh),
       /// Send/Receive Parcel
-      DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(entry, eh),
-      DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(entry, eh),
+      DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(sah, entry, eh),
+      DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(sah, entry, eh),
       /// Send/Receive ReceptionProof
-      DeliveryEntryTypes::ReceptionProof => post_commit_ReceptionProof(entry, eh),
-      DeliveryEntryTypes::ReceptionAck => post_commit_ReceptionAck(entry, eh),
+      DeliveryEntryTypes::ReceptionProof => post_commit_ReceptionProof(sah, entry, eh),
+      DeliveryEntryTypes::ReceptionAck => post_commit_ReceptionAck(sah, entry, eh),
       /// Public entries
-      DeliveryEntryTypes::PendingItem => post_commit_PendingItem(entry, eh),
-      DeliveryEntryTypes::PublicChunk => post_commit_PublicChunk(entry, eh),
-      DeliveryEntryTypes::PublicManifest => post_commit_PublicManifest(entry, eh),
-      DeliveryEntryTypes::PublicParcel => post_commit_PublicParcel(entry, eh),
+      DeliveryEntryTypes::PendingItem => post_commit_PendingItem(sah, entry, eh),
+      DeliveryEntryTypes::PublicChunk => post_commit_PublicChunk(sah, entry, eh),
+      DeliveryEntryTypes::PublicManifest => post_commit_PublicManifest(sah, entry, eh),
+      DeliveryEntryTypes::PublicParcel => post_commit_PublicParcel(sah, entry, eh),
       ///
       _ => Ok(()),
    }

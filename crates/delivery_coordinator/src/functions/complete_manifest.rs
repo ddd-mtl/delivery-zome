@@ -41,7 +41,7 @@ pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(Ent
       let notice_eh = hash_entry(notice)?;
       /// Must not already have a ReceptionProof
       let maybe_reception_proof = query_ReceptionProof(ReceptionProofQueryField::Notice(notice_eh.clone()))?;
-      if let Some((_reception_eh, reception_proof)) = maybe_reception_proof {
+      if let Some((_reception_eh, _ts, reception_proof)) = maybe_reception_proof {
          debug!("ReceptionProof found for notice: {:?}", notice_eh);
          let reception_proof_eh = hash_entry(reception_proof.clone())?;
          res.push((notice_eh, Ok(reception_proof_eh)));

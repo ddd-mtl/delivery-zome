@@ -30,12 +30,12 @@ export interface DeliveryPerspective {
     /** -- -- */
     inbox: ActionHashB64[],
 
-    /** pp_eh -> [ParcelDescription */
-    publicParcels: Dictionary<ParcelDescription>,
+    /** pp_eh -> ParcelDescription */
+    publicParcels: Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>,
 
     /** Parcels */
     /** manifest_eh -> ParcelManifest */
-    privateManifests: Dictionary<ParcelManifest>,
+    privateManifests: Dictionary<[ParcelManifest, Timestamp]>,
     /** manifest_eh -> ParcelManifest */
     localPublicManifests: Dictionary<ParcelManifest>,
     /** data_hash -> [manifest_eh, isPrivate] */
@@ -52,7 +52,7 @@ export interface DeliveryPerspective {
     /** distrib_ah -> ReplyAck */
     replyAcks: Dictionary<ReplyAck>,
     /** distrib_ah -> ReceptionAck */
-    receptionAcks: Dictionary<ReceptionAck>,
+    receptionAcks: Dictionary<[ReceptionAck, Timestamp]>,
 
     /** -- INBOUND -- */
     /** notice_eh -> Timestamp, Notice, State, Download Percentage */
@@ -62,10 +62,11 @@ export interface DeliveryPerspective {
     /** notice_eh -> NoticeReply */
     replies: Dictionary<NoticeReply>,
     /** notice_eh -> ReceptionProof */
-    receptions: Dictionary<ReceptionProof>,
+    receptions: Dictionary<[ReceptionProof, Timestamp]>,
 }
 
 
+/** */
 export function createDeliveryPerspective(): DeliveryPerspective {
     return {
         myPubEncKey: new Uint8Array(),

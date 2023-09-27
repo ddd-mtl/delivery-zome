@@ -11,7 +11,7 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, notice
     let me = agent_info()?.agent_latest_pubkey;
     let notice = DeliveryNotice::try_from(entry)?;
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::NewNotice((notice_eh.to_owned(), notice.clone(), sah.hashed.content.timestamp())));
+    let res = emit_signal(&SignalProtocol::NewNotice((notice_eh.to_owned(), sah.hashed.content.timestamp(), notice.clone())));
     if let Err(err) = res.clone() {
         error!("Emit signal failed: {}", err);
     }

@@ -5,14 +5,14 @@ use crate::*;
 
 
 ///
-pub fn post_commit_ReplyAck(entry: Entry, eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_ReplyAck(sah: &SignedActionHashed, entry: Entry, eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ReplyAck() {:?}", eh);
    let reply_ack = ReplyAck::try_from(entry)?;
    /// Check signature
    // FIXME
    //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::NewReplyAck((eh.to_owned(), reply_ack.clone())));
+   let res = emit_signal(&SignalProtocol::NewReplyAck((eh.to_owned(), sah.hashed.content.timestamp(), reply_ack.clone())));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }

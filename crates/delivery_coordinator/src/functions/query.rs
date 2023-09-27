@@ -48,7 +48,7 @@ pub fn query_all_DeliveryNotice(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp
 
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]
-pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResult<Vec<DeliveryNotice>> {
+pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResult<Vec<(DeliveryNotice, Timestamp)>> {
    //debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
@@ -57,23 +57,23 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
    let mut res = Vec::new();
    match query_field {
       DeliveryNoticeQueryField::Sender(sender) => {
-         for (_, _, notice) in tuples {
+         for (_ah, create, notice) in tuples {
             if notice.sender == sender {
-               res.push(notice.clone());
+               res.push((notice.clone(), create.timestamp));
             }
          }
       },
       DeliveryNoticeQueryField::Parcel(parcel_eh) => {
-         for (_, _, notice) in tuples {
+         for (_ah, create, notice) in tuples {
             if notice.summary.parcel_reference.eh == parcel_eh {
-               res.push(notice.clone());
+               res.push((notice.clone(), create.timestamp));
             }
          }
       },
       DeliveryNoticeQueryField::Distribution(distrib_ah) => {
-         for (_, _, notice) in tuples {
+         for (_ah, create, notice) in tuples {
             if notice.distribution_ah == distrib_ah {
-               res.push(notice.clone());
+               res.push((notice.clone(), create.timestamp));
             }
          }
          if res.len() > 1 {
@@ -135,12 +135,12 @@ pub fn query_NoticeAck(field: NoticeAckQueryField) -> ExternResult<Vec<NoticeAck
 
 ///
 #[hdk_extern]
-pub fn query_all_NoticeReply(_: ()) -> ExternResult<Vec<(EntryHash, NoticeReply)>> {
+pub fn query_all_NoticeReply(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, NoticeReply)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<NoticeReply>(DeliveryEntryTypes::NoticeReply.try_into().unwrap())?;
    let res = tuples.into_iter()
-       .map(|(_, create, typed)| (create.entry_hash, typed))
+       .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
        .collect();
    /// Done
    Ok(res)
@@ -165,12 +165,12 @@ pub fn query_NoticeReply(notice_eh: EntryHash) -> ExternResult<Option<NoticeRepl
 
 ///
 #[hdk_extern]
-pub fn query_all_ReplyAck(_: ()) -> ExternResult<Vec<(EntryHash, ReplyAck)>> {
+pub fn query_all_ReplyAck(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ReplyAck)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<ReplyAck>(DeliveryEntryTypes::ReplyAck.try_into().unwrap())?;
    let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)
@@ -199,13 +199,13 @@ pub fn query_ReplyAck(maybe_distribution: Option<ActionHash>, maybe_recipient: O
 
 ///
 #[hdk_extern]
-pub fn query_all_ReceptionProof(_: ()) -> ExternResult<Vec<(EntryHash, ReceptionProof)>> {
+pub fn query_all_ReceptionProof(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ReceptionProof)>> {
    //debug!("*** query_ReceptionProof() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<ReceptionProof>(DeliveryEntryTypes::ReceptionProof.try_into().unwrap())?;
    let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)
@@ -214,7 +214,7 @@ pub fn query_all_ReceptionProof(_: ()) -> ExternResult<Vec<(EntryHash, Reception
 
 ///Find ReceptionProof with field with given value
 #[hdk_extern]
-pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Option<(EntryHash, ReceptionProof)>> {
+pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Option<(EntryHash, Timestamp, ReceptionProof)>> {
    //debug!("*** query_ReceptionProof() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create ReceptionProof Elements with query
@@ -225,7 +225,7 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
       ReceptionProofQueryField::Notice(eh) => {
          for (_ah, create, reception) in tuples {
             if reception.notice_eh == eh {
-               return Ok(Some((create.entry_hash, reception)));
+               return Ok(Some((create.entry_hash, create.timestamp, reception)));
             }
          }
       },
@@ -233,7 +233,7 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
          for (_ah, create, reception) in tuples {
             //debug!("*** query_ReceptionProof() Parcel  receipt.parcel_eh {:?}", receipt.parcel_eh);
             if reception.parcel_eh == eh {
-               return Ok(Some((create.entry_hash, reception)));
+               return Ok(Some((create.entry_hash, create.timestamp, reception)));
             }
          }
       },
@@ -245,12 +245,12 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
 
 ///
 #[hdk_extern]
-pub fn query_all_ReceptionAck(_: ()) -> ExternResult<Vec<(EntryHash, ReceptionAck)>> {
+pub fn query_all_ReceptionAck(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ReceptionAck)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create ReceptionAck Elements with query
    let tuples = get_all_typed_local::<ReceptionAck>(DeliveryEntryTypes::ReceptionAck.try_into().unwrap())?;
    let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)
@@ -282,13 +282,13 @@ pub fn query_ReceptionAck(maybe_distribution: Option<ActionHash>, maybe_recipien
 
 ///
 #[hdk_extern]
-pub fn query_all_Manifest(_: ()) -> ExternResult<Vec<(EntryHash, ParcelManifest)>> {
+pub fn query_all_Manifest(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
    //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Elements with query
    let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::ParcelManifest.try_into().unwrap())?;
    let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)
@@ -297,13 +297,13 @@ pub fn query_all_Manifest(_: ()) -> ExternResult<Vec<(EntryHash, ParcelManifest)
 
 ///
 #[hdk_extern]
-pub fn query_all_PublicManifest(_: ()) -> ExternResult<Vec<(EntryHash, ParcelManifest)>> {
+pub fn query_all_PublicManifest(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
    //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Elements with query
    let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PublicManifest.try_into().unwrap())?;
    let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)

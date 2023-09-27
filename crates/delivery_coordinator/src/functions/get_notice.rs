@@ -15,10 +15,10 @@ pub fn get_notice(distribution_ah: ActionHash) -> ExternResult<Option<GetNoticeO
    if maybe_notices.is_empty() {
       return Ok(None)
    }
-   let notice_eh = hash_entry(maybe_notices[0].clone())?;
+   let notice_eh = hash_entry(maybe_notices[0].0.clone())?;
    /// Get state
    let output = GetNoticeOutput {
-      notice: maybe_notices[0].clone(),
+      notice: maybe_notices[0].0.clone(),
       state: get_notice_state(notice_eh)?,
    };
    /// Done
@@ -36,7 +36,7 @@ pub fn get_parcel_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNo
    if maybe_reception.is_none() {
       return Ok(None)
    }
-   let notice_eh = maybe_reception.unwrap().1.notice_eh;
+   let notice_eh = maybe_reception.unwrap().2.notice_eh;
    let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
    /// Done
    Ok(Some(notice))
