@@ -21,6 +21,14 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         DeliveryProtocol::ParcelRequest(distribution_ah) => {
             receive_dm_parcel_request(dm.from, distribution_ah)
         }
+        DeliveryProtocol::NewPublicParcel(tuple) => {
+            let res = emit_signal(&SignalProtocol::NewPublicParcel(tuple));
+            if let Err(err) = res.clone() {
+                error!("Emit signal failed: {}", err);
+            }
+            /** DOnt care */
+            return Ok(DeliveryProtocol::Pong);
+        }
         DeliveryProtocol::Item(pending_item) => {
             match pending_item.kind {
                 /// Sent by recipient
