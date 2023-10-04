@@ -62,8 +62,13 @@ export class DeliveryZvm extends ZomeViewModel {
             const manifestEh = encodeHashToBase64(deliverySignal.NewManifest[0]);
             const ts = deliverySignal.NewManifest[1];
             const manifest = deliverySignal.NewManifest[2];
-            this._perspective.privateManifests[manifestEh] = [manifest, ts];
-            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, "Private" in manifest.description.visibility];
+            const isPrivate = "Private" in manifest.description.visibility
+            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
+            if (isPrivate) {
+                this._perspective.privateManifests[manifestEh] = [manifest, ts];
+            } else {
+                this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
+            }
         }
         // if (SignalProtocolType.ReceivedChunk in deliverySignal) {
         //     console.log("signal ReceivedChunk", deliverySignal.ReceivedChunk);
