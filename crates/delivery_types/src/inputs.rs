@@ -66,3 +66,11 @@ pub struct GetDeliveryStateInput {
    pub distribution_ah: ActionHash,
    pub recipient: AgentPubKey,
 }
+
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct NotifyInput {
+   pub peers: Vec<AgentPubKey>,
+   pub pr: ParcelReference,
+   pub timestamp: Timestamp,
+}

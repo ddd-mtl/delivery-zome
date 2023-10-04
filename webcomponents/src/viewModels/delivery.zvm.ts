@@ -180,10 +180,11 @@ export class DeliveryZvm extends ZomeViewModel {
         }
         if (SignalProtocolType.NewPublicParcel in deliverySignal) {
             console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
+            const author = deliverySignal.NewPublicParcel[2];
             const pr = deliverySignal.NewPublicParcel[1];
             const ts = deliverySignal.NewPublicParcel[0];
             const parcel_eh = encodeHashToBase64(pr.eh);
-            this._perspective.publicParcels[parcel_eh] = [pr.description, ts, this.cell.agentPubKey];
+            this._perspective.publicParcels[parcel_eh] = [pr.description, ts, encodeHashToBase64(author)];
         }
         /** Done */
         this.notifySubscribers();

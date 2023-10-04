@@ -16,6 +16,7 @@ mod publish_chunk;
 mod pull_public_parcels;
 mod get_manifest;
 mod complete_manifest;
+mod notify_new_public_parcel;
 
 
 pub use get_distribution_state::*;
@@ -37,4 +38,5 @@ pub use self::{
    get_delivery_state::*,
    publish_manifest::*,
    publish_chunk::*,
+   notify_new_public_parcel::*,
 };

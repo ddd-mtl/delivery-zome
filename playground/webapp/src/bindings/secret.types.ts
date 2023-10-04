@@ -379,6 +379,12 @@ export interface GetDeliveryStateInput {
   recipient: AgentPubKey
 }
 
+export interface NotifyInput {
+  peers: AgentPubKey[]
+  pr: ParcelReference
+  timestamp: Timestamp
+}
+
 /** Dna properties */
 export interface DeliveryProperties {
   maxChunkSize: number
