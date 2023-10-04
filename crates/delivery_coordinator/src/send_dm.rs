@@ -10,7 +10,7 @@ pub fn send_dm(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<
    /// Pre-conditions: Don't call yourself (otherwise we get concurrency issues)
    let me = agent_info()?.agent_latest_pubkey;
    if destination == me {
-      return zome_error!("send_dm() aborted. Can't send to self.");
+      return error("send_dm() aborted. Can't send to self.");
    }
    /// Prepare payload
    let dm_packet = DirectMessage { from: me, msg: msg.clone() };
