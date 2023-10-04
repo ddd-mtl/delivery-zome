@@ -16,7 +16,7 @@ pub enum SignalProtocol {
     NewReceptionProof((EntryHash, Timestamp, ReceptionProof)),
     NewReceptionAck((EntryHash, Timestamp, ReceptionAck)),
     NewPendingItem((EntryHash, PendingItem)),
-    NewPublicParcel((Timestamp, ParcelReference)),
+    NewPublicParcel((Timestamp, ParcelReference, AgentPubKey)),
 }
 
 

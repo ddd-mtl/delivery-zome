@@ -451,6 +451,7 @@ export enum DeliveryProtocolType {
 	ParcelResponse = 'ParcelResponse',
 	ChunkRequest = 'ChunkRequest',
 	ChunkResponse = 'ChunkResponse',
+	NewPublicParcel = 'NewPublicParcel',
 	Ping = 'Ping',
 	Pong = 'Pong',
 }
@@ -461,10 +462,11 @@ export type DeliveryProtocolVariantParcelRequest = {ParcelRequest: ActionHash}
 export type DeliveryProtocolVariantParcelResponse = {ParcelResponse: Entry}
 export type DeliveryProtocolVariantChunkRequest = {ChunkRequest: EntryHash}
 export type DeliveryProtocolVariantChunkResponse = {ChunkResponse: ParcelChunk}
+export type DeliveryProtocolVariantNewPublicParcel = {NewPublicParcel: [Timestamp, ParcelReference, AgentPubKey]}
 export type DeliveryProtocolVariantPing = {Ping: null}
 export type DeliveryProtocolVariantPong = {Pong: null}
 export type DeliveryProtocol = 
- | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
+ | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantNewPublicParcel | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
 
 export interface FullDistributionState {
   distribution_state: DistributionState
@@ -506,6 +508,6 @@ export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timesta
 export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
 export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [Timestamp, ParcelReference]}
+export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [Timestamp, ParcelReference, AgentPubKey]}
 export type SignalProtocol = 
  | SignalProtocolVariantNewManifest | SignalProtocolVariantNewChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;
