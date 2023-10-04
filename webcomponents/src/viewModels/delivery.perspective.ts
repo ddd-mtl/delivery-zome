@@ -37,7 +37,7 @@ export interface DeliveryPerspective {
     /** manifest_eh -> ParcelManifest */
     privateManifests: Dictionary<[ParcelManifest, Timestamp]>,
     /** manifest_eh -> ParcelManifest */
-    localPublicManifests: Dictionary<ParcelManifest>,
+    localPublicManifests: Dictionary<[ParcelManifest, Timestamp]>,
     /** data_hash -> [manifest_eh, isPrivate] */
     localManifestByData: Dictionary<[EntryHashB64, boolean]>,
     /** data_hash -> number of chunks on chain */

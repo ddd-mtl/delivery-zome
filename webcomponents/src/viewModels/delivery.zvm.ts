@@ -301,9 +301,9 @@ export class DeliveryZvm extends ZomeViewModel {
 
         this._perspective.localPublicManifests = {};
         tuples = await this.zomeProxy.queryAllPublicManifest();
-        Object.values(tuples).map(([eh, _ts, manifest]) => {
+        Object.values(tuples).map(([eh, ts, manifest]) => {
             const manifestEh = encodeHashToBase64(eh);
-            this._perspective.localPublicManifests[manifestEh] = manifest;
+            this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
             this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, false];
         });
 
