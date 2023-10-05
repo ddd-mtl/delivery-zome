@@ -200,12 +200,9 @@ export class DeliveryZvm extends ZomeViewModel {
         const pds = await this.probePublicParcels();
         console.log("PublicParcels count", Object.entries(pds).length);
         await this.probeInbox();
-        this.postProbeAll();
         this.notifySubscribers();
     }
 
-
-    protected postProbeAll(): void {};
 
     /** */
     private async probePublicParcels(): Promise<Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>> {
