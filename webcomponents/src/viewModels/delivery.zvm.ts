@@ -194,18 +194,18 @@ export class DeliveryZvm extends ZomeViewModel {
     /** -- probe -- */
 
     /** */
-    async probeAll(): Promise<void> {
+    async probeAllInner(): Promise<void> {
         this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
         await this.queryAll();
         const pds = await this.probePublicParcels();
         console.log("PublicParcels count", Object.entries(pds).length);
         await this.probeInbox();
-        //await this.queryDistributions();
-        //await this.determineUnrepliedInbounds();
-        //await this.determineUnrepliedOutbounds();
+        this.postProbeAll();
         this.notifySubscribers();
     }
 
+
+    protected postProbeAll(): void {};
 
     /** */
     private async probePublicParcels(): Promise<Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>> {

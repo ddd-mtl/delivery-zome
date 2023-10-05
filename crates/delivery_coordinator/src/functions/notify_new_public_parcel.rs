@@ -14,5 +14,6 @@ pub fn notify_new_public_parcel(input: NotifyInput) -> ExternResult<()> {
     for peer in input.peers {
         let _ = send_dm(peer, msg.clone());
     }
+    debug!("DONE");
     Ok(())
 }
