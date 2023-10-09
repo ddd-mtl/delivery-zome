@@ -129,8 +129,13 @@ export class DeliveryZvm extends ZomeViewModel {
         if (SignalProtocolType.NewNoticeAck in deliverySignal) {
             console.log("signal NewNoticeAck", deliverySignal.NewNoticeAck);
             const noticeAck = deliverySignal.NewNoticeAck[2];
+            const ts = deliverySignal.NewNoticeAck[1];
             const distribAh = encodeHashToBase64(noticeAck.distribution_ah);
-            this._perspective.noticeAcks[distribAh] = noticeAck;
+            const recipient = encodeHashToBase64(noticeAck.recipient);
+            if (!this._perspective.noticeAcks[distribAh]) {
+                this._perspective.noticeAcks[distribAh] = {};
+            }
+            this._perspective.noticeAcks[distribAh][recipient] = [noticeAck, ts];
             this.getDistributionState(distribAh).then(([fullState, deliveryStates]) => {
                 this._perspective.distributions[distribAh][2] = fullState;
                 this._perspective.distributions[distribAh][3] = deliveryStates;
@@ -147,8 +152,13 @@ export class DeliveryZvm extends ZomeViewModel {
         if (SignalProtocolType.NewReplyAck in deliverySignal) {
             console.log("signal NewReplyAck", deliverySignal.NewReplyAck);
             const replyAck = deliverySignal.NewReplyAck[2];
+            const ts = deliverySignal.NewReplyAck[1];
             const distribAh = encodeHashToBase64(replyAck.distribution_ah);
-            this._perspective.replyAcks[distribAh] = replyAck;
+            const recipient = encodeHashToBase64(replyAck.recipient);
+            if (!this._perspective.replyAcks[distribAh]) {
+                this._perspective.replyAcks[distribAh] = {};
+            }
+            this._perspective.replyAcks[distribAh][recipient] = [replyAck, ts];
             this.getDistributionState(distribAh).then(([fullState, deliveryStates]) => {
                 this._perspective.distributions[distribAh][2] = fullState;
                 this._perspective.distributions[distribAh][3] = deliveryStates;
@@ -168,7 +178,11 @@ export class DeliveryZvm extends ZomeViewModel {
             const receptionAck = deliverySignal.NewReceptionAck[2];
             const ts = deliverySignal.NewReceptionAck[1];
             const distribAh = encodeHashToBase64(receptionAck.distribution_ah);
-            this._perspective.receptionAcks[distribAh] = [receptionAck, ts];
+            const recipient = encodeHashToBase64(receptionAck.recipient);
+            if (!this._perspective.receptionAcks[distribAh]) {
+                this._perspective.receptionAcks[distribAh] = {};
+            }
+            this._perspective.receptionAcks[distribAh][recipient] = [receptionAck, ts];
             this.getDistributionState(distribAh).then(([fullState, deliveryStates]) => {
                 this._perspective.distributions[distribAh][2] = fullState;
                 this._perspective.distributions[distribAh][3] = deliveryStates;
@@ -264,16 +278,36 @@ export class DeliveryZvm extends ZomeViewModel {
 
         this._perspective.noticeAcks = {};
         tuples = await this.zomeProxy.queryAllNoticeAck();
-        Object.values(tuples).map(([_eh, typed]) => this._perspective.noticeAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
+        Object.values(tuples).map(([_eh, ts, typed]) => {
+            const distribAh = encodeHashToBase64(typed.distribution_ah);
+            const recipient = encodeHashToBase64(typed.recipient);
+            if (!this._perspective.noticeAcks[distribAh]) {
+                this._perspective.noticeAcks[distribAh] = {};
+            }
+            this._perspective.noticeAcks[distribAh][recipient] = [typed, ts]
+        });
 
         this._perspective.replyAcks = {};
         tuples = await this.zomeProxy.queryAllReplyAck();
-        Object.values(tuples).map(([_eh, _ts, typed]) => this._perspective.replyAcks[encodeHashToBase64(typed.distribution_ah)] = typed);
+        Object.values(tuples).map(([_eh, ts, typed]) => {
+            const distribAh = encodeHashToBase64(typed.distribution_ah);
+            const recipient = encodeHashToBase64(typed.recipient);
+            if (!this._perspective.replyAcks[distribAh]) {
+                this._perspective.replyAcks[distribAh] = {};
+            }
+            this._perspective.replyAcks[distribAh][recipient] = [typed, ts]
+        });
 
         this._perspective.receptionAcks = {};
         tuples = await this.zomeProxy.queryAllReceptionAck();
-        Object.values(tuples).map(([_eh, ts, typed]) => this._perspective.receptionAcks[encodeHashToBase64(typed.distribution_ah)] = [typed, ts]);
-
+        Object.values(tuples).map(([_eh, ts, typed]) => {
+            const distribAh = encodeHashToBase64(typed.distribution_ah);
+            const recipient = encodeHashToBase64(typed.recipient);
+            if (!this._perspective.receptionAcks[distribAh]) {
+                this._perspective.receptionAcks[distribAh] = {};
+            }
+            this._perspective.receptionAcks[distribAh][recipient] = [typed, ts]
+        });
 
         this._perspective.notices = {};
         tuples = await this.zomeProxy.queryAllDeliveryNotice();

@@ -47,12 +47,12 @@ export interface DeliveryPerspective {
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
     distributions: Dictionary<[Distribution, Timestamp, DistributionState, Dictionary<DeliveryState>]>,
-    /** distrib_ah -> NoticeAck */
-    noticeAcks: Dictionary<NoticeAck>,
-    /** distrib_ah -> ReplyAck */
-    replyAcks: Dictionary<ReplyAck>,
-    /** distrib_ah -> ReceptionAck */
-    receptionAcks: Dictionary<[ReceptionAck, Timestamp]>,
+    /** distrib_ah -> (recipientKey -> NoticeAck) */
+    noticeAcks: Dictionary<Dictionary<[NoticeAck, Timestamp]>>,
+    /** distrib_ah -> (recipientKey -> ReplyAck) */
+    replyAcks: Dictionary<Dictionary<[ReplyAck, Timestamp]>>,
+    /** distrib_ah -> (recipientKey -> ReceptionAck) */
+    receptionAcks: Dictionary<Dictionary<[ReceptionAck, Timestamp]>>,
 
     /** -- INBOUND -- */
     /** notice_eh -> Timestamp, Notice, State, Download Percentage */

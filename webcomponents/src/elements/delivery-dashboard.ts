@@ -70,32 +70,38 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
         const receivedNoticesLi = Object.entries(this.perspective.noticeAcks).map(
-            ([distribAh, received]) => {
-                return html `
-          <li style="margin-top:10px;" title=${distribAh}>
-              ${this.distrib2str(encodeHashToBase64(received.distribution_ah))}: ${encodeHashToBase64(received.recipient).slice(-5)}
-          </li>`
-            }
-        )
+            ([distribAh, receiveds]) => {
+                return Object.entries(receiveds).map(
+                  ([recipientKey, [_received, _ts]]) => {
+                    return html `
+                      <li style="margin-top:10px;" title=${distribAh}>
+                          ${this.distrib2str(distribAh)}: ${recipientKey.slice(-5)}
+                      </li>`;
+                });
+            });
 
         const receivedRepliesLi = Object.entries(this.perspective.replyAcks).map(
-            ([distribAh, received]) => {
-                return html `
-          <li style="margin-top:10px;" title=${distribAh}>
-              ${this.distrib2str(encodeHashToBase64(received.distribution_ah))}: ${encodeHashToBase64(received.recipient).slice(-5)} ${received.has_accepted? "accepted" : "declined"}
-          </li>`
-            }
-        )
+            ([distribAh, receiveds]) => {
+              return Object.entries(receiveds).map(
+                ([recipientKey, [received, _ts]]) => {
+                  return html `
+                    <li style="margin-top:10px;" title=${distribAh}>
+                        ${this.distrib2str(distribAh)}: ${recipientKey.slice(-5)} ${received.has_accepted? "accepted" : "declined"}
+                    </li>`
+                });
+            });
 
 
         const receptionAcksLi = Object.entries(this.perspective.receptionAcks).map(
-            ([distribAh, [receptionAck, _ts]]) => {
-                return html `
-          <li style="margin-top:10px;" title=${distribAh}>
-              ${this.distrib2str(encodeHashToBase64(receptionAck.distribution_ah))}: ${encodeHashToBase64(receptionAck.recipient).slice(-5)}
-          </li>`
-            }
-        )
+            ([distribAh, receiveds]) => {
+              return Object.entries(receiveds).map(
+                ([recipientKey, [_receptionAck, _ts]]) => {
+                  return html `
+                    <li style="margin-top:10px;" title=${distribAh}>
+                        ${this.distrib2str(distribAh)}: ${recipientKey.slice(-5)}
+                    </li>`
+          });
+        });
 
 
         /* Li */

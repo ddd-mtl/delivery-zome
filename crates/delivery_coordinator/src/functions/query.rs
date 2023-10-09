@@ -88,12 +88,12 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 
 ///
 #[hdk_extern]
-pub fn query_all_NoticeAck(_: ()) -> ExternResult<Vec<(EntryHash, NoticeAck)>> {
+pub fn query_all_NoticeAck(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, NoticeAck)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<NoticeAck>(DeliveryEntryTypes::NoticeAck.try_into().unwrap())?;
    let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, typed))
+                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)

@@ -249,7 +249,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_DeliveryNotice', queryField);
   }
 
-  async queryAllNoticeAck(): Promise<[EntryHash, NoticeAck][]> {
+  async queryAllNoticeAck(): Promise<[EntryHash, Timestamp, NoticeAck][]> {
     return this.call('query_all_NoticeAck', null);
   }
 
