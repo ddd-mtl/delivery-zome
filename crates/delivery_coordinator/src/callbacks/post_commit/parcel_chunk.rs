@@ -34,7 +34,7 @@ pub fn post_commit_ParcelChunk(_sah: &SignedActionHashed, entry: Entry, chunk_eh
     debug!("post_commit_ParcelChunk() {:?}", chunk_eh);
     let chunk = ParcelChunk::try_from(entry)?;
     /// Emit signal
-    let res = emit_signal(&SignalProtocol::NewChunk((chunk_eh.to_owned(), chunk.clone())));
+    let res = emit_signal(&SignalProtocol::NewLocalChunk((chunk_eh.to_owned(), chunk.clone())));
     if let Err(err) = res {
         error!("Emit signal failed: {}", err);
     }

@@ -9,7 +9,7 @@ pub fn post_commit_ParcelManifest(sah: &SignedActionHashed, entry: Entry, manife
    debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
    let manifest = ParcelManifest::try_from(entry)?;
    /// Emit signal
-   let res = emit_signal(&SignalProtocol::NewManifest((manifest_eh.to_owned(), sah.hashed.content.timestamp(), manifest.clone())));
+   let res = emit_signal(&SignalProtocol::NewLocalManifest((manifest_eh.to_owned(), sah.hashed.content.timestamp(), manifest.clone())));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }

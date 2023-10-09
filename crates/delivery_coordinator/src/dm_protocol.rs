@@ -37,7 +37,7 @@ pub enum DeliveryProtocol {
     ParcelResponse(Entry),
     ChunkRequest(EntryHash),
     ChunkResponse(ParcelChunk),
-    NewPublicParcel((Timestamp, ParcelReference, AgentPubKey)),
+    PublicParcelPublished((Timestamp, ParcelReference, AgentPubKey)),
     //UnknownEntry, // TODO implement
     Ping,
     Pong,
@@ -53,7 +53,7 @@ impl fmt::Display for DeliveryProtocol {
             DeliveryProtocol::ParcelResponse(_entry) => format!("ParcelResponse"),
             DeliveryProtocol::ChunkRequest(eh) => format!("ChunkRequest: {}", eh),
             DeliveryProtocol::ChunkResponse(_chunk) => format!("ChunkResponse"),
-            DeliveryProtocol::NewPublicParcel((_ts, _pr, author)) => format!("NewPublicParcel from {}", author),
+            DeliveryProtocol::PublicParcelPublished((_ts, _pr, author)) => format!("NewPublicParcel from {}", author),
             // DeliveryProtocol::UnknownEntry => "UnknownEntry".to_owned(),
             DeliveryProtocol::Ping => "Ping".to_owned(),
             DeliveryProtocol::Pong => "Pong".to_owned(),

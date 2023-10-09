@@ -457,7 +457,7 @@ export enum DeliveryProtocolType {
 	ParcelResponse = 'ParcelResponse',
 	ChunkRequest = 'ChunkRequest',
 	ChunkResponse = 'ChunkResponse',
-	NewPublicParcel = 'NewPublicParcel',
+	PublicParcelPublished = 'PublicParcelPublished',
 	Ping = 'Ping',
 	Pong = 'Pong',
 }
@@ -468,11 +468,11 @@ export type DeliveryProtocolVariantParcelRequest = {ParcelRequest: ActionHash}
 export type DeliveryProtocolVariantParcelResponse = {ParcelResponse: Entry}
 export type DeliveryProtocolVariantChunkRequest = {ChunkRequest: EntryHash}
 export type DeliveryProtocolVariantChunkResponse = {ChunkResponse: ParcelChunk}
-export type DeliveryProtocolVariantNewPublicParcel = {NewPublicParcel: [Timestamp, ParcelReference, AgentPubKey]}
+export type DeliveryProtocolVariantPublicParcelPublished = {PublicParcelPublished: [Timestamp, ParcelReference, AgentPubKey]}
 export type DeliveryProtocolVariantPing = {Ping: null}
 export type DeliveryProtocolVariantPong = {Pong: null}
 export type DeliveryProtocol = 
- | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantNewPublicParcel | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
+ | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantPublicParcelPublished | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
 
 export interface FullDistributionState {
   distribution_state: DistributionState
@@ -490,8 +490,8 @@ export interface CommitParcelInput {
 
 /** Protocol for notifying the ViewModel (UI) */
 export enum SignalProtocolType {
-	NewManifest = 'NewManifest',
-	NewChunk = 'NewChunk',
+	NewLocalManifest = 'NewLocalManifest',
+	NewLocalChunk = 'NewLocalChunk',
 	ReceivedChunk = 'ReceivedChunk',
 	NewDistribution = 'NewDistribution',
 	NewNotice = 'NewNotice',
@@ -503,8 +503,8 @@ export enum SignalProtocolType {
 	NewPendingItem = 'NewPendingItem',
 	NewPublicParcel = 'NewPublicParcel',
 }
-export type SignalProtocolVariantNewManifest = {NewManifest: [EntryHash, Timestamp, ParcelManifest]}
-export type SignalProtocolVariantNewChunk = {NewChunk: [EntryHash, ParcelChunk]}
+export type SignalProtocolVariantNewLocalManifest = {NewLocalManifest: [EntryHash, Timestamp, ParcelManifest]}
+export type SignalProtocolVariantNewLocalChunk = {NewLocalChunk: [EntryHash, ParcelChunk]}
 export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
 export type SignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Timestamp, Distribution]}
 export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, Timestamp, DeliveryNotice]}
@@ -516,4 +516,4 @@ export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash,
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
 export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [Timestamp, ParcelReference, AgentPubKey]}
 export type SignalProtocol = 
- | SignalProtocolVariantNewManifest | SignalProtocolVariantNewChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;
+ | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;

@@ -57,11 +57,11 @@ export class DeliveryZvm extends ZomeViewModel {
     mySignalHandler(signal: AppSignal): void {
         console.log("DELIVERY received signal", signal);
         const deliverySignal = signal.payload as SignalProtocol;
-        if (SignalProtocolType.NewManifest in deliverySignal) {
-            console.log("signal NewManifest", deliverySignal.NewManifest);
-            const manifestEh = encodeHashToBase64(deliverySignal.NewManifest[0]);
-            const ts = deliverySignal.NewManifest[1];
-            const manifest = deliverySignal.NewManifest[2];
+        if (SignalProtocolType.NewLocalManifest in deliverySignal) {
+            console.log("signal NewLocalManifest", deliverySignal.NewLocalManifest);
+            const manifestEh = encodeHashToBase64(deliverySignal.NewLocalManifest[0]);
+            const ts = deliverySignal.NewLocalManifest[1];
+            const manifest = deliverySignal.NewLocalManifest[2];
             const isPrivate = "Private" in manifest.description.visibility
             this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
             if (isPrivate) {
@@ -83,9 +83,9 @@ export class DeliveryZvm extends ZomeViewModel {
         //         this._perspective.notices[noticeEh][3] = completion_pct;
         //     }
         // }
-        if (SignalProtocolType.NewChunk in deliverySignal) {
-            console.log("signal NewChunk", deliverySignal.NewChunk);
-            const chunk = deliverySignal.NewChunk[1];
+        if (SignalProtocolType.NewLocalChunk in deliverySignal) {
+            console.log("signal NewLocalChunk", deliverySignal.NewLocalChunk);
+            const chunk = deliverySignal.NewLocalChunk[1];
             if (!this._perspective.chunkCounts[chunk.data_hash]) {
                 this._perspective.chunkCounts[chunk.data_hash] = 0;
             }

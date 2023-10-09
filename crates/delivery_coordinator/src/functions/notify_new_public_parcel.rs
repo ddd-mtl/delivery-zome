@@ -10,7 +10,7 @@ use crate::{DeliveryProtocol, send_dm};
 pub fn notify_new_public_parcel(input: NotifyInput) -> ExternResult<()> {
     debug!("peer count: {}", input.peers.len());
     std::panic::set_hook(Box::new(zome_panic_hook));
-    let msg = DeliveryProtocol::NewPublicParcel((input.timestamp, input.pr, agent_info()?.agent_latest_pubkey));
+    let msg = DeliveryProtocol::PublicParcelPublished((input.timestamp, input.pr, agent_info()?.agent_latest_pubkey));
     for peer in input.peers {
         let _ = send_dm(peer, msg.clone());
     }
