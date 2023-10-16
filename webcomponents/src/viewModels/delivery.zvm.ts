@@ -239,6 +239,7 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     async probeAllInner(): Promise<void> {
         await this.queryAll();
+        await this.scanProblems();
         const pds = await this.probePublicParcels();
         await this.probeInbox();
         console.log("PublicParcels count", Object.entries(pds).length);
