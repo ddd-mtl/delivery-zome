@@ -44,6 +44,12 @@ export interface DeliveryPerspective {
     chunkCounts: Dictionary<number>,
 
 
+    /** -- PROBLEMS -- */
+    orphanPublicChunks: EntryHashB64[],
+    orphanPrivateChunks: EntryHashB64[],
+    incompleteManifests: EntryHashB64[],
+
+
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
     distributions: Dictionary<[Distribution, Timestamp, DistributionState, Dictionary<DeliveryState>]>,
@@ -77,6 +83,10 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         localPublicManifests: {},
         localManifestByData: {},
         chunkCounts: {},
+        /* Problems */
+        orphanPublicChunks: [],
+        orphanPrivateChunks: [],
+        incompleteManifests: [],
         /** Inbound */
         distributions: {},
         noticeAcks: {},

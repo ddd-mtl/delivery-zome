@@ -205,15 +205,44 @@ export class DeliveryZvm extends ZomeViewModel {
     }
 
 
+    /** -- Init -- */
+
+
+    /** */
+    async initializePerspectiveOnline(): Promise<void> {
+        const pds = await this.probePublicParcels();
+        console.log("init: PublicParcels count", Object.entries(pds).length);
+        await this.probeInbox();
+    }
+
+
+    /** */
+    async initializePerspectiveOffline(): Promise<void> {
+        this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
+        await this.queryAll();
+        await this.scanProblems();
+    }
+
+
+    /** */
+    async scanProblems(): Promise<void> {
+        this._perspective.incompleteManifests = (await this.zomeProxy.scanIncompleteManifests())
+          .map((eh) => encodeHashToBase64(eh));
+        const [publicOrphans, privateOrphans] = await this.zomeProxy.scanOrphanChunks();
+        this._perspective.orphanPublicChunks = publicOrphans.map((eh) => encodeHashToBase64(eh));
+        this._perspective.orphanPrivateChunks = privateOrphans.map((eh) => encodeHashToBase64(eh));
+    }
+
+
     /** -- probe -- */
 
     /** */
     async probeAllInner(): Promise<void> {
-        this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
         await this.queryAll();
         const pds = await this.probePublicParcels();
-        console.log("PublicParcels count", Object.entries(pds).length);
         await this.probeInbox();
+        console.log("PublicParcels count", Object.entries(pds).length);
+        /** */
         this.notifySubscribers();
     }
 
