@@ -282,7 +282,7 @@ pub fn query_ReceptionAck(maybe_distribution: Option<ActionHash>, maybe_recipien
 
 ///
 #[hdk_extern]
-pub fn query_all_Manifest(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
+pub fn query_all_private_manifests(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
    //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Elements with query
@@ -297,13 +297,42 @@ pub fn query_all_Manifest(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, Parc
 
 ///
 #[hdk_extern]
-pub fn query_all_PublicManifest(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
+pub fn query_all_public_manifests(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
    //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Elements with query
    let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PublicManifest.try_into().unwrap())?;
    let res = tuples.into_iter()
                    .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+                   .collect();
+   /// Done
+   Ok(res)
+}
+
+
+
+///
+#[hdk_extern]
+pub fn query_all_public_chunks(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelChunk)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::PublicChunk.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_ah, create, typed)| (create.entry_hash, create.timestamp, typed))
+                   .collect();
+   /// Done
+   Ok(res)
+}
+
+
+///
+#[hdk_extern]
+pub fn query_all_private_chunks(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelChunk)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   /// Get all Create DeliveryNotice Elements with query
+   let tuples = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::ParcelChunk.try_into().unwrap())?;
+   let res = tuples.into_iter()
+                   .map(|(_ah, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
    /// Done
    Ok(res)

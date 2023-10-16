@@ -7,7 +7,7 @@ use crate::*;
 
 //pub type FetchChunkOutput = Option<(ParcelChunk, Option<Link>)>;
 
-/// Internal Zome Function
+
 /// Return EntryHash of ParcelEntry if it has been downloaded
 #[ignore(zits)]
 #[hdk_extern]

@@ -329,7 +329,7 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
         this._perspective.privateManifests = {};
-        tuples = await this.zomeProxy.queryAllManifest();
+        tuples = await this.zomeProxy.queryAllPrivateManifests();
         Object.values(tuples).map(([eh, ts, manifest]) => {
             const manifestEh = encodeHashToBase64(eh);
             this._perspective.privateManifests[manifestEh] = [manifest, ts];
@@ -337,7 +337,7 @@ export class DeliveryZvm extends ZomeViewModel {
         });
 
         this._perspective.localPublicManifests = {};
-        tuples = await this.zomeProxy.queryAllPublicManifest();
+        tuples = await this.zomeProxy.queryAllPublicManifests();
         Object.values(tuples).map(([eh, ts, manifest]) => {
             const manifestEh = encodeHashToBase64(eh);
             this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
@@ -362,7 +362,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 res[noticeEh] = [notice, ts, pct];
             }
         }
-        console.log("inbounds() count", Object.values(res));
+        //console.log("inbounds() count", Object.values(res));
         return res;
     }
 
@@ -386,7 +386,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 }
             }
         }
-        console.log("outbounds() count", Object.values(res));
+        //console.log("outbounds() count", Object.values(res));
         return res;
     }
 

@@ -277,16 +277,40 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_all_ReceptionAck', null);
   }
 
-  async queryAllManifest(): Promise<[EntryHash, Timestamp, ParcelManifest][]> {
-    return this.call('query_all_Manifest', null);
+  async queryAllPrivateManifests(): Promise<[EntryHash, Timestamp, ParcelManifest][]> {
+    return this.call('query_all_private_manifests', null);
   }
 
-  async queryAllPublicManifest(): Promise<[EntryHash, Timestamp, ParcelManifest][]> {
-    return this.call('query_all_PublicManifest', null);
+  async queryAllPublicManifests(): Promise<[EntryHash, Timestamp, ParcelManifest][]> {
+    return this.call('query_all_public_manifests', null);
+  }
+
+  async queryAllPublicChunks(): Promise<[EntryHash, Timestamp, ParcelChunk][]> {
+    return this.call('query_all_public_chunks', null);
+  }
+
+  async queryAllPrivateChunks(): Promise<[EntryHash, Timestamp, ParcelChunk][]> {
+    return this.call('query_all_private_chunks', null);
   }
 
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {
     return this.call('respond_to_notice', input);
+  }
+
+  async scanIncompleteManifests(): Promise<EntryHash[]> {
+    return this.call('scan_incomplete_manifests', null);
+  }
+
+  async checkManifestIntegrity(manifestEh: EntryHash): Promise<EntryHash[]> {
+    return this.call('check_manifest_integrity', manifestEh);
+  }
+
+  async fetchMissingChunks(manifestEh: EntryHash): Promise<void> {
+    return this.call('fetch_missing_chunks', manifestEh);
+  }
+
+  async scanOrphanChunks(): Promise<[EntryHash[], EntryHash[]]> {
+    return this.call('scan_orphan_chunks', null);
   }
 
   async receiveDeliveryDm(dm: DirectMessage): Promise<DeliveryProtocol> {

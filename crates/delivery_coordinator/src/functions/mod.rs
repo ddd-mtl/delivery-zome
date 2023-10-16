@@ -17,6 +17,8 @@ mod pull_public_parcels;
 mod get_manifest;
 mod complete_manifest;
 mod notify_new_public_parcel;
+mod scan_incomplete_manifests;
+mod scan_orphan_chunks;
 
 
 pub use get_distribution_state::*;
@@ -39,4 +41,5 @@ pub use self::{
    publish_manifest::*,
    publish_chunk::*,
    notify_new_public_parcel::*,
+   scan_incomplete_manifests::*,
 };

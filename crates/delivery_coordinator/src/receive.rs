@@ -13,7 +13,9 @@ use crate::*;
 #[ignore(zits)]
 #[hdk_extern]
 pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> {
-    debug!("Received DM from: {} ; msg: {}", snip(&dm.from), dm.msg);
+    debug!("Received DM from: {}", snip(&dm.from));
+    trace!("msg: {}", dm.msg);
+
     let reply = match dm.msg {
         DeliveryProtocol::ChunkRequest(chunk_eh) => {
             receive_dm_chunk_request(dm.from, chunk_eh)
@@ -128,7 +130,6 @@ pub fn receive_chunk(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
 
 /// Returns ChunkResponse or Failure
 pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> DeliveryProtocol {
-    /// Get Distribution Entry
     let maybe_chunk: ExternResult<ParcelChunk> = get_typed_from_eh(chunk_eh);
     if let Err(err) = maybe_chunk {
         return failure_err("ParcelChunk not found", err);
