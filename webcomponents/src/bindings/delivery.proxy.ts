@@ -149,8 +149,8 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
-  async commitParcelChunk(chunk: ParcelChunk): Promise<EntryHash> {
-    return this.call('commit_parcel_chunk', chunk);
+  async commitParcelChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
+    return this.call('commit_parcel_chunks', chunks);
   }
 
   async commitParcelManifest(manifestArg: ParcelManifest): Promise<EntryHash> {

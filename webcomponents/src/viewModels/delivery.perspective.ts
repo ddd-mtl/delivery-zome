@@ -69,6 +69,9 @@ export interface DeliveryPerspective {
     replies: Dictionary<NoticeReply>,
     /** notice_eh -> ReceptionProof */
     receptions: Dictionary<[ReceptionProof, Timestamp]>,
+
+    /** -- META -- */
+    probeDhtCount: number,
 }
 
 
@@ -97,5 +100,7 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         noticeByParcel: {},
         replies: {},
         receptions: {},
+        /** meta */
+        probeDhtCount: 0,
     };
 }

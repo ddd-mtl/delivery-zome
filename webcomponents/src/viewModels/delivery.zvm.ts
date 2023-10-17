@@ -210,9 +210,7 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** */
     async initializePerspectiveOnline(): Promise<void> {
-        const pds = await this.probePublicParcels();
-        console.log("init: PublicParcels count", Object.entries(pds).length);
-        await this.probeInbox();
+        await this.probeDht();
     }
 
 
@@ -240,11 +238,18 @@ export class DeliveryZvm extends ZomeViewModel {
     async probeAllInner(): Promise<void> {
         await this.queryAll();
         await this.scanProblems();
-        const pds = await this.probePublicParcels();
-        await this.probeInbox();
-        console.log("PublicParcels count", Object.entries(pds).length);
+        await this.probeDht();
         /** */
         this.notifySubscribers();
+    }
+
+
+    /** */
+    async probeDht(): Promise<void> {
+        const pds = await this.probePublicParcels();
+        await this.probeInbox();
+        this._perspective.probeDhtCount += 1;
+        console.log(`probeDht: ${this._perspective.probeDhtCount} | PublicParcels count: ${Object.entries(pds).length}`);
     }
 
 
