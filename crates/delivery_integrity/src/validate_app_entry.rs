@@ -11,8 +11,8 @@ pub(crate) fn validate_app_entry(_creation_action: EntryCreationAction, entry_in
     let variant = entry_index_to_variant(entry_index)?;
     return match variant {
         DeliveryEntryTypes::Distribution => validate_Distribution(entry),
-        DeliveryEntryTypes::ParcelChunk | DeliveryEntryTypes::PublicChunk => validate_ParcelChunk(entry),
-        DeliveryEntryTypes::ParcelManifest | DeliveryEntryTypes::PublicManifest => validate_ParcelManifest(entry),
+        DeliveryEntryTypes::PrivateChunk | DeliveryEntryTypes::PublicChunk => validate_ParcelChunk(entry),
+        DeliveryEntryTypes::PrivateManifest | DeliveryEntryTypes::PublicManifest => validate_ParcelManifest(entry),
         DeliveryEntryTypes::PublicParcel => validate_PublicParcel(entry),
         _ => Ok(ValidateCallbackResult::Valid),
     }

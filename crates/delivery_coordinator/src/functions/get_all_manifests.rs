@@ -12,7 +12,7 @@ pub fn get_all_private_manifests(_:()) -> ExternResult<Vec<(EntryHash, ParcelMan
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
       .action_type(ActionType::Create)
-      .entry_type(DeliveryEntryTypes::ParcelManifest.try_into().unwrap());
+      .entry_type(DeliveryEntryTypes::PrivateManifest.try_into().unwrap());
    let records = query(query_args)?;
    debug!("private manifest found: {}", records.len());
    /// Convert records to ParcelManifests

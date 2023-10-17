@@ -12,9 +12,9 @@ export const deliveryFunctionNames: FunctionName[] = [
 
 
 
-	"commit_parcel_chunks",
-	"commit_parcel_manifest",
 	"commit_pending_item",
+	"commit_private_chunks",
+	"commit_private_manifest",
 	"complete_manifest",
 	"distribute_parcel",
 	"get_all_private_manifests",

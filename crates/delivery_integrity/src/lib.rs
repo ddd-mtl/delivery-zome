@@ -44,9 +44,9 @@ pub enum DeliveryEntry {
    #[entry_def(required_validations = 1, visibility = "private")]
    Distribution(Distribution),
    #[entry_def(required_validations = 1, visibility = "private")]
-   ParcelChunk(ParcelChunk),
+   PrivateChunk(ParcelChunk),
    #[entry_def(required_validations = 1, visibility = "private")]
-   ParcelManifest(ParcelManifest), // WARN. DONT MOVE THIS
+   PrivateManifest(ParcelManifest), // WARN. DONT MOVE THIS
    #[entry_def(required_validations = 1, visibility = "private")]
    ReceptionProof(ReceptionProof),
    #[entry_def(required_validations = 1, visibility = "private")]

@@ -61,13 +61,13 @@ pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(Ent
 }
 
 
-///Find manifest with that chunk_eh
+/// Find manifest with that chunk_eh
 pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelManifest>> {
    /// Get all Create ParcelManifest Elements with query
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
       .action_type(ActionType::Create)
-      .entry_type(DeliveryEntryTypes::ParcelManifest.try_into().unwrap());
+      .entry_type(DeliveryEntryTypes::PrivateManifest.try_into().unwrap());
    let manifests = query(query_args)?;
    for manifest_record in manifests {
       let manifest: ParcelManifest = get_typed_from_record(manifest_record)?;

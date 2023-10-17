@@ -30,7 +30,7 @@ fn commit_received_chunks(chunks: Vec<(ParcelChunk, Option<Link>)>) -> ExternRes
          continue;
       }
       /// Commit Parcel
-      let _ = create_entry_relaxed(DeliveryEntry::ParcelChunk(chunk))?;
+      let _ = create_entry_relaxed(DeliveryEntry::PrivateChunk(chunk))?;
 
       /// Delete Link
       if let Some(link) = maybe_link {

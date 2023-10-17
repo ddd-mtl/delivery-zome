@@ -92,8 +92,8 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
       DeliveryEntryTypes::NoticeReply => post_commit_NoticeReply(sah, entry, eh),
       DeliveryEntryTypes::ReplyAck => post_commit_ReplyAck(sah, entry, eh),
       /// Send/Receive Parcel
-      DeliveryEntryTypes::ParcelChunk => post_commit_ParcelChunk(sah, entry, eh),
-      DeliveryEntryTypes::ParcelManifest => post_commit_ParcelManifest(sah, entry, eh),
+      DeliveryEntryTypes::PrivateChunk => post_commit_ParcelChunk(sah, entry, eh),
+      DeliveryEntryTypes::PrivateManifest => post_commit_ParcelManifest(sah, entry, eh),
       /// Send/Receive ReceptionProof
       DeliveryEntryTypes::ReceptionProof => post_commit_ReceptionProof(sah, entry, eh),
       DeliveryEntryTypes::ReceptionAck => post_commit_ReceptionAck(sah, entry, eh),

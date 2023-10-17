@@ -410,8 +410,8 @@ export enum DeliveryEntryType {
 	ReceptionAck = 'ReceptionAck',
 	NoticeReply = 'NoticeReply',
 	Distribution = 'Distribution',
-	ParcelChunk = 'ParcelChunk',
-	ParcelManifest = 'ParcelManifest',
+	PrivateChunk = 'PrivateChunk',
+	PrivateManifest = 'PrivateManifest',
 	ReceptionProof = 'ReceptionProof',
 	NoticeAck = 'NoticeAck',
 	ReplyAck = 'ReplyAck',
@@ -425,8 +425,8 @@ export type DeliveryEntryVariantDeliveryNotice = {DeliveryNotice: DeliveryNotice
 export type DeliveryEntryVariantReceptionAck = {ReceptionAck: ReceptionAck}
 export type DeliveryEntryVariantNoticeReply = {NoticeReply: NoticeReply}
 export type DeliveryEntryVariantDistribution = {Distribution: Distribution}
-export type DeliveryEntryVariantParcelChunk = {ParcelChunk: ParcelChunk}
-export type DeliveryEntryVariantParcelManifest = {ParcelManifest: ParcelManifest}
+export type DeliveryEntryVariantPrivateChunk = {PrivateChunk: ParcelChunk}
+export type DeliveryEntryVariantPrivateManifest = {PrivateManifest: ParcelManifest}
 export type DeliveryEntryVariantReceptionProof = {ReceptionProof: ReceptionProof}
 export type DeliveryEntryVariantNoticeAck = {NoticeAck: NoticeAck}
 export type DeliveryEntryVariantReplyAck = {ReplyAck: ReplyAck}
@@ -435,7 +435,7 @@ export type DeliveryEntryVariantPublicManifest = {PublicManifest: ParcelManifest
 export type DeliveryEntryVariantPublicChunk = {PublicChunk: ParcelChunk}
 export type DeliveryEntryVariantPublicParcel = {PublicParcel: ParcelReference}
 export type DeliveryEntry = 
- | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantParcelChunk | DeliveryEntryVariantParcelManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
+ | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantPrivateChunk | DeliveryEntryVariantPrivateManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
 
 /** Entry representing the Public Encryption Key of an Agent */
 export interface PubEncKey {

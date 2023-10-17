@@ -122,7 +122,7 @@ pub fn receive_chunk(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     /// Make sure we accepted to receive this chunk
     // FIXME
     /// Commit entry
-    let _maybe_hh = create_entry_relaxed(DeliveryEntry::ParcelChunk(maybe_chunk.unwrap()))?;
+    let _maybe_hh = create_entry_relaxed(DeliveryEntry::PrivateChunk(maybe_chunk.unwrap()))?;
     /// Done
     Ok(())
 }

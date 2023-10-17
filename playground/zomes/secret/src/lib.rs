@@ -55,7 +55,7 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
       description,
       chunks,
    };
-   let response = call_delivery_zome("commit_parcel_manifest", manifest)?;
+   let response = call_delivery_zome("commit_private_manifest", manifest)?;
    let eh: EntryHash = decode_response(response)?;
    /// Done
    return Ok(eh);

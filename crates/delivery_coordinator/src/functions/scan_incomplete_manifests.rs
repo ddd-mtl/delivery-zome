@@ -32,6 +32,7 @@ pub fn check_manifest_integrity(manifest_eh: EntryHash) -> ExternResult<Vec<Entr
    for chunk_eh in manifest.chunks.clone() {
       let maybe_record = get_local_from_eh(chunk_eh.clone());
       if maybe_record.is_err() {
+         debug!("check_manifest_integrity() error: {:?}", maybe_record.err().unwrap());
          result.push(chunk_eh);
       }
    }
@@ -44,7 +45,7 @@ pub fn check_manifest_integrity(manifest_eh: EntryHash) -> ExternResult<Vec<Entr
 /// Try to retrieve every chunk
 #[hdk_extern]
 pub fn fetch_missing_chunks(manifest_eh: EntryHash) -> ExternResult<()> {
-   debug!("START - {:?}", manifest_eh);
+   //debug!("START - {:?}", manifest_eh);
    /// Find chunks
    let missing_chunks = check_manifest_integrity(manifest_eh.clone())?;
    if missing_chunks.is_empty() {
@@ -54,7 +55,7 @@ pub fn fetch_missing_chunks(manifest_eh: EntryHash) -> ExternResult<()> {
    let _manifest = get_typed_from_eh::<ParcelManifest>(manifest_eh.clone())?;
    let notices = query_DeliveryNotice(DeliveryNoticeQueryField::Parcel(manifest_eh.clone()))?;
    if notices.is_empty() {
-      warn!("No DeliveryNotice found for post-committed ParcelManifest");
+      debug!("No Notice found for post-committed ParcelManifest");
       /// Normal if agent is original creator of ParcelManifest
       return Ok(())
    }

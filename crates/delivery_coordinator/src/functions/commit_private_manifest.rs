@@ -7,7 +7,7 @@ use crate::get_app_entry_size;
 
 /// Return EntryHash of newly created ParcelManifest
 #[hdk_extern]
-pub fn commit_parcel_manifest(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
+pub fn commit_private_manifest(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
    trace!(" START - {}", manifest_arg.data_hash);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Compute size
@@ -19,7 +19,7 @@ pub fn commit_parcel_manifest(manifest_arg: ParcelManifest) -> ExternResult<Entr
    debug!(" Size : {} == {}?", manifest.description.size, computed_size);
    /// Commit entry
    let manifest_eh = hash_entry(manifest.clone())?;
-   let _ = create_entry_relaxed(DeliveryEntry::ParcelManifest(manifest))?;
+   let _ = create_entry_relaxed(DeliveryEntry::PrivateManifest(manifest))?;
    /// Done
    Ok(manifest_eh)
 }

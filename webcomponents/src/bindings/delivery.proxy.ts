@@ -149,16 +149,16 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
-  async commitParcelChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
-    return this.call('commit_parcel_chunks', chunks);
-  }
-
-  async commitParcelManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
-    return this.call('commit_parcel_manifest', manifestArg);
-  }
-
   async commitPendingItem(input: CommitPendingItemInput): Promise<ActionHash> {
     return this.call('commit_pending_item', input);
+  }
+
+  async commitPrivateChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
+    return this.call('commit_private_chunks', chunks);
+  }
+
+  async commitPrivateManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
+    return this.call('commit_private_manifest', manifestArg);
   }
 
   async completeManifest(manifestEh: EntryHash): Promise<[EntryHash, EntryHash | number][] | null> {

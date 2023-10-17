@@ -288,7 +288,7 @@ pub fn query_all_private_manifests(_: ()) -> ExternResult<Vec<(EntryHash, Timest
    //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Elements with query
-   let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::ParcelManifest.try_into().unwrap())?;
+   let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PrivateManifest.try_into().unwrap())?;
    let res = tuples.into_iter()
                    .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();
@@ -332,7 +332,7 @@ pub fn query_all_public_chunks(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp,
 pub fn query_all_private_chunks(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelChunk)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
-   let tuples = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::ParcelChunk.try_into().unwrap())?;
+   let tuples = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?;
    let res = tuples.into_iter()
                    .map(|(_ah, create, typed)| (create.entry_hash, create.timestamp, typed))
                    .collect();

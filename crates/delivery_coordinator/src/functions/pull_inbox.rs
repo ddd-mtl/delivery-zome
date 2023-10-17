@@ -88,7 +88,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    /// Get list of entries waiting to be received
    let mut unreceived_entries = HashMap::new();
    let mut unreceived_chunks = Vec::new();
-   let tuples = get_all_typed_local::<ParcelChunk>(EntryType::App(DeliveryEntryTypes::ParcelChunk.try_into().unwrap()))?;
+   let tuples = get_all_typed_local::<ParcelChunk>(EntryType::App(DeliveryEntryTypes::PrivateChunk.try_into().unwrap()))?;
    let mut received_chunks_ehs: Vec<EntryHash> = Vec::new();
    for (_, _, chunk) in tuples {
       let chunk_eh = hash_entry(chunk)?;
@@ -144,7 +144,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    /// Process manifests
    for (eh, manifest) in manifest_map.iter() {
       if let Some(_notice) = unreceived_entries.get(eh) {
-         let ah = create_entry_relaxed(DeliveryEntry::ParcelManifest(manifest.clone()))?;
+         let ah = create_entry_relaxed(DeliveryEntry::PrivateManifest(manifest.clone()))?;
          ahs.push(ah);
          manifest.chunks.iter().for_each(|x|unreceived_chunks.push(x.clone()));
       }
@@ -153,7 +153,7 @@ pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    /// Process chunks
    for (eh, (entry, link)) in chunk_map.iter() {
       if unreceived_chunks.contains(eh) {
-         let ah = create_entry_relaxed(DeliveryEntry::ParcelChunk(entry.clone()))?;
+         let ah = create_entry_relaxed(DeliveryEntry::PrivateChunk(entry.clone()))?;
          let _link_hh = delete_link_relaxed(link.create_link_hash.clone())?;
          ahs.push(ah);
       }
