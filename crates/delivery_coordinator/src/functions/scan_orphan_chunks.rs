@@ -43,7 +43,7 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
          private_orphans.push(found_chunk.0.to_owned());
       }
    }
-
+   debug!("orphans: {} {}", public_orphans.len(), private_orphans.len());
    /// Done
    Ok((public_orphans, private_orphans))
 }

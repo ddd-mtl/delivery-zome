@@ -25,7 +25,7 @@ pub fn scan_incomplete_manifests(_: ()) -> ExternResult<Vec<EntryHash>> {
 ///
 #[hdk_extern]
 pub fn check_manifest_integrity(manifest_eh: EntryHash) -> ExternResult<Vec<EntryHash>> {
-   debug!("START - {:?}", manifest_eh);
+   debug!("check_manifest_integrity() {:?}", manifest_eh);
    let manifest = get_typed_from_eh::<ParcelManifest>(manifest_eh.to_owned())?;
    /// Find chunks
    let mut result = Vec::new();
@@ -36,7 +36,7 @@ pub fn check_manifest_integrity(manifest_eh: EntryHash) -> ExternResult<Vec<Entr
          result.push(chunk_eh);
       }
    }
-   debug!("check_manifest_integrity() result: {:?}", result);
+   debug!("check_manifest_integrity() missing: {}", result.len());
    /// Done
    Ok(result)
 }
