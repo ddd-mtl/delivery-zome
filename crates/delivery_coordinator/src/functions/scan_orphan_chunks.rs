@@ -17,8 +17,9 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
       .map(|(_eh, manifest)| manifest.chunks)
       .flatten()
       .collect();
-   debug!("known_chunks public: {}", known_chunks.len());
+   debug!("known public chunks: {}", known_chunks.len());
    let found_chunks = query_all_public_chunks(())?;
+   debug!("found public chunks: {}", found_chunks.len());
    for found_chunk in found_chunks {
       let index = known_chunks.iter().position(|x| *x == found_chunk.0);
       if index.is_none() {
@@ -33,8 +34,9 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
                                                    .map(|(_eh, manifest)| manifest.chunks)
                                                    .flatten()
                                                    .collect();
-   debug!("known_chunks private: {}", known_chunks.len());
+   debug!("known private chunks: {}", known_chunks.len());
    let found_chunks = query_all_private_chunks(())?;
+   debug!("found private chunks: {}", found_chunks.len());
    for found_chunk in found_chunks {
       let index = known_chunks.iter().position(|x| *x == found_chunk.0);
       if index.is_none() {
