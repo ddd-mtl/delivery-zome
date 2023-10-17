@@ -30,6 +30,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"get_enc_key",
 	"get_my_enc_key",
 	"test_encryption",
+	"publish_chunks",
 	"publish_chunk",
 	"publish_manifest",
 	"pull_inbox",

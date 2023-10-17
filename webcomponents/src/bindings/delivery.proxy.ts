@@ -221,6 +221,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('test_encryption', to);
   }
 
+  async publishChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
+    return this.call('publish_chunks', chunks);
+  }
+
   async publishChunk(chunk: ParcelChunk): Promise<EntryHash> {
     return this.call('publish_chunk', chunk);
   }
