@@ -23,7 +23,7 @@ fn fetch_chunk(input: FetchChunkInput) -> ExternResult<Option<(ParcelChunk, Opti
 
 
 /// Try to retrieve the chunk entry
-fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
+pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
    if notice.summary.distribution_strategy.can_dht() {

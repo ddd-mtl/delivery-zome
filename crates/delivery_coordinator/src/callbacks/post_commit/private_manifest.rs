@@ -5,7 +5,7 @@ use crate::*;
 
 
 /// Try to retrieve every chunk
-pub fn post_commit_ParcelManifest(sah: &SignedActionHashed, entry: Entry, manifest_eh: &EntryHash) -> ExternResult<()> {
+pub fn post_commit_PrivateManifest(sah: &SignedActionHashed, entry: Entry, manifest_eh: &EntryHash) -> ExternResult<()> {
    debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
    let manifest = ParcelManifest::try_from(entry)?;
    /// Emit signal

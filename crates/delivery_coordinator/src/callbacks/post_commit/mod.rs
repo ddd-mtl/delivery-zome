@@ -1,7 +1,7 @@
 mod distribution;
 mod notice_reply;
-mod parcel_chunk;
-mod parcel_manifest;
+mod private_chunk;
+mod private_manifest;
 mod reception_proof;
 mod reply_ack;
 mod delivery_notice;
@@ -16,8 +16,8 @@ mod public_parcel;
 pub use delivery_notice::*;
 pub use distribution::*;
 pub use notice_reply::*;
-pub use parcel_chunk::*;
-pub use parcel_manifest::*;
+pub use private_chunk::*;
+pub use private_manifest::*;
 pub use reception_proof::*;
 pub use reply_ack::*;
 pub use notice_ack::*;
@@ -92,8 +92,8 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
       DeliveryEntryTypes::NoticeReply => post_commit_NoticeReply(sah, entry, eh),
       DeliveryEntryTypes::ReplyAck => post_commit_ReplyAck(sah, entry, eh),
       /// Send/Receive Parcel
-      DeliveryEntryTypes::PrivateChunk => post_commit_ParcelChunk(sah, entry, eh),
-      DeliveryEntryTypes::PrivateManifest => post_commit_ParcelManifest(sah, entry, eh),
+      DeliveryEntryTypes::PrivateChunk => post_commit_PrivateChunk(sah, entry, eh),
+      DeliveryEntryTypes::PrivateManifest => post_commit_PrivateManifest(sah, entry, eh),
       /// Send/Receive ReceptionProof
       DeliveryEntryTypes::ReceptionProof => post_commit_ReceptionProof(sah, entry, eh),
       DeliveryEntryTypes::ReceptionAck => post_commit_ReceptionAck(sah, entry, eh),
