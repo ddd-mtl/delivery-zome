@@ -13,7 +13,7 @@ pub fn scan_incomplete_manifests(_: ()) -> ExternResult<Vec<EntryHash>> {
    debug!("scan_incomplete_manifests() manifests count: {}", tuples.len());
    let mut incomplete_manifests = Vec::new();
    for tuple in tuples {
-      let chunks = check_manifest_integrity(tuple.0.clone())?;
+      let chunks = check_manifest_integrity(tuple.0.clone(), tuple.2.clone())?;
       if !chunks.is_empty() {
          incomplete_manifests.push(tuple.0);
       }
@@ -24,11 +24,9 @@ pub fn scan_incomplete_manifests(_: ()) -> ExternResult<Vec<EntryHash>> {
 
 
 ///
-#[hdk_extern]
-pub fn check_manifest_integrity(manifest_eh: EntryHash) -> ExternResult<Vec<EntryHash>> {
-   debug!("checking manifest {:?}", manifest_eh);
-   let manifest = get_typed_from_eh::<ParcelManifest>(manifest_eh.to_owned())?;
-   debug!("checking manifest {}", manifest.description.name);
+//#[hdk_extern]
+pub fn check_manifest_integrity(manifest_eh: EntryHash, manifest: ParcelManifest) -> ExternResult<Vec<EntryHash>> {
+   debug!("check_manifest_integrity() {} {:?}", manifest.description.name, manifest_eh);
    /// Find chunks
    let mut result = Vec::new();
    for chunk_eh in manifest.chunks.clone() {

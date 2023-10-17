@@ -8,14 +8,15 @@ use crate::*;
 #[hdk_extern]
 pub fn fetch_missing_chunks(manifest_eh: EntryHash) -> ExternResult<()> {
    debug!("START - {:?}", manifest_eh);
+   let manifest = get_typed_from_eh::<ParcelManifest>(manifest_eh.clone())?;
    /// Find chunks
-   let missing_chunks = check_manifest_integrity(manifest_eh.clone())?;
+   let missing_chunks = check_manifest_integrity(manifest_eh.clone(), manifest)?;
    if missing_chunks.is_empty() {
       return Ok(());
    }
    debug!("missing_chunks: {}", missing_chunks.len());
    /// Private: Find notice
-   let _manifest = get_typed_from_eh::<ParcelManifest>(manifest_eh.clone())?;
+
    let notices = query_DeliveryNotice(DeliveryNoticeQueryField::Parcel(manifest_eh.clone()))?;
    if notices.is_empty() {
       debug!("No Notice found for post-committed ParcelManifest");
