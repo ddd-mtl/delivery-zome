@@ -209,18 +209,17 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async initializePerspectiveOnline(): Promise<void> {
-        await this.probeDht();
-    }
-
-
-    /** */
     async initializePerspectiveOffline(): Promise<void> {
         this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
         await this.queryAll();
         await this.scanProblems();
     }
 
+
+    /** */
+    async initializePerspectiveOnline(): Promise<void> {
+        await this.probeDht();
+    }
 
     /** */
     async scanProblems(): Promise<void> {

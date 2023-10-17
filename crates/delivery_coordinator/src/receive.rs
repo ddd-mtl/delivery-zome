@@ -172,7 +172,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash)
 pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<DeliveryNotice> {
     let maybe_notice: Option<DeliveryNotice> = unpack_item(item, from.clone())?;
     let Some(notice) = maybe_notice
-       else { return zome_error!("Failed deserializing DeliveryNotice (2)"); };
+       else { return error("Failed deserializing DeliveryNotice (2)"); };
     /// Commit DeliveryNotice
     let _ah = create_entry_relaxed(DeliveryEntry::DeliveryNotice(notice.clone()))?;
     /// Done
@@ -183,7 +183,7 @@ pub fn receive_notice(from: AgentPubKey, item: PendingItem) -> ExternResult<Deli
 pub fn receive_ack(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
     let maybe_ack: Option<NoticeAck> = unpack_item(item, from.clone())?;
     let Some(ack) = maybe_ack
-       else { return zome_error!("Failed deserializing NoticeAck"); };
+       else { return error("Failed deserializing NoticeAck"); };
     // /// Check for duplicate DeliveryNotice
     // let maybe_already = find_notice_for_parcel(ack.summary.parcel_reference.entry_address())?;
     // if maybe_already.is_some() {

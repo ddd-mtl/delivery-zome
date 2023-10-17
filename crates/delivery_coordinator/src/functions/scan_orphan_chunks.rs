@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-//use zome_utils::*;
+use zome_utils::*;
 //use zome_delivery_types::*;
 use crate::*;
 use crate::functions::get_all_manifests::*;
@@ -9,6 +9,7 @@ use crate::functions::get_all_manifests::*;
 /// Return list of chunks with no local Manifest (Public, Private)
 #[hdk_extern]
 fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
    /// Public
    let mut public_orphans = Vec::new();
    let manifests = get_all_local_public_manifests(())?;

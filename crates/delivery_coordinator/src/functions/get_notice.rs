@@ -16,6 +16,7 @@ pub fn get_notice(distribution_ah: ActionHash) -> ExternResult<Option<GetNoticeO
       return Ok(None)
    }
    let notice_eh = hash_entry(maybe_notices[0].0.clone())?;
+   debug!("get_notice() notice_eh: {}", notice_eh);
    /// Get state
    let output = GetNoticeOutput {
       notice: maybe_notices[0].0.clone(),

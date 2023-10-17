@@ -53,6 +53,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<DeliveryNotice>(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap())?;
+   let len = tuples.len();
    /// Search through query result
    let mut res = Vec::new();
    match query_field {
@@ -81,6 +82,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
          }
       }
    }
+   debug!("*** query_DeliveryNotice() found {} notice(s) ", len);
    /// Done
    Ok(res)
 }

@@ -8,6 +8,7 @@ use crate::*;
 /// Return EntryHash of every incomplete manifests
 #[hdk_extern]
 pub fn scan_incomplete_manifests(_: ()) -> ExternResult<Vec<EntryHash>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
    let tuples = query_all_private_manifests(())?;
    let mut incomplete_manifests = Vec::new();
    for tuple in tuples {
