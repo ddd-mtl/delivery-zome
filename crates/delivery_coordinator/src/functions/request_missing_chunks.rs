@@ -4,9 +4,9 @@ use zome_delivery_types::*;
 use crate::*;
 
 
-/// Try to retrieve every chunk
+/// Ask for every missing chunk
 #[hdk_extern]
-pub fn fetch_missing_chunks(manifest_eh: EntryHash) -> ExternResult<()> {
+pub fn request_missing_chunks(manifest_eh: EntryHash) -> ExternResult<()> {
    debug!("START - {:?}", manifest_eh);
    let manifest = get_typed_from_eh::<ParcelManifest>(manifest_eh.clone())?;
    /// Find chunks
@@ -24,21 +24,17 @@ pub fn fetch_missing_chunks(manifest_eh: EntryHash) -> ExternResult<()> {
       return Ok(())
    }
    let notice = notices[0].0.clone();
+   // if !notice.summary.distribution_strategy.can_dm() {
+   //    return error("Not allowed to receive this Parcel via DM");
+   // }
    let notice_eh = hash_entry(notice.clone())?;
-   debug!("notice_eh: {:?}", notice_eh);
+   debug!("notice_eh: {}", notice_eh);
    ///
-   let mut pairs = Vec::new();
    for chunk_eh in missing_chunks.clone() {
-      debug!("fetching chunk {} ...", pairs.len());
-      let maybe_chunk = pull_chunk(chunk_eh.clone(), notice.clone())?;
-      if let Some(pair) = maybe_chunk {
-         pairs.push(pair);
-      }
+      let dm = DeliveryProtocol::ChunkRequest(chunk_eh.clone());
+      send_dm_signal(notice.sender.clone(), dm)?;
    }
-   /// Commit chunks
-   let response = call_self("commit_received_chunks", pairs)?;
-   debug!("commit_received_chunks() response: {:?}", response);
-   assert!(matches!(response, ZomeCallResponse::Ok { .. }));
+   debug!("END");
    /// Done
    Ok(())
 }

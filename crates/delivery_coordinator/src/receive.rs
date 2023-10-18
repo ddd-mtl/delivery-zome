@@ -20,6 +20,11 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         DeliveryProtocol::ChunkRequest(chunk_eh) => {
             receive_dm_chunk_request(dm.from, chunk_eh)
         },
+        DeliveryProtocol::ChunkResponse(chunk) => {
+            commit_received_chunks(vec![(chunk.clone(), None)])?;
+            let signature = sign(agent_info()?.agent_latest_pubkey, chunk.clone())?;
+            DeliveryProtocol::Success(signature)
+        },
         DeliveryProtocol::ParcelRequest(distribution_ah) => {
             receive_dm_parcel_request(dm.from, distribution_ah)
         }

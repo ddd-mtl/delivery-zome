@@ -7,7 +7,7 @@ use zome_delivery_types::*;
 /// Internal Zome function
 #[ignore(zits)]
 #[hdk_extern]
-fn commit_received_chunks(chunks: Vec<(ParcelChunk, Option<Link>)>) -> ExternResult<()> {
+pub fn commit_received_chunks(chunks: Vec<(ParcelChunk, Option<Link>)>) -> ExternResult<()> {
    debug!("commit_received_chunks() len = {}", chunks.len());
    /// Check if chunk not already committed
    let mut chunk_ehs: Vec<EntryHash> = chunks.iter().map(|pair| {

@@ -7,3 +7,4 @@ mod fetch_chunk;
 
 pub use commit::*;
 pub use fetch_chunk::*;
+pub use commit_received_chunks::*;
