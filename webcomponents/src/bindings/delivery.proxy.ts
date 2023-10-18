@@ -149,6 +149,7 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
+
   async commitPendingItem(input: CommitPendingItemInput): Promise<ActionHash> {
     return this.call('commit_pending_item', input);
   }
@@ -167,10 +168,6 @@ export class DeliveryProxy extends ZomeProxy {
 
   async distributeParcel(input: DistributeParcelInput): Promise<ActionHash> {
     return this.call('distribute_parcel', input);
-  }
-
-  async fetchMissingChunks(manifestEh: EntryHash): Promise<void> {
-    return this.call('fetch_missing_chunks', manifestEh);
   }
 
   async getAllPrivateManifests(): Promise<[EntryHash, ParcelManifest][]> {
@@ -299,6 +296,10 @@ export class DeliveryProxy extends ZomeProxy {
 
   async queryAllPrivateChunks(): Promise<[EntryHash, Timestamp, ParcelChunk][]> {
     return this.call('query_all_private_chunks', null);
+  }
+
+  async requestMissingChunks(manifestEh: EntryHash): Promise<void> {
+    return this.call('request_missing_chunks', manifestEh);
   }
 
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {

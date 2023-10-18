@@ -12,12 +12,12 @@ export const deliveryFunctionNames: FunctionName[] = [
 
 
 
+
 	"commit_pending_item",
 	"commit_private_chunks",
 	"commit_private_manifest",
 	"complete_manifest",
 	"distribute_parcel",
-	"fetch_missing_chunks",
 	"get_all_private_manifests",
 	"get_all_local_public_manifests",
 	"get_delivery_state",
@@ -50,6 +50,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"query_all_public_manifests",
 	"query_all_public_chunks",
 	"query_all_private_chunks",
+	"request_missing_chunks",
 	"respond_to_notice",
 	"scan_incomplete_manifests",
 	"scan_orphan_chunks",
