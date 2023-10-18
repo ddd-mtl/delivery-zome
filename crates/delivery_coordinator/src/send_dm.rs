@@ -33,3 +33,25 @@ pub fn send_dm(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<
        ZomeCallResponse::CountersigningSession(e) => Ok(DeliveryProtocol::Failure(format!("CountersigningSession: {:?}", e))),
    };
 }
+
+
+
+///
+pub fn send_dm_signal(destination: AgentPubKey, msg: DeliveryProtocol) -> ExternResult<()> {
+   /// Pre-conditions: Don't call yourself (otherwise we get concurrency issues)
+   let me = agent_info()?.agent_latest_pubkey;
+   if destination == me {
+      return error("send_dm() aborted. Can't send to self.");
+   }
+   /// Prepare payload
+   let dm_packet = DirectMessage { from: me, msg: msg.clone() };
+   /// Call peer
+   debug!("calling remote recv_remote_signal()");
+   trace!("dm = '{}'", msg);
+   remote_signal(
+      &dm_packet,
+      vec![destination],
+   )?;
+   debug!("calling remote recv_remote_signal() DONE");
+   Ok(())
+}

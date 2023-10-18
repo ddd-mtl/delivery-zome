@@ -5,7 +5,7 @@ use zome_delivery_types::*;
 
 
 ///
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, SerializedBytes)]
 pub struct DirectMessage {
     pub from: AgentPubKey,
     pub msg: DeliveryProtocol,
