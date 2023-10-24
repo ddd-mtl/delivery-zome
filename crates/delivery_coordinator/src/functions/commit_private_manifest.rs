@@ -31,6 +31,6 @@ pub fn commit_private_manifest(manifest_arg: ParcelManifest) -> ExternResult<Ent
 pub fn determine_parcel_size(manifest: ParcelManifest) -> ExternResult<u64> {
    //let last_chunk: ParcelChunk = get_typed_from_eh(input.manifest.chunks.last().unwrap().to_owned())?;
    let last_chunk_size = get_app_entry_size(manifest.chunks.last().unwrap().to_owned())?;
-   let size: u64 = (manifest.chunks.len() as u64 - 1) * get_dna_properties().max_chunk_size as u64 + last_chunk_size as u64;
+   let size: u64 = (manifest.chunks.len() as u64 - 1) * get_properties()?.max_chunk_size as u64 + last_chunk_size as u64;
    Ok(size)
 }

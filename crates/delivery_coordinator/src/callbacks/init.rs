@@ -28,10 +28,12 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    Path::from(DIRECTORY_PATH).typed(LinkTypes::Members)?.ensure()?;
    /// Setup initial capabilities
    init_caps(())?;
-   ///
-   let res = validate_properties()?;
-   let InitCallbackResult::Pass = res
-      else { return Ok(res); };
+
+   // ///
+   // let res = validate_properties()?;
+   // let InitCallbackResult::Pass = res
+   //    else { return Ok(res); };
+
    /// Create public encryption key and broadcast it
    create_enc_key()?;
    /// Done

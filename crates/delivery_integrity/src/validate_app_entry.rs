@@ -21,16 +21,20 @@ pub(crate) fn validate_app_entry(_creation_action: EntryCreationAction, entry_in
 
 ///
 fn validate_description(pd: ParcelDescription) -> ExternResult<ValidateCallbackResult> {
+    let Ok(dna_properties) = get_properties() else {
+        debug!("Failed to get dna properties, skipping ParcelDescription validation");
+        return Ok(ValidateCallbackResult::Valid)
+    };
     /// Must meet name length requirements
-    if pd.name.len() < get_dna_properties().min_parcel_name_length as usize {
-        return Ok(ValidateCallbackResult::Invalid(format!("Parcel name is too small: {} < {}", pd.name.len(), get_dna_properties().min_parcel_name_length)));
+    if pd.name.len() < dna_properties.min_parcel_name_length as usize {
+        return Ok(ValidateCallbackResult::Invalid(format!("Parcel name is too small: {} < {}", pd.name.len(), dna_properties.min_parcel_name_length)));
     }
-    if pd.name.len() > get_dna_properties().max_parcel_name_length as usize {
-        return Ok(ValidateCallbackResult::Invalid(format!("Parcel name is too big: {} > {}", pd.name.len(), get_dna_properties().max_parcel_name_length)));
+    if pd.name.len() > dna_properties.max_parcel_name_length as usize {
+        return Ok(ValidateCallbackResult::Invalid(format!("Parcel name is too big: {} > {}", pd.name.len(), dna_properties.max_parcel_name_length)));
     }
     /// Must meet size requirements
-    if pd.size > get_dna_properties().max_parcel_size {
-        return Ok(ValidateCallbackResult::Invalid(format!("Parcel is too big: {} > {}", pd.size, get_dna_properties().max_parcel_size)));
+    if pd.size > dna_properties.max_parcel_size {
+        return Ok(ValidateCallbackResult::Invalid(format!("Parcel is too big: {} > {}", pd.size, dna_properties.max_parcel_size)));
     }
     /// Must have Size
     if pd.size == 0 {
@@ -68,9 +72,15 @@ fn validate_ParcelChunk(entry: Entry) -> ExternResult<ValidateCallbackResult> {
             format!("Chunk data empty. Must have at least some content")
         ));
     }
-    if parcel_chunk.data.len() > get_dna_properties().max_chunk_size as usize {
+
+    let Ok(dna_properties) = get_properties() else {
+        debug!("Failed to get dna properties, skipping ParcelChunk validation");
+        return Ok(ValidateCallbackResult::Valid)
+    };
+
+    if parcel_chunk.data.len() > dna_properties.max_chunk_size as usize {
         return Ok(ValidateCallbackResult::Invalid(
-            format!("A chunk can't be bigger than {} KiB", get_dna_properties().max_chunk_size / 1024)
+            format!("A chunk can't be bigger than {} KiB", dna_properties.max_chunk_size / 1024)
         ));
     }
     /// Done
@@ -92,7 +102,12 @@ fn validate_ParcelManifest(entry: Entry) -> ExternResult<ValidateCallbackResult>
         return Ok(ValidateCallbackResult::Invalid("Missing chunks".to_string()));
     }
 
-    let PARCEL_MAX_CHUNKS: usize = (get_dna_properties().max_parcel_size / get_dna_properties().max_chunk_size as u64 + 1) as usize;
+    let Ok(dna_properties) = get_properties() else {
+        debug!("Failed to get dna properties, skipping ParcelManifest validation");
+        return Ok(ValidateCallbackResult::Valid)
+    };
+
+    let PARCEL_MAX_CHUNKS: usize = (dna_properties.max_parcel_size / dna_properties.max_chunk_size as u64 + 1) as usize;
 
     /// Must not exceed size limit
     if parcel_manifest.chunks.len() > PARCEL_MAX_CHUNKS {

@@ -19,14 +19,14 @@ pub fn get_properties() -> ExternResult<DeliveryProperties> {
    //debug!("props = {:?}", props);
    let maybe_properties: Result<DeliveryProperties, <DeliveryProperties as TryFrom<SerializedBytes>>::Error> = props.try_into();
    if let Err(e) = maybe_properties {
-      debug!("deserializing properties failed: {:?}", e);
-      panic!("Should deserialize dna properties");
+      debug!("Deserializing DeliveryZome properties failed: {:?}", e);
+      return Err(wasm_error!("Deserializing DeliveryZome properties failed: {:?}", e));
    }
    Ok(maybe_properties.unwrap())
 }
 
 
-/// Helper for crate use
-pub fn get_dna_properties() -> DeliveryProperties {
-   return get_properties().unwrap();
-}
+// /// Helper for crate use
+// pub fn get_dna_properties() -> DeliveryProperties {
+//    return get_properties().unwrap();
+// }
