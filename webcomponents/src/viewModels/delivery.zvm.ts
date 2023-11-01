@@ -237,36 +237,37 @@ export class DeliveryZvm extends ZomeViewModel {
     async probeAllInner(): Promise<void> {
         await this.queryAll();
         await this.scanProblems();
-        await this.probeDht();
+        await this.probeDht(true);
         /** */
         this.notifySubscribers();
     }
 
 
     /** */
-    async probeDht(): Promise<void> {
-        const pds = await this.probePublicParcels();
-        await this.probeInbox();
+    async probeDht(denyNotify?: boolean): Promise<void> {
+        const pds = await this.probePublicParcels(true);
+        await this.probeInbox(true);
         this._perspective.probeDhtCount += 1;
+        if (denyNotify == undefined) this.notifySubscribers();
         console.log(`probeDht: ${this._perspective.probeDhtCount} | PublicParcels count: ${Object.entries(pds).length}`);
     }
 
 
     /** */
-    private async probePublicParcels(): Promise<Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>> {
+    private async probePublicParcels(denyNotify?: boolean): Promise<Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>> {
         const prs = await this.zomeProxy.pullPublicParcels();
         this._perspective.publicParcels = {};
         prs.map(([pr, ts, author]) => this._perspective.publicParcels[encodeHashToBase64(pr.eh)] = [pr.description, ts, encodeHashToBase64(author)]);
-        this.notifySubscribers();
+        if (denyNotify == undefined) this.notifySubscribers();
         return this._perspective.publicParcels;
     }
 
 
     /** */
-    private async probeInbox(): Promise<ActionHashB64[]> {
+    private async probeInbox(denyNotify?: boolean): Promise<ActionHashB64[]> {
         const inbox = await this.zomeProxy.pullInbox();
         this._perspective.inbox = inbox.map((ah) => encodeHashToBase64(ah));
-        this.notifySubscribers();
+        if (denyNotify == undefined) this.notifySubscribers();
         return this._perspective.inbox;
     }
 
