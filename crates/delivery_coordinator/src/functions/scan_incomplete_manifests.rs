@@ -11,11 +11,17 @@ pub fn scan_incomplete_manifests(_: ()) -> ExternResult<Vec<EntryHash>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let tuples = query_all_private_manifests(())?;
    debug!("scan_incomplete_manifests() manifests count: {}", tuples.len());
+   let chunks: Vec<EntryHash> = query_all_private_chunks(())?.into_iter()
+      .map(|tuple| tuple.0)
+      .collect();
+   debug!("scan_incomplete_manifests() chunks count: {}", chunks.len());
    let mut incomplete_manifests = Vec::new();
-   for tuple in tuples {
-      let chunks = check_manifest_integrity(tuple.0.clone(), tuple.2.clone())?;
-      if !chunks.is_empty() {
-         incomplete_manifests.push(tuple.0);
+   for (manifest_eh, ts, manifest)  in tuples {
+      for chunk_eh in manifest.chunks.clone() {
+         if !chunks.contains(&chunk_eh) {
+            incomplete_manifests.push(manifest_eh);
+            break;
+         }
       }
    }
    /// Done
