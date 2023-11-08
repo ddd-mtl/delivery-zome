@@ -401,22 +401,27 @@ export class DeliveryZvm extends ZomeViewModel {
     }
 
 
-    /** Return notice_eh -> [notice, Timestamp, missingChunks]  */
-    inbounds(): Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64> | null]> {
+    /**
+     * Return
+     *  - unReplieds: notice_eh -> [notice, Timestamp]
+     *  - inProgress: notice_eh -> [notice, Timestamp, MissingChunks]
+     */
+    inbounds(): [Dictionary<[DeliveryNotice, Timestamp]>, Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64>]>] {
         //console.log("inbounds() allNotices count", Object.entries(this._perspective.notices).length);
-        let res: Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64> | null]> = {};
+        let unreplieds: Dictionary<[DeliveryNotice, Timestamp]> = {};
+        let inProgress: Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64>]> = {};
         for (const [noticeEh, [notice, ts, state, missingChunks]] of Object.entries(this._perspective.notices)) {
-            const sender = encodeHashToBase64(notice.sender);
+            //const sender = encodeHashToBase64(notice.sender);
             //console.log("inbounds() state", state);
             if (NoticeStateType.Unreplied in state) {
-                res[noticeEh] = [notice, ts, null];
+                unreplieds[noticeEh] = [notice, ts];
             }
             if (NoticeStateType.Accepted in state) {
-                res[noticeEh] = [notice, ts, missingChunks];
+                inProgress[noticeEh] = [notice, ts, missingChunks];
             }
         }
         //console.log("inbounds() count", Object.values(res));
-        return res;
+        return [unreplieds, inProgress];
     }
 
 

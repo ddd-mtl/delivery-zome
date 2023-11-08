@@ -105,16 +105,13 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
         /* Li */
-        const inbounds = this._zvm.inbounds();
-        console.log("inbounds", inbounds);
-        const newNoticesLi = Object.entries(inbounds).map(
-            ([noticeEh, [_notice, _ts, missingChunks]]) => {
-                let content = html`retrieving...`;
-                if (missingChunks == null) {
-                    content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
-                        <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
-                        <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>`;
-                }
+        const [unreplieds, inbounds] = this._zvm.inbounds();
+        console.log("unreplieds", unreplieds);
+        const newNoticesLi = Object.entries(unreplieds).map(
+            ([noticeEh, [_notice, _ts]]) => {
+                let content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
+                    <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
+                    <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>`;
                 return html `
               <li style="margin-top:10px;" title=${noticeEh}>
                   ${this.notice2str(noticeEh)}
