@@ -66,6 +66,11 @@ export class DeliveryZvm extends ZomeViewModel {
             this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
             if (isPrivate) {
                 this._perspective.privateManifests[manifestEh] = [manifest, ts];
+                const maybeNoticeEh = this._perspective.noticeByParcel[manifestEh];
+                if (maybeNoticeEh) {
+                    this._perspective.notices[maybeNoticeEh][2] = {PartiallyReceived: null};
+                    this._perspective.notices[maybeNoticeEh][3] = new Set(manifest.chunks.map((eh) => encodeHashToBase64(eh)));
+                }
             } else {
                 this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
             }
@@ -150,7 +155,10 @@ export class DeliveryZvm extends ZomeViewModel {
             const reply = deliverySignal.NewReply[2];
             const noticeEh = encodeHashToBase64((reply.notice_eh));
             this._perspective.replies[noticeEh] = reply;
-            this._perspective.notices[noticeEh][2] = reply.has_accepted? {Accepted: null} : {Refused: null};
+            this._perspective.notices[noticeEh][2] = {Refused: null};
+            if (reply.has_accepted) {
+                this._perspective.notices[noticeEh][2] = {Accepted: null};
+            }
         }
         if (SignalProtocolType.NewReplyAck in deliverySignal) {
             console.log("signal NewReplyAck", deliverySignal.NewReplyAck);
@@ -403,13 +411,13 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /**
      * Return
-     *  - unReplieds: notice_eh -> [notice, Timestamp]
-     *  - inProgress: notice_eh -> [notice, Timestamp, MissingChunks]
+     *  - unreplieds: notice_eh -> [notice, Timestamp]
+     *  - incompletes: notice_eh -> [notice, Timestamp, MissingChunks]
      */
     inbounds(): [Dictionary<[DeliveryNotice, Timestamp]>, Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64>]>] {
         //console.log("inbounds() allNotices count", Object.entries(this._perspective.notices).length);
         let unreplieds: Dictionary<[DeliveryNotice, Timestamp]> = {};
-        let inProgress: Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64>]> = {};
+        let incompletes: Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64>]> = {};
         for (const [noticeEh, [notice, ts, state, missingChunks]] of Object.entries(this._perspective.notices)) {
             //const sender = encodeHashToBase64(notice.sender);
             //console.log("inbounds() state", state);
@@ -417,11 +425,14 @@ export class DeliveryZvm extends ZomeViewModel {
                 unreplieds[noticeEh] = [notice, ts];
             }
             if (NoticeStateType.Accepted in state) {
-                inProgress[noticeEh] = [notice, ts, missingChunks];
+                incompletes[noticeEh] = [notice, ts, missingChunks];
+            }
+            if (NoticeStateType.PartiallyReceived in state) {
+                incompletes[noticeEh] = [notice, ts, missingChunks];
             }
         }
         //console.log("inbounds() count", Object.values(res));
-        return [unreplieds, inProgress];
+        return [unreplieds, incompletes];
     }
 
 

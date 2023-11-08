@@ -175,11 +175,12 @@ export enum DistributionStateType {
 
 /** Possible states of a DeliveryNotice entry */
 export type NoticeState =
-  | {Unreplied: null} | {Accepted: null} | {Refused: null} | {Received: null} | {Deleted: null};
+  | {Unreplied: null} | {Accepted: null} | {Refused: null} | {PartiallyReceived: null} | {Received: null} | {Deleted: null};
 export enum NoticeStateType {
 	Unreplied = 'Unreplied',
 	Accepted = 'Accepted',
 	Refused = 'Refused',
+	PartiallyReceived = 'PartiallyReceived',
 	Received = 'Received',
 	Deleted = 'Deleted',
 }

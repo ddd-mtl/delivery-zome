@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 use zome_utils::*;
-
 use zome_delivery_types::*;
 use crate::*;
 
@@ -28,11 +27,16 @@ pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, Vec<
    if maybe_parcel.is_some() {
       return Ok((NoticeState::Received, vec![]));
    }
-   /// Count chunks if it has a manifest
-   let mut missing_chunks = Vec::new();
+   /// If its a manifest, see if we have it and how many chunks
    if let ParcelKind::Manifest(_) = notice.summary.parcel_reference.description.kind_info {
-      missing_chunks = determine_missing_chunks(notice.summary.parcel_reference.eh)?;
+      let maybe_manifest = get_typed_from_eh::<ParcelManifest>(notice.summary.parcel_reference.eh.clone());
+      if maybe_manifest.is_err() {
+         return Ok((NoticeState::Accepted, vec![]));
+      }
+
+      let missing_chunks = determine_missing_chunks(notice.summary.parcel_reference.eh)?;
+      return Ok((NoticeState::PartiallyReceived, missing_chunks));
    }
    /// Done
-   Ok((NoticeState::Accepted, missing_chunks))
+   Ok((NoticeState::Accepted, vec![]))
 }

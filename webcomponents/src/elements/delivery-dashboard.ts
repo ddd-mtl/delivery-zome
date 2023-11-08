@@ -105,7 +105,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
         /* Li */
-        const [unreplieds, inbounds] = this._zvm.inbounds();
+        const [unreplieds, _] = this._zvm.inbounds();
         console.log("unreplieds", unreplieds);
         const newNoticesLi = Object.entries(unreplieds).map(
             ([noticeEh, [_notice, _ts]]) => {

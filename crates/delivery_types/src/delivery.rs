@@ -67,6 +67,8 @@ pub enum NoticeState {
    Accepted,
    /// ReceptionConfirmation(no) committed
    Refused,
+   /// Manifest received but chunks are missing
+   PartiallyReceived,
    /// ReceptionProof committed
    Received,
    /// ??? Parcel deleted ???
