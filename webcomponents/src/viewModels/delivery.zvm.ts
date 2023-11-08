@@ -4,7 +4,7 @@ import {
     ActionHashB64,
     AgentPubKeyB64, AppSignalCb,
     decodeHashFromBase64,
-    encodeHashToBase64, EntryHashB64, Timestamp
+    encodeHashToBase64, EntryHash, EntryHashB64, Timestamp
 } from "@holochain/client";
 import {
     DeliveryNotice,
@@ -85,13 +85,14 @@ export class DeliveryZvm extends ZomeViewModel {
         // }
         if (SignalProtocolType.NewLocalChunk in deliverySignal) {
             console.log("signal NewLocalChunk", deliverySignal.NewLocalChunk);
+            const chunkEh = encodeHashToBase64(deliverySignal.NewLocalChunk[0]);
             const chunk = deliverySignal.NewLocalChunk[1];
-            if (!this._perspective.chunkCounts[chunk.data_hash]) {
-                this._perspective.chunkCounts[chunk.data_hash] = 0;
-            }
-            const chunksCount = this._perspective.chunkCounts[chunk.data_hash] + 1;
-            this._perspective.chunkCounts[chunk.data_hash] = chunksCount;
-            console.log("chunkCounts", chunk.data_hash, chunksCount);
+            // if (!this._perspective.chunkCounts[chunk.data_hash]) {
+            //     this._perspective.chunkCounts[chunk.data_hash] = 0;
+            // }
+            // const chunksCount = this._perspective.chunkCounts[chunk.data_hash] + 1;
+            // this._perspective.chunkCounts[chunk.data_hash] = chunksCount;
+            //console.log("chunkCounts", chunk.data_hash, chunksCount);
             /** Update notice state */
             const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
             if (manifestPair) {
@@ -99,10 +100,12 @@ export class DeliveryZvm extends ZomeViewModel {
                 const noticeEh = this._perspective.noticeByParcel[manifestEh];
                 if (noticeEh) {
                     const [manifest, _ts] = this._perspective.privateManifests[manifestEh];
-                    const completion_pct = Math.ceil(chunksCount / manifest.chunks.length * 100);
-                    this._perspective.notices[noticeEh][3] = completion_pct;
-                    if (completion_pct == 100) {
+                    //const completion_pct = Math.ceil(chunksCount / manifest.chunks.length * 100);
+                    this._perspective.notices[noticeEh][3].delete(chunkEh);
+                    if (this._perspective.notices[noticeEh][3].size == 0) {
                         this.zomeProxy.completeManifest(decodeHashFromBase64(manifestEh));
+                    } else {
+                        // Ask for next chunk?
                     }
                 }
             }
@@ -123,7 +126,7 @@ export class DeliveryZvm extends ZomeViewModel {
             const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
             const notice = deliverySignal.NewNotice[2];
             const ts = deliverySignal.NewNotice[1];
-            this._perspective.notices[noticeEh] = [notice, ts, {Unreplied: null}, 0];
+            this._perspective.notices[noticeEh] = [notice, ts, {Unreplied: null}, new Set()];
             this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.eh)] = noticeEh;
         }
         if (SignalProtocolType.NewNoticeAck in deliverySignal) {
@@ -223,11 +226,26 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** */
     async scanProblems(): Promise<void> {
-        this._perspective.incompleteManifests = (await this.zomeProxy.scanIncompleteManifests())
-          .map((eh) => encodeHashToBase64(eh));
+        // this._perspective.incompleteManifests = (await this.zomeProxy.scanIncompleteManifests())
+        //   .map((eh) => encodeHashToBase64(eh));
         const [publicOrphans, privateOrphans] = await this.zomeProxy.scanOrphanChunks();
         this._perspective.orphanPublicChunks = publicOrphans.map((eh) => encodeHashToBase64(eh));
         this._perspective.orphanPrivateChunks = privateOrphans.map((eh) => encodeHashToBase64(eh));
+    }
+
+
+    /** */
+    async requestMissingChunks(noticeEh: EntryHashB64): Promise<void> {
+        const notice = this._perspective.notices[noticeEh];
+        if (!notice) {
+            console.warn("Requesting unknown notice");
+            return;
+        }
+        const missingChunks = await this.zomeProxy.determineMissingChunks(notice[0].summary.parcel_reference.eh);
+        const notice_eh = decodeHashFromBase64(noticeEh);
+        for (const chunk_eh of missingChunks) {
+            this.zomeProxy.fetchChunk({notice_eh, chunk_eh});
+        }
     }
 
 
@@ -383,18 +401,18 @@ export class DeliveryZvm extends ZomeViewModel {
     }
 
 
-    /** Return notice_eh -> [notice, Timestamp, Percentage]  */
-    inbounds(): Dictionary<[DeliveryNotice, Timestamp, number]> {
+    /** Return notice_eh -> [notice, Timestamp, missingChunks]  */
+    inbounds(): Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64> | null]> {
         //console.log("inbounds() allNotices count", Object.entries(this._perspective.notices).length);
-        let res: Dictionary<[DeliveryNotice, Timestamp, number]> = {};
-        for (const [noticeEh, [notice, ts, state, pct]] of Object.entries(this._perspective.notices)) {
+        let res: Dictionary<[DeliveryNotice, Timestamp, Set<EntryHashB64> | null]> = {};
+        for (const [noticeEh, [notice, ts, state, missingChunks]] of Object.entries(this._perspective.notices)) {
             const sender = encodeHashToBase64(notice.sender);
             //console.log("inbounds() state", state);
             if (NoticeStateType.Unreplied in state) {
-                res[noticeEh] = [notice, ts, -1];
+                res[noticeEh] = [notice, ts, null];
             }
             if (NoticeStateType.Accepted in state) {
-                res[noticeEh] = [notice, ts, pct];
+                res[noticeEh] = [notice, ts, missingChunks];
             }
         }
         //console.log("inbounds() count", Object.values(res));
@@ -408,7 +426,11 @@ export class DeliveryZvm extends ZomeViewModel {
         let res: Dictionary<[Distribution, Timestamp, Dictionary<DeliveryState>]> = {};
         for (const [distribAh, [distrib, ts, state, deliveryStates]] of Object.entries(this._perspective.distributions)) {
             //console.log("outbounds() distrib state", state);
-            if (DistributionStateType.Unsent in state || DistributionStateType.AllNoticesSent in state || DistributionStateType.AllNoticeReceived in state) {
+            if (DistributionStateType.Unsent in state
+              || DistributionStateType.AllNoticesSent in state
+              || DistributionStateType.AllNoticeReceived in state
+              || DistributionStateType.AllRepliesReceived in state
+            ) {
                 //console.log("outbounds() recipients", distrib.recipients.length);
                 for (const [recipient, state] of Object.entries(deliveryStates)) {
                     //console.log("outbounds() state", deliveryStates[agentB64], agentB64);
@@ -478,7 +500,9 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async getNoticeState(noticeEh: EntryHashB64): Promise<[NoticeState, number]> {
-        return this.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh));
+    async getNoticeState(noticeEh: EntryHashB64): Promise<[NoticeState, Set<EntryHashB64>]> {
+        const [state, missing_chunks] = await this.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh));
+        const missingChunks = missing_chunks.map((chunk_eh) => encodeHashToBase64(chunk_eh));
+        return [state, new Set(missingChunks)];
     }
 }

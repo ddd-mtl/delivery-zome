@@ -337,7 +337,7 @@ export interface FetchChunkInput {
 
 export interface GetNoticeOutput {
   notice: DeliveryNotice
-  state: [NoticeState, number]
+  state: [NoticeState, EntryHash[]]
 }
 
 export enum DeliveryNoticeQueryFieldType {

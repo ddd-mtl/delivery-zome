@@ -19,7 +19,7 @@ mod complete_manifest;
 mod notify_new_public_parcel;
 mod scan_incomplete_manifests;
 mod scan_orphan_chunks;
-mod request_missing_chunks;
+mod determine_missing_chunks;
 
 
 pub use get_distribution_state::*;
@@ -43,5 +43,5 @@ pub use self::{
    publish_chunks::*,
    notify_new_public_parcel::*,
    scan_incomplete_manifests::*,
-   request_missing_chunks::*,
+   determine_missing_chunks::*,
 };

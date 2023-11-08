@@ -7,7 +7,7 @@ use crate::*;
 
 ///
 #[hdk_extern]
-pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, usize)> {
+pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, Vec<EntryHash>)> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    //debug!("START");
    /// Make sure EntryHash is correct
@@ -15,10 +15,10 @@ pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, usiz
    /// look for reply
    let maybe_reply = query_NoticeReply(notice_eh.clone())?;
    if maybe_reply.is_none() {
-      return Ok((NoticeState::Unreplied, 0));
+      return Ok((NoticeState::Unreplied, vec![]));
    }
    if !maybe_reply.unwrap().has_accepted {
-      return Ok((NoticeState::Refused, 0));
+      return Ok((NoticeState::Refused, vec![]));
    }
    /// Look for parcel
    //let notice: DeliveryNotice = get_typed_from_eh(notice_eh)?;
@@ -26,13 +26,13 @@ pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, usiz
    let maybe_parcel = query_ReceptionProof(ReceptionProofQueryField::Notice(notice_eh.clone()))?;
    /// Done
    if maybe_parcel.is_some() {
-      return Ok((NoticeState::Received, 0));
+      return Ok((NoticeState::Received, vec![]));
    }
    /// Count chunks if it has a manifest
-   let mut pct = 0;
+   let mut missing_chunks = Vec::new();
    if let ParcelKind::Manifest(_) = notice.summary.parcel_reference.description.kind_info {
-      pct = count_chunks_received(notice.summary.parcel_reference.eh)?;
+      missing_chunks = determine_missing_chunks(notice.summary.parcel_reference.eh)?;
    }
    /// Done
-   Ok((NoticeState::Accepted, pct))
+   Ok((NoticeState::Accepted, missing_chunks))
 }

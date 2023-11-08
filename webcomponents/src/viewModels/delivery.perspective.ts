@@ -34,20 +34,20 @@ export interface DeliveryPerspective {
     publicParcels: Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>,
 
     /** Parcels */
-    /** manifest_eh -> ParcelManifest */
+    /** manifest_eh -> (ParcelManifest, timestamp) */
     privateManifests: Dictionary<[ParcelManifest, Timestamp]>,
     /** manifest_eh -> ParcelManifest */
     localPublicManifests: Dictionary<[ParcelManifest, Timestamp]>,
     /** data_hash -> [manifest_eh, isPrivate] */
     localManifestByData: Dictionary<[EntryHashB64, boolean]>,
-    /** data_hash -> number of chunks on chain */
-    chunkCounts: Dictionary<number>,
+    // /** data_hash -> number of chunks on chain */
+    // chunkCounts: Dictionary<number>,
 
 
     /** -- PROBLEMS -- */
     orphanPublicChunks: EntryHashB64[],
     orphanPrivateChunks: EntryHashB64[],
-    incompleteManifests: EntryHashB64[],
+    //incompleteManifests: EntryHashB64[],
 
 
     /** -- OUTBOUND -- */
@@ -61,8 +61,8 @@ export interface DeliveryPerspective {
     receptionAcks: Dictionary<Dictionary<[ReceptionAck, Timestamp]>>,
 
     /** -- INBOUND -- */
-    /** notice_eh -> Timestamp, Notice, State, Download Percentage */
-    notices: Dictionary<[DeliveryNotice, Timestamp, NoticeState, number]>,
+    /** notice_eh -> Timestamp, Notice, State, Missing chunks */
+    notices: Dictionary<[DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]>,
     /** parcel_eh -> notice_eh */
     noticeByParcel: Dictionary<EntryHashB64>,
     /** notice_eh -> NoticeReply */
@@ -85,11 +85,11 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         privateManifests: {},
         localPublicManifests: {},
         localManifestByData: {},
-        chunkCounts: {},
+        //chunkCounts: {},
         /* Problems */
         orphanPublicChunks: [],
         orphanPrivateChunks: [],
-        incompleteManifests: [],
+        //incompleteManifests: [],
         /** Inbound */
         distributions: {},
         noticeAcks: {},

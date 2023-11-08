@@ -36,7 +36,7 @@ fn send_reply(delivery_reply: NoticeReply) -> ExternResult<()> {
     if let Err(e) = res {
         warn!("send_item() during NoticeReply::post_commit() failed: {}", e);
     } else {
-        /// Try to retrieve parcel if it has been accepted by recipient
+        /// Fetch parcel if it has been accepted by this agent (recipient)
         if let SendSuccessKind::OK_DIRECT(_signature) = res.unwrap() {
             // FIXME
             // let valid = verify_signature(recipient.clone(), signature.clone(), pending_item.clone())?;

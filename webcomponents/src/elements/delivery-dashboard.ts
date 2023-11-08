@@ -108,9 +108,9 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         const inbounds = this._zvm.inbounds();
         console.log("inbounds", inbounds);
         const newNoticesLi = Object.entries(inbounds).map(
-            ([noticeEh, [_notice, _ts, pct]]) => {
-                let content = html`retrieving... ${pct}%`;
-                if (pct == -1) {
+            ([noticeEh, [_notice, _ts, missingChunks]]) => {
+                let content = html`retrieving...`;
+                if (missingChunks == null) {
                     content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
                         <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
                         <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>`;
