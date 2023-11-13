@@ -75,37 +75,16 @@ export class DeliveryZvm extends ZomeViewModel {
                 this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
             }
         }
-        // if (SignalProtocolType.ReceivedChunk in deliverySignal) {
-        //     console.log("signal ReceivedChunk", deliverySignal.ReceivedChunk);
-        //     for (const notice_eh of deliverySignal.ReceivedChunk[0]) {
-        //         const noticeEh = encodeHashToBase64(notice_eh);
-        //         const completion_pct = deliverySignal.ReceivedChunk[1];
-        //         const noticeTuple = this._perspective.notices[noticeEh];
-        //         if (!noticeTuple) {
-        //             console.error("Notice not found for chunk", noticeEh);
-        //             return;
-        //         }
-        //         this._perspective.notices[noticeEh][3] = completion_pct;
-        //     }
-        // }
         if (SignalProtocolType.NewLocalChunk in deliverySignal) {
             console.log("signal NewLocalChunk", deliverySignal.NewLocalChunk);
             const chunkEh = encodeHashToBase64(deliverySignal.NewLocalChunk[0]);
             const chunk = deliverySignal.NewLocalChunk[1];
-            // if (!this._perspective.chunkCounts[chunk.data_hash]) {
-            //     this._perspective.chunkCounts[chunk.data_hash] = 0;
-            // }
-            // const chunksCount = this._perspective.chunkCounts[chunk.data_hash] + 1;
-            // this._perspective.chunkCounts[chunk.data_hash] = chunksCount;
-            //console.log("chunkCounts", chunk.data_hash, chunksCount);
-            /** Update notice state */
+            /** Update notice state if Chunk is not from us */
             const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
             if (manifestPair) {
                 const manifestEh = manifestPair[0];
                 const noticeEh = this._perspective.noticeByParcel[manifestEh];
                 if (noticeEh) {
-                    const [manifest, _ts] = this._perspective.privateManifests[manifestEh];
-                    //const completion_pct = Math.ceil(chunksCount / manifest.chunks.length * 100);
                     this._perspective.notices[noticeEh][3].delete(chunkEh);
                     if (this._perspective.notices[noticeEh][3].size == 0) {
                         this.zomeProxy.completeManifest(decodeHashFromBase64(manifestEh));

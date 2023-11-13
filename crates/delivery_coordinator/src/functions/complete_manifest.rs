@@ -9,9 +9,9 @@ use crate::*;
 /// Check if all chunks have been committed for this parcel.
 /// Return EntryHash of Notice if Manifest is received from remote agent.
 /// Return EntryHash of ReceptionProof if it has been completly downloaded.
-/// Otherwise return download completion percentage.
+/// Otherwise return missing chunks list.
 #[hdk_extern]
-pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(EntryHash, Result<EntryHash, usize>)>>> {
+pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(EntryHash, Result<EntryHash, Vec<EntryHash>>)>>> {
    debug!("START {}", manifest_eh);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Make sure manifest exists
@@ -24,13 +24,14 @@ pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(Ent
       return Ok(None);
    }
    /// Matching notice(s) found. Check if we have all chunks
-   let received_pct = count_chunks_received(manifest_eh.clone())?;
-   debug!("received_pct = {}", received_pct);
-   if received_pct != 100 {
+   //let received_pct = count_chunks_received(manifest_eh.clone())?;
+   let missing_chunks = determine_missing_chunks(manifest_eh.clone())?;
+   debug!("missing_chunks = {}", missing_chunks.len());
+   if !missing_chunks.is_empty() {
       debug!("ABORT - Missing chunks");
       let vec = notices.into_iter().map(|notice| {
          let notice_eh = hash_entry(notice).unwrap();
-         (notice_eh, Err(received_pct))
+         (notice_eh, Err(missing_chunks.clone()))
       }).collect();
       return Ok(Some(vec));
    }
