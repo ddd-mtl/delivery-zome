@@ -2,7 +2,7 @@
   "name": "delivery-root",
   "config": {
     "hc_version": "0.2.2",
-    "zits_version": "1.9.0",
+    "zits_version": "1.11.0",
     "bin": "bin"
   },
   "private": true,
@@ -35,7 +35,6 @@
     "start"                  : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run watch:webcomponents\" \"npm run start:happ:holo\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
     "start:local"            : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run watch:webcomponents\" \"npm run start:happ:local\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
     "start:mem"              : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run watch:webcomponents\" \"npm run start:happ:mem\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
-    "start:hc-playground"    : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run watch:webcomponents\" \"npm run hc-playground\" \"npm run start:happ:proxied\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
 
     "serve:run"              : "$npm_package_config_bin/hc run-local-services --bootstrap-port $BOOT_PORT --signal-port $SIGNAL_PORT",
     "serve"                  : "cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:happ:local\"",
@@ -44,9 +43,6 @@
 
     "network"                : "concurrently-repeat \"npm run start\"",
     "network:mem"            : "concurrently-repeat \"npm run start:mem\"",
-    "network:hc-playground"  : "concurrently-repeat \"npm run start:hc-playground\"",
-
-    "hc-playground"          : "run-singleton \"holochain-playground\"",
 
     "clean:hc"               : "rm .hc*",
     "clean"                  : "bash scripts/clean.sh",
@@ -54,22 +50,22 @@
     "clean:all"              : "npm run clean:hc && npm run clean && npm run clean:npm"
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.0.8",
     "bestzip": "^2.2.0",
     "concurrently": "^6.2.1",
     "concurrently-repeat": "^0.0.1",
     "cross-env": "^7.0.3",
     "new-port-cli": "^1.0.0",
     "run-singleton-cli": "^0.0.5",
+    "@types/libsodium-wrappers": "~0.7.13",
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@ddd-qc/cell-proxy"            : "=0.19.19",
-    "@ddd-qc/lit-happ"              : "=0.19.19",
-    "@holochain-open-dev/core-types": "^0.6.3",
-    "@holochain/client"             : "=0.14.1",
-    "@lit-labs/context"             : "0.2.0",
-    "lit"                           : "2.6.0"
+    "@ddd-qc/cell-proxy"            : "=0.20.0",
+    "@ddd-qc/lit-happ"              : "=0.20.0",
+    "@holochain-open-dev/core-types": "0.7.0",
+    "@holochain/client"             : "=0.16.2",
+    "@lit-labs/context"             : "0.5.1",
+    "lit"                           : "3.0.2"
   },
   "engines": {
     "npm": ">=7.0.0"

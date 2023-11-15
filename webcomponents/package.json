@@ -1,6 +1,6 @@
 {
   "name": "@ddd-qc/delivery",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "Delivery zome webcomponents",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -28,7 +28,7 @@
     "@types/ws": "^8.5.3",
     "lit-analyzer": "^1.2.1",
     "tslib": "^2.4.0",
-    "typescript": "^4.9.0",
+    "typescript": "~5.2.0",
     "watch-cli": "^0.2.3"
   },
   "dependencies": {
