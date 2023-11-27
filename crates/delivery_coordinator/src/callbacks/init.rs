@@ -4,8 +4,8 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 use crate::*;
 
-//#[hdk_extern]
-fn init_caps(_: ()) -> ExternResult<()> {
+///
+fn init_caps() -> ExternResult<()> {
    let mut functions = BTreeSet::new();
    functions.insert((zome_info()?.name, REMOTE_ENDPOINT.into()));
    //functions.insert((zome_info()?.name, "get_enc_key".into()));
@@ -27,7 +27,7 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    /// Set Global Anchors
    Path::from(DIRECTORY_PATH).typed(LinkTypes::Members)?.ensure()?;
    /// Setup initial capabilities
-   init_caps(())?;
+   init_caps()?;
 
    // ///
    // let res = validate_properties()?;

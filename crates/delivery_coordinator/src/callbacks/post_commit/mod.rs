@@ -37,7 +37,7 @@ use zome_delivery_integrity::*;
 /// Zome Callback
 #[hdk_extern(infallible)]
 fn post_commit(signedActionList: Vec<SignedActionHashed>) {
-   //debug!("DELIVERY post_commit() called for {} actions", signedActionList.len());
+   debug!("DELIVERY post_commit() called for {} actions", signedActionList.len());
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each Action
    for sah in signedActionList {
@@ -62,17 +62,21 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
 
 ///
 fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
-   debug!(" >> post_commit() called for a {:?}", app_entry_def);
+   debug!(" >> post_commit_app_entry() called for a {:?}", app_entry_def);
    /// Get Entry from local chain
-   let monad: HashSet<EntryHash> = HashSet::from([eh.clone()]);
-   let query_args = ChainQueryFilter::default()
-      .include_entries(true)
-      .entry_hashes(monad);
-   let records = query(query_args)?;
-   if records.is_empty() {
-      return zome_error!("Post committed entry not found on chain");
-   }
-   let entry = records[0].entry().as_option().unwrap().to_owned();
+   // let monad: HashSet<EntryHash> = HashSet::from([eh.clone()]);
+   // let query_args = ChainQueryFilter::default()
+   //    .include_entries(true)
+   //    .entry_hashes(monad);
+   // let records = query(query_args)?;
+   // if records.is_empty() {
+   //    return zome_error!("Post committed entry not found on chain");
+   // }
+   //
+   let entry = must_get_entry(eh.clone())?.content;
+
+   debug!("    post_commit_app_entry() entry found");
+   //let entry = records[0].entry().as_option().unwrap().to_owned();
    /// Deserialize it and call its post_commit()
    let Entry::App(ref entry_bytes) = entry
       else {
