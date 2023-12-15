@@ -34,7 +34,7 @@
     "typescript": "~5.2.0"
   },
   "dependencies": {
-    "@ddd-qc/agent-directory": "6.1.0",
+    "@ddd-qc/agent-directory": "6.2.0",
     "@ddd-qc/delivery": "file:../../webcomponents"
   }
 }
