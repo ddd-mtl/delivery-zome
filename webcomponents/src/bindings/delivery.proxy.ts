@@ -33,6 +33,7 @@ NetworkInfo,
 FetchPoolInfo,
 /** hdk/action.ts */
 SignedActionHashed,
+RegisterAgentActivity,
 ActionHashed,
 ActionType,
 Action,
@@ -53,6 +54,7 @@ CapClaim,
 GrantedFunctionsType,
 GrantedFunctions,
 ZomeCallCapGrant,
+CapAccessType,
 CapAccess,
 CapGrant,
 ///** hdk/countersigning.ts */
@@ -80,6 +82,15 @@ Entry,
 /** hdk/record.ts */
 Record as HcRecord,
 RecordEntry as HcRecordEntry,
+/** hdk/link.ts */
+AnyLinkableHash,
+ZomeIndex,
+LinkType,
+LinkTag,
+RateWeight,
+RateBucketId,
+RateUnits,
+Link,
 /** api/admin/types.ts */
 InstalledAppInfoStatus,
 DeactivationReason,
@@ -115,6 +126,8 @@ ZomeLocation,
 import {
 /** Common */
 DhtOpHashB64,
+//DnaHashB64, (duplicate)
+//AnyDhtHashB64, (duplicate)
 DhtOpHash,
 /** DnaFile */
 DnaFile,
@@ -133,7 +146,7 @@ ValidationReceipt,
    } from '@holochain-open-dev/core-types';
 
 /** User defined external dependencies */
-import {Link, ZomeIndex, EntryDefIndex} from './deps.types';
+import {EntryDefIndex} from './deps.types';
 
 import {ZomeProxy} from '@ddd-qc/lit-happ';
 import {deliveryFunctionNames} from './delivery.fn';
