@@ -216,6 +216,7 @@ export class DeliveryZvm extends ZomeViewModel {
         await this.probeDht();
     }
 
+
     /** */
     async scanProblems(): Promise<void> {
         // this._perspective.incompleteManifests = (await this.zomeProxy.scanIncompleteManifests())
@@ -300,7 +301,7 @@ export class DeliveryZvm extends ZomeViewModel {
         // if (!pd) {
         //     return Promise.reject("Unknown PublicParcel");
         // }
-        const [manifest, ts, author] = await this.zomeProxy.getManifest(decodeHashFromBase64(parcelEh));
+        const [manifest, _ts] = await this.getManifest(parcelEh);
         let dataB64 = "";
         for (const chunk_eh of manifest.chunks) {
             let chunk = await this.zomeProxy.getChunk(chunk_eh);
