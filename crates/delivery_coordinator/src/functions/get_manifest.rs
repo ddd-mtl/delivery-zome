@@ -5,9 +5,9 @@ use zome_delivery_types::*;
 
 ///
 #[hdk_extern]
-pub fn get_manifest(manifest_eh: EntryHash) -> ExternResult<ParcelManifest> {
-   let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
-   Ok(manifest)
+pub fn get_manifest(manifest_eh: EntryHash) -> ExternResult<(ParcelManifest, Timestamp, AgentPubKey)> {
+   let (record, manifest) = get_typed_and_record::<ParcelManifest>(&AnyLinkableHash::from(manifest_eh))?;
+   Ok((manifest, record.action().timestamp(), record.action().author().to_owned()))
 }
 
 

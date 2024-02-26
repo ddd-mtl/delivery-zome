@@ -6,7 +6,7 @@ import {
     NoticeReply, NoticeState, ParcelDescription, ParcelManifest, ReceptionAck, ReceptionProof, ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary} from "@ddd-qc/lit-happ";
-import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, EntryHashB64, Timestamp} from "@holochain/client";
+import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, decodeHashFromBase64, EntryHashB64, Timestamp} from "@holochain/client";
 
 /** [DistributionState, AgentPubKey -> DeliveryState] */
 //export type FullDistributionState = [DistributionState, Dictionary<DeliveryState>];
@@ -103,4 +103,31 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         /** meta */
         probeDhtCount: 0,
     };
+}
+
+
+export interface ParcelManifestMat {
+    description: ParcelDescription
+    data_hash: string
+    chunks: EntryHashB64[]
+}
+
+
+export function materializeParcelManifest(pm: ParcelManifest): ParcelManifestMat {
+    const chunks = pm.chunks.map((eh) => encodeHashToBase64(eh));
+    return {
+        description: pm.description,
+        data_hash: pm.data_hash,
+        chunks,
+    }
+}
+
+
+export function dematerializeParcelManifest(pm: ParcelManifestMat): ParcelManifest {
+    const chunks = pm.chunks.map((eh) => decodeHashFromBase64(eh));
+    return {
+        description: pm.description,
+        data_hash: pm.data_hash,
+        chunks,
+    }
 }

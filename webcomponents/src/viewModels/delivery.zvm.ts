@@ -13,12 +13,17 @@ import {
     DistributionState,
     DistributionStateType,
     NoticeState,
-    NoticeStateType, ParcelDescription,
+    NoticeStateType, ParcelDescription, ParcelManifest,
     SignalProtocol,
     SignalProtocolType,
 } from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
-import {createDeliveryPerspective, DeliveryPerspective} from "./delivery.perspective";
+import {
+    createDeliveryPerspective,
+    DeliveryPerspective,
+    materializeParcelManifest,
+    ParcelManifestMat
+} from "./delivery.perspective";
 
 
 /**
@@ -277,13 +282,25 @@ export class DeliveryZvm extends ZomeViewModel {
     }
 
 
+    /** */
+    async getManifest(manifestEh: EntryHashB64, preventNotify?: boolean): Promise<[ParcelManifest, Timestamp]> {
+        const [manifest, ts, author] = await this.zomeProxy.getManifest(decodeHashFromBase64(manifestEh));
+        this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
+        this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, false];
+        if (!preventNotify) {
+            this.notifySubscribers();
+        }
+        return [manifest, ts];
+    }
+
+
     /** Return base64 data string */
     async getParcelData(parcelEh: EntryHashB64): Promise<string> {
         // const pd = this._perspective.publicParcels[parcelEh];
         // if (!pd) {
         //     return Promise.reject("Unknown PublicParcel");
         // }
-        const manifest = await this.zomeProxy.getManifest(decodeHashFromBase64(parcelEh));
+        const [manifest, ts, author] = await this.zomeProxy.getManifest(decodeHashFromBase64(parcelEh));
         let dataB64 = "";
         for (const chunk_eh of manifest.chunks) {
             let chunk = await this.zomeProxy.getChunk(chunk_eh);
@@ -500,4 +517,24 @@ export class DeliveryZvm extends ZomeViewModel {
         const missingChunks = missing_chunks.map((chunk_eh) => encodeHashToBase64(chunk_eh));
         return [state, new Set(missingChunks)];
     }
+
+
+    /** */
+    async getAllPublicManifest(): Promise<[ParcelManifestMat, Timestamp, AgentPubKeyB64][]> {
+        const manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][] = [];
+        for (const [parcelEh, [desc, ts, author]] of Object.entries(this._perspective.publicParcels)) {
+            const [manifest, _ts2] = await this.getManifest(parcelEh, true);
+            manifests.push([materializeParcelManifest(manifest), ts, author]);
+        }
+        this.notifySubscribers();
+        return manifests;
+    }
+
+
+    /** Dump perspective as JSON  (caller should call getAllPublicManifest() first) */
+    exportPerspective(/*originalsZvm: AuthorshipZvm*/): string {
+        const manifests: [ParcelManifestMat, Timestamp][] = Object.values(this._perspective.localPublicManifests).map(([manifest, ts]) => [materializeParcelManifest(manifest), ts])
+        return JSON.stringify(manifests, null, 2);
+    }
+
 }

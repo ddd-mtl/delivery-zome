@@ -203,7 +203,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_distribution_state', distributionAh);
   }
 
-  async getManifest(manifestEh: EntryHash): Promise<ParcelManifest> {
+  async getManifest(manifestEh: EntryHash): Promise<[ParcelManifest, Timestamp, AgentPubKey]> {
     return this.call('get_manifest', manifestEh);
   }
 

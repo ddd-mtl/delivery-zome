@@ -27,6 +27,17 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
     /** */
+    downloadTextFile(filename: string, content: string): void {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /** */
     render() {
         console.log("<delivery-dashboard> render()", this._initialized, this.perspective);
         if (!this._initialized) {
@@ -150,6 +161,9 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
         const manifestsLi = Object.entries(this.perspective.localManifestByData).map(
             ([dataHash, [manifestEh, _isPrivate]]) => {
+                if (!this.perspective.privateManifests[manifestEh]) {
+                  return html`__privateManifest__`; // TODO
+                }
                 const [manifest, _ts] = this.perspective.privateManifests[manifestEh];
                 return html `
           <li style="margin-top:10px;" title=${dataHash}>
@@ -162,7 +176,11 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         return html`
         <div>
             <h1 style="text-decoration:underline;">Delivery Dashboard</h1>
-
+            <button @click=${async (_e: any) => {
+              await this._zvm.getAllPublicManifest();
+              const json = this._zvm.exportPerspective();
+                this.downloadTextFile("dump.json", json);
+            }}>Export</button>
             <h2>Local Parcels</h2>
             <ul>${manifestsLi}</ul>
             
