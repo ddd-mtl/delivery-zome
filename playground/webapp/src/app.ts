@@ -1,10 +1,8 @@
 import { html } from "lit";
 import {property, state} from "lit/decorators.js";
-import {SecretPage} from "./elements/secret-page";
-import {AgentDirectoryList} from "@ddd-qc/agent-directory";
 import { SecretDvm } from "./viewModels/secret.dvm";
 import {
-  HvmDef, HappElement, HCL, ViewCellContext, CellDef, CellContext, delay, Cell
+  HvmDef, HappElement, Cell
 } from "@ddd-qc/lit-happ";
 import {AdminWebsocket, AgentPubKeyB64, DnaDefinition, RoleName} from "@holochain/client";
 
@@ -47,13 +45,13 @@ export class SecretApp extends HappElement {
     console.log("hvmConstructed()")
     //new ContextProvider(this, cellContext, this.taskerDvm.cell);
     /** Authorize all zome calls */
-    const adminWs = await AdminWebsocket.connect(new URL(`ws://localhost:${process.env.ADMIN_PORT}`));
+    const adminWs = await AdminWebsocket.connect({url: new URL(`ws://localhost:${process.env.ADMIN_PORT}`)});
     console.log({adminWs});
     await this.hvm.authorizeAllZomeCalls(adminWs);
     console.log("*** Zome call authorization complete");
     this._dnaDef = await adminWs.getDnaDefinition(this.secret.cell.id[0]);
     console.log("happInitialized() dnaDef", this._dnaDef);
-    /** Probe */    
+    /** Probe */
     this._cell = this.secret.cell;
     await this.hvm.probeAll();
     this._allAppEntryTypes = await this.secret.fetchAllEntryDefs();

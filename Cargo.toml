@@ -18,7 +18,7 @@ rust-version = "1.73.0"
 edition = "2021"
 
 [workspace.dependencies]
-serde = { version = "=1.0.163", default-features = false }
+serde = { version = "=1.0.197", default-features = false }
 hdi = { version = "=0.4.0-beta-dev.30", default-features = false }
 hdk = { version = "=0.3.0-beta-dev.34", default-features = false }
 
