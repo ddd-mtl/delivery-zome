@@ -159,7 +159,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash)
     let parcel_eh = distribution.delivery_summary.parcel_reference.eh.clone();
     debug!("Looking for Parcel: {:?}", parcel_eh);
     /// Get entry
-    let maybe_maybe_element = get(parcel_eh, GetOptions::content());
+    let maybe_maybe_element = get(parcel_eh, GetOptions::network());
     if let Err(err) = maybe_maybe_element {
         return failure_err("Failed to get Parcel Element", err);
     }

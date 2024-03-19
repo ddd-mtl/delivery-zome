@@ -64,11 +64,11 @@ pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
 pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
     /// Get typed targets
     let my_agent_eh = EntryHash::from(agent_info()?.agent_latest_pubkey);
-    let mut pending_pairs = get_typed_from_links::<PendingItem>(
+    let mut pending_pairs = get_typed_from_links::<PendingItem>(link_input(
         my_agent_eh.clone(),
         LinkTypes::Inbox,
         None,
-    )?;
+    ))?;
     /// Filter
     if maybe_kind.is_some() {
         let kind = maybe_kind.unwrap();
@@ -82,7 +82,7 @@ pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(Pe
 /// Return size of an AppEntry
 pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
     /// Get Element
-    let maybe_element = get(eh, GetOptions::content())?;
+    let maybe_element = get(eh, GetOptions::network())?;
     let element = match maybe_element {
         Some(el) => el,
         None => return error("No element found at given payload address"),

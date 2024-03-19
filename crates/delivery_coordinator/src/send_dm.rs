@@ -48,7 +48,7 @@ pub fn send_dm_signal(destination: AgentPubKey, msg: DeliveryProtocol) -> Extern
    /// Call peer
    debug!("calling remote recv_remote_signal()");
    trace!("dm = '{}'", msg);
-   remote_signal(
+   send_remote_signal(
       &dm_packet,
       vec![destination],
    )?;

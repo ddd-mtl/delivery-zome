@@ -413,13 +413,6 @@ export interface SendSecretInput {
   recipients: AgentPubKey[]
 }
 
-export enum SecretEntryType {
-	Secret = 'Secret',
-}
-export type SecretEntryVariantSecret = {Secret: Secret}
-export type SecretEntry = 
- | SecretEntryVariantSecret;
-
 /** Entry representing a secret message */
 export interface Secret {
   value: string

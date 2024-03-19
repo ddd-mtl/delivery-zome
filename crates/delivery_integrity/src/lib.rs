@@ -30,36 +30,36 @@ pub enum LinkTypes {
 }
 
 
-#[hdk_entry_defs]
+#[hdk_entry_types]
 #[unit_enum(DeliveryEntryTypes)]
 pub enum DeliveryEntry {
-   #[entry_def(required_validations = 2, visibility = "public")]
+   #[entry_type(required_validations = 2, visibility = "public")]
    PubEncKey(PubEncKey),
-   #[entry_def(required_validations = 3, visibility = "private")]
+   #[entry_type(required_validations = 3, visibility = "private")]
    DeliveryNotice(DeliveryNotice),
-   #[entry_def(required_validations = 3, visibility = "private")]
+   #[entry_type(required_validations = 3, visibility = "private")]
    ReceptionAck(ReceptionAck),
-   #[entry_def(required_validations = 3, visibility = "private")]
+   #[entry_type(required_validations = 3, visibility = "private")]
    NoticeReply(NoticeReply),
-   #[entry_def(required_validations = 1, visibility = "private")]
+   #[entry_type(required_validations = 1, visibility = "private")]
    Distribution(Distribution),
-   #[entry_def(required_validations = 1, visibility = "private")]
+   #[entry_type(required_validations = 1, visibility = "private")]
    PrivateChunk(ParcelChunk),
-   #[entry_def(required_validations = 1, visibility = "private")]
+   #[entry_type(required_validations = 1, visibility = "private")]
    PrivateManifest(ParcelManifest), // WARN. DONT MOVE THIS
-   #[entry_def(required_validations = 1, visibility = "private")]
+   #[entry_type(required_validations = 1, visibility = "private")]
    ReceptionProof(ReceptionProof),
-   #[entry_def(required_validations = 1, visibility = "private")]
+   #[entry_type(required_validations = 1, visibility = "private")]
    NoticeAck(NoticeAck),
-   #[entry_def(required_validations = 1, visibility = "private")]
+   #[entry_type(required_validations = 1, visibility = "private")]
    ReplyAck(ReplyAck),
-   #[entry_def(required_validations = 1, visibility = "public")]
+   #[entry_type(required_validations = 1, visibility = "public")]
    PendingItem(PendingItem),
-   #[entry_def(required_validations = 1, visibility = "public")]
+   #[entry_type(required_validations = 1, visibility = "public")]
    PublicManifest(ParcelManifest),
-   #[entry_def(required_validations = 1, visibility = "public")]
+   #[entry_type(required_validations = 1, visibility = "public")]
    PublicChunk(ParcelChunk),
-   #[entry_def(required_validations = 1, visibility = "public")]
+   #[entry_type(required_validations = 1, visibility = "public")]
    PublicParcel(ParcelReference),
 }
 

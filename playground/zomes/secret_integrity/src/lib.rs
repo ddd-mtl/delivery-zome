@@ -9,10 +9,10 @@ use hdi::prelude::*;
 
 
 
-#[hdk_entry_defs]
+#[hdk_entry_types]
 #[unit_enum(SecretEntryTypes)]
 pub enum SecretEntry {
-   #[entry_def(required_validations = 2, visibility = "private")]
+   #[entry_type(required_validations = 2, visibility = "private")]
    Secret(Secret),
 }
 

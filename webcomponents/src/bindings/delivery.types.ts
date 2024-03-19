@@ -418,39 +418,6 @@ export enum LinkTypesType {
 	PublicParcels = 'PublicParcels',
 }
 
-export enum DeliveryEntryType {
-	PubEncKey = 'PubEncKey',
-	DeliveryNotice = 'DeliveryNotice',
-	ReceptionAck = 'ReceptionAck',
-	NoticeReply = 'NoticeReply',
-	Distribution = 'Distribution',
-	PrivateChunk = 'PrivateChunk',
-	PrivateManifest = 'PrivateManifest',
-	ReceptionProof = 'ReceptionProof',
-	NoticeAck = 'NoticeAck',
-	ReplyAck = 'ReplyAck',
-	PendingItem = 'PendingItem',
-	PublicManifest = 'PublicManifest',
-	PublicChunk = 'PublicChunk',
-	PublicParcel = 'PublicParcel',
-}
-export type DeliveryEntryVariantPubEncKey = {PubEncKey: PubEncKey}
-export type DeliveryEntryVariantDeliveryNotice = {DeliveryNotice: DeliveryNotice}
-export type DeliveryEntryVariantReceptionAck = {ReceptionAck: ReceptionAck}
-export type DeliveryEntryVariantNoticeReply = {NoticeReply: NoticeReply}
-export type DeliveryEntryVariantDistribution = {Distribution: Distribution}
-export type DeliveryEntryVariantPrivateChunk = {PrivateChunk: ParcelChunk}
-export type DeliveryEntryVariantPrivateManifest = {PrivateManifest: ParcelManifest}
-export type DeliveryEntryVariantReceptionProof = {ReceptionProof: ReceptionProof}
-export type DeliveryEntryVariantNoticeAck = {NoticeAck: NoticeAck}
-export type DeliveryEntryVariantReplyAck = {ReplyAck: ReplyAck}
-export type DeliveryEntryVariantPendingItem = {PendingItem: PendingItem}
-export type DeliveryEntryVariantPublicManifest = {PublicManifest: ParcelManifest}
-export type DeliveryEntryVariantPublicChunk = {PublicChunk: ParcelChunk}
-export type DeliveryEntryVariantPublicParcel = {PublicParcel: ParcelReference}
-export type DeliveryEntry = 
- | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantPrivateChunk | DeliveryEntryVariantPrivateManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
-
 /** Entry representing the Public Encryption Key of an Agent */
 export interface PubEncKey {
   value: Uint8Array

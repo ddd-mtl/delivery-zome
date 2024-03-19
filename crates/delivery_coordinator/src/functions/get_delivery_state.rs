@@ -61,11 +61,13 @@ pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<Delivery
 ///
 pub fn find_PendingItem(distribution_ah: ActionHash, recipient: AgentPubKey, kind: ItemKind)
    -> ExternResult<Option<PendingItem>> {
-   let mut pairs: Vec<(PendingItem, Link)> = get_typed_from_links(
-      distribution_ah,
-      LinkTypes::Pendings,
+   let mut pairs: Vec<(PendingItem, Link)> = get_typed_from_links( link_input_full(
+       AnyLinkableHash::from(distribution_ah),
+      LinkTypes::Pendings.try_into_filter()?,
+      GetOptions::network(),
       Some(LinkTag::from(recipient.as_ref().to_vec())),
-   )?;
+      None, None, None,
+   ))?;
    pairs.retain(|pair| pair.0.kind == kind);
    /// Search through results
    for pair in pairs {
