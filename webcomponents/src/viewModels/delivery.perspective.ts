@@ -2,7 +2,7 @@ import {
     DeliveryNotice,
     DeliveryState,
     Distribution,
-    DistributionState, FullDistributionState, NoticeAck,
+    DistributionState, NoticeAck,
     NoticeReply, NoticeState, ParcelDescription, ParcelManifest, ReceptionAck, ReceptionProof, ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary} from "@ddd-qc/lit-happ";
