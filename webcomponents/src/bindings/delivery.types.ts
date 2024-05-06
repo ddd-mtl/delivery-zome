@@ -410,9 +410,8 @@ export interface DeliveryProperties {
 
 /** List of all Link kinds handled by this Zome */
 export type LinkTypes =
-  | {EncKey: null} | {Members: null} | {Inbox: null} | {Pendings: null} | {PublicParcels: null};
+  | {Members: null} | {Inbox: null} | {Pendings: null} | {PublicParcels: null};
 export enum LinkTypesType {
-	EncKey = 'EncKey',
 	Members = 'Members',
 	Inbox = 'Inbox',
 	Pendings = 'Pendings',
@@ -420,7 +419,6 @@ export enum LinkTypesType {
 }
 
 export enum DeliveryEntryType {
-	PubEncKey = 'PubEncKey',
 	DeliveryNotice = 'DeliveryNotice',
 	ReceptionAck = 'ReceptionAck',
 	NoticeReply = 'NoticeReply',
@@ -435,7 +433,6 @@ export enum DeliveryEntryType {
 	PublicChunk = 'PublicChunk',
 	PublicParcel = 'PublicParcel',
 }
-export type DeliveryEntryVariantPubEncKey = {PubEncKey: PubEncKey}
 export type DeliveryEntryVariantDeliveryNotice = {DeliveryNotice: DeliveryNotice}
 export type DeliveryEntryVariantReceptionAck = {ReceptionAck: ReceptionAck}
 export type DeliveryEntryVariantNoticeReply = {NoticeReply: NoticeReply}
@@ -450,12 +447,7 @@ export type DeliveryEntryVariantPublicManifest = {PublicManifest: ParcelManifest
 export type DeliveryEntryVariantPublicChunk = {PublicChunk: ParcelChunk}
 export type DeliveryEntryVariantPublicParcel = {PublicParcel: ParcelReference}
 export type DeliveryEntry = 
- | DeliveryEntryVariantPubEncKey | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantPrivateChunk | DeliveryEntryVariantPrivateManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
-
-/** Entry representing the Public Encryption Key of an Agent */
-export interface PubEncKey {
-  value: Uint8Array
-}
+ | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantPrivateChunk | DeliveryEntryVariantPrivateManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
 
 /**  */
 export interface DirectMessage {

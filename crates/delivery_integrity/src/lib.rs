@@ -6,12 +6,8 @@
 #![allow(dead_code)]
 
 
-mod pub_enc_key;
 mod validate_app_entry;
 mod validate;
-
-
-pub use pub_enc_key::*;
 
 
 use hdi::prelude::*;
@@ -22,7 +18,6 @@ use zome_delivery_types::*;
 #[hdk_link_types]
 #[derive(Serialize, Deserialize)]
 pub enum LinkTypes {
-   EncKey,
    Members,
    Inbox,
    Pendings,
@@ -33,8 +28,6 @@ pub enum LinkTypes {
 #[hdk_entry_types]
 #[unit_enum(DeliveryEntryTypes)]
 pub enum DeliveryEntry {
-   #[entry_type(required_validations = 2, visibility = "public")]
-   PubEncKey(PubEncKey),
    #[entry_type(required_validations = 3, visibility = "private")]
    DeliveryNotice(DeliveryNotice),
    #[entry_type(required_validations = 3, visibility = "private")]
