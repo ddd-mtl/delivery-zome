@@ -29,8 +29,6 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"get_parcel_notice",
 	"get_notice_state",
 	"notify_new_public_parcel",
-	"get_enc_key",
-	"get_my_enc_key",
 	"publish_chunks",
 	"publish_chunk",
 	"publish_manifest",

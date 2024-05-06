@@ -22,8 +22,6 @@ import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, decodeHashFromBase64,
 
 /** */
 export interface DeliveryPerspective {
-    /** -- Encrytion -- */
-    myPubEncKey: Uint8Array,
     /** AgentPubKey -> PubEncKey */
     encKeys: Dictionary<Uint8Array>,
 
@@ -78,7 +76,6 @@ export interface DeliveryPerspective {
 /** */
 export function createDeliveryPerspective(): DeliveryPerspective {
     return {
-        myPubEncKey: new Uint8Array(),
         encKeys: {},
         inbox: [],
         publicParcels: {},

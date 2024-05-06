@@ -2,13 +2,11 @@ use hdk::prelude::*;
 
 use zome_delivery_types::*;
 use zome_delivery_integrity::*;
-use crate::*;
 
 ///
 fn init_caps() -> ExternResult<()> {
    let mut functions = BTreeSet::new();
    functions.insert((zome_info()?.name, REMOTE_ENDPOINT.into()));
-   //functions.insert((zome_info()?.name, "get_enc_key".into()));
    create_cap_grant(
       CapGrantEntry {
          tag: "".into(),
@@ -34,8 +32,7 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    // let InitCallbackResult::Pass = res
    //    else { return Ok(res); };
 
-   /// Create public encryption key and broadcast it
-   create_enc_key()?;
+
    /// Done
    debug!("*** zDelivery.init() callback DONE");
    Ok(InitCallbackResult::Pass)

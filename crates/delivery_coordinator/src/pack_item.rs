@@ -23,7 +23,9 @@ fn create_PendingItem<T>(
    /// Serialize
    let data: XSalsa20Poly1305Data = bincode::serialize(&content).unwrap().into();
    /// Encrypt
-   let encrypted_data = encrypt_parcel(data, recipient)?;
+   let encrypted_data = ed_25519_x_salsa20_poly1305_encrypt(
+      agent_info()?.agent_latest_pubkey, recipient, data)
+     .expect("Encryption should work");
    /// Done
    let item = PendingItem {
       kind,
@@ -54,7 +56,7 @@ fn create_pending_parcel(
    trace!("create_pending_parcel() bytes: {:?}", bytes);
    let data: XSalsa20Poly1305Data = XSalsa20Poly1305Data::from(bytes);
    /// Encrypt
-   let encrypted_data = encrypt_parcel(data, recipient)?;
+   let encrypted_data = ed_25519_x_salsa20_poly1305_encrypt(agent_info()?.agent_latest_pubkey, recipient, data)?;
    /// Done
    let item = PendingItem {
       kind,
@@ -64,32 +66,6 @@ fn create_pending_parcel(
       author_signature,
    };
    Ok(item)
-}
-
-
-/// Encrypt some data with my encryption key and the recipient's public encryption key
-/// called from post_commit()
-fn encrypt_parcel(
-   data: XSalsa20Poly1305Data,
-   recipient: AgentPubKey,
-) -> ExternResult<XSalsa20Poly1305EncryptedData> {
-   /// Get my key
-   trace!("get_enc_key() for sender {:?}", agent_info()?.agent_latest_pubkey);
-   let response = call_self("get_enc_key", agent_info()?.agent_latest_pubkey)?;
-   trace!("get_enc_key() for sender result: {:?}", response);
-   let sender_key: X25519PubKey = decode_response(response)?;
-   trace!("PendingItem: sender_key found");
-   /// Get recipient's key
-   trace!("get_enc_key() for recipient {:?}", recipient);
-   let response = call_self("get_enc_key", recipient.clone())?;
-   trace!("get_enc_key() for recipient result: {:?}", response);
-   let recipient_key: X25519PubKey = decode_response(response)?;
-   trace!("PendingItem: recipient_key found");
-   /// Encrypt
-   let encrypted_data = x_25519_x_salsa20_poly1305_encrypt(sender_key, recipient_key, data)
-      .expect("Encryption should work");
-   //trace!("Encrypted: {:?}", encrypted_data.clone());
-   Ok(encrypted_data)
 }
 
 

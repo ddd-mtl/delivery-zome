@@ -228,14 +228,6 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('notify_new_public_parcel', input);
   }
 
-  async getEncKey(from: AgentPubKey): Promise<Uint8Array> {
-    return this.call('get_enc_key', from);
-  }
-
-  async getMyEncKey(): Promise<Uint8Array> {
-    return this.call('get_my_enc_key', null);
-  }
-
   async publishChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
     return this.call('publish_chunks', chunks);
   }

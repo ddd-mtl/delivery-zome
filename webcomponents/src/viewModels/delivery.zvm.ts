@@ -205,7 +205,6 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** */
     async initializePerspectiveOffline(): Promise<void> {
-        this._perspective.myPubEncKey = await this.zomeProxy.getMyEncKey();
         await this.queryAll();
         await this.scanProblems();
     }
@@ -308,18 +307,6 @@ export class DeliveryZvm extends ZomeViewModel {
             dataB64 += chunk.data;
         }
         return dataB64;
-    }
-
-
-    /** */
-    async probeEncKey(from: AgentPubKeyB64): Promise<Uint8Array> {
-        const key = await this.zomeProxy.getEncKey(decodeHashFromBase64(from));
-        const maybe = this._perspective.encKeys[from];
-        if (!maybe && encodeHashToBase64(maybe) != encodeHashToBase64(key)) {
-            this._perspective.encKeys[from] = key;
-            this.notifySubscribers();
-        }
-        return key;
     }
 
 

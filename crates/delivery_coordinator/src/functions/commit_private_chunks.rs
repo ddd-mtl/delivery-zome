@@ -5,7 +5,6 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 
 
-/// Batch call to commit_parcel_chunk()
 /// WARN: Make sure input does not exceed websocket packet max size limit.
 #[hdk_extern]
 pub fn commit_private_chunks(chunks: Vec<ParcelChunk>) -> ExternResult<Vec<EntryHash>> {
