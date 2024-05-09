@@ -51,6 +51,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"respond_to_notice",
 	"scan_incomplete_manifests",
 	"scan_orphan_chunks",
+	"remove_public_parcel",
 	"fetch_chunk",];
 
 

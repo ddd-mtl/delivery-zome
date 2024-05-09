@@ -316,6 +316,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('scan_orphan_chunks', null);
   }
 
+  async removePublicParcel(ppEh: EntryHash): Promise<ActionHash> {
+    return this.call('remove_public_parcel', ppEh);
+  }
+
   async fetchChunk(input: FetchChunkInput): Promise<[ParcelChunk, Link | null] | null> {
     return this.call('fetch_chunk', input);
   }
