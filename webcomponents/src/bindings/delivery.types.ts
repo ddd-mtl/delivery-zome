@@ -475,7 +475,7 @@ export type DeliveryProtocolVariantParcelRequest = {ParcelRequest: ActionHash}
 export type DeliveryProtocolVariantParcelResponse = {ParcelResponse: Entry}
 export type DeliveryProtocolVariantChunkRequest = {ChunkRequest: EntryHash}
 export type DeliveryProtocolVariantChunkResponse = {ChunkResponse: ParcelChunk}
-export type DeliveryProtocolVariantPublicParcelPublished = {PublicParcelPublished: [Timestamp, ParcelReference, AgentPubKey]}
+export type DeliveryProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
 export type DeliveryProtocolVariantPing = {Ping: null}
 export type DeliveryProtocolVariantPong = {Pong: null}
 export type DeliveryProtocol = 
@@ -521,6 +521,6 @@ export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timesta
 export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
 export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [Timestamp, ParcelReference, AgentPubKey]}
+export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
 export type SignalProtocol = 
  | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;

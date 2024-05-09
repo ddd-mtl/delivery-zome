@@ -2,7 +2,7 @@ import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import { DnaElement } from "@ddd-qc/lit-happ";
 import { SecretDvm } from "../viewModels/secret.dvm";
-import {AgentPubKeyB64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
+import {AgentPubKeyB64, decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {SecretPerspective} from "../viewModels/secret.zvm";
 
 
@@ -160,7 +160,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     const secretOptions = Object.values(this._senderSecrets).map(
       (secretEh) => {
         //console.log("" + index + ". " + agentIdB64)
-        return html `<option value="${secretEh}">${secretEh.slice(-5)}</option>`
+        return html `<option value=${secretEh}>${secretEh.slice(-5)}</option>`
       }
     )
 
@@ -171,10 +171,11 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     //   }
     // )
 
-    const ppLi = Object.values(this._dvm.perspective.publicMessages).map(
-      (msg) => {
+    const ppLi = Object.entries(this._dvm.perspective.publicMessages).map(
+      ([ppEh, msg]) => {
         //console.log("" + index + ". " + agentIdB64)
-        return html`<li>${msg}</li>`
+        const prEh = decodeHashFromBase64(this._dvm.deliveryZvm.perspective.publicParcels[ppEh][0]);
+        return html`<li>${msg} <button style="margin-left:20px" @click=${(e:any) => this._dvm.deliveryZvm.zomeProxy.removePublicParcel(prEh)}>Remove</button></li>`
       }
     )
 

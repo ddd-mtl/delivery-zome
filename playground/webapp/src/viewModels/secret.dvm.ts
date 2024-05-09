@@ -72,7 +72,7 @@ export class SecretDvm extends DnaViewModel {
 
     if (SignalProtocolType.NewPublicParcel in deliverySignal) {
       console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[1].eh);
+      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[2].eh);
       this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
         this._perspective.publicMessages[ppEh] = msg;
         this.notifySubscribers();
@@ -84,9 +84,10 @@ export class SecretDvm extends DnaViewModel {
   /** */
   async probePublicMessages(): Promise<Dictionary<string>> {
     let publicMessages: Dictionary<string> = {};
+    await this.deliveryZvm.probeDht();
     const pds = Object.entries(this.deliveryZvm.perspective.publicParcels);
     console.log("probePublicMessages() PublicParcels count", Object.entries(pds).length);
-    for (const [ppEh, pd] of pds) {
+    for (const [ppEh, tuple] of pds) {
       publicMessages[ppEh] = await this.deliveryZvm.getParcelData(ppEh);
     }
     this._perspective.publicMessages = publicMessages;

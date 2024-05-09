@@ -28,8 +28,10 @@ export interface DeliveryPerspective {
     /** -- -- */
     inbox: ActionHashB64[],
 
-    /** pp_eh -> ParcelDescription */
-    publicParcels: Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>,
+    /** pp_eh -> (ParcelReferenceEh, ParcelDescription, ...)  */
+    publicParcels: Dictionary<[EntryHashB64, ParcelDescription, Timestamp, AgentPubKeyB64]>,
+    /** pr_eh -> pp_eh  */
+    //parcelReferences: Dictionary<EntryHashB64>,
 
     /** Parcels */
     /** manifest_eh -> (ParcelManifest, timestamp) */

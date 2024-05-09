@@ -244,7 +244,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('pull_inbox', null);
   }
 
-  async pullPublicParcels(): Promise<[ParcelReference, Timestamp, AgentPubKey][]> {
+  async pullPublicParcels(): Promise<[EntryHash, ParcelReference, Timestamp, AgentPubKey][]> {
     return this.call('pull_public_parcels', null);
   }
 
@@ -316,8 +316,8 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('scan_orphan_chunks', null);
   }
 
-  async removePublicParcel(ppEh: EntryHash): Promise<ActionHash> {
-    return this.call('remove_public_parcel', ppEh);
+  async removePublicParcel(prEh: EntryHash): Promise<ActionHash> {
+    return this.call('remove_public_parcel', prEh);
   }
 
   async fetchChunk(input: FetchChunkInput): Promise<[ParcelChunk, Link | null] | null> {

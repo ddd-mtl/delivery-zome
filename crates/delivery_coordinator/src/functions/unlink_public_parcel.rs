@@ -17,8 +17,8 @@ use zome_delivery_types::ParcelReference;
 
 ///
 #[hdk_extern]
-pub fn remove_public_parcel(pp_eh: EntryHash) -> ExternResult<ActionHash> {
-   let Some(record) = get(pp_eh, GetOptions::network())? else {
+pub fn remove_public_parcel(pr_eh: EntryHash) -> ExternResult<ActionHash> {
+   let Some(record) = get(pr_eh, GetOptions::network())? else {
       return error("No entry found at EntryHash");
    };
    /// Make sure its the correct entry type

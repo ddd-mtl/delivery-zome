@@ -12,7 +12,7 @@ pub fn post_commit_PublicParcel(sah: &SignedActionHashed, entry: Entry, eh: &Ent
    let _response = call_self("link_public_parcel", eh)?;
    //let _ah: ActionHash = decode_response(response)?;
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::NewPublicParcel((sah.hashed.content.timestamp(), parcel_reference, agent_info()?.agent_latest_pubkey)));
+   let res = emit_signal(&SignalProtocol::NewPublicParcel((eh.to_owned(), sah.hashed.content.timestamp(), parcel_reference, agent_info()?.agent_latest_pubkey)));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }

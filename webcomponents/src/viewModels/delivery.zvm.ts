@@ -189,11 +189,12 @@ export class DeliveryZvm extends ZomeViewModel {
         }
         if (SignalProtocolType.NewPublicParcel in deliverySignal) {
             console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-            const author = deliverySignal.NewPublicParcel[2];
-            const pr = deliverySignal.NewPublicParcel[1];
-            const ts = deliverySignal.NewPublicParcel[0];
+            const author = deliverySignal.NewPublicParcel[3];
+            const pr = deliverySignal.NewPublicParcel[2];
+            const ts = deliverySignal.NewPublicParcel[1];
+            const pr_eh = deliverySignal.NewPublicParcel[0];
             const parcel_eh = encodeHashToBase64(pr.eh);
-            this._perspective.publicParcels[parcel_eh] = [pr.description, ts, encodeHashToBase64(author)];
+            this._perspective.publicParcels[parcel_eh] = [encodeHashToBase64(pr_eh), pr.description, ts, encodeHashToBase64(author)];
         }
         /** Done */
         this.notifySubscribers();
@@ -264,10 +265,12 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    private async probePublicParcels(denyNotify?: boolean): Promise<Dictionary<[ParcelDescription, Timestamp, AgentPubKeyB64]>> {
+    private async probePublicParcels(denyNotify?: boolean): Promise<Dictionary<[EntryHashB64, ParcelDescription, Timestamp, AgentPubKeyB64]>> {
         const prs = await this.zomeProxy.pullPublicParcels();
         this._perspective.publicParcels = {};
-        prs.map(([pr, ts, author]) => this._perspective.publicParcels[encodeHashToBase64(pr.eh)] = [pr.description, ts, encodeHashToBase64(author)]);
+        prs.map(([pr_eh, pr, ts, author]) => {
+            this._perspective.publicParcels[encodeHashToBase64(pr.eh)] = [encodeHashToBase64(pr_eh), pr.description, ts, encodeHashToBase64(author)];
+        });
         if (denyNotify == undefined) this.notifySubscribers();
         return this._perspective.publicParcels;
     }
@@ -510,7 +513,7 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     async getAllPublicManifest(): Promise<[ParcelManifestMat, Timestamp, AgentPubKeyB64][]> {
         const manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][] = [];
-        for (const [parcelEh, [desc, ts, author]] of Object.entries(this._perspective.publicParcels)) {
+        for (const [parcelEh, [prEh, desc, ts, author]] of Object.entries(this._perspective.publicParcels)) {
             const [manifest, _ts2] = await this.getManifest(parcelEh, true);
             manifests.push([materializeParcelManifest(manifest), ts, author]);
         }
