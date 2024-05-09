@@ -19,6 +19,7 @@ mod notify_new_public_parcel;
 mod scan_incomplete_manifests;
 mod scan_orphan_chunks;
 mod determine_missing_chunks;
+mod unlink_public_parcel;
 
 
 pub use get_distribution_state::*;
