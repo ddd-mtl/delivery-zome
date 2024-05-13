@@ -75,3 +75,14 @@ pub struct NotifyInput {
    pub timestamp: Timestamp,
    pub removed: bool,
 }
+
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PublicParcelRecord {
+   pub pr_eh: EntryHash,
+   pub pp_eh: EntryHash,
+   pub description: ParcelDescription,
+   pub creation_ts: Timestamp,
+   pub author: AgentPubKey,
+   pub deleteInfo: Option<(Timestamp, AgentPubKey)>,
+}

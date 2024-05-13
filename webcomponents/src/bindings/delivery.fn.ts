@@ -34,7 +34,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"publish_manifest",
 	"pull_inbox",
 	"pull_public_parcels",
-	"pull_removed_public_parcels",
+	"pull_public_parcels_details",
 	"get_parcel_ref",
 	"query_all_Distribution",
 	"query_all_DeliveryNotice",

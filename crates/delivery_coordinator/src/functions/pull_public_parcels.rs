@@ -23,26 +23,32 @@ pub fn pull_public_parcels(_:()) -> ExternResult<Vec<(EntryHash, ParcelReference
 
 
 #[hdk_extern]
-pub fn pull_removed_public_parcels(_:()) -> ExternResult<Vec<(EntryHash, Timestamp, Timestamp, AgentPubKey)>> {
+pub fn pull_public_parcels_details(_:()) -> ExternResult<Vec<PublicParcelRecord>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let anchor = public_parcels_path().path_entry_hash()?;
 
-
    let links = get_link_details(anchor, LinkTypes::PublicParcels, None, GetOptions::network())?;
-   debug!(" pull_removed_public_parcels: {:?}", links);
+   debug!(" pull_public_parcels_details: {:?}", links);
 
-   let res: Vec<(EntryHash, Timestamp, Timestamp, AgentPubKey)> = links.clone().into_inner().into_iter()
-     .filter(|(create, maybe_deletes)| maybe_deletes.len() > 0)
+   let res: Vec<PublicParcelRecord> = links.clone().into_inner().into_iter()
      .map(|(create_sah, maybe_deletes)| {
        let Action::CreateLink(create) = create_sah.hashed.content else { panic!("get_link_details() should return a CreateLink Action")};
-       let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content else { panic!("get_link_details() should return a DeleteLink Action")};
-       let eh = EntryHash::try_from(create.target_address).unwrap();
-       (eh, create.timestamp, delete.timestamp, delete.author)
+       let pr_eh = EntryHash::try_from(create.target_address).unwrap();
+       let Ok(Some(Details::Entry(details))) = get_details(pr_eh.clone(), GetOptions::network())
+         else { return None };
+       let Ok(pr) = ParcelReference::try_from(details.entry)
+         else { return None };
+       let mut deleteInfo = None;
+       if maybe_deletes.len() > 0 {
+         let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content else { panic!("get_link_details() should return a DeleteLink Action") };
+         deleteInfo = Some((delete.timestamp, delete.author));
+       }
+       return Some(PublicParcelRecord {pr_eh, pp_eh: pr.eh, description: pr.description, creation_ts: create.timestamp, author: create.author, deleteInfo});
      })
-     .collect();
+     .flatten().collect();
 
    debug!(" links count: {}", links.into_inner().len());
-   debug!(" res count: {}", res.len());
+   debug!("   res count: {}", res.len());
    /// Done
    Ok(res)
 }

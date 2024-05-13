@@ -2,8 +2,16 @@ import {
     DeliveryNotice,
     DeliveryState,
     Distribution,
-    DistributionState, NoticeAck,
-    NoticeReply, NoticeState, ParcelDescription, ParcelManifest, ReceptionAck, ReceptionProof, ReplyAck,
+    DistributionState,
+    NoticeAck,
+    NoticeReply,
+    NoticeState,
+    ParcelDescription,
+    ParcelManifest,
+    PublicParcelRecord,
+    ReceptionAck,
+    ReceptionProof,
+    ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary} from "@ddd-qc/lit-happ";
 import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, decodeHashFromBase64, EntryHashB64, Timestamp} from "@holochain/client";
@@ -19,6 +27,16 @@ import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, decodeHashFromBase64,
 //     return {distribution_state: {Unsent: null}, delivery_states];
 // }
 
+/** */
+export interface PublicParcelRecordMat {
+    prEh: EntryHashB64,
+    ppEh: EntryHashB64,
+    description: ParcelDescription,
+    creationTs: Timestamp,
+    author: AgentPubKeyB64,
+    deleteInfo?: [Timestamp, AgentPubKeyB64],
+}
+
 
 /** */
 export interface DeliveryPerspective {
@@ -29,8 +47,7 @@ export interface DeliveryPerspective {
     inbox: ActionHashB64[],
 
     /** pp_eh -> (pr_eh, ParcelDescription, ...)  */
-    publicParcels: Dictionary<[EntryHashB64, ParcelDescription, Timestamp, AgentPubKeyB64]>,
-    publicParcelsRemoved: Dictionary<[EntryHashB64, ParcelDescription, Timestamp, Timestamp, AgentPubKeyB64]>,
+    publicParcels: Dictionary<PublicParcelRecordMat>,
     /** pr_eh -> pp_eh */
     parcelReferences: Dictionary<EntryHashB64>
 
@@ -83,7 +100,6 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         encKeys: {},
         inbox: [],
         publicParcels: {},
-        publicParcelsRemoved: {},
         parcelReferences: {},
         privateManifests: {},
         localPublicManifests: {},
@@ -132,5 +148,30 @@ export function dematerializeParcelManifest(pm: ParcelManifestMat): ParcelManife
         description: pm.description,
         data_hash: pm.data_hash,
         chunks,
+    }
+}
+
+
+
+export function materializePublicParcelRecord(ppr: PublicParcelRecord): PublicParcelRecordMat {
+    return {
+        prEh: encodeHashToBase64(ppr.pr_eh),
+        ppEh: encodeHashToBase64(ppr.pp_eh),
+        description: ppr.description,
+        creationTs: ppr.creation_ts,
+        author: encodeHashToBase64(ppr.author),
+        deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], encodeHashToBase64(ppr.deleteInfo[1])] : undefined,
+    }
+}
+
+
+export function dematerializePublicParcelRecord(ppr: PublicParcelRecordMat): PublicParcelRecord {
+    return {
+        pr_eh: decodeHashFromBase64(ppr.prEh),
+        pp_eh: decodeHashFromBase64(ppr.ppEh),
+        description: ppr.description,
+        creation_ts: ppr.creationTs,
+        author: decodeHashFromBase64(ppr.author),
+        deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], decodeHashFromBase64(ppr.deleteInfo[1])] : undefined,
     }
 }

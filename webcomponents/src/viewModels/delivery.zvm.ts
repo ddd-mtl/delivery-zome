@@ -21,8 +21,8 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
 import {
     createDeliveryPerspective,
     DeliveryPerspective,
-    materializeParcelManifest,
-    ParcelManifestMat
+    materializeParcelManifest, materializePublicParcelRecord,
+    ParcelManifestMat, PublicParcelRecordMat
 } from "./delivery.perspective";
 
 
@@ -194,7 +194,7 @@ export class DeliveryZvm extends ZomeViewModel {
             const ts = deliverySignal.NewPublicParcel[1];
             const prEh = encodeHashToBase64(deliverySignal.NewPublicParcel[0]);
             const ppEh = encodeHashToBase64(pr.eh);
-            this._perspective.publicParcels[ppEh] = [prEh, pr.description, ts, encodeHashToBase64(author)];
+            this._perspective.publicParcels[ppEh] = {prEh, ppEh, description: pr.description, creationTs: ts, author: encodeHashToBase64(author)};
             this._perspective.parcelReferences[prEh] = ppEh;
         }
         if (SignalProtocolType.RemovedPublicParcel in deliverySignal) {
@@ -202,16 +202,14 @@ export class DeliveryZvm extends ZomeViewModel {
             const author = deliverySignal.RemovedPublicParcel[3];
             const pr = deliverySignal.RemovedPublicParcel[2];
             const del_ts = deliverySignal.RemovedPublicParcel[1];
-            const pr_eh = deliverySignal.RemovedPublicParcel[0];
-            const parcel_eh = encodeHashToBase64(pr.eh);
-            const created = this._perspective.publicParcels[parcel_eh];
-            let create_ts = 0;
+            //const pr_eh = deliverySignal.RemovedPublicParcel[0];
+            const ppEh = encodeHashToBase64(pr.eh);
+            const created = this._perspective.publicParcels[ppEh];
             if (created) {
-                create_ts = created[2];
+                this._perspective.publicParcels[ppEh].deleteInfo = [del_ts, encodeHashToBase64(author)];
             } else {
-                console.warn("Unknown Removed PublicParcel", parcel_eh);
+                console.warn("Unknown Removed PublicParcel", ppEh);
             }
-            this._perspective.publicParcelsRemoved[parcel_eh] = [encodeHashToBase64(pr_eh), pr.description, create_ts, del_ts, encodeHashToBase64(author)];
         }
         /** Done */
         this.notifySubscribers();
@@ -274,48 +272,49 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     async probeDht(denyNotify?: boolean): Promise<void> {
         const pds = await this.probePublicParcels(true);
-        const rems = await this.probePublicParcelsRemoved(true);
+        //const rems = await this.probePublicParcelsRemoved(true);
         await this.probeInbox(true);
         this._perspective.probeDhtCount += 1;
         if (denyNotify == undefined) this.notifySubscribers();
-        console.log(`probeDht: ${this._perspective.probeDhtCount} | PublicParcels count: ${Object.entries(pds).length} | Removed count: ${Object.entries(rems).length}`);
+        console.log(`probeDht: ${this._perspective.probeDhtCount} | PublicParcels count: ${Object.entries(pds).length}`);
     }
 
 
     /** */
-    private async probePublicParcels(denyNotify?: boolean): Promise<Dictionary<[EntryHashB64, ParcelDescription, Timestamp, AgentPubKeyB64]>> {
-        const prs = await this.zomeProxy.pullPublicParcels();
+    private async probePublicParcels(denyNotify?: boolean): Promise<Dictionary<PublicParcelRecordMat>> {
+        const prs = await this.zomeProxy.pullPublicParcelsDetails();
         this._perspective.publicParcels = {};
-        prs.map(([pr_eh, pr, ts, author]) => {
-            this._perspective.publicParcels[encodeHashToBase64(pr.eh)] = [encodeHashToBase64(pr_eh), pr.description, ts, encodeHashToBase64(author)];
-            this._perspective.parcelReferences[encodeHashToBase64(pr_eh)] = encodeHashToBase64(pr.eh);
+        prs.map((ppr) => {
+            const pprm = materializePublicParcelRecord(ppr);
+            this._perspective.publicParcels[pprm.ppEh] = pprm;
+            this._perspective.parcelReferences[pprm.prEh] = pprm.ppEh;
         });
         if (denyNotify == undefined) this.notifySubscribers();
         return this._perspective.publicParcels;
     }
 
 
-    /** */
-    private async probePublicParcelsRemoved(denyNotify?: boolean): Promise<Dictionary<[EntryHashB64, ParcelDescription, Timestamp, Timestamp, AgentPubKeyB64]>> {
-        const prs = await this.zomeProxy.pullRemovedPublicParcels();
-        this._perspective.publicParcelsRemoved = {};
-        prs.map(async ([pr_eh, create_ts, del_ts, author]) => {
-            const prEh = encodeHashToBase64(pr_eh);
-            let pd = undefined;
-            let ppEh = this._perspective.parcelReferences[prEh];
-            if (ppEh && this._perspective.publicParcels[ppEh]) {
-                const tuple = this._perspective.publicParcels[ppEh];
-                pd = tuple[1];
-            } else {
-                const pr = await this.zomeProxy.getParcelRef(pr_eh);
-                pd = pr!.description;
-            }
-            this._perspective.publicParcelsRemoved[ppEh] = [prEh, pd, create_ts, del_ts, encodeHashToBase64(author)];
-            this._perspective.parcelReferences[prEh] = ppEh;
-        });
-        if (denyNotify == undefined) this.notifySubscribers();
-        return this._perspective.publicParcelsRemoved;
-    }
+    // /** */
+    // private async probePublicParcelsRemoved(denyNotify?: boolean): Promise<Dictionary<[EntryHashB64, ParcelDescription, Timestamp, Timestamp, AgentPubKeyB64]>> {
+    //     const prs = await this.zomeProxy.pullRemovedPublicParcels();
+    //     this._perspective.publicParcelsRemoved = {};
+    //     prs.map(async ([pr_eh, create_ts, del_ts, author]) => {
+    //         const prEh = encodeHashToBase64(pr_eh);
+    //         let pd = undefined;
+    //         let ppEh = this._perspective.parcelReferences[prEh];
+    //         if (ppEh && this._perspective.publicParcels[ppEh]) {
+    //             const tuple = this._perspective.publicParcels[ppEh];
+    //             pd = tuple[1];
+    //         } else {
+    //             const pr = await this.zomeProxy.getParcelRef(pr_eh);
+    //             pd = pr!.description;
+    //         }
+    //         this._perspective.publicParcelsRemoved[ppEh] = [prEh, pd, create_ts, del_ts, encodeHashToBase64(author)];
+    //         this._perspective.parcelReferences[prEh] = ppEh;
+    //     });
+    //     if (denyNotify == undefined) this.notifySubscribers();
+    //     return this._perspective.publicParcelsRemoved;
+    // }
 
 
     /** */
@@ -555,9 +554,12 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     async getAllPublicManifest(): Promise<[ParcelManifestMat, Timestamp, AgentPubKeyB64][]> {
         const manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][] = [];
-        for (const [parcelEh, [prEh, desc, ts, author]] of Object.entries(this._perspective.publicParcels)) {
+        for (const [parcelEh, pprm] of Object.entries(this._perspective.publicParcels)) {
+            if (pprm.deleteInfo) {
+                continue;
+            }
             const [manifest, _ts2] = await this.getManifest(parcelEh, true);
-            manifests.push([materializeParcelManifest(manifest), ts, author]);
+            manifests.push([materializeParcelManifest(manifest), pprm.creationTs, pprm.author]);
         }
         this.notifySubscribers();
         return manifests;

@@ -174,16 +174,23 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     const ppLi = Object.entries(this._dvm.perspective.publicMessages).map(
       ([ppEh, msg]) => {
         //console.log("" + index + ". " + agentIdB64)
-        const prEh = decodeHashFromBase64(this._dvm.deliveryZvm.perspective.publicParcels[ppEh][0]);
+        const pprm = this._dvm.deliveryZvm.perspective.publicParcels[ppEh];
+        if (pprm.deleteInfo) {
+          return html``;
+        }
+        const prEh = decodeHashFromBase64(pprm.prEh);
         return html`<li>${msg} <button style="margin-left:20px" @click=${(e:any) => this._dvm.deliveryZvm.zomeProxy.removePublicParcel(prEh)}>Remove</button></li>`
       }
     )
 
-    const remLi = Object.entries(this._dvm.deliveryZvm.perspective.publicParcelsRemoved).map(
-      ([ppEh, tuple]) => {
-        console.log("remLi:", tuple);
+    const remLi = Object.entries(this._dvm.deliveryZvm.perspective.publicParcels).map(
+      ([ppEh, pprm]) => {
+        console.log("remLi:", pprm.deleteInfo);
+        if (!pprm.deleteInfo) {
+          return html``;
+        }
         //const prEh = decodeHashFromBase64(this._dvm.deliveryZvm.perspective.publicParcels[ppEh][0]);
-        const msg = `[${tuple[3]}] ${tuple[1].name}`
+        const msg = `[${pprm.deleteInfo[0]}] ${pprm.description.name} | by ${pprm.deleteInfo[1]}`
         return html`<li>${msg}</li>`
       }
     )

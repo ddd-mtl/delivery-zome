@@ -401,6 +401,15 @@ export interface NotifyInput {
   removed: boolean
 }
 
+export interface PublicParcelRecord {
+  pr_eh: EntryHash
+  pp_eh: EntryHash
+  description: ParcelDescription
+  creation_ts: Timestamp
+  author: AgentPubKey
+  deleteInfo?: [Timestamp, AgentPubKey]
+}
+
 /** Dna properties */
 export interface DeliveryProperties {
   maxChunkSize: number
