@@ -1,3 +1,4 @@
+use std::hash::Hash;
 use hdk::prelude::*;
 use zome_utils::*;
 
@@ -5,7 +6,7 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 use crate::*;
 
-///
+
 /// Get All public Parcels
 #[hdk_extern]
 pub fn pull_public_parcels(_:()) -> ExternResult<Vec<(EntryHash, ParcelReference, Timestamp, AgentPubKey)>> {
@@ -18,4 +19,40 @@ pub fn pull_public_parcels(_:()) -> ExternResult<Vec<(EntryHash, ParcelReference
    debug!(" pps count: {}", pps.len());
    /// Done
    Ok(pps)
+}
+
+
+#[hdk_extern]
+pub fn pull_removed_public_parcels(_:()) -> ExternResult<Vec<(EntryHash, Timestamp, Timestamp, AgentPubKey)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   let anchor = public_parcels_path().path_entry_hash()?;
+
+
+   let links = get_link_details(anchor, LinkTypes::PublicParcels, None, GetOptions::network())?;
+   debug!(" pull_removed_public_parcels: {:?}", links);
+
+   let res: Vec<(EntryHash, Timestamp, Timestamp, AgentPubKey)> = links.clone().into_inner().into_iter()
+     .filter(|(create, maybe_deletes)| maybe_deletes.len() > 0)
+     .map(|(create_sah, maybe_deletes)| {
+       let Action::CreateLink(create) = create_sah.hashed.content else { panic!("get_link_details() should return a CreateLink Action")};
+       let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content else { panic!("get_link_details() should return a DeleteLink Action")};
+       let eh = EntryHash::try_from(create.target_address).unwrap();
+       (eh, create.timestamp, delete.timestamp, delete.author)
+     })
+     .collect();
+
+   debug!(" links count: {}", links.into_inner().len());
+   debug!(" res count: {}", res.len());
+   /// Done
+   Ok(res)
+}
+
+
+#[hdk_extern]
+pub fn get_parcel_ref(pr_eh : EntryHash) -> ExternResult<Option<ParcelReference>> {
+  let wtf = get_details(pr_eh, GetOptions::network())?;
+  let Some(Details::Entry(details)) = wtf
+    else {return Ok(None)};
+  let typed = ParcelReference::try_from(details.entry)?;
+  Ok(Some(typed))
 }

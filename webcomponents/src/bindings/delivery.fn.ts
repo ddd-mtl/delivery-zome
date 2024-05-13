@@ -28,12 +28,14 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"get_notice",
 	"get_parcel_notice",
 	"get_notice_state",
-	"notify_new_public_parcel",
+	"notify_public_parcel",
 	"publish_chunks",
 	"publish_chunk",
 	"publish_manifest",
 	"pull_inbox",
 	"pull_public_parcels",
+	"pull_removed_public_parcels",
+	"get_parcel_ref",
 	"query_all_Distribution",
 	"query_all_DeliveryNotice",
 	"query_DeliveryNotice",
@@ -48,10 +50,10 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"query_all_public_manifests",
 	"query_all_public_chunks",
 	"query_all_private_chunks",
+	"remove_public_parcel",
 	"respond_to_notice",
 	"scan_incomplete_manifests",
 	"scan_orphan_chunks",
-	"remove_public_parcel",
 	"fetch_chunk",];
 
 

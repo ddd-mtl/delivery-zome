@@ -179,6 +179,14 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
       }
     )
 
+    const remLi = Object.entries(this._dvm.deliveryZvm.perspective.publicParcelsRemoved).map(
+      ([ppEh, tuple]) => {
+        console.log("remLi:", tuple);
+        //const prEh = decodeHashFromBase64(this._dvm.deliveryZvm.perspective.publicParcels[ppEh][0]);
+        const msg = `[${tuple[3]}] ${tuple[1].name}`
+        return html`<li>${msg}</li>`
+      }
+    )
 
     /** render all */
     return html`
@@ -215,9 +223,9 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
         </h2>
         <hr/>
         <h2>Public messages</h2>
-        <ul>
-            ${ppLi}
-        </ul>  
+        <ul>${ppLi}</ul>
+        <h2>Removed Public messages</h2>
+        <ul>${remLi}</ul>
       </div>
     `;
   }

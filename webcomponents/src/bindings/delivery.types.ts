@@ -398,6 +398,7 @@ export interface NotifyInput {
   peers: AgentPubKey[]
   pr: ParcelReference
   timestamp: Timestamp
+  removed: boolean
 }
 
 /** Dna properties */
@@ -465,6 +466,7 @@ export enum DeliveryProtocolType {
 	ChunkRequest = 'ChunkRequest',
 	ChunkResponse = 'ChunkResponse',
 	PublicParcelPublished = 'PublicParcelPublished',
+	PublicParcelRemoved = 'PublicParcelRemoved',
 	Ping = 'Ping',
 	Pong = 'Pong',
 }
@@ -476,10 +478,11 @@ export type DeliveryProtocolVariantParcelResponse = {ParcelResponse: Entry}
 export type DeliveryProtocolVariantChunkRequest = {ChunkRequest: EntryHash}
 export type DeliveryProtocolVariantChunkResponse = {ChunkResponse: ParcelChunk}
 export type DeliveryProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type DeliveryProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
 export type DeliveryProtocolVariantPing = {Ping: null}
 export type DeliveryProtocolVariantPong = {Pong: null}
 export type DeliveryProtocol = 
- | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantPublicParcelPublished | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
+ | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantPublicParcelPublished | DeliveryProtocolVariantPublicParcelRemoved | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
 
 export interface FullDistributionState {
   distribution_state: DistributionState
@@ -509,6 +512,7 @@ export enum SignalProtocolType {
 	NewReceptionAck = 'NewReceptionAck',
 	NewPendingItem = 'NewPendingItem',
 	NewPublicParcel = 'NewPublicParcel',
+	RemovedPublicParcel = 'RemovedPublicParcel',
 }
 export type SignalProtocolVariantNewLocalManifest = {NewLocalManifest: [EntryHash, Timestamp, ParcelManifest]}
 export type SignalProtocolVariantNewLocalChunk = {NewLocalChunk: [EntryHash, ParcelChunk]}
@@ -522,5 +526,6 @@ export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryH
 export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
 export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type SignalProtocolVariantRemovedPublicParcel = {RemovedPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
 export type SignalProtocol = 
- | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel;
+ | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel | SignalProtocolVariantRemovedPublicParcel;

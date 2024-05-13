@@ -28,10 +28,12 @@ export interface DeliveryPerspective {
     /** -- -- */
     inbox: ActionHashB64[],
 
-    /** pp_eh -> (ParcelReferenceEh, ParcelDescription, ...)  */
+    /** pp_eh -> (pr_eh, ParcelDescription, ...)  */
     publicParcels: Dictionary<[EntryHashB64, ParcelDescription, Timestamp, AgentPubKeyB64]>,
-    /** pr_eh -> pp_eh  */
-    //parcelReferences: Dictionary<EntryHashB64>,
+    publicParcelsRemoved: Dictionary<[EntryHashB64, ParcelDescription, Timestamp, Timestamp, AgentPubKeyB64]>,
+    /** pr_eh -> pp_eh */
+    parcelReferences: Dictionary<EntryHashB64>
+
 
     /** Parcels */
     /** manifest_eh -> (ParcelManifest, timestamp) */
@@ -81,6 +83,8 @@ export function createDeliveryPerspective(): DeliveryPerspective {
         encKeys: {},
         inbox: [],
         publicParcels: {},
+        publicParcelsRemoved: {},
+        parcelReferences: {},
         privateManifests: {},
         localPublicManifests: {},
         localManifestByData: {},

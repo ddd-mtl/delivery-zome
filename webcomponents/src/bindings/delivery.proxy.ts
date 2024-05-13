@@ -224,8 +224,8 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_notice_state', noticeEh);
   }
 
-  async notifyNewPublicParcel(input: NotifyInput): Promise<void> {
-    return this.call('notify_new_public_parcel', input);
+  async notifyPublicParcel(input: NotifyInput): Promise<void> {
+    return this.call('notify_public_parcel', input);
   }
 
   async publishChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
@@ -246,6 +246,14 @@ export class DeliveryProxy extends ZomeProxy {
 
   async pullPublicParcels(): Promise<[EntryHash, ParcelReference, Timestamp, AgentPubKey][]> {
     return this.call('pull_public_parcels', null);
+  }
+
+  async pullRemovedPublicParcels(): Promise<[EntryHash, Timestamp, Timestamp, AgentPubKey][]> {
+    return this.call('pull_removed_public_parcels', null);
+  }
+
+  async getParcelRef(prEh: EntryHash): Promise<ParcelReference | null> {
+    return this.call('get_parcel_ref', prEh);
   }
 
   async queryAllDistribution(): Promise<[ActionHash, Timestamp, Distribution][]> {
@@ -304,6 +312,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_all_private_chunks', null);
   }
 
+  async removePublicParcel(prEh: EntryHash): Promise<ActionHash> {
+    return this.call('remove_public_parcel', prEh);
+  }
+
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {
     return this.call('respond_to_notice', input);
   }
@@ -314,10 +326,6 @@ export class DeliveryProxy extends ZomeProxy {
 
   async scanOrphanChunks(): Promise<[EntryHash[], EntryHash[]]> {
     return this.call('scan_orphan_chunks', null);
-  }
-
-  async removePublicParcel(prEh: EntryHash): Promise<ActionHash> {
-    return this.call('remove_public_parcel', prEh);
   }
 
   async fetchChunk(input: FetchChunkInput): Promise<[ParcelChunk, Link | null] | null> {

@@ -15,11 +15,11 @@ mod publish_chunks;
 mod pull_public_parcels;
 mod get_manifest;
 mod complete_manifest;
-mod notify_new_public_parcel;
+mod notify_public_parcel;
 mod scan_incomplete_manifests;
 mod scan_orphan_chunks;
 mod determine_missing_chunks;
-mod unlink_public_parcel;
+mod remove_public_parcel;
 
 
 pub use get_distribution_state::*;
@@ -39,7 +39,7 @@ pub use self::{
    get_delivery_state::*,
    publish_manifest::*,
    publish_chunks::*,
-   notify_new_public_parcel::*,
+   notify_public_parcel::*,
    scan_incomplete_manifests::*,
    determine_missing_chunks::*,
 };

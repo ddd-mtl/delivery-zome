@@ -398,6 +398,7 @@ export interface NotifyInput {
   peers: AgentPubKey[]
   pr: ParcelReference
   timestamp: Timestamp
+  removed: boolean
 }
 
 /** Dna properties */

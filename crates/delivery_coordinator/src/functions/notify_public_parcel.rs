@@ -5,13 +5,18 @@ use zome_delivery_types::*;
 use crate::{DeliveryProtocol, send_dm_signal};
 
 
-/// Notify other agents that a new Parcel has been shared publicly
+/// Notify other agents that a Public Parcel has been shared or removed publicly
 #[hdk_extern]
-pub fn notify_new_public_parcel(input: NotifyInput) -> ExternResult<()> {
+pub fn notify_public_parcel(input: NotifyInput) -> ExternResult<()> {
     debug!("peer count: {}", input.peers.len());
     std::panic::set_hook(Box::new(zome_panic_hook));
     let eh = hash_entry(input.pr.clone())?;
-    let msg = DeliveryProtocol::PublicParcelPublished((eh, input.timestamp, input.pr, agent_info()?.agent_latest_pubkey));
+    let tuple = (eh, input.timestamp, input.pr, agent_info()?.agent_latest_pubkey);
+    let msg = if input.removed {
+        DeliveryProtocol::PublicParcelRemoved(tuple)
+    } else {
+        DeliveryProtocol::PublicParcelPublished(tuple)
+    };
     for peer in input.peers {
         let _ = send_dm_signal(peer, msg.clone());
     }

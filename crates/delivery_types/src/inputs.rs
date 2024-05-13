@@ -73,4 +73,5 @@ pub struct NotifyInput {
    pub peers: Vec<AgentPubKey>,
    pub pr: ParcelReference,
    pub timestamp: Timestamp,
+   pub removed: bool,
 }
