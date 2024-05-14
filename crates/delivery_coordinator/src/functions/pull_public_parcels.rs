@@ -1,4 +1,3 @@
-use std::hash::Hash;
 use hdk::prelude::*;
 use zome_utils::*;
 

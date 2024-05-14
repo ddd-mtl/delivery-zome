@@ -37,10 +37,10 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    /// Commit chunks
    let mut chunks = Vec::new();
    for word in split {
-      let response = call_delivery_zome("commit_parcel_chunk", ParcelChunk{data_hash: data_hash.clone(), data: word.to_string()})?;
-      let eh: EntryHash = decode_response(response)?;
-      chunks.push(eh);
+      chunks.push(ParcelChunk{data_hash: data_hash.clone(), data: word.to_string()});
    }
+   let response = call_delivery_zome("commit_private_chunks", chunks)?;
+   let chunk_ehs: Vec<EntryHash> = decode_response(response)?;
 
    let description = ParcelDescription {
      name: "".to_string(),
@@ -53,7 +53,7 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
    let manifest = ParcelManifest {
       data_hash,
       description,
-      chunks,
+      chunks: chunk_ehs,
    };
    let response = call_delivery_zome("commit_private_manifest", manifest)?;
    let eh: EntryHash = decode_response(response)?;
@@ -112,17 +112,17 @@ pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
       "query_DeliveryNotice",
       DeliveryNoticeQueryField::Sender(sender),
    )?;
-   let notices: Vec<DeliveryNotice> = decode_response(response)?;
+   let notices: Vec<(DeliveryNotice, Timestamp)> = decode_response(response)?;
 
    let mut parcels: Vec<EntryHash> = Vec::new();
-   for notice in notices {
+   for (notice, _ts) in notices {
       let notice_eh = hash_entry(notice)?;
       let response = call_delivery_zome(
          "query_ReceptionProof",
          ReceptionProofQueryField::Notice(notice_eh),
       )?;
-      let maybe_reception: Option<(EntryHash, ReceptionProof)> = decode_response(response)?;
-      if let Some((_reception_eh, reception)) = maybe_reception {
+      let maybe_reception: Option<(EntryHash, Timestamp, ReceptionProof)> = decode_response(response)?;
+      if let Some((_reception_eh, _ts, reception)) = maybe_reception {
          parcels.push(reception.parcel_eh);
       }
    }

@@ -53,7 +53,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
          EntryType::CapGrant => {},
          EntryType::App(app_entry_def) => {
             let result = post_commit_app_entry(&sah, eh, app_entry_def);
-            debug!(" << post_commit() result = {:?}", result);
+            debug!("<< post_commit() result = {:?}", result);
          },
       }
    }
@@ -62,7 +62,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
 
 ///
 fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
-   debug!(" >> post_commit_app_entry() called for a {:?}", app_entry_def);
+   debug!(">> post_commit_app_entry() called for a {:?}", app_entry_def);
    /// Get Entry from local chain
    // let monad: HashSet<EntryHash> = HashSet::from([eh.clone()]);
    // let query_args = ChainQueryFilter::default()
@@ -75,7 +75,7 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
    //
    let entry = must_get_entry(eh.clone())?.content;
 
-   debug!("    post_commit_app_entry() entry found");
+   debug!("post_commit_app_entry() entry found");
    //let entry = records[0].entry().as_option().unwrap().to_owned();
    /// Deserialize it and call its post_commit()
    let Entry::App(ref entry_bytes) = entry
@@ -87,6 +87,7 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
 
    // let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes.clone())?;
    let variant = entry_index_to_variant(app_entry_def.entry_index)?;
+   debug!("post_commit_app_entry() variant: {:?}", variant);
    match variant {
       /// Send/Receive/Ack Notice
       DeliveryEntryTypes::Distribution => post_commit_Distribution(sah, entry, eh),

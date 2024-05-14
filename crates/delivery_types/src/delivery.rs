@@ -158,7 +158,7 @@ impl ParcelKind {
    pub fn entry_index(&self) -> EntryDefIndex {
       match self {
          ParcelKind::AppEntry(entry_index) => entry_index.to_owned(),
-         ParcelKind::Manifest(_) => EntryDefIndex::from(6), // FIXME should not be hardcoded: DeliveryEntryTypes::ParcelManifest
+         ParcelKind::Manifest(_) => EntryDefIndex::from(5), // FIXME should not be hardcoded: DeliveryEntryTypes::ParcelManifest
       }
    }
 }

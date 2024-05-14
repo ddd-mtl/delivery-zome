@@ -49,8 +49,9 @@ pub fn query_all_DeliveryNotice(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp
 ///Find DeliveryNotice with field with given value
 #[hdk_extern]
 pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResult<Vec<(DeliveryNotice, Timestamp)>> {
-   //debug!("*** query_DeliveryNotice() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
+   debug!("query_DeliveryNotice() CALLED with {:?}", query_field);
+
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<DeliveryNotice>(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap())?;
    let len = tuples.len();
@@ -82,7 +83,8 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
          }
       }
    }
-   debug!("*** query_DeliveryNotice() found {} notice(s) ", len);
+   debug!("query_DeliveryNotice() found {} notice(s) ", len);
+   //debug!("query_DeliveryNotice() res {:?}", res);
    /// Done
    Ok(res)
 }
@@ -217,11 +219,11 @@ pub fn query_all_ReceptionProof(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp
 ///Find ReceptionProof with field with given value
 #[hdk_extern]
 pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Option<(EntryHash, Timestamp, ReceptionProof)>> {
-   //debug!("*** query_ReceptionProof() CALLED with {:?}", field);
+   debug!("*** query_ReceptionProof() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create ReceptionProof Elements with query
    let tuples = get_all_typed_local::<ReceptionProof>(DeliveryEntryTypes::ReceptionProof.try_into().unwrap())?;
-   //debug!("*** query_ReceptionProof() CALLED with {:?}", field);
+   //debug!("*** query_ReceptionProof() tuples: {:?}", tuples.clone());
    /// Search through query result
    match field {
       ReceptionProofQueryField::Notice(eh) => {

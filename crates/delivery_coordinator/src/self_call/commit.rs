@@ -10,7 +10,7 @@ use zome_delivery_types::*;
 pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: Option<ActionHash>)
    -> ExternResult<ActionHash>
 {
-
+   debug!("call_commit_parcel() notice = {:?}", notice);
    let input = CommitParcelInput {
       zome_index: notice.summary.parcel_reference.description.zome_index(),
       entry_index: notice.summary.parcel_reference.description.kind_info.entry_index(),
@@ -136,6 +136,7 @@ fn commit_NoticeAck(ack: NoticeAck) -> ExternResult<ActionHash> {
 #[hdk_extern]
 fn commit_ReceptionProof(pr: ReceptionProof) -> ExternResult<EntryHash> {
    std::panic::set_hook(Box::new(zome_panic_hook));
+   debug!("commit_ReceptionProof() pr = {:?}", pr);
    let eh = hash_entry(pr.clone())?;
    let _hh = create_entry_relaxed(DeliveryEntry::ReceptionProof(pr))?;
    return Ok(eh);

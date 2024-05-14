@@ -54,6 +54,7 @@ pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(Ent
          parcel_eh: manifest_eh.clone(),
       };
       let reception_proof_eh = hash_entry(reception_proof.clone())?;
+      debug!("complete_manifest() reception_proof = {:?}", reception_proof);
       let _ah = create_entry_relaxed(DeliveryEntry::ReceptionProof(reception_proof.clone()))?;
       res.push((notice_eh, Ok(reception_proof_eh)));
    }

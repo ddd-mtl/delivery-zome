@@ -33,7 +33,15 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
             if let Err(err) = res.clone() {
                 error!("Emit signal failed: {}", err);
             }
-            /** DOnt care */
+            /** Dont care */
+            return Ok(DeliveryProtocol::Pong);
+        }
+        DeliveryProtocol::PublicParcelRemoved(tuple) => {
+            let res = emit_signal(&SignalProtocol::RemovedPublicParcel(tuple));
+            if let Err(err) = res.clone() {
+                error!("Emit signal failed: {}", err);
+            }
+            /** Dont care */
             return Ok(DeliveryProtocol::Pong);
         }
         DeliveryProtocol::Item(pending_item) => {
