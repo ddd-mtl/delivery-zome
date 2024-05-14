@@ -7,11 +7,12 @@ use zome_delivery_integrity::*;
 fn init_caps() -> ExternResult<()> {
    let mut functions = BTreeSet::new();
    functions.insert((zome_info()?.name, REMOTE_ENDPOINT.into()));
+   functions.insert((zome_info()?.name, "recv_remote_signal".into()));
    create_cap_grant(
       CapGrantEntry {
          tag: "".into(),
          access: ().into(), // empty access converts to unrestricted
-         functions: hdk::prelude::GrantedFunctions::Listed(functions),
+         functions: GrantedFunctions::Listed(functions),
       }
    )?;
    Ok(())

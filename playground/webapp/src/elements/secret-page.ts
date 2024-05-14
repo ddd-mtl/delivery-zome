@@ -4,6 +4,7 @@ import { DnaElement } from "@ddd-qc/lit-happ";
 import { SecretDvm } from "../viewModels/secret.dvm";
 import {AgentPubKeyB64, decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {SecretPerspective} from "../viewModels/secret.zvm";
+import {ParcelReference} from "@ddd-qc/delivery";
 
 
 /**
@@ -72,6 +73,13 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     }
     let res = await this._dvm.publishMessage(textInput.value);
     console.log("onPublishMessage() res:", res);
+    /** Notify peers that we published something */
+    const pr = {description: res[1].description, eh: decodeHashFromBase64(res[0])} as ParcelReference;
+    const timestamp = Date.now();
+    const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
+    console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
+    this._dvm.deliveryZvm.zomeProxy.notifyPublicParcel({peers, timestamp, pr, removed: false});
+    /** */
     textInput.value = "";
   }
 
@@ -148,7 +156,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     }
 
     //const secrets = this._dvm.secretZvm.secrets;
-    let agents: AgentPubKeyB64[] = this._dvm.AgentDirectoryZvm.perspective.agents;
+    let agents: AgentPubKeyB64[] = this._dvm.agentDirectoryZvm.perspective.agents;
 
     const AgentOptions = Object.entries(agents).map(
       ([_index, agentIdB64]) => {
@@ -179,13 +187,21 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
           return html``;
         }
         const prEh = decodeHashFromBase64(pprm.prEh);
-        return html`<li>${msg} <button style="margin-left:20px" @click=${(e:any) => this._dvm.deliveryZvm.zomeProxy.removePublicParcel(prEh)}>Remove</button></li>`
+        return html`<li>${msg} <button style="margin-left:20px" @click=${async (e:any) => {
+          const res = await this._dvm.deliveryZvm.zomeProxy.removePublicParcel(prEh);
+            /** Notify peers that we published something */
+            const pr = {description: pprm.description, eh: decodeHashFromBase64(ppEh)} as ParcelReference;
+            const timestamp = Date.now();
+            const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
+            console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
+            this._dvm.deliveryZvm.zomeProxy.notifyPublicParcel({peers, timestamp, pr, removed: true});
+        }}>Remove</button></li>`
       }
     )
 
     const remLi = Object.entries(this._dvm.deliveryZvm.perspective.publicParcels).map(
       ([ppEh, pprm]) => {
-        console.log("remLi:", pprm.deleteInfo);
+        //console.log("remLi:", pprm.deleteInfo);
         if (!pprm.deleteInfo) {
           return html``;
         }

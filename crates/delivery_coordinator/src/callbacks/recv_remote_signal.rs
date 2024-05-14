@@ -1,6 +1,4 @@
 use hdk::prelude::*;
-//use zome_delivery_types::*;
-//use zome_delivery_integrity::*;
 use crate::*;
 
 ///

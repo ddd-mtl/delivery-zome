@@ -46,10 +46,10 @@ pub fn send_dm_signal(destination: AgentPubKey, msg: DeliveryProtocol) -> Extern
    /// Prepare payload
    let dm_packet = DirectMessage { from: me, msg: msg.clone() };
    /// Call peer
-   debug!("calling remote recv_remote_signal()");
+   debug!("calling remote recv_remote_signal() to {}", destination);
    trace!("dm = '{}'", msg);
    send_remote_signal(
-      &dm_packet,
+      ExternIO::encode(dm_packet).unwrap(),
       vec![destination],
    )?;
    debug!("calling remote recv_remote_signal() DONE");

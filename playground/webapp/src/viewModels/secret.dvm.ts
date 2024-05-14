@@ -32,7 +32,7 @@ export class SecretDvm extends DnaViewModel {
   /** QoL Helpers */
   get secretZvm(): SecretZvm {return this.getZomeViewModel(SecretZvm.DEFAULT_ZOME_NAME) as SecretZvm}
   get deliveryZvm(): DeliveryZvm {return this.getZomeViewModel("zDelivery") as DeliveryZvm}
-  get AgentDirectoryZvm(): AgentDirectoryZvm {return this.getZomeViewModel("zAgentDirectory") as AgentDirectoryZvm}
+  get agentDirectoryZvm(): AgentDirectoryZvm {return this.getZomeViewModel("zAgentDirectory") as AgentDirectoryZvm}
 
 
   /** -- ViewModel Interface -- */
@@ -73,10 +73,15 @@ export class SecretDvm extends DnaViewModel {
     if (SignalProtocolType.NewPublicParcel in deliverySignal) {
       console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
       const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[2].eh);
-      this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
-        this._perspective.publicMessages[ppEh] = msg;
-        this.notifySubscribers();
-      })
+      const from = encodeHashToBase64(deliverySignal.NewPublicParcel[3]);
+      if (from != this.cell.agentPubKey) {
+        this.probeAll();
+      } else {
+        this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
+          this._perspective.publicMessages[ppEh] = msg;
+          this.notifySubscribers();
+        })
+      }
     }
   }
 
@@ -97,11 +102,10 @@ export class SecretDvm extends DnaViewModel {
 
 
   /** */
-  async publishMessage(message: string): Promise<EntryHashB64> {
+  async publishMessage(message: string): Promise<[EntryHashB64, ParcelManifest]> {
    const data_hash = message; // should be an actual hash, but we don't care in this example code.
    const chunk_ehs = await this.deliveryZvm.zomeProxy.publishChunks([{data_hash, data: message}]);
-   const eh = await this.deliveryZvm.zomeProxy.publishManifest(
-    {
+   const manifest =     {
      data_hash,
      chunks: [chunk_ehs[0]],
      description: {
@@ -110,8 +114,9 @@ export class SecretDvm extends DnaViewModel {
        kind_info: {Manifest: "public_secret"},
        name: message[0],
        visibility: {Public: null}
-    },
-   });
-   return encodeHashToBase64(eh);
+     },
+   };
+   const eh = await this.deliveryZvm.zomeProxy.publishManifest(manifest);
+   return [encodeHashToBase64(eh), manifest];
   }
 }
