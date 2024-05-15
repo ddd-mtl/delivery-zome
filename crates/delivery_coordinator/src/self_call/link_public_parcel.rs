@@ -10,6 +10,7 @@ pub fn link_public_parcel(parcel_ref_eh: EntryHash) -> ExternResult<ActionHash> 
    let path = public_parcels_path();
    path.ensure()?;
    let anchor_eh = path.path_entry_hash()?;
+   debug!("link_public_parcel() {} | {}", parcel_ref_eh, anchor_eh);
    let ah = create_link(anchor_eh, parcel_ref_eh.clone(), LinkTypes::PublicParcels, LinkTag::from(()))?;
    Ok(ah)
 }

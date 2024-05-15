@@ -4,7 +4,7 @@ import {
     ActionHashB64,
     AgentPubKeyB64, AppSignalCb,
     decodeHashFromBase64,
-    encodeHashToBase64, EntryHash, EntryHashB64, Timestamp
+    encodeHashToBase64, EntryHashB64, Timestamp
 } from "@holochain/client";
 import {
     DeliveryNotice,
@@ -13,7 +13,7 @@ import {
     DistributionState,
     DistributionStateType,
     NoticeState,
-    NoticeStateType, ParcelDescription, ParcelManifest,
+    NoticeStateType, ParcelManifest,
     SignalProtocol,
     SignalProtocolType,
 } from "../bindings/delivery.types";
@@ -276,7 +276,7 @@ export class DeliveryZvm extends ZomeViewModel {
         await this.probeInbox(true);
         this._perspective.probeDhtCount += 1;
         if (denyNotify == undefined) this.notifySubscribers();
-        console.log(`probeDht: ${this._perspective.probeDhtCount} | PublicParcels count: ${Object.entries(pds).length}`);
+        console.log(`probeDht[${this._perspective.probeDhtCount}] PublicParcels count: ${Object.entries(pds).length}`);
     }
 
 
