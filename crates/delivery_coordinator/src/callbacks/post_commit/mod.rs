@@ -41,7 +41,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each Action
    for sah in signedActionList {
-      debug!(" - {:?}", sah.action().entry_type());
+      debug!(" - {}", sah.action());
       let action = sah.action();
       if action.entry_type().is_none() {
          continue;
