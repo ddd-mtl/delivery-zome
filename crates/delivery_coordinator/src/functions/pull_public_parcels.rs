@@ -31,7 +31,7 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<Vec<PublicParcelRecord>
   debug!(" pull_public_parcels_details() get_links = {}", links0.len());
 
   let links = get_link_details(anchor_eh, LinkTypes::PublicParcels, None, GetOptions::network())?;
-  debug!(" pull_public_parcels_details() get_link_details = {}", links.len());
+  debug!(" pull_public_parcels_details() get_link_details = {}", links.clone().into_inner().len());
 
    let res: Vec<PublicParcelRecord> = links.clone().into_inner().into_iter()
      .map(|(create_sah, maybe_deletes)| {
