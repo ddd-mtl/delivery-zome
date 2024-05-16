@@ -53,7 +53,11 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
          EntryType::CapGrant => {},
          EntryType::App(app_entry_def) => {
             let result = post_commit_app_entry(&sah, eh, app_entry_def);
-            debug!("<< post_commit() result = {:?}", result);
+            if let Err(e) = result {
+               error!("<< post_commit() failed: {:?}", e);
+            } else {
+               debug!("<< post_commit() SUCCEEDED");
+            }
          },
       }
    }
