@@ -26,13 +26,8 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<Vec<PublicParcelRecord>
   std::panic::set_hook(Box::new(zome_panic_hook));
   let anchor_eh = public_parcels_path().path_entry_hash()?;
   debug!("pull_public_parcels_details() {}", anchor_eh);
-
-  let links0 = get_links(link_input(anchor_eh.clone(), LinkTypes::PublicParcels, None))?;
-  debug!(" pull_public_parcels_details() get_links = {}", links0.len());
-
   let links = get_link_details(anchor_eh, LinkTypes::PublicParcels, None, GetOptions::network())?;
-  debug!(" pull_public_parcels_details() get_link_details = {}", links.clone().into_inner().len());
-
+  //debug!(" pull_public_parcels_details() get_link_details = {}", links.clone().into_inner().len());
    let res: Vec<PublicParcelRecord> = links.clone().into_inner().into_iter()
      .map(|(create_sah, maybe_deletes)| {
        let Action::CreateLink(create) = create_sah.hashed.content else { panic!("get_link_details() should return a CreateLink Action")};
