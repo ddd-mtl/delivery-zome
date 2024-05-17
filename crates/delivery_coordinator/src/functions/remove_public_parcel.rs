@@ -7,6 +7,7 @@ use crate::public_parcels_path;
 
 ///
 #[hdk_extern]
+#[feature(zits_blocking)]
 pub fn remove_public_parcel(pr_eh: EntryHash) -> ExternResult<ActionHash> {
    let Some(record) = get(pr_eh.clone(), GetOptions::network())? else {
       return error("No entry found at EntryHash");
