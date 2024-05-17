@@ -7,6 +7,7 @@ use zome_delivery_integrity::*;
 
 /// WARN: Make sure input does not exceed websocket packet max size limit.
 #[hdk_extern]
+#[feature(zits_blocking)]
 pub fn commit_private_chunks(chunks: Vec<ParcelChunk>) -> ExternResult<Vec<EntryHash>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("chunks count: {}", chunks.len());

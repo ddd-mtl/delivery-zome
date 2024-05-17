@@ -418,6 +418,54 @@ export interface DeliveryProperties {
   minParcelNameLength: number
 }
 
+/** Protocol for notifying the ViewModel (UI) */
+export enum SystemSignalProtocolType {
+	PostCommitStart = 'PostCommitStart',
+	PostCommitEnd = 'PostCommitEnd',
+	SelfCallStart = 'SelfCallStart',
+	SelfCallEnd = 'SelfCallEnd',
+}
+export type SystemSignalProtocolVariantPostCommitStart = {PostCommitStart: string}
+export type SystemSignalProtocolVariantPostCommitEnd = {PostCommitEnd: [string, boolean]}
+export type SystemSignalProtocolVariantSelfCallStart = {SelfCallStart: [string, string]}
+export type SystemSignalProtocolVariantSelfCallEnd = {SelfCallEnd: [string, string, boolean]}
+export type SystemSignalProtocol = 
+ | SystemSignalProtocolVariantPostCommitStart | SystemSignalProtocolVariantPostCommitEnd | SystemSignalProtocolVariantSelfCallStart | SystemSignalProtocolVariantSelfCallEnd;
+
+/** Protocol for notifying the ViewModel (UI) */
+export enum SignalProtocolType {
+	System = 'System',
+	NewLocalManifest = 'NewLocalManifest',
+	NewLocalChunk = 'NewLocalChunk',
+	ReceivedChunk = 'ReceivedChunk',
+	NewDistribution = 'NewDistribution',
+	NewNotice = 'NewNotice',
+	NewNoticeAck = 'NewNoticeAck',
+	NewReply = 'NewReply',
+	NewReplyAck = 'NewReplyAck',
+	NewReceptionProof = 'NewReceptionProof',
+	NewReceptionAck = 'NewReceptionAck',
+	NewPendingItem = 'NewPendingItem',
+	NewPublicParcel = 'NewPublicParcel',
+	RemovedPublicParcel = 'RemovedPublicParcel',
+}
+export type SignalProtocolVariantSystem = {System: SystemSignalProtocol}
+export type SignalProtocolVariantNewLocalManifest = {NewLocalManifest: [EntryHash, Timestamp, ParcelManifest]}
+export type SignalProtocolVariantNewLocalChunk = {NewLocalChunk: [EntryHash, ParcelChunk]}
+export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
+export type SignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Timestamp, Distribution]}
+export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, Timestamp, DeliveryNotice]}
+export type SignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, Timestamp, NoticeAck]}
+export type SignalProtocolVariantNewReply = {NewReply: [EntryHash, Timestamp, NoticeReply]}
+export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timestamp, ReplyAck]}
+export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
+export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
+export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
+export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type SignalProtocolVariantRemovedPublicParcel = {RemovedPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type SignalProtocol = 
+ | SignalProtocolVariantSystem | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel | SignalProtocolVariantRemovedPublicParcel;
+
 export interface SendSecretInput {
   secret_eh: EntryHash
   strategy: DistributionStrategy

@@ -32,6 +32,7 @@ pub use public_parcel::*;
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::*;
+use zome_delivery_types::{SignalProtocol, SystemSignalProtocol};
 
 
 /// Zome Callback
@@ -41,7 +42,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each Action
    for sah in signedActionList {
-      debug!(" - {}", sah.action());
+      //debug!(" - {}", sah.action());
       let action = sah.action();
       if action.entry_type().is_none() {
          continue;
@@ -52,7 +53,10 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
          EntryType::CapClaim => {},
          EntryType::CapGrant => {},
          EntryType::App(app_entry_def) => {
+            let variantName = format!("{:?}", entry_index_to_variant(app_entry_def.entry_index).unwrap());
+            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitStart(variantName.clone())));
             let result = post_commit_app_entry(&sah, eh, app_entry_def);
+            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitEnd((variantName, result.is_ok()))));
             if let Err(e) = result {
                error!("<< post_commit() failed: {:?}", e);
             } else {
@@ -67,6 +71,8 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
 ///
 fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
    debug!(">> post_commit_app_entry() called for a {:?}", app_entry_def);
+   let variant = entry_index_to_variant(app_entry_def.entry_index)?;
+
    /// Get Entry from local chain
    // let monad: HashSet<EntryHash> = HashSet::from([eh.clone()]);
    // let query_args = ChainQueryFilter::default()
@@ -90,8 +96,8 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
    // let entry_kind = EntryKind::from_index(&app_entry_def.id());
 
    // let delivery_zome_entry = entry_kind.into_zome_entry(entry_bytes.clone())?;
-   let variant = entry_index_to_variant(app_entry_def.entry_index)?;
-   debug!("post_commit_app_entry() variant: {:?}", variant);
+
+
    match variant {
       /// Send/Receive/Ack Notice
       DeliveryEntryTypes::Distribution => post_commit_Distribution(sah, entry, eh),

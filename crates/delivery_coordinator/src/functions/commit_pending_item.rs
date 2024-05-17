@@ -6,6 +6,7 @@ use zome_delivery_types::*;
 
 
 #[hdk_extern]
+#[feature(zits_blocking)]
 fn commit_pending_item(input: CommitPendingItemInput) -> ExternResult<ActionHash> {
    debug!("START");
    std::panic::set_hook(Box::new(zome_panic_hook));

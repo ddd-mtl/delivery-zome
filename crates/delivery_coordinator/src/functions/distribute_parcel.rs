@@ -9,6 +9,7 @@ use crate::*;
 /// Create & Commit Distribution Entry.
 /// It will try to send deliveryNotice during its post_commit().
 #[hdk_extern]
+#[feature(zits_blocking)]
 pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<ActionHash> {
    debug!("START: {:?}", input);
    std::panic::set_hook(Box::new(zome_panic_hook));

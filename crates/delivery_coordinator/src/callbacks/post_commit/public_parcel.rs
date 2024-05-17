@@ -1,7 +1,6 @@
 use hdk::prelude::*;
 use zome_utils::{call_self, decode_response};
 use zome_delivery_types::*;
-use crate::SignalProtocol;
 
 
 ///

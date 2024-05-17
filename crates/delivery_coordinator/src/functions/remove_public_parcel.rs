@@ -1,8 +1,7 @@
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::LinkTypes;
-use zome_delivery_types::ParcelReference;
-use crate::SignalProtocol;
+use zome_delivery_types::{ParcelReference, SignalProtocol};
 use crate::public_parcels_path;
 
 

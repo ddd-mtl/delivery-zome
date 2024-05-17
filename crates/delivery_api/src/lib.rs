@@ -16,13 +16,16 @@ pub fn call_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCall
    where
       I: Serialize + Debug,
 {
-   return call(
+   let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::SelfCallStart((DELIVERY_ZOME_NAME.to_owned(), fn_name.to_owned()))));
+   let res = call(
       CallTargetCell::Local,
       ZomeName::from(DELIVERY_ZOME_NAME),
       fn_name.to_string().into(),
       None,
       payload,
    );
+   let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::SelfCallEnd((DELIVERY_ZOME_NAME.to_owned(), fn_name.to_owned(), res.is_ok()))));
+   res
 }
 
 
