@@ -1,13 +1,14 @@
 use hdi::prelude::*;
 use crate::*;
 
-/// Protocol for notifying the ViewModel (UI)
+/// Protocol for notifying the ViewModel (UI) of system level events
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type", rename_all = "camelCase")]
 pub enum SystemSignalProtocol {
-    PostCommitStart(String), // EntryType
-    PostCommitEnd((String, bool)), // EntryType, Succeedded
-    SelfCallStart((String, String)), // ZomeName, FunctionName
-    SelfCallEnd((String, String, bool)), // ZomeName, FunctionName, Succeedded
+    PostCommitStart {entry_type: String},
+    PostCommitEnd {entry_type: String, succeeded: bool},
+    SelfCallStart {zome_name: String, fn_name: String},
+    SelfCallEnd {zome_name: String, fn_name: String, succeeded: bool},
 }
 
 /// Protocol for notifying the ViewModel (UI)

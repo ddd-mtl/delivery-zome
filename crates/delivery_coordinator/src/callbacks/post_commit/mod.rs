@@ -53,10 +53,10 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
          EntryType::CapClaim => {},
          EntryType::CapGrant => {},
          EntryType::App(app_entry_def) => {
-            let variantName = format!("{:?}", entry_index_to_variant(app_entry_def.entry_index).unwrap());
-            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitStart(variantName.clone())));
+            let variant_name = format!("{:?}", entry_index_to_variant(app_entry_def.entry_index).unwrap());
+            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitStart {entry_type: variant_name.clone()}));
             let result = post_commit_app_entry(&sah, eh, app_entry_def);
-            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitEnd((variantName, result.is_ok()))));
+            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitEnd {entry_type: variant_name, succeeded: result.is_ok()}));
             if let Err(e) = result {
                error!("<< post_commit() failed: {:?}", e);
             } else {

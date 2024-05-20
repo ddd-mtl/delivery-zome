@@ -313,7 +313,7 @@ export class DeliveryProxy extends ZomeProxy {
   }
 
   async removePublicParcel(prEh: EntryHash): Promise<ActionHash> {
-    return this.call('remove_public_parcel', prEh);
+    return this.callBlocking('remove_public_parcel', prEh);
   }
 
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {

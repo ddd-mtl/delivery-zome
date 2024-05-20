@@ -418,19 +418,32 @@ export interface DeliveryProperties {
   minParcelNameLength: number
 }
 
-/** Protocol for notifying the ViewModel (UI) */
-export enum SystemSignalProtocolType {
-	PostCommitStart = 'PostCommitStart',
-	PostCommitEnd = 'PostCommitEnd',
-	SelfCallStart = 'SelfCallStart',
-	SelfCallEnd = 'SelfCallEnd',
+/** Protocol for notifying the ViewModel (UI) of system level events */
+export type SystemSignalProtocolVariantPostCommitStart = {
+  type: "PostCommitStart"
+  entryType: string
 }
-export type SystemSignalProtocolVariantPostCommitStart = {PostCommitStart: string}
-export type SystemSignalProtocolVariantPostCommitEnd = {PostCommitEnd: [string, boolean]}
-export type SystemSignalProtocolVariantSelfCallStart = {SelfCallStart: [string, string]}
-export type SystemSignalProtocolVariantSelfCallEnd = {SelfCallEnd: [string, string, boolean]}
-export type SystemSignalProtocol = 
- | SystemSignalProtocolVariantPostCommitStart | SystemSignalProtocolVariantPostCommitEnd | SystemSignalProtocolVariantSelfCallStart | SystemSignalProtocolVariantSelfCallEnd;
+export type SystemSignalProtocolVariantPostCommitEnd = {
+  type: "PostCommitEnd"
+  entryType: string
+  succeeded: boolean
+}
+export type SystemSignalProtocolVariantSelfCallStart = {
+  type: "SelfCallStart"
+  zomeName: string
+  fnName: string
+}
+export type SystemSignalProtocolVariantSelfCallEnd = {
+  type: "SelfCallEnd"
+  zomeName: string
+  fnName: string
+  succeeded: boolean
+}
+export type SystemSignalProtocol =
+  | SystemSignalProtocolVariantPostCommitStart
+  | SystemSignalProtocolVariantPostCommitEnd
+  | SystemSignalProtocolVariantSelfCallStart
+  | SystemSignalProtocolVariantSelfCallEnd;
 
 /** Protocol for notifying the ViewModel (UI) */
 export enum SignalProtocolType {
