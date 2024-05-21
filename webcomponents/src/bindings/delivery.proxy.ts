@@ -237,7 +237,7 @@ export class DeliveryProxy extends ZomeProxy {
   }
 
   async publishManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
-    return this.call('publish_manifest', manifestArg);
+    return this.callZomeBlockPostCommit('PublicParcel','publish_manifest', manifestArg);
   }
 
   async pullInbox(): Promise<ActionHash[]> {

@@ -421,22 +421,22 @@ export interface DeliveryProperties {
 /** Protocol for notifying the ViewModel (UI) of system level events */
 export type SystemSignalProtocolVariantPostCommitStart = {
   type: "PostCommitStart"
-  entryType: string
+  entry_type: string
 }
 export type SystemSignalProtocolVariantPostCommitEnd = {
   type: "PostCommitEnd"
-  entryType: string
+  entry_type: string
   succeeded: boolean
 }
 export type SystemSignalProtocolVariantSelfCallStart = {
   type: "SelfCallStart"
-  zomeName: string
-  fnName: string
+  zome_name: string
+  fn_name: string
 }
 export type SystemSignalProtocolVariantSelfCallEnd = {
   type: "SelfCallEnd"
-  zomeName: string
-  fnName: string
+  zome_name: string
+  fn_name: string
   succeeded: boolean
 }
 export type SystemSignalProtocol =

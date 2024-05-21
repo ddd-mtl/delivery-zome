@@ -7,8 +7,9 @@ use crate::determine_parcel_size;
 
 ///
 #[hdk_extern]
+#[feature(zits_blocking = "PublicParcel")]
 pub fn publish_manifest(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
-   trace!(" START - {}", manifest_arg.description.name);
+   debug!(" START - {}", manifest_arg.description.name);
    std::panic::set_hook(Box::new(zome_panic_hook));
    if manifest_arg.chunks.is_empty() {
       return error("No chunks in Manifest");
