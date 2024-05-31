@@ -11,13 +11,13 @@ import {DeliveryPerspective} from "../viewModels/delivery.perspective";
  */
 @customElement("delivery-dashboard")
 export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, DeliveryZvm>  {
-    /** */
+
     constructor() {
         super(DeliveryZvm.DEFAULT_ZOME_NAME)
     }
 
-    /** -- Fields -- */
     @state() private _initialized = false;
+
 
     /** After first render only */
     async firstUpdated() {
@@ -36,6 +36,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
       link.click();
       URL.revokeObjectURL(url);
     }
+
 
     /** */
     render() {

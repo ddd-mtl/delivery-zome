@@ -43,7 +43,8 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<Vec<PublicParcelRecord>
        }
        return Some(PublicParcelRecord {pr_eh, pp_eh: pr.eh, description: pr.description, creation_ts: create.timestamp, author: create.author, deleteInfo});
      })
-     .flatten().collect();
+     .flatten()
+     .collect();
 
    debug!(" links count: {}", links.into_inner().len());
    debug!("   res count: {}", res.len());
