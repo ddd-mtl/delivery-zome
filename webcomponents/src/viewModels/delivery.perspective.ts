@@ -16,16 +16,6 @@ import {
 import {Dictionary} from "@ddd-qc/lit-happ";
 import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, decodeHashFromBase64, EntryHashB64, Timestamp} from "@holochain/client";
 
-/** [DistributionState, AgentPubKey -> DeliveryState] */
-//export type FullDistributionState = [DistributionState, Dictionary<DeliveryState>];
-
-
-// /** */
-// export function createFds(distribution: Distribution): FullDistributionState {
-//     let delivery_states: Dictionary<DeliveryState> = {};
-//     distribution.recipients.map((recipient) => delivery_states[encodeHashToBase64(recipient)] = {Unsent: null});
-//     return {distribution_state: {Unsent: null}, delivery_states];
-// }
 
 /** */
 export interface PublicParcelRecordMat {
@@ -38,11 +28,20 @@ export interface PublicParcelRecordMat {
 }
 
 
-/** */
-export interface DeliveryPerspective {
-    /** AgentPubKey -> PubEncKey */
-    encKeys: Dictionary<Uint8Array>,
+export type DeliveryPerspective = DeliveryPerspectiveCore & DeliveryPerspectiveLive;
 
+/** */
+export interface DeliveryPerspectiveLive {
+    probeDhtCount: number,
+    /** -- PROBLEMS -- */
+    orphanPublicChunks: EntryHashB64[],
+    orphanPrivateChunks: EntryHashB64[],
+    //incompleteManifests: EntryHashB64[],
+}
+
+
+/** */
+export interface DeliveryPerspectiveCore {
     /** -- -- */
     inbox: ActionHashB64[],
 
@@ -60,11 +59,6 @@ export interface DeliveryPerspective {
     localManifestByData: Dictionary<[EntryHashB64, boolean]>,
     // /** data_hash -> number of chunks on chain */
     // chunkCounts: Dictionary<number>,
-
-    /** -- PROBLEMS -- */
-    orphanPublicChunks: EntryHashB64[],
-    orphanPrivateChunks: EntryHashB64[],
-    //incompleteManifests: EntryHashB64[],
 
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
@@ -85,16 +79,12 @@ export interface DeliveryPerspective {
     replies: Dictionary<NoticeReply>,
     /** notice_eh -> ReceptionProof */
     receptions: Dictionary<[ReceptionProof, Timestamp]>,
-
-    /** -- META -- */
-    probeDhtCount: number,
 }
 
 
 /** */
 export function createDeliveryPerspective(): DeliveryPerspective {
     return {
-        encKeys: {},
         inbox: [],
         publicParcels: {},
         parcelReferences: {},

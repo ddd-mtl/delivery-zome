@@ -8,14 +8,12 @@ import {
 } from "@holochain/client";
 import {
     DeliveryGossipProtocolType,
-    DeliveryNotice, DeliverySignal,
+    DeliveryNotice, DeliverySignal, DeliverySignalProtocol, DeliverySignalProtocolType,
     DeliveryState,
     Distribution,
     DistributionState,
     NoticeState,
     ParcelManifest,
-    SignalProtocol,
-    SignalProtocolType,
 } from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 import {
@@ -65,26 +63,23 @@ export class DeliveryZvm extends ZomeViewModel {
         if (!("signal" in sig)) {
             return;
         }
-        const deliverySignal = sig.signal;
-        if (SignalProtocolType.NewLocalManifest in deliverySignal) {
+        for (const signal of sig.signal) {
+            /*await*/ this.handleDeliverySignal(signal, encodeHashToBase64(sig.from));
+        }
+        this.notifySubscribers();
+    }
+
+
+    /** */
+    async handleDeliverySignal(deliverySignal: DeliverySignalProtocol, from: AgentPubKeyB64): Promise<void> {
+        if (DeliverySignalProtocolType.NewLocalManifest in deliverySignal) {
             console.log("signal NewLocalManifest", deliverySignal.NewLocalManifest);
             const manifestEh = encodeHashToBase64(deliverySignal.NewLocalManifest[0]);
             const ts = deliverySignal.NewLocalManifest[1];
             const manifest = deliverySignal.NewLocalManifest[2];
-            const isPrivate = "Private" === manifest.description.visibility;
-            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
-            if (isPrivate) {
-                this._perspective.privateManifests[manifestEh] = [manifest, ts];
-                const maybeNoticeEh = this._perspective.noticeByParcel[manifestEh];
-                if (maybeNoticeEh) {
-                    this._perspective.notices[maybeNoticeEh][2] = NoticeState.PartiallyReceived;
-                    this._perspective.notices[maybeNoticeEh][3] = new Set(manifest.chunks.map((eh) => encodeHashToBase64(eh)));
-                }
-            } else {
-                this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
-            }
+            this.storeManifest(manifestEh, ts, manifest);
         }
-        if (SignalProtocolType.NewLocalChunk in deliverySignal) {
+        if (DeliverySignalProtocolType.NewLocalChunk in deliverySignal) {
             console.log("signal NewLocalChunk", deliverySignal.NewLocalChunk);
             const chunkEh = encodeHashToBase64(deliverySignal.NewLocalChunk[0]);
             const chunk = deliverySignal.NewLocalChunk[1];
@@ -103,26 +98,30 @@ export class DeliveryZvm extends ZomeViewModel {
                 }
             }
         }
-        if (SignalProtocolType.NewDistribution in deliverySignal) {
+        if (DeliverySignalProtocolType.NewDistribution in deliverySignal) {
             console.log("signal NewDistribution", deliverySignal.NewDistribution);
             const distribAh = encodeHashToBase64(deliverySignal.NewDistribution[0]);
             const distribution = deliverySignal.NewDistribution[2];
             const ts = deliverySignal.NewDistribution[1];
             this._perspective.distributions[distribAh] = [distribution, ts, DistributionState.Unsent, {}];
-            this.getDistributionState(distribAh).then(([fullState, deliveryStates]) => {
-                this._perspective.distributions[distribAh] = [distribution, ts, fullState, deliveryStates];
-                this.notifySubscribers();
-            });
+            const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
+            this._perspective.distributions[distribAh] = [distribution, ts, fullState, deliveryStates];
+            ;
         }
-        if (SignalProtocolType.NewNotice in deliverySignal) {
+        if (DeliverySignalProtocolType.NewNotice in deliverySignal) {
             console.log("signal NewNotice", deliverySignal.NewNotice);
             const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
             const notice = deliverySignal.NewNotice[2];
             const ts = deliverySignal.NewNotice[1];
             this._perspective.notices[noticeEh] = [notice, ts, NoticeState.Unreplied, new Set()];
             this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.eh)] = noticeEh;
+
+            const [state, pct] = await this.getNoticeState(noticeEh);
+            this._perspective.notices[noticeEh] = [notice, ts, state, pct];
+            this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.eh)] = noticeEh;
+
         }
-        if (SignalProtocolType.NewNoticeAck in deliverySignal) {
+        if (DeliverySignalProtocolType.NewNoticeAck in deliverySignal) {
             console.log("signal NewNoticeAck", deliverySignal.NewNoticeAck);
             const noticeAck = deliverySignal.NewNoticeAck[2];
             const ts = deliverySignal.NewNoticeAck[1];
@@ -132,13 +131,12 @@ export class DeliveryZvm extends ZomeViewModel {
                 this._perspective.noticeAcks[distribAh] = {};
             }
             this._perspective.noticeAcks[distribAh][recipient] = [noticeAck, ts];
-            this.getDistributionState(distribAh).then(([fullState, deliveryStates]) => {
-                this._perspective.distributions[distribAh][2] = fullState;
-                this._perspective.distributions[distribAh][3] = deliveryStates;
-                this.notifySubscribers();
-            });
+            const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
+            this._perspective.distributions[distribAh][2] = fullState;
+            this._perspective.distributions[distribAh][3] = deliveryStates;
+
         }
-        if (SignalProtocolType.NewReply in deliverySignal) {
+        if (DeliverySignalProtocolType.NewReply in deliverySignal) {
             console.log("signal NewReply", deliverySignal.NewReply);
             const reply = deliverySignal.NewReply[2];
             const noticeEh = encodeHashToBase64((reply.notice_eh));
@@ -148,7 +146,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 this._perspective.notices[noticeEh][2] = NoticeState.Accepted;
             }
         }
-        if (SignalProtocolType.NewReplyAck in deliverySignal) {
+        if (DeliverySignalProtocolType.NewReplyAck in deliverySignal) {
             console.log("signal NewReplyAck", deliverySignal.NewReplyAck);
             const replyAck = deliverySignal.NewReplyAck[2];
             const ts = deliverySignal.NewReplyAck[1];
@@ -158,13 +156,11 @@ export class DeliveryZvm extends ZomeViewModel {
                 this._perspective.replyAcks[distribAh] = {};
             }
             this._perspective.replyAcks[distribAh][recipient] = [replyAck, ts];
-            this.getDistributionState(distribAh).then(([fullState, deliveryStates]) => {
-                this._perspective.distributions[distribAh][2] = fullState;
-                this._perspective.distributions[distribAh][3] = deliveryStates;
-                this.notifySubscribers();
-            });
+            const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
+            this._perspective.distributions[distribAh][2] = fullState;
+            this._perspective.distributions[distribAh][3] = deliveryStates;
         }
-        if (SignalProtocolType.NewReceptionProof in deliverySignal) {
+        if (DeliverySignalProtocolType.NewReceptionProof in deliverySignal) {
             console.log("signal NewReceptionProof", deliverySignal.NewReceptionProof);
             const receptionProof = deliverySignal.NewReceptionProof[2];
             const ts = deliverySignal.NewReceptionProof[1];
@@ -172,7 +168,7 @@ export class DeliveryZvm extends ZomeViewModel {
             this._perspective.receptions[noticeEh] = [receptionProof, ts];
             this._perspective.notices[noticeEh][2] = NoticeState.Received;
         }
-        if (SignalProtocolType.NewReceptionAck in deliverySignal) {
+        if (DeliverySignalProtocolType.NewReceptionAck in deliverySignal) {
             console.log("signal NewReceptionAck", deliverySignal.NewReceptionAck);
             const receptionAck = deliverySignal.NewReceptionAck[2];
             const ts = deliverySignal.NewReceptionAck[1];
@@ -182,25 +178,23 @@ export class DeliveryZvm extends ZomeViewModel {
                 this._perspective.receptionAcks[distribAh] = {};
             }
             this._perspective.receptionAcks[distribAh][recipient] = [receptionAck, ts];
-            this.getDistributionState(distribAh).then(([fullState, deliveryStates]) => {
-                this._perspective.distributions[distribAh][2] = fullState;
-                this._perspective.distributions[distribAh][3] = deliveryStates;
-                this.notifySubscribers();
-            });
+            const [fullState, deliveryStates] = await this.getDistributionState(distribAh)
+            this._perspective.distributions[distribAh][2] = fullState;
+            this._perspective.distributions[distribAh][3] = deliveryStates;
         }
-        if (SignalProtocolType.NewPendingItem in deliverySignal) {
+        if (DeliverySignalProtocolType.NewPendingItem in deliverySignal) {
             console.log("signal NewPendingItem", deliverySignal.NewPendingItem);
         }
-        if (SignalProtocolType.PublicParcelPublished in deliverySignal) {
+        if (DeliverySignalProtocolType.PublicParcelPublished in deliverySignal) {
             console.log("signal PublicParcelPublished", deliverySignal.PublicParcelPublished);
             const pr = deliverySignal.PublicParcelPublished[2];
             const ts = deliverySignal.PublicParcelPublished[1];
             const prEh = encodeHashToBase64(deliverySignal.PublicParcelPublished[0]);
             const ppEh = encodeHashToBase64(pr.eh);
-            this._perspective.publicParcels[ppEh] = {prEh, ppEh, description: pr.description, creationTs: ts, author: encodeHashToBase64(sig.from)};
+            this._perspective.publicParcels[ppEh] = {prEh, ppEh, description: pr.description, creationTs: ts, author: from};
             this._perspective.parcelReferences[prEh] = ppEh;
         }
-        if (SignalProtocolType.PublicParcelRemoved in deliverySignal) {
+        if (DeliverySignalProtocolType.PublicParcelRemoved in deliverySignal) {
             console.log("signal RemovedPublicParcel", deliverySignal.PublicParcelRemoved);
             const pr = deliverySignal.PublicParcelRemoved[2];
             const del_ts = deliverySignal.PublicParcelRemoved[1];
@@ -208,12 +202,12 @@ export class DeliveryZvm extends ZomeViewModel {
             const ppEh = encodeHashToBase64(pr.eh);
             const created = this._perspective.publicParcels[ppEh];
             if (created) {
-                this._perspective.publicParcels[ppEh].deleteInfo = [del_ts, encodeHashToBase64(sig.from)];
+                this._perspective.publicParcels[ppEh].deleteInfo = [del_ts, from];
             } else {
                 console.warn("Unknown Removed PublicParcel", ppEh);
             }
         }
-        if (SignalProtocolType.Gossip in deliverySignal) {
+        if (DeliverySignalProtocolType.Gossip in deliverySignal) {
             console.log("signal Gossip", deliverySignal.Gossip);
             const gossip = deliverySignal.Gossip;
             if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {
@@ -222,10 +216,10 @@ export class DeliveryZvm extends ZomeViewModel {
                 const ts = gossip.PublicParcelPublished[1];
                 const prEh = encodeHashToBase64(gossip.PublicParcelPublished[0]);
                 const ppEh = encodeHashToBase64(pr.eh);
-                this._perspective.publicParcels[ppEh] = {prEh, ppEh, description: pr.description, creationTs: ts, author: encodeHashToBase64(sig.from)};
+                this._perspective.publicParcels[ppEh] = {prEh, ppEh, description: pr.description, creationTs: ts, author: from};
                 this._perspective.parcelReferences[prEh] = ppEh;
             }
-            if (SignalProtocolType.PublicParcelRemoved in gossip) {
+            if (DeliverySignalProtocolType.PublicParcelRemoved in gossip) {
                 console.log("Gossip signal RemovedPublicParcel", gossip.PublicParcelRemoved);
                 const pr = gossip.PublicParcelRemoved[2];
                 const del_ts = gossip.PublicParcelRemoved[1];
@@ -233,23 +227,39 @@ export class DeliveryZvm extends ZomeViewModel {
                 const ppEh = encodeHashToBase64(pr.eh);
                 const created = this._perspective.publicParcels[ppEh];
                 if (created) {
-                    this._perspective.publicParcels[ppEh].deleteInfo = [del_ts, encodeHashToBase64(sig.from)];
+                    this._perspective.publicParcels[ppEh].deleteInfo = [del_ts, from];
                 } else {
                     console.warn("Unknown Removed PublicParcel", ppEh);
                 }
             }
         }
-        /** Done */
-        this.notifySubscribers();
+    }
+
+
+    /** -- Store -- */
+
+    /** */
+    storeManifest(manifestEh: EntryHashB64, ts: Timestamp, manifest: ParcelManifest) {
+        const isPrivate = "Private" === manifest.description.visibility;
+        this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
+        if (isPrivate) {
+            this._perspective.privateManifests[manifestEh] = [manifest, ts];
+            const maybeNoticeEh = this._perspective.noticeByParcel[manifestEh];
+            if (maybeNoticeEh) {
+                this._perspective.notices[maybeNoticeEh][2] = NoticeState.PartiallyReceived;
+                this._perspective.notices[maybeNoticeEh][3] = new Set(manifest.chunks.map((eh) => encodeHashToBase64(eh)));
+            }
+        } else {
+            this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
+        }
     }
 
 
     /** -- Init -- */
 
-
     /** */
     async initializePerspectiveOffline(): Promise<void> {
-        await this.queryAll();
+        await this.zomeProxy.queryAll();
         await this.scanProblems();
     }
 
@@ -280,7 +290,7 @@ export class DeliveryZvm extends ZomeViewModel {
         const missingChunks = await this.zomeProxy.determineMissingChunks(notice[0].summary.parcel_reference.eh);
         const notice_eh = decodeHashFromBase64(noticeEh);
         for (const chunk_eh of missingChunks) {
-            this.zomeProxy.fetchChunk({notice_eh, chunk_eh});
+            this.zomeProxy.pullChunk({notice_eh, chunk_eh});
         }
     }
 
@@ -290,8 +300,8 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     async probeAllInner(): Promise<void> {
         console.log("DeliveryZvm.probeAllInner()");
-        console.trace();
-        await this.queryAll();
+        //console.trace();
+        await this.zomeProxy.queryAll();
         await this.scanProblems();
         await this.probeDht(true);
         /** */
@@ -357,13 +367,9 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async getManifest(manifestEh: EntryHashB64, preventNotify?: boolean): Promise<[ParcelManifest, Timestamp]> {
-        const [manifest, ts, author] = await this.zomeProxy.getManifest(decodeHashFromBase64(manifestEh));
-        this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
-        this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, false];
-        if (!preventNotify) {
-            this.notifySubscribers();
-        }
+    async fetchManifest(manifestEh: EntryHashB64, preventNotify?: boolean): Promise<[ParcelManifest, Timestamp]> {
+        const [manifest, ts, author] = await this.zomeProxy.fetchPublicManifest(decodeHashFromBase64(manifestEh));
+        this.storeManifest(manifestEh, ts, manifest);
         return [manifest, ts];
     }
 
@@ -374,96 +380,13 @@ export class DeliveryZvm extends ZomeViewModel {
         // if (!pd) {
         //     return Promise.reject("Unknown PublicParcel");
         // }
-        const [manifest, _ts] = await this.getManifest(parcelEh);
+        const [manifest, _ts] = await this.fetchManifest(parcelEh);
         let dataB64 = "";
         for (const chunk_eh of manifest.chunks) {
-            let chunk = await this.zomeProxy.getChunk(chunk_eh);
+            let chunk = await this.zomeProxy.fetchChunk(chunk_eh);
             dataB64 += chunk.data;
         }
         return dataB64;
-    }
-
-
-    /** */
-    async queryAll(): Promise<null> {
-        let tuples = [];
-        this._perspective.distributions = {};
-        tuples = await this.zomeProxy.queryAllDistribution();
-        Object.values(tuples).map(async([ah, ts, typed]) => {
-            const [fullState, deliveryStates] = await this.getDistributionState(encodeHashToBase64(ah), typed);
-            this._perspective.distributions[encodeHashToBase64(ah)] = [typed, ts, fullState, deliveryStates];
-        });
-        console.log("queryAll() distribs: " + tuples.length);
-
-        this._perspective.noticeAcks = {};
-        tuples = await this.zomeProxy.queryAllNoticeAck();
-        Object.values(tuples).map(([_eh, ts, typed]) => {
-            const distribAh = encodeHashToBase64(typed.distribution_ah);
-            const recipient = encodeHashToBase64(typed.recipient);
-            if (!this._perspective.noticeAcks[distribAh]) {
-                this._perspective.noticeAcks[distribAh] = {};
-            }
-            this._perspective.noticeAcks[distribAh][recipient] = [typed, ts]
-        });
-
-        this._perspective.replyAcks = {};
-        tuples = await this.zomeProxy.queryAllReplyAck();
-        Object.values(tuples).map(([_eh, ts, typed]) => {
-            const distribAh = encodeHashToBase64(typed.distribution_ah);
-            const recipient = encodeHashToBase64(typed.recipient);
-            if (!this._perspective.replyAcks[distribAh]) {
-                this._perspective.replyAcks[distribAh] = {};
-            }
-            this._perspective.replyAcks[distribAh][recipient] = [typed, ts]
-        });
-
-        this._perspective.receptionAcks = {};
-        tuples = await this.zomeProxy.queryAllReceptionAck();
-        Object.values(tuples).map(([_eh, ts, typed]) => {
-            const distribAh = encodeHashToBase64(typed.distribution_ah);
-            const recipient = encodeHashToBase64(typed.recipient);
-            if (!this._perspective.receptionAcks[distribAh]) {
-                this._perspective.receptionAcks[distribAh] = {};
-            }
-            this._perspective.receptionAcks[distribAh][recipient] = [typed, ts]
-        });
-
-        this._perspective.notices = {};
-        tuples = await this.zomeProxy.queryAllDeliveryNotice();
-        Object.values(tuples).map(async([eh, ts, notice]) => {
-            const noticeEh = encodeHashToBase64(eh);
-            const [state, pct] = await this.getNoticeState(noticeEh);
-            this._perspective.notices[noticeEh] = [notice, ts, state, pct];
-            this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.eh)] = noticeEh;
-        });
-        console.log("queryAll() notices: " + tuples.length);
-
-        this._perspective.replies = {};
-        tuples = await this.zomeProxy.queryAllNoticeReply();
-        Object.values(tuples).map(([_eh, ts, reply]) => this._perspective.replies[encodeHashToBase64(reply.notice_eh)] = reply);
-
-        this._perspective.receptions = {};
-        tuples = await this.zomeProxy.queryAllReceptionProof();
-        Object.values(tuples).map(([_eh, ts, recepetion]) => this._perspective.receptions[encodeHashToBase64(recepetion.notice_eh)] = [recepetion, ts]);
-
-
-        this._perspective.privateManifests = {};
-        tuples = await this.zomeProxy.queryAllPrivateManifests();
-        Object.values(tuples).map(([eh, ts, manifest]) => {
-            const manifestEh = encodeHashToBase64(eh);
-            this._perspective.privateManifests[manifestEh] = [manifest, ts];
-            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, true];
-        });
-
-        this._perspective.localPublicManifests = {};
-        tuples = await this.zomeProxy.queryAllPublicManifests();
-        Object.values(tuples).map(([eh, ts, manifest]) => {
-            const manifestEh = encodeHashToBase64(eh);
-            this._perspective.localPublicManifests[manifestEh] = [manifest, ts];
-            this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, false];
-        });
-
-        return null;
     }
 
 
@@ -582,13 +505,13 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async getAllPublicManifest(): Promise<[ParcelManifestMat, Timestamp, AgentPubKeyB64][]> {
+    async fetchAllPublicManifest(): Promise<[ParcelManifestMat, Timestamp, AgentPubKeyB64][]> {
         const manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][] = [];
         for (const [parcelEh, pprm] of Object.entries(this._perspective.publicParcels)) {
             if (pprm.deleteInfo) {
                 continue;
             }
-            const [manifest, _ts2] = await this.getManifest(parcelEh, true);
+            const [manifest, _ts2] = await this.fetchManifest(parcelEh, true);
             manifests.push([materializeParcelManifest(manifest), pprm.creationTs, pprm.author]);
         }
         this.notifySubscribers();

@@ -2,19 +2,37 @@ use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::*;
 use zome_delivery_types::*;
+use crate::{emit_self_signals};
+
+
+#[hdk_extern]
+pub fn query_all(_: ()) -> ExternResult<()> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   query_all_Distribution(())?;
+   query_all_NoticeAck(())?;
+   query_all_ReplyAck(())?;
+   query_all_ReceptionAck(())?;
+   query_all_DeliveryNotice(())?;
+   query_all_NoticeReply(())?;
+   query_all_ReceptionProof(())?;
+   query_all_private_manifests(())?;
+   query_all_public_manifests(())?;
+   Ok(())
+}
 
 
 ///
 #[hdk_extern]
-pub fn query_all_Distribution(_: ()) -> ExternResult<Vec<(ActionHash, Timestamp, Distribution)>> {
+pub fn query_all_Distribution(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Get all Create DeliveryNotice Elements with query
+   /// Get all Distribution Elements with query
    let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
-   let res = tuples.into_iter()
-                   .map(|(ah, create, typed)| (ah, create.timestamp, typed))
+   let signals = tuples.into_iter()
+                   .map(|(ah, create, typed)| DeliverySignalProtocol::NewDistribution((ah, create.timestamp, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
@@ -34,15 +52,16 @@ pub fn query_all_Distribution(_: ()) -> ExternResult<Vec<(ActionHash, Timestamp,
 
 ///
 #[hdk_extern]
-pub fn query_all_DeliveryNotice(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, DeliveryNotice)>> {
+pub fn query_all_DeliveryNotice(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<DeliveryNotice>(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap())?;
-   let res = tuples.into_iter()
-      .map(|(_, create, notice)| (create.entry_hash, create.timestamp, notice))
+   let signals = tuples.into_iter()
+      .map(|(_, create, notice)| DeliverySignalProtocol::NewNotice((create.entry_hash, create.timestamp, notice)))
       .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
@@ -92,15 +111,17 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
 
 ///
 #[hdk_extern]
-pub fn query_all_NoticeAck(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, NoticeAck)>> {
+pub fn query_all_NoticeAck(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<NoticeAck>(DeliveryEntryTypes::NoticeAck.try_into().unwrap())?;
-   let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signals
+   let signals = tuples.into_iter()
+                   .map(|(_, create, typed)| DeliverySignalProtocol::NewNoticeAck((create.entry_hash, create.timestamp, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
@@ -139,15 +160,17 @@ pub fn query_NoticeAck(field: NoticeAckQueryField) -> ExternResult<Vec<NoticeAck
 
 ///
 #[hdk_extern]
-pub fn query_all_NoticeReply(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, NoticeReply)>> {
+pub fn query_all_NoticeReply(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<NoticeReply>(DeliveryEntryTypes::NoticeReply.try_into().unwrap())?;
-   let res = tuples.into_iter()
-       .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signals
+   let signals = tuples.into_iter()
+       .map(|(_, create, typed)| DeliverySignalProtocol::NewReply((create.entry_hash, create.timestamp, typed)))
        .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
@@ -169,15 +192,17 @@ pub fn query_NoticeReply(notice_eh: EntryHash) -> ExternResult<Option<NoticeRepl
 
 ///
 #[hdk_extern]
-pub fn query_all_ReplyAck(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ReplyAck)>> {
+pub fn query_all_ReplyAck(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<ReplyAck>(DeliveryEntryTypes::ReplyAck.try_into().unwrap())?;
-   let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signals
+   let signals = tuples.into_iter()
+                   .map(|(_, create, typed)| DeliverySignalProtocol::NewReplyAck((create.entry_hash, create.timestamp, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
@@ -203,16 +228,18 @@ pub fn query_ReplyAck(maybe_distribution: Option<ActionHash>, maybe_recipient: O
 
 ///
 #[hdk_extern]
-pub fn query_all_ReceptionProof(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ReceptionProof)>> {
+pub fn query_all_ReceptionProof(_: ()) -> ExternResult<()> {
    //debug!("*** query_ReceptionProof() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let tuples = get_all_typed_local::<ReceptionProof>(DeliveryEntryTypes::ReceptionProof.try_into().unwrap())?;
-   let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signals
+   let signals = tuples.into_iter()
+                   .map(|(_, create, typed)| DeliverySignalProtocol::NewReceptionProof((create.entry_hash, create.timestamp, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
@@ -249,15 +276,17 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
 
 ///
 #[hdk_extern]
-pub fn query_all_ReceptionAck(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ReceptionAck)>> {
+pub fn query_all_ReceptionAck(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create ReceptionAck Elements with query
    let tuples = get_all_typed_local::<ReceptionAck>(DeliveryEntryTypes::ReceptionAck.try_into().unwrap())?;
-   let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signals
+   let signals = tuples.into_iter()
+                   .map(|(_, create, typed)| DeliverySignalProtocol::NewReceptionAck((create.entry_hash, create.timestamp, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
@@ -286,62 +315,69 @@ pub fn query_ReceptionAck(maybe_distribution: Option<ActionHash>, maybe_recipien
 
 ///
 #[hdk_extern]
-pub fn query_all_private_manifests(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
+pub fn query_all_private_manifests(_: ()) -> ExternResult<()> {
    //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Elements with query
    let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PrivateManifest.try_into().unwrap())?;
-   let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signals
+   let signals = tuples.into_iter()
+                   .map(|(_, create, typed)| DeliverySignalProtocol::NewLocalManifest((create.entry_hash, create.timestamp, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
 ///
 #[hdk_extern]
-pub fn query_all_public_manifests(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelManifest)>> {
+pub fn query_all_public_manifests(_: ()) -> ExternResult<()> {
    //debug!("*** query_all_Manifest() CALLED with {:?}", query_field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create Elements with query
    let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PublicManifest.try_into().unwrap())?;
-   let res = tuples.into_iter()
-                   .map(|(_, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signals
+   let signals = tuples.into_iter()
+                   .map(|(_, create, typed)| DeliverySignalProtocol::NewLocalManifest((create.entry_hash, create.timestamp, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
-
 
 
 ///
 #[hdk_extern]
-pub fn query_all_public_chunks(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelChunk)>> {
+pub fn query_all_public_chunks(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let entry_type = DeliveryEntryTypes::PublicChunk.try_into().unwrap();
    debug!("PublicChunk entry_type: {:?}", entry_type);
    let tuples = get_all_typed_local::<ParcelChunk>(entry_type)?;
-   let res = tuples.into_iter()
-                   .map(|(_ah, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signal
+   let signals = tuples.into_iter()
+                   .map(|(_ah, create, typed)| DeliverySignalProtocol::NewLocalChunk((create.entry_hash, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }
 
 
 ///
 #[hdk_extern]
-pub fn query_all_private_chunks(_: ()) -> ExternResult<Vec<(EntryHash, Timestamp, ParcelChunk)>> {
+pub fn query_all_private_chunks(_: ()) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create DeliveryNotice Elements with query
    let entry_type = DeliveryEntryTypes::PrivateChunk.try_into().unwrap();
    debug!("PrivateChunk entry_type: {:?}", entry_type);
    let tuples = get_all_typed_local::<ParcelChunk>(entry_type)?;
-   let res = tuples.into_iter()
-                   .map(|(_ah, create, typed)| (create.entry_hash, create.timestamp, typed))
+   /// Return as signal
+   let signals = tuples.into_iter()
+                   .map(|(_ah, create, typed)| DeliverySignalProtocol::NewLocalChunk((create.entry_hash, typed)))
                    .collect();
+   emit_self_signals(signals)?;
    /// Done
-   Ok(res)
+   Ok(())
 }

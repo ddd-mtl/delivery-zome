@@ -11,19 +11,19 @@ use crate::*;
 /// Return EntryHash of ParcelEntry if it has been downloaded
 //#[ignore(zits)]
 #[hdk_extern]
-fn fetch_chunk(input: FetchChunkInput) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
-   trace!(" fetch_chunk() {:?}", input);
+fn pull_chunk(input: FetchChunkInput) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
+   trace!(" pull_chunk() {:?}", input);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
    /// Look for Chunk
-   let maybe_chunk = pull_chunk(input.chunk_eh.clone(), notice)?;
+   let maybe_chunk = pull_chunk_inner(input.chunk_eh.clone(), notice)?;
    Ok(maybe_chunk)
 }
 
 
 /// Try to retrieve the chunk entry
-pub fn pull_chunk(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
+fn pull_chunk_inner(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
    if notice.summary.distribution_strategy.can_dht() {

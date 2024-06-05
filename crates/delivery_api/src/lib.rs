@@ -78,7 +78,7 @@ pub fn call_delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> E
 fn emit_system_signal(signal: SystemSignalProtocol) -> ExternResult<()> {
    let signal = DeliverySignal {
       from: agent_info()?.agent_latest_pubkey,
-      signal: SignalProtocol::System(signal),
+      signal: vec![DeliverySignalProtocol::System(signal)],
    };
    return emit_signal(&signal);
 }

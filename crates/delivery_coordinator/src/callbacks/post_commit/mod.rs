@@ -32,8 +32,8 @@ pub use public_parcel::*;
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::*;
-use zome_delivery_types::{SignalProtocol, SystemSignalProtocol};
-use crate::{emit_self_signal, emit_system_signal};
+use zome_delivery_types::{SystemSignalProtocol};
+use crate::{emit_system_signal};
 
 
 /// Zome Callback

@@ -27,18 +27,18 @@ pub fn get_notice(distribution_ah: ActionHash) -> ExternResult<Option<GetNoticeO
 }
 
 
-/// Return DeliveryNotice from which we received a Parcel
-#[hdk_extern]
-pub fn get_parcel_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
-   std::panic::set_hook(Box::new(zome_panic_hook));
-   debug!("get_parcel_notice()");
-   let field = ReceptionProofQueryField::Parcel(parcel_eh.clone());
-   let maybe_reception = query_ReceptionProof(field)?;
-   if maybe_reception.is_none() {
-      return Ok(None)
-   }
-   let notice_eh = maybe_reception.unwrap().2.notice_eh;
-   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
-   /// Done
-   Ok(Some(notice))
-}
+// /// Return DeliveryNotice from which we received a Parcel
+// #[hdk_extern]
+// pub fn get_parcel_notice(parcel_eh: EntryHash) -> ExternResult<Option<DeliveryNotice>> {
+//    std::panic::set_hook(Box::new(zome_panic_hook));
+//    debug!("get_parcel_notice()");
+//    let field = ReceptionProofQueryField::Parcel(parcel_eh.clone());
+//    let maybe_reception = query_ReceptionProof(field)?;
+//    if maybe_reception.is_none() {
+//       return Ok(None)
+//    }
+//    let notice_eh = maybe_reception.unwrap().2.notice_eh;
+//    let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
+//    /// Done
+//    Ok(Some(notice))
+// }

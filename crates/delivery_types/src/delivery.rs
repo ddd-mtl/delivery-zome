@@ -169,29 +169,29 @@ impl ParcelKind {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DistributionStrategy {
    /// DM first, DHT otherwise
-   NORMAL,
+   Normal,
    // /// Publish to DHT unencrypted,
    // PUBLIC,
    /// Only via DM no DHT
-   DM_ONLY,
+   DmOnly,
    /// Encrypt to recipients on DHT, no DM
-   DHT_ONLY,
+   DhtOnly,
 }
 
 
 impl DistributionStrategy {
    pub fn can_dm(&self) -> bool {
       match self {
-         Self::NORMAL => true,
-         Self::DHT_ONLY => false,
-         Self::DM_ONLY => true,
+         Self::Normal => true,
+         Self::DhtOnly => false,
+         Self::DmOnly => true,
       }
    }
    pub fn can_dht(&self) -> bool {
       match self {
-         Self::NORMAL => true,
-         Self::DHT_ONLY => true,
-         Self::DM_ONLY => false,
+         Self::Normal => true,
+         Self::DhtOnly => true,
+         Self::DmOnly => false,
       }
    }
 }

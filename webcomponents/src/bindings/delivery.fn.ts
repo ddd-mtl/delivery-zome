@@ -20,14 +20,11 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"complete_manifest",
 	"determine_missing_chunks",
 	"distribute_parcel",
-	"get_all_private_manifests",
-	"get_all_local_public_manifests",
+	"fetch_public_manifest",
+	"fetch_chunk",
 	"get_delivery_state",
 	"get_distribution_state",
-	"get_manifest",
-	"get_chunk",
 	"get_notice",
-	"get_parcel_notice",
 	"get_notice_state",
 	"publish_chunks",
 	"publish_chunk",
@@ -36,6 +33,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"pull_public_parcels",
 	"pull_public_parcels_details",
 	"get_parcel_ref",
+	"query_all",
 	"query_all_Distribution",
 	"query_all_DeliveryNotice",
 	"query_DeliveryNotice",
@@ -54,7 +52,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"respond_to_notice",
 	"scan_incomplete_manifests",
 	"scan_orphan_chunks",
-	"fetch_chunk",];
+	"pull_chunk",];
 
 
 /** Generate tuple array of function names with given zomeName */

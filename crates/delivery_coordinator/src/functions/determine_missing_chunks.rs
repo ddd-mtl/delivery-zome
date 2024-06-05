@@ -1,7 +1,8 @@
 use hdk::prelude::*;
 use zome_utils::*;
+use zome_delivery_integrity::DeliveryEntryTypes;
 use zome_delivery_types::*;
-use crate::*;
+//use crate::*;
 
 
 /// Grab all chunks in source-chain. Check if each manifest chunk is found in that list.
@@ -11,9 +12,9 @@ pub fn determine_missing_chunks(manifest_eh: EntryHash) -> ExternResult<Vec<Entr
    debug!("START - {}",manifest_eh);
    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
    debug!("manifest: {}", manifest.description.name);
-   let chunks: Vec<EntryHash> = query_all_private_chunks(())?
+   let chunks: Vec<EntryHash> = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?
       .into_iter()
-      .map(|tuple| tuple.0)
+      .map(|tuple| tuple.1.entry_hash)
       .collect();
    /// Find chunks
    let mut missing_chunks = Vec::new();

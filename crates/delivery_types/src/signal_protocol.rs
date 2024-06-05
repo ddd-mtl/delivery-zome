@@ -11,7 +11,7 @@ pub struct SystemSignal {
 #[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
 pub struct DeliverySignal {
     pub from: AgentPubKey,
-    pub signal: SignalProtocol,
+    pub signal: Vec<DeliverySignalProtocol>,
 }
 
 
@@ -27,7 +27,7 @@ pub enum SystemSignalProtocol {
 
 /// Protocol for notifying the ViewModel (UI)
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum SignalProtocol {
+pub enum DeliverySignalProtocol {
     System(SystemSignalProtocol),
     Gossip(DeliveryGossipProtocol),
     NewLocalManifest((EntryHash, Timestamp, ParcelManifest)),

@@ -428,7 +428,7 @@ export interface SystemSignal {
 
 export interface DeliverySignal {
   from: AgentPubKey
-  signal: SignalProtocol
+  signal: DeliverySignalProtocol[]
 }
 
 /** Protocol for notifying the ViewModel (UI) of system level events */
@@ -459,7 +459,7 @@ export type SystemSignalProtocol =
   | SystemSignalProtocolVariantSelfCallEnd;
 
 /** Protocol for notifying the ViewModel (UI) */
-export enum SignalProtocolType {
+export enum DeliverySignalProtocolType {
 	System = 'System',
 	Gossip = 'Gossip',
 	NewLocalManifest = 'NewLocalManifest',
@@ -476,23 +476,23 @@ export enum SignalProtocolType {
 	PublicParcelPublished = 'PublicParcelPublished',
 	PublicParcelRemoved = 'PublicParcelRemoved',
 }
-export type SignalProtocolVariantSystem = {System: SystemSignalProtocol}
-export type SignalProtocolVariantGossip = {Gossip: DeliveryGossipProtocol}
-export type SignalProtocolVariantNewLocalManifest = {NewLocalManifest: [EntryHash, Timestamp, ParcelManifest]}
-export type SignalProtocolVariantNewLocalChunk = {NewLocalChunk: [EntryHash, ParcelChunk]}
-export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
-export type SignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Timestamp, Distribution]}
-export type SignalProtocolVariantNewNotice = {NewNotice: [EntryHash, Timestamp, DeliveryNotice]}
-export type SignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, Timestamp, NoticeAck]}
-export type SignalProtocolVariantNewReply = {NewReply: [EntryHash, Timestamp, NoticeReply]}
-export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timestamp, ReplyAck]}
-export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
-export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
-export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type SignalProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
-export type SignalProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference]}
-export type SignalProtocol = 
- | SignalProtocolVariantSystem | SignalProtocolVariantGossip | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantPublicParcelPublished | SignalProtocolVariantPublicParcelRemoved;
+export type DeliverySignalProtocolVariantSystem = {System: SystemSignalProtocol}
+export type DeliverySignalProtocolVariantGossip = {Gossip: DeliveryGossipProtocol}
+export type DeliverySignalProtocolVariantNewLocalManifest = {NewLocalManifest: [EntryHash, Timestamp, ParcelManifest]}
+export type DeliverySignalProtocolVariantNewLocalChunk = {NewLocalChunk: [EntryHash, ParcelChunk]}
+export type DeliverySignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
+export type DeliverySignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Timestamp, Distribution]}
+export type DeliverySignalProtocolVariantNewNotice = {NewNotice: [EntryHash, Timestamp, DeliveryNotice]}
+export type DeliverySignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, Timestamp, NoticeAck]}
+export type DeliverySignalProtocolVariantNewReply = {NewReply: [EntryHash, Timestamp, NoticeReply]}
+export type DeliverySignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timestamp, ReplyAck]}
+export type DeliverySignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
+export type DeliverySignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
+export type DeliverySignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
+export type DeliverySignalProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
+export type DeliverySignalProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference]}
+export type DeliverySignalProtocol = 
+ | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantNewLocalManifest | DeliverySignalProtocolVariantNewLocalChunk | DeliverySignalProtocolVariantReceivedChunk | DeliverySignalProtocolVariantNewDistribution | DeliverySignalProtocolVariantNewNotice | DeliverySignalProtocolVariantNewNoticeAck | DeliverySignalProtocolVariantNewReply | DeliverySignalProtocolVariantNewReplyAck | DeliverySignalProtocolVariantNewReceptionProof | DeliverySignalProtocolVariantNewReceptionAck | DeliverySignalProtocolVariantNewPendingItem | DeliverySignalProtocolVariantPublicParcelPublished | DeliverySignalProtocolVariantPublicParcelRemoved;
 
 export interface SendSecretInput {
   secret_eh: EntryHash

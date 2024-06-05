@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use zome_utils::zome_panic_hook;
 use crate::emit_gossip_signal;
-use crate::emit_gossip::DeliveryGossip;
+use crate::broadcast_gossip::DeliveryGossip;
 
 
 ///

@@ -5,8 +5,8 @@ import {
   DeliveryZvm,
   ParcelKindType,
   ParcelManifest,
-  SignalProtocol,
-  SignalProtocolType
+  DeliverySignalProtocol,
+  DeliverySignalProtocolType,
 } from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
@@ -60,11 +60,15 @@ export class SecretDvm extends DnaViewModel {
       return;
     }
     const sig = signal.payload as DeliverySignal;
-    const deliverySignal = sig.signal;
-    const from = encodeHashToBase64(sig.from);
+    for (const signal of sig.signal) {
+      /*await*/ this.handleDeliverySignal(signal, encodeHashToBase64(sig.from));
+    }
+  }
 
+  /** */
+  async handleDeliverySignal(deliverySignal: DeliverySignalProtocol, from: AgentPubKeyB64): Promise<void> {
     /** Automatically accept parcel from secret zome */
-    if (SignalProtocolType.NewNotice in deliverySignal) {
+    if (DeliverySignalProtocolType.NewNotice in deliverySignal) {
       console.log("ADDING DeliveryNotice. parcel_description:", deliverySignal.NewNotice[2].summary.parcel_reference.description);
       const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
       if (ParcelKindType.AppEntry in deliverySignal.NewNotice[2].summary.parcel_reference.description.kind_info) {
@@ -79,15 +83,15 @@ export class SecretDvm extends DnaViewModel {
       }
     }
 
-    if (SignalProtocolType.NewReceptionProof in deliverySignal) {
+    if (DeliverySignalProtocolType.NewReceptionProof in deliverySignal) {
       console.log("ADDING NewReceptionProof. parcel_eh:", encodeHashToBase64(deliverySignal.NewReceptionProof[2].parcel_eh));
     }
-    if (SignalProtocolType.PublicParcelPublished in deliverySignal) {
+    if (DeliverySignalProtocolType.PublicParcelPublished in deliverySignal) {
       console.log("signal NewPublicParcel", deliverySignal.PublicParcelPublished);
       const ppEh = encodeHashToBase64(deliverySignal.PublicParcelPublished[2].eh);
       this.handlePublicParcelPublished(ppEh, from);
     }
-    if (SignalProtocolType.Gossip in deliverySignal) {
+    if (DeliverySignalProtocolType.Gossip in deliverySignal) {
       console.log("signal Gossip", deliverySignal.Gossip);
       const gossip = deliverySignal.Gossip;
       if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {

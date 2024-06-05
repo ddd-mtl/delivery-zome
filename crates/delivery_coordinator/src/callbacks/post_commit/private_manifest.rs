@@ -9,7 +9,7 @@ pub fn post_commit_PrivateManifest(sah: &SignedActionHashed, entry: Entry, manif
    debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
    let manifest = ParcelManifest::try_from(entry)?;
    /// Emit signal
-   let res = emit_self_signal(SignalProtocol::NewLocalManifest((manifest_eh.to_owned(), sah.hashed.content.timestamp(), manifest.clone())));
+   let res = emit_self_signal(DeliverySignalProtocol::NewLocalManifest((manifest_eh.to_owned(), sah.hashed.content.timestamp(), manifest.clone())));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }
@@ -28,7 +28,7 @@ pub fn post_commit_PrivateManifest(sah: &SignedActionHashed, entry: Entry, manif
          chunk_eh,
          notice_eh: notice_eh.clone(),
       };
-      let response = call_self("fetch_chunk", input)?;
+      let response = call_self("pull_chunk", input)?;
       let output: Option<(ParcelChunk, Option<Link>)> = decode_response(response)?;
       //assert!(matches!(response, ZomeCallResponse::Ok { .. }));
       if let Some(pair) = output {
