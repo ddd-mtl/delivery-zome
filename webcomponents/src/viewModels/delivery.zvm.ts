@@ -19,7 +19,7 @@ import {AppSignal} from "@holochain/client/lib/api/app/types";
 import {
     createDeliveryPerspective,
     DeliveryPerspective,
-    materializeParcelManifest, 
+    materializeParcelManifest,
     ParcelManifestMat,
 } from "./delivery.perspective";
 
