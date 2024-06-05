@@ -20,7 +20,7 @@ pub fn remove_public_parcel(pr_eh: EntryHash) -> ExternResult<ActionHash> {
    let _link_ah = unlink_public_parcel(pr_eh.clone())?;
    /// FIXME: delete ParcelManifest
    /// Emit Signal
-   let res = emit_self_signal(DeliverySignalProtocol::PublicParcelRemoved((pr_eh, record.signed_action.hashed.content.timestamp(), pr)));
+   let res = emit_self_signal(DeliverySignalProtocol::RemovedPublicParcel((pr_eh, record.signed_action.hashed.content.timestamp(), pr, agent_info()?.agent_latest_pubkey)));
    if let Err(err) = res {
      error!("Emit signal failed: {}", err);
    }

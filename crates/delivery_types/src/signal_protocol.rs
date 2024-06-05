@@ -41,8 +41,8 @@ pub enum DeliverySignalProtocol {
     NewReceptionProof((EntryHash, Timestamp, ReceptionProof)),
     NewReceptionAck((EntryHash, Timestamp, ReceptionAck)),
     NewPendingItem((EntryHash, PendingItem)),
-    PublicParcelPublished((EntryHash, Timestamp, ParcelReference)),
-    PublicParcelRemoved((EntryHash, Timestamp, ParcelReference)),
+    NewPublicParcel((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
+    RemovedPublicParcel((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
 }
 
 

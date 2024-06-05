@@ -86,10 +86,11 @@ export class SecretDvm extends DnaViewModel {
     if (DeliverySignalProtocolType.NewReceptionProof in deliverySignal) {
       console.log("ADDING NewReceptionProof. parcel_eh:", encodeHashToBase64(deliverySignal.NewReceptionProof[2].parcel_eh));
     }
-    if (DeliverySignalProtocolType.PublicParcelPublished in deliverySignal) {
-      console.log("signal NewPublicParcel", deliverySignal.PublicParcelPublished);
-      const ppEh = encodeHashToBase64(deliverySignal.PublicParcelPublished[2].eh);
-      this.handlePublicParcelPublished(ppEh, from);
+    if (DeliverySignalProtocolType.NewPublicParcel in deliverySignal) {
+      console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
+      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[2].eh);
+      const auth = encodeHashToBase64(deliverySignal.NewPublicParcel[3]);
+      this.handlePublicParcelPublished(ppEh, auth);
     }
     if (DeliverySignalProtocolType.Gossip in deliverySignal) {
       console.log("signal Gossip", deliverySignal.Gossip);

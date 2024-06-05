@@ -473,8 +473,8 @@ export enum DeliverySignalProtocolType {
 	NewReceptionProof = 'NewReceptionProof',
 	NewReceptionAck = 'NewReceptionAck',
 	NewPendingItem = 'NewPendingItem',
-	PublicParcelPublished = 'PublicParcelPublished',
-	PublicParcelRemoved = 'PublicParcelRemoved',
+	NewPublicParcel = 'NewPublicParcel',
+	RemovedPublicParcel = 'RemovedPublicParcel',
 }
 export type DeliverySignalProtocolVariantSystem = {System: SystemSignalProtocol}
 export type DeliverySignalProtocolVariantGossip = {Gossip: DeliveryGossipProtocol}
@@ -489,10 +489,10 @@ export type DeliverySignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash,
 export type DeliverySignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
 export type DeliverySignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
 export type DeliverySignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type DeliverySignalProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
-export type DeliverySignalProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference]}
+export type DeliverySignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type DeliverySignalProtocolVariantRemovedPublicParcel = {RemovedPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
 export type DeliverySignalProtocol = 
- | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantNewLocalManifest | DeliverySignalProtocolVariantNewLocalChunk | DeliverySignalProtocolVariantReceivedChunk | DeliverySignalProtocolVariantNewDistribution | DeliverySignalProtocolVariantNewNotice | DeliverySignalProtocolVariantNewNoticeAck | DeliverySignalProtocolVariantNewReply | DeliverySignalProtocolVariantNewReplyAck | DeliverySignalProtocolVariantNewReceptionProof | DeliverySignalProtocolVariantNewReceptionAck | DeliverySignalProtocolVariantNewPendingItem | DeliverySignalProtocolVariantPublicParcelPublished | DeliverySignalProtocolVariantPublicParcelRemoved;
+ | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantNewLocalManifest | DeliverySignalProtocolVariantNewLocalChunk | DeliverySignalProtocolVariantReceivedChunk | DeliverySignalProtocolVariantNewDistribution | DeliverySignalProtocolVariantNewNotice | DeliverySignalProtocolVariantNewNoticeAck | DeliverySignalProtocolVariantNewReply | DeliverySignalProtocolVariantNewReplyAck | DeliverySignalProtocolVariantNewReceptionProof | DeliverySignalProtocolVariantNewReceptionAck | DeliverySignalProtocolVariantNewPendingItem | DeliverySignalProtocolVariantNewPublicParcel | DeliverySignalProtocolVariantRemovedPublicParcel;
 
 export interface SendSecretInput {
   secret_eh: EntryHash

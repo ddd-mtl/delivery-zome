@@ -232,16 +232,12 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('pull_inbox', null);
   }
 
-  async pullPublicParcels(): Promise<[EntryHash, ParcelReference, Timestamp, AgentPubKey][]> {
-    return this.call('pull_public_parcels', null);
-  }
-
-  async pullPublicParcelsDetails(): Promise<PublicParcelRecord[]> {
+  async pullPublicParcelsDetails(): Promise<void> {
     return this.call('pull_public_parcels_details', null);
   }
 
-  async getParcelRef(prEh: EntryHash): Promise<ParcelReference | null> {
-    return this.call('get_parcel_ref', prEh);
+  async fetchParcelRef(prEh: EntryHash): Promise<ParcelReference | null> {
+    return this.call('fetch_parcel_ref', prEh);
   }
 
   async queryAll(): Promise<void> {
