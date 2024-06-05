@@ -56,6 +56,9 @@ export class SecretDvm extends DnaViewModel {
   /** */
   mySignalHandler(signal: AppSignal): void {
     console.log("secretDvm received signal", signal);
+    if (!("signal" in (signal.payload as Object))) {
+      return;
+    }
     const sig = signal.payload as DeliverySignal;
     const deliverySignal = sig.signal;
     const from = encodeHashToBase64(sig.from);
