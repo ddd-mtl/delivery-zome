@@ -1,5 +1,6 @@
 use hdk::prelude::*;
 use zome_delivery_types::*;
+use crate::emit_self_signal;
 //use zome_utils::*;
 
 
@@ -11,7 +12,7 @@ pub fn post_commit_ReplyAck(sah: &SignedActionHashed, entry: Entry, eh: &EntryHa
    // FIXME
    //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::NewReplyAck((eh.to_owned(), sah.hashed.content.timestamp(), reply_ack.clone())));
+   let res = emit_self_signal(SignalProtocol::NewReplyAck((eh.to_owned(), sah.hashed.content.timestamp(), reply_ack.clone())));
    if let Err(err) = res {
       error!("Emit signal failed: {}", err);
    }

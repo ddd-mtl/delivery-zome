@@ -45,7 +45,7 @@ export class SecretApp extends HappElement {
     console.log("hvmConstructed()")
     /** Probe */
     this._cell = this.secret.cell;
-    await this.hvm.probeAll();
+    //await this.hvm.probeAll();
     this._allAppEntryTypes = await this.secret.fetchAllEntryDefs();
     console.log("happInitialized(), _allAppEntryTypes", this._allAppEntryTypes);
     // TODO: Fix issue: zTasker entry_defs() not found. Maybe confusion with integrity zome name?

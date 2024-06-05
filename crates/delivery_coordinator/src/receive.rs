@@ -12,7 +12,7 @@ use crate::*;
 /// Name of this function must match REMOTE_ENDPOINT value
 #[ignore(zits)]
 #[hdk_extern]
-pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> {
+pub fn receive_delivery_dm(dm: DeliveryMessage) -> ExternResult<DeliveryProtocol> {
     debug!("Received DM from: {}", snip(&dm.from));
     trace!("msg: {}", dm.msg);
 
@@ -27,22 +27,6 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
         },
         DeliveryProtocol::ParcelRequest(distribution_ah) => {
             receive_dm_parcel_request(dm.from, distribution_ah)
-        }
-        DeliveryProtocol::PublicParcelPublished(tuple) => {
-            let res = emit_signal(&SignalProtocol::NewPublicParcel(tuple));
-            if let Err(err) = res.clone() {
-                error!("Emit signal failed: {}", err);
-            }
-            /** Dont care */
-            return Ok(DeliveryProtocol::Pong);
-        }
-        DeliveryProtocol::PublicParcelRemoved(tuple) => {
-            let res = emit_signal(&SignalProtocol::RemovedPublicParcel(tuple));
-            if let Err(err) = res.clone() {
-                error!("Emit signal failed: {}", err);
-            }
-            /** Dont care */
-            return Ok(DeliveryProtocol::Pong);
         }
         DeliveryProtocol::Item(pending_item) => {
             match pending_item.kind {
@@ -81,7 +65,6 @@ pub fn receive_delivery_dm(dm: DirectMessage) -> ExternResult<DeliveryProtocol> 
                 //_ => panic!("ItemKind '{:?}' should not be received via DM", item.kind),
             }
         },
-        DeliveryProtocol::Ping => DeliveryProtocol::Pong,
         _ => {
              DeliveryProtocol::Failure("Unexpected protocol".to_owned())
         },

@@ -78,7 +78,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     const timestamp = Date.now();
     const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
     console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
-    this._dvm.deliveryZvm.zomeProxy.notifyPublicParcel({peers, timestamp, pr, removed: false});
+    this._dvm.deliveryZvm.zomeProxy.broadcastPublicParcelGossip({peers, timestamp, pr, removed: false});
     /** */
     textInput.value = "";
   }
@@ -194,7 +194,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
             const timestamp = Date.now();
             const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
             console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
-            this._dvm.deliveryZvm.zomeProxy.notifyPublicParcel({peers, timestamp, pr, removed: true});
+            this._dvm.deliveryZvm.zomeProxy.broadcastPublicParcelGossip({peers, timestamp, pr, removed: true});
         }}>Remove</button></li>`
       }
     )

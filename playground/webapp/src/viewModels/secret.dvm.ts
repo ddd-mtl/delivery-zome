@@ -1,8 +1,16 @@
 import {Dictionary, DnaViewModel, ZvmDef} from "@ddd-qc/lit-happ";
-import {DeliveryZvm, ParcelKindType, ParcelManifest, SignalProtocol, SignalProtocolType} from "@ddd-qc/delivery";
+import {
+  DeliveryGossipProtocolType,
+  DeliverySignal,
+  DeliveryZvm,
+  ParcelKindType,
+  ParcelManifest,
+  SignalProtocol,
+  SignalProtocolType
+} from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
-import {AppSignalCb, encodeHashToBase64, EntryHashB64, ZomeName} from "@holochain/client";
+import {AgentPubKey, AgentPubKeyB64, AppSignalCb, encodeHashToBase64, EntryHashB64, ZomeName} from "@holochain/client";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 
 
@@ -48,7 +56,9 @@ export class SecretDvm extends DnaViewModel {
   /** */
   mySignalHandler(signal: AppSignal): void {
     console.log("secretDvm received signal", signal);
-    const deliverySignal = signal.payload as SignalProtocol;
+    const sig = signal.payload as DeliverySignal;
+    const deliverySignal = sig.signal;
+    const from = encodeHashToBase64(sig.from);
 
     /** Automatically accept parcel from secret zome */
     if (SignalProtocolType.NewNotice in deliverySignal) {
@@ -69,19 +79,32 @@ export class SecretDvm extends DnaViewModel {
     if (SignalProtocolType.NewReceptionProof in deliverySignal) {
       console.log("ADDING NewReceptionProof. parcel_eh:", encodeHashToBase64(deliverySignal.NewReceptionProof[2].parcel_eh));
     }
-
-    if (SignalProtocolType.NewPublicParcel in deliverySignal) {
-      console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[2].eh);
-      const from = encodeHashToBase64(deliverySignal.NewPublicParcel[3]);
-      if (from != this.cell.agentPubKey) {
-        this.probeAll();
-      } else {
-        this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
-          this._perspective.publicMessages[ppEh] = msg;
-          this.notifySubscribers();
-        })
+    if (SignalProtocolType.PublicParcelPublished in deliverySignal) {
+      console.log("signal NewPublicParcel", deliverySignal.PublicParcelPublished);
+      const ppEh = encodeHashToBase64(deliverySignal.PublicParcelPublished[2].eh);
+      this.handlePublicParcelPublished(ppEh, from);
+    }
+    if (SignalProtocolType.Gossip in deliverySignal) {
+      console.log("signal Gossip", deliverySignal.Gossip);
+      const gossip = deliverySignal.Gossip;
+      if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {
+        console.log("Gossip signal PublicParcelPublished", gossip.PublicParcelPublished);
+        const ppEh = encodeHashToBase64(gossip.PublicParcelPublished[2].eh);
+        this.handlePublicParcelPublished(ppEh, from);
       }
+    }
+  }
+
+
+  /** */
+  handlePublicParcelPublished(ppEh: EntryHashB64, from: AgentPubKeyB64) {
+    if (from != this.cell.agentPubKey) {
+      this.probeAll();
+    } else {
+      this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
+        this._perspective.publicMessages[ppEh] = msg;
+        this.notifySubscribers();
+      })
     }
   }
 

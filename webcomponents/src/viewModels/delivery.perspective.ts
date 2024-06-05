@@ -51,7 +51,6 @@ export interface DeliveryPerspective {
     /** pr_eh -> pp_eh */
     parcelReferences: Dictionary<EntryHashB64>
 
-
     /** Parcels */
     /** manifest_eh -> (ParcelManifest, timestamp) */
     privateManifests: Dictionary<[ParcelManifest, Timestamp]>,
@@ -62,12 +61,10 @@ export interface DeliveryPerspective {
     // /** data_hash -> number of chunks on chain */
     // chunkCounts: Dictionary<number>,
 
-
     /** -- PROBLEMS -- */
     orphanPublicChunks: EntryHashB64[],
     orphanPrivateChunks: EntryHashB64[],
     //incompleteManifests: EntryHashB64[],
-
 
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */

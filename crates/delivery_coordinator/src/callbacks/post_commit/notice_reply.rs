@@ -11,7 +11,7 @@ pub fn post_commit_NoticeReply(sah: &SignedActionHashed, entry: Entry, reply_eh:
     debug!("post_commit_NoticeReply() {:?}", reply_eh);
     let reply = NoticeReply::try_from(entry)?;
     /// Emit Signal
-    let res = emit_signal(&SignalProtocol::NewReply((reply_eh.to_owned(), sah.hashed.content.timestamp(), reply.clone())));
+    let res = emit_self_signal(SignalProtocol::NewReply((reply_eh.to_owned(), sah.hashed.content.timestamp(), reply.clone())));
     if let Err(err) = res {
         error!("Emit signal failed: {}", err);
     }

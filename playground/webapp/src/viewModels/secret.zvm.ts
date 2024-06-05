@@ -8,6 +8,7 @@ import {
   EntryHash,
   EntryHashB64
 } from "@holochain/client";
+import {DistributionStrategy} from "../bindings/secret.types";
 
 
 /** */
@@ -67,7 +68,7 @@ export class SecretZvm extends ZomeViewModel {
         : await this.zomeProxy.createSecret(text)
     const input = {
       secret_eh,
-      strategy: {NORMAL: null},
+      strategy: DistributionStrategy.Normal,
       recipients: [decodeHashFromBase64(recipient)],
     }
     const res = await this.zomeProxy.sendSecret(input);

@@ -1,18 +1,23 @@
 use hdk::prelude::*;
-use crate::*;
+use zome_utils::zome_panic_hook;
+use crate::emit_gossip_signal;
+use crate::emit_gossip::DeliveryGossip;
+
 
 ///
 #[hdk_extern]
-fn recv_remote_signal(dm_signal: SerializedBytes) -> ExternResult<()> {
-   debug!("START - {}", dm_signal.bytes().len());
-   let dm: DirectMessage = DirectMessage::try_from(dm_signal)
+fn recv_remote_signal(gossip_signal: SerializedBytes) -> ExternResult<()> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   debug!("START - {}", gossip_signal.bytes().len());
+   /// Unpack gossip
+   let dg: DeliveryGossip = DeliveryGossip::try_from(gossip_signal)
       .map_err(|e| wasm_error!(WasmErrorInner::Serialize(e)))?;
-   debug!("dm: {:?}", dm);
-   let response_dm = receive_delivery_dm(dm.clone())?;
-   debug!("response_dm: {:?}", response_dm);
-   /// Send response. It is expected for the Signal sender to still be online.
-   let response_response = send_dm(dm.from.clone(), response_dm)?;
-   debug!("response_response: {:?}", response_response);
+   debug!("dg: {:?}", dg);
+   /// Emit signal
+   let res = emit_gossip_signal(dg);
+   if let Err(err) = res {
+      error!("Emit signal failed: {}", err);
+   }
    /// Done
    Ok(())
 }

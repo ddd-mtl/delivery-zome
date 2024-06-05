@@ -6,7 +6,7 @@ use zome_delivery_types::*;
 
 ///
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, SerializedBytes)]
-pub struct DirectMessage {
+pub struct DeliveryMessage {
     pub from: AgentPubKey,
     pub msg: DeliveryProtocol,
 }
@@ -37,11 +37,7 @@ pub enum DeliveryProtocol {
     ParcelResponse(Entry),
     ChunkRequest(EntryHash),
     ChunkResponse(ParcelChunk),
-    PublicParcelPublished((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
-    PublicParcelRemoved((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
     //UnknownEntry, // TODO implement
-    Ping,
-    Pong,
 }
 
 impl fmt::Display for DeliveryProtocol {
@@ -54,11 +50,7 @@ impl fmt::Display for DeliveryProtocol {
             DeliveryProtocol::ParcelResponse(_entry) => format!("ParcelResponse"),
             DeliveryProtocol::ChunkRequest(eh) => format!("ChunkRequest: {}", eh),
             DeliveryProtocol::ChunkResponse(_chunk) => format!("ChunkResponse"),
-            DeliveryProtocol::PublicParcelPublished((_pr_eh, _ts, _pr, author)) => format!("NewPublicParcel from {}", author),
-            DeliveryProtocol::PublicParcelRemoved((_pr_eh, _ts, _pr, author)) => format!("PublicParcel removed from {}", author),
             // DeliveryProtocol::UnknownEntry => "UnknownEntry".to_owned(),
-            DeliveryProtocol::Ping => "Ping".to_owned(),
-            DeliveryProtocol::Pong => "Pong".to_owned(),
         };
         fmt.write_str(&str)?;
         Ok(())

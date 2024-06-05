@@ -69,7 +69,7 @@ pub struct GetDeliveryStateInput {
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct NotifyInput {
+pub struct BroadcastInput {
    pub peers: Vec<AgentPubKey>,
    pub pr: ParcelReference,
    pub timestamp: Timestamp,

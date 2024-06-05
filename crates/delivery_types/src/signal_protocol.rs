@@ -1,6 +1,20 @@
 use hdi::prelude::*;
 use crate::*;
 
+
+#[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
+pub struct SystemSignal {
+    pub System: SystemSignalProtocol,
+}
+
+
+#[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
+pub struct DeliverySignal {
+    pub from: AgentPubKey,
+    pub signal: SignalProtocol,
+}
+
+
 /// Protocol for notifying the ViewModel (UI) of system level events
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
@@ -15,6 +29,7 @@ pub enum SystemSignalProtocol {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SignalProtocol {
     System(SystemSignalProtocol),
+    Gossip(DeliveryGossipProtocol),
     NewLocalManifest((EntryHash, Timestamp, ParcelManifest)),
     NewLocalChunk((EntryHash, ParcelChunk)),
     ReceivedChunk((Vec<EntryHash>, usize)), // EntryHash of DeliveryNotice for the Chunk
@@ -26,8 +41,8 @@ pub enum SignalProtocol {
     NewReceptionProof((EntryHash, Timestamp, ReceptionProof)),
     NewReceptionAck((EntryHash, Timestamp, ReceptionAck)),
     NewPendingItem((EntryHash, PendingItem)),
-    NewPublicParcel((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
-    RemovedPublicParcel((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
+    PublicParcelPublished((EntryHash, Timestamp, ParcelReference)),
+    PublicParcelRemoved((EntryHash, Timestamp, ParcelReference)),
 }
 
 

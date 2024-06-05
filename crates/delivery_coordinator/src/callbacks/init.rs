@@ -1,4 +1,5 @@
 use hdk::prelude::*;
+use zome_utils::zome_panic_hook;
 
 use zome_delivery_types::*;
 use zome_delivery_integrity::*;
@@ -22,6 +23,7 @@ fn init_caps() -> ExternResult<()> {
 /// Zome Callback
 #[hdk_extern]
 fn init(_: ()) -> ExternResult<InitCallbackResult> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("*** zDelivery.init() callback START");
    /// Set Global Anchors
    Path::from(DIRECTORY_PATH).typed(LinkTypes::Members)?.ensure()?;

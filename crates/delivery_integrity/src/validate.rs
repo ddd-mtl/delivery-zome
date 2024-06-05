@@ -4,7 +4,7 @@ use crate::validate_app_entry::validate_app_entry;
 ///
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
-   //debug!("*** membranes.validate() op = {:?}", op);
+   debug!("*** DeliveryIntegrityZome.validate() op = {:?}", op);
    match op {
       Op::StoreRecord ( _ ) => Ok(ValidateCallbackResult::Valid),
       Op::StoreEntry(storeEntry) => {
@@ -32,7 +32,7 @@ pub fn validate_entry(creation_action: EntryCreationAction, entry: Entry, maybe_
       Entry::CapClaim(_claim) => Ok(ValidateCallbackResult::Valid),
       Entry::CapGrant(_grant) => Ok(ValidateCallbackResult::Valid),
       Entry::App(_entry_bytes) => {
-         let EntryType::App(app_entry_def) = maybe_entry_type.unwrap() 
+         let EntryType::App(app_entry_def) = maybe_entry_type.unwrap()
             else { unreachable!() };
          let entry_def_index = validate_app_entry(creation_action, app_entry_def.entry_index(), entry);
          entry_def_index

@@ -163,9 +163,7 @@ export const DELIVERY_ZOME_NAME = "zDelivery";
 export const DELIVERY_INTERGRITY_ZOME_NAME = "zDeliveryIntegrity";
 
 /** State of a single delivery of an item to a unique recipient */
-export type DeliveryState =
-  | {Unsent: null} | {PendingNotice: null} | {NoticeDelivered: null} | {ParcelRefused: null} | {ParcelAccepted: null} | {PendingParcel: null} | {ParcelDelivered: null};
-export enum DeliveryStateType {
+export enum DeliveryState {
 	Unsent = 'Unsent',
 	PendingNotice = 'PendingNotice',
 	NoticeDelivered = 'NoticeDelivered',
@@ -176,9 +174,7 @@ export enum DeliveryStateType {
 }
 
 /** Possible states of an OutMail entry */
-export type DistributionState =
-  | {Unsent: null} | {AllNoticesSent: null} | {AllNoticeReceived: null} | {AllRepliesReceived: null} | {AllAcceptedParcelsReceived: null} | {Deleted: null};
-export enum DistributionStateType {
+export enum DistributionState {
 	Unsent = 'Unsent',
 	AllNoticesSent = 'AllNoticesSent',
 	AllNoticeReceived = 'AllNoticeReceived',
@@ -188,9 +184,7 @@ export enum DistributionStateType {
 }
 
 /** Possible states of a DeliveryNotice entry */
-export type NoticeState =
-  | {Unreplied: null} | {Accepted: null} | {Refused: null} | {PartiallyReceived: null} | {Received: null} | {Deleted: null};
-export enum NoticeStateType {
+export enum NoticeState {
 	Unreplied = 'Unreplied',
 	Accepted = 'Accepted',
 	Refused = 'Refused',
@@ -231,9 +225,7 @@ export type ParcelKind =
  | ParcelKindVariantAppEntry | ParcelKindVariantManifest;
 
 /**  */
-export type DistributionStrategy =
-  | {NORMAL: null} | {DM_ONLY: null} | {DHT_ONLY: null};
-export enum DistributionStrategyType {
+export enum DistributionStrategy {
 	Normal = 'Normal',
 	DmOnly = 'DmOnly',
 	DhtOnly = 'DhtOnly',
@@ -323,9 +315,7 @@ export interface PendingItem {
 }
 
 /** List of structs that PendingItem can embed */
-export type ItemKind =
-  | {NoticeAck: null} | {NoticeReply: null} | {ReceptionProof: null} | {DeliveryNotice: null} | {ParcelChunk: null} | {AppEntryBytes: null};
-export enum ItemKindType {
+export enum ItemKind {
 	NoticeAck = 'NoticeAck',
 	NoticeReply = 'NoticeReply',
 	ReceptionProof = 'ReceptionProof',
@@ -333,6 +323,20 @@ export enum ItemKindType {
 	ParcelChunk = 'ParcelChunk',
 	AppEntryBytes = 'AppEntryBytes',
 }
+
+/** Protocol for sending data between agents */
+export enum DeliveryGossipProtocolType {
+	PublicParcelPublished = 'PublicParcelPublished',
+	PublicParcelRemoved = 'PublicParcelRemoved',
+	Ping = 'Ping',
+	Pong = 'Pong',
+}
+export type DeliveryGossipProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
+export type DeliveryGossipProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference]}
+export type DeliveryGossipProtocolVariantPing = {Ping: null}
+export type DeliveryGossipProtocolVariantPong = {Pong: null}
+export type DeliveryGossipProtocol = 
+ | DeliveryGossipProtocolVariantPublicParcelPublished | DeliveryGossipProtocolVariantPublicParcelRemoved | DeliveryGossipProtocolVariantPing | DeliveryGossipProtocolVariantPong;
 
 export interface DistributeParcelInput {
   recipients: AgentPubKey[]
@@ -394,7 +398,7 @@ export interface GetDeliveryStateInput {
   recipient: AgentPubKey
 }
 
-export interface NotifyInput {
+export interface BroadcastInput {
   peers: AgentPubKey[]
   pr: ParcelReference
   timestamp: Timestamp
@@ -416,6 +420,15 @@ export interface DeliveryProperties {
   maxParcelSize: number
   maxParcelNameLength: number
   minParcelNameLength: number
+}
+
+export interface SystemSignal {
+  System: SystemSignalProtocol
+}
+
+export interface DeliverySignal {
+  from: AgentPubKey
+  signal: SignalProtocol
 }
 
 /** Protocol for notifying the ViewModel (UI) of system level events */
@@ -448,6 +461,7 @@ export type SystemSignalProtocol =
 /** Protocol for notifying the ViewModel (UI) */
 export enum SignalProtocolType {
 	System = 'System',
+	Gossip = 'Gossip',
 	NewLocalManifest = 'NewLocalManifest',
 	NewLocalChunk = 'NewLocalChunk',
 	ReceivedChunk = 'ReceivedChunk',
@@ -459,10 +473,11 @@ export enum SignalProtocolType {
 	NewReceptionProof = 'NewReceptionProof',
 	NewReceptionAck = 'NewReceptionAck',
 	NewPendingItem = 'NewPendingItem',
-	NewPublicParcel = 'NewPublicParcel',
-	RemovedPublicParcel = 'RemovedPublicParcel',
+	PublicParcelPublished = 'PublicParcelPublished',
+	PublicParcelRemoved = 'PublicParcelRemoved',
 }
 export type SignalProtocolVariantSystem = {System: SystemSignalProtocol}
+export type SignalProtocolVariantGossip = {Gossip: DeliveryGossipProtocol}
 export type SignalProtocolVariantNewLocalManifest = {NewLocalManifest: [EntryHash, Timestamp, ParcelManifest]}
 export type SignalProtocolVariantNewLocalChunk = {NewLocalChunk: [EntryHash, ParcelChunk]}
 export type SignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
@@ -474,15 +489,13 @@ export type SignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timesta
 export type SignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
 export type SignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
 export type SignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type SignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
-export type SignalProtocolVariantRemovedPublicParcel = {RemovedPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type SignalProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
+export type SignalProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference]}
 export type SignalProtocol = 
- | SignalProtocolVariantSystem | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantNewPublicParcel | SignalProtocolVariantRemovedPublicParcel;
+ | SignalProtocolVariantSystem | SignalProtocolVariantGossip | SignalProtocolVariantNewLocalManifest | SignalProtocolVariantNewLocalChunk | SignalProtocolVariantReceivedChunk | SignalProtocolVariantNewDistribution | SignalProtocolVariantNewNotice | SignalProtocolVariantNewNoticeAck | SignalProtocolVariantNewReply | SignalProtocolVariantNewReplyAck | SignalProtocolVariantNewReceptionProof | SignalProtocolVariantNewReceptionAck | SignalProtocolVariantNewPendingItem | SignalProtocolVariantPublicParcelPublished | SignalProtocolVariantPublicParcelRemoved;
 
 /** List of all Link kinds handled by this Zome */
-export type LinkTypes =
-  | {Members: null} | {Inbox: null} | {Pendings: null} | {PublicParcels: null};
-export enum LinkTypesType {
+export enum LinkTypes {
 	Members = 'Members',
 	Inbox = 'Inbox',
 	Pendings = 'Pendings',
@@ -521,7 +534,7 @@ export type DeliveryEntry =
  | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantPrivateChunk | DeliveryEntryVariantPrivateManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
 
 /**  */
-export interface DirectMessage {
+export interface DeliveryMessage {
   from: AgentPubKey
   msg: DeliveryProtocol
 }
@@ -535,10 +548,6 @@ export enum DeliveryProtocolType {
 	ParcelResponse = 'ParcelResponse',
 	ChunkRequest = 'ChunkRequest',
 	ChunkResponse = 'ChunkResponse',
-	PublicParcelPublished = 'PublicParcelPublished',
-	PublicParcelRemoved = 'PublicParcelRemoved',
-	Ping = 'Ping',
-	Pong = 'Pong',
 }
 export type DeliveryProtocolVariantFailure = {Failure: string}
 export type DeliveryProtocolVariantSuccess = {Success: Signature}
@@ -547,12 +556,14 @@ export type DeliveryProtocolVariantParcelRequest = {ParcelRequest: ActionHash}
 export type DeliveryProtocolVariantParcelResponse = {ParcelResponse: Entry}
 export type DeliveryProtocolVariantChunkRequest = {ChunkRequest: EntryHash}
 export type DeliveryProtocolVariantChunkResponse = {ChunkResponse: ParcelChunk}
-export type DeliveryProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
-export type DeliveryProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
-export type DeliveryProtocolVariantPing = {Ping: null}
-export type DeliveryProtocolVariantPong = {Pong: null}
 export type DeliveryProtocol = 
- | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse | DeliveryProtocolVariantPublicParcelPublished | DeliveryProtocolVariantPublicParcelRemoved | DeliveryProtocolVariantPing | DeliveryProtocolVariantPong;
+ | DeliveryProtocolVariantFailure | DeliveryProtocolVariantSuccess | DeliveryProtocolVariantItem | DeliveryProtocolVariantParcelRequest | DeliveryProtocolVariantParcelResponse | DeliveryProtocolVariantChunkRequest | DeliveryProtocolVariantChunkResponse;
+
+/**  */
+export interface DeliveryGossip {
+  from: AgentPubKey
+  gossip: DeliveryGossipProtocol
+}
 
 export interface FullDistributionState {
   distribution_state: DistributionState

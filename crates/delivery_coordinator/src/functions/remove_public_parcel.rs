@@ -2,7 +2,7 @@ use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::LinkTypes;
 use zome_delivery_types::{ParcelReference, SignalProtocol};
-use crate::public_parcels_path;
+use crate::*;
 
 
 ///
@@ -20,7 +20,7 @@ pub fn remove_public_parcel(pr_eh: EntryHash) -> ExternResult<ActionHash> {
    let _link_ah = unlink_public_parcel(pr_eh.clone())?;
    /// FIXME: delete ParcelManifest
    /// Emit Signal
-   let res = emit_signal(&SignalProtocol::RemovedPublicParcel((pr_eh, record.signed_action.hashed.content.timestamp(), pr, agent_info()?.agent_latest_pubkey)));
+   let res = emit_self_signal(SignalProtocol::PublicParcelRemoved((pr_eh, record.signed_action.hashed.content.timestamp(), pr)));
    if let Err(err) = res {
      error!("Emit signal failed: {}", err);
    }

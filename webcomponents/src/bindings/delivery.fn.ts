@@ -13,6 +13,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 
 
 
+	"broadcast_public_parcel_gossip",
 	"commit_pending_item",
 	"commit_private_chunks",
 	"commit_private_manifest",
@@ -28,7 +29,6 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"get_notice",
 	"get_parcel_notice",
 	"get_notice_state",
-	"notify_public_parcel",
 	"publish_chunks",
 	"publish_chunk",
 	"publish_manifest",

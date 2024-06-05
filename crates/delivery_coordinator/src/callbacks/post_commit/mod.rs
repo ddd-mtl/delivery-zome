@@ -33,6 +33,7 @@ use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_integrity::*;
 use zome_delivery_types::{SignalProtocol, SystemSignalProtocol};
+use crate::{emit_self_signal, emit_system_signal};
 
 
 /// Zome Callback
@@ -54,9 +55,9 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
          EntryType::CapGrant => {},
          EntryType::App(app_entry_def) => {
             let variant_name = format!("{:?}", entry_index_to_variant(app_entry_def.entry_index).unwrap());
-            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitStart {entry_type: variant_name.clone()}));
+            let _ = emit_system_signal(SystemSignalProtocol::PostCommitStart {entry_type: variant_name.clone()});
             let result = post_commit_app_entry(&sah, eh, app_entry_def);
-            let _ = emit_signal(&SignalProtocol::System(SystemSignalProtocol::PostCommitEnd {entry_type: variant_name, succeeded: result.is_ok()}));
+            let _ = emit_system_signal(SystemSignalProtocol::PostCommitEnd {entry_type: variant_name, succeeded: result.is_ok()});
             if let Err(e) = result {
                error!("<< post_commit() failed: {:?}", e);
             } else {

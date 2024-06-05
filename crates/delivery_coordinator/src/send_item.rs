@@ -32,7 +32,7 @@ pub fn send_item(
       let response_dm = send_dm(
          recipient.clone(),
          DeliveryProtocol::Item(pending_item.clone())
-      ,)?;
+         ,)?;
       debug!("response_dm = {}", response_dm);
       if let DeliveryProtocol::Success(signature) = response_dm {
          return Ok(SendSuccessKind::OK_DIRECT(signature));
