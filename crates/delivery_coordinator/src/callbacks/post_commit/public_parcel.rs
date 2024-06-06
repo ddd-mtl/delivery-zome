@@ -5,11 +5,11 @@ use crate::{DeliveryGossip, emit_gossip_signal};
 
 
 ///
-pub fn post_commit_PublicParcel(_sah: &SignedActionHashed, _entry: Entry, pp_eh: &EntryHash) -> ExternResult<()> {
-   debug!("post_commit_PublicParcel() {:?}", pp_eh);
-   //let parcel_reference = ParcelReference::try_from(entry)?;
+pub fn post_commit_create_PublicParcel(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
+   debug!("post_commit_PublicParcel() {:?}", create.entry_hash);
+   let parcel_reference = ParcelReference::try_from(entry)?;
    /// Create Anchor
-   let response = call_self("link_public_parcel", pp_eh)?;
+   let response = call_self("link_public_parcel", create.entry_hash.clone())?;
    let _ah = decode_response::<ActionHash>(response)?;
    // /// Emit Signal
    // let dg = DeliveryGossip {
@@ -21,7 +21,7 @@ pub fn post_commit_PublicParcel(_sah: &SignedActionHashed, _entry: Entry, pp_eh:
    //    error!("Emit signal failed: {}", err);
    // }
    /// Done
-   Ok(())
+   Ok(DeliveryEntryKind::PublicParcel(parcel_reference))
 }
 
 

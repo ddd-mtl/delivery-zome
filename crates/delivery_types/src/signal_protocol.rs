@@ -25,24 +25,46 @@ pub enum SystemSignalProtocol {
     SelfCallEnd {zome_name: String, fn_name: String, succeeded: bool},
 }
 
+
 /// Protocol for notifying the ViewModel (UI)
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum DeliverySignalProtocol {
     System(SystemSignalProtocol),
     Gossip(DeliveryGossipProtocol),
-    NewLocalManifest((EntryHash, Timestamp, ParcelManifest)),
-    NewLocalChunk((EntryHash, ParcelChunk)),
-    ReceivedChunk((Vec<EntryHash>, usize)), // EntryHash of DeliveryNotice for the Chunk
-    NewDistribution((ActionHash, Timestamp, Distribution)),
-    NewNotice((EntryHash, Timestamp, DeliveryNotice)),
-    NewNoticeAck((EntryHash, Timestamp, NoticeAck)),
-    NewReply((EntryHash, Timestamp, NoticeReply)),
-    NewReplyAck((EntryHash, Timestamp, ReplyAck)),
-    NewReceptionProof((EntryHash, Timestamp, ReceptionProof)),
-    NewReceptionAck((EntryHash, Timestamp, ReceptionAck)),
-    NewPendingItem((EntryHash, PendingItem)),
-    NewPublicParcel((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
-    DeletedPublicParcel((EntryHash, Timestamp, ParcelReference, AgentPubKey)),
+    Entry((EntryInfo, DeliveryEntryKind)),
+    //ReceivedChunk((Vec<EntryHash>, usize)), // EntryHash of DeliveryNotice for the Chunk
+}
+
+
+#[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
+pub enum EntryStateChange {
+    None,
+    Created,
+    Deleted,
+    Updated,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
+pub struct EntryInfo {
+    pub hash: AnyDhtHash,
+    pub ts: Timestamp,
+    pub author: AgentPubKey,
+    pub state: EntryStateChange,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum DeliveryEntryKind {
+    DeliveryNotice(DeliveryNotice),
+    ReceptionAck(ReceptionAck),
+    NoticeReply(NoticeReply),
+    Distribution(Distribution),
+    ParcelManifest(ParcelManifest),
+    ParcelChunk(ParcelChunk),
+    NoticeAck(NoticeAck),
+    ReplyAck(ReplyAck),
+    ReceptionProof(ReceptionProof),
+    PendingItem(PendingItem),
+    PublicParcel(ParcelReference),
 }
 
 

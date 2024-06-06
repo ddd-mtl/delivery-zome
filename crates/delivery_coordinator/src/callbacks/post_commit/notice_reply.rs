@@ -7,17 +7,12 @@ use crate::*;
 
 
 /// Once committed, send reply to sender
-pub fn post_commit_NoticeReply(sah: &SignedActionHashed, entry: Entry, reply_eh: &EntryHash) -> ExternResult<()> {
-    debug!("post_commit_NoticeReply() {:?}", reply_eh);
+pub fn post_commit_create_NoticeReply(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
+    debug!("post_commit_NoticeReply() {:?}", create.entry_hash);
     let reply = NoticeReply::try_from(entry)?;
-    /// Emit Signal
-    let res = emit_self_signal(DeliverySignalProtocol::NewReply((reply_eh.to_owned(), sah.hashed.content.timestamp(), reply.clone())));
-    if let Err(err) = res {
-        error!("Emit signal failed: {}", err);
-    }
     /// Send reply to sender
-    let _ = send_reply(reply)?;
-    Ok(())
+    let _ = send_reply(reply.clone())?;
+    Ok(DeliveryEntryKind::NoticeReply(reply))
 }
 
 

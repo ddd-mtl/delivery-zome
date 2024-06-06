@@ -38,11 +38,13 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
       else { continue };
     let Ok(pr) = ParcelReference::try_from(details.entry)
       else { continue };
-    signals.push(DeliverySignalProtocol::NewPublicParcel((pr_eh.clone(), create.timestamp, pr.clone(), create.author)));
+    let first = DeliveryGossipProtocol::PublicParcelPublished((pr_eh.clone(), create.timestamp, pr.clone()));
+    signals.push(DeliverySignalProtocol::Gossip(first));
     if maybe_deletes.len() > 0 {
       let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
         else { panic!("get_link_details() should return a DeleteLink Action") };
-      signals.push(DeliverySignalProtocol::DeletedPublicParcel((pr_eh, delete.timestamp, pr, delete.author)));
+      let second = DeliveryGossipProtocol::PublicParcelUnpublished((pr_eh, delete.timestamp, pr));
+      signals.push(DeliverySignalProtocol::Gossip(second));
     }
   }
   debug!(" signals count: {}", signals.len());

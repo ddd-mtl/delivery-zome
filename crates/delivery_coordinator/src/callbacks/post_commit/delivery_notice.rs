@@ -6,15 +6,10 @@ use crate::*;
 
 
 ///
-pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, notice_eh: &EntryHash) -> ExternResult<()> {
-    debug!("post_commit_DeliveryNotice() {:?}", notice_eh);
+pub fn post_commit_create_DeliveryNotice(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
+    debug!("post_commit_DeliveryNotice() {:?}", create.entry_hash);
     let me = agent_info()?.agent_latest_pubkey;
     let notice = DeliveryNotice::try_from(entry)?;
-    /// Emit Signal
-    let res = emit_self_signal(DeliverySignalProtocol::NewNotice((notice_eh.to_owned(), sah.hashed.content.timestamp(), notice.clone())));
-    if let Err(err) = res.clone() {
-        error!("Emit signal failed: {}", err);
-    }
     /// Create NoticeAck and pack it
     let signature = sign(me.clone(), notice.summary.clone())?;
     let ack: NoticeAck = NoticeAck {
@@ -34,18 +29,17 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, notice
         warn!("send_item() during DeliveryNotice::post_commit() failed: {}", e);
     }
     /// Check for duplicate Parcel
-    let has_parcel = has_entry(notice.summary.parcel_reference.parcel_eh)?;
+    let has_parcel = has_entry(notice.summary.parcel_reference.parcel_eh.clone())?;
     if has_parcel {
         /// Automatically reject notice
         debug!("Already have this parcel");
         let input = RespondToNoticeInput {
-            notice_eh: notice_eh.clone(),
+            notice_eh: create.entry_hash.clone(),
             has_accepted: false,
         };
         let _response = call_self("respond_to_notice", input)?;
         //let _reply_eh: EntryHash = decode_response(response)?;
-        return Ok(());
     }
     /// Done
-    Ok(())
+    Ok(DeliveryEntryKind::DeliveryNotice(notice))
 }

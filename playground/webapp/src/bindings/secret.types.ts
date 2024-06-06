@@ -462,37 +462,54 @@ export type SystemSignalProtocol =
 export enum DeliverySignalProtocolType {
 	System = 'System',
 	Gossip = 'Gossip',
-	NewLocalManifest = 'NewLocalManifest',
-	NewLocalChunk = 'NewLocalChunk',
-	ReceivedChunk = 'ReceivedChunk',
-	NewDistribution = 'NewDistribution',
-	NewNotice = 'NewNotice',
-	NewNoticeAck = 'NewNoticeAck',
-	NewReply = 'NewReply',
-	NewReplyAck = 'NewReplyAck',
-	NewReceptionProof = 'NewReceptionProof',
-	NewReceptionAck = 'NewReceptionAck',
-	NewPendingItem = 'NewPendingItem',
-	NewPublicParcel = 'NewPublicParcel',
-	DeletedPublicParcel = 'DeletedPublicParcel',
+	Entry = 'Entry',
 }
 export type DeliverySignalProtocolVariantSystem = {System: SystemSignalProtocol}
 export type DeliverySignalProtocolVariantGossip = {Gossip: DeliveryGossipProtocol}
-export type DeliverySignalProtocolVariantNewLocalManifest = {NewLocalManifest: [EntryHash, Timestamp, ParcelManifest]}
-export type DeliverySignalProtocolVariantNewLocalChunk = {NewLocalChunk: [EntryHash, ParcelChunk]}
-export type DeliverySignalProtocolVariantReceivedChunk = {ReceivedChunk: [EntryHash[], number]}
-export type DeliverySignalProtocolVariantNewDistribution = {NewDistribution: [ActionHash, Timestamp, Distribution]}
-export type DeliverySignalProtocolVariantNewNotice = {NewNotice: [EntryHash, Timestamp, DeliveryNotice]}
-export type DeliverySignalProtocolVariantNewNoticeAck = {NewNoticeAck: [EntryHash, Timestamp, NoticeAck]}
-export type DeliverySignalProtocolVariantNewReply = {NewReply: [EntryHash, Timestamp, NoticeReply]}
-export type DeliverySignalProtocolVariantNewReplyAck = {NewReplyAck: [EntryHash, Timestamp, ReplyAck]}
-export type DeliverySignalProtocolVariantNewReceptionProof = {NewReceptionProof: [EntryHash, Timestamp, ReceptionProof]}
-export type DeliverySignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
-export type DeliverySignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
-export type DeliverySignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
-export type DeliverySignalProtocolVariantDeletedPublicParcel = {DeletedPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type DeliverySignalProtocolVariantEntry = {Entry: [EntryInfo, DeliveryEntryKind]}
 export type DeliverySignalProtocol = 
- | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantNewLocalManifest | DeliverySignalProtocolVariantNewLocalChunk | DeliverySignalProtocolVariantReceivedChunk | DeliverySignalProtocolVariantNewDistribution | DeliverySignalProtocolVariantNewNotice | DeliverySignalProtocolVariantNewNoticeAck | DeliverySignalProtocolVariantNewReply | DeliverySignalProtocolVariantNewReplyAck | DeliverySignalProtocolVariantNewReceptionProof | DeliverySignalProtocolVariantNewReceptionAck | DeliverySignalProtocolVariantNewPendingItem | DeliverySignalProtocolVariantNewPublicParcel | DeliverySignalProtocolVariantDeletedPublicParcel;
+ | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantEntry;
+
+export enum EntryStateChange {
+	None = 'None',
+	Created = 'Created',
+	Deleted = 'Deleted',
+	Updated = 'Updated',
+}
+
+export interface EntryInfo {
+  hash: AnyDhtHash
+  ts: Timestamp
+  author: AgentPubKey
+  state: EntryStateChange
+}
+
+export enum DeliveryEntryKindType {
+	DeliveryNotice = 'DeliveryNotice',
+	ReceptionAck = 'ReceptionAck',
+	NoticeReply = 'NoticeReply',
+	Distribution = 'Distribution',
+	ParcelManifest = 'ParcelManifest',
+	ParcelChunk = 'ParcelChunk',
+	NoticeAck = 'NoticeAck',
+	ReplyAck = 'ReplyAck',
+	ReceptionProof = 'ReceptionProof',
+	PendingItem = 'PendingItem',
+	PublicParcel = 'PublicParcel',
+}
+export type DeliveryEntryKindVariantDeliveryNotice = {DeliveryNotice: DeliveryNotice}
+export type DeliveryEntryKindVariantReceptionAck = {ReceptionAck: ReceptionAck}
+export type DeliveryEntryKindVariantNoticeReply = {NoticeReply: NoticeReply}
+export type DeliveryEntryKindVariantDistribution = {Distribution: Distribution}
+export type DeliveryEntryKindVariantParcelManifest = {ParcelManifest: ParcelManifest}
+export type DeliveryEntryKindVariantParcelChunk = {ParcelChunk: ParcelChunk}
+export type DeliveryEntryKindVariantNoticeAck = {NoticeAck: NoticeAck}
+export type DeliveryEntryKindVariantReplyAck = {ReplyAck: ReplyAck}
+export type DeliveryEntryKindVariantReceptionProof = {ReceptionProof: ReceptionProof}
+export type DeliveryEntryKindVariantPendingItem = {PendingItem: PendingItem}
+export type DeliveryEntryKindVariantPublicParcel = {PublicParcel: ParcelReference}
+export type DeliveryEntryKind = 
+ | DeliveryEntryKindVariantDeliveryNotice | DeliveryEntryKindVariantReceptionAck | DeliveryEntryKindVariantNoticeReply | DeliveryEntryKindVariantDistribution | DeliveryEntryKindVariantParcelManifest | DeliveryEntryKindVariantParcelChunk | DeliveryEntryKindVariantNoticeAck | DeliveryEntryKindVariantReplyAck | DeliveryEntryKindVariantReceptionProof | DeliveryEntryKindVariantPendingItem | DeliveryEntryKindVariantPublicParcel;
 
 export interface SendSecretInput {
   secret_eh: EntryHash

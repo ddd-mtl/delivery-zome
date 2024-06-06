@@ -7,11 +7,13 @@ import {
     encodeHashToBase64, EntryHashB64, Timestamp
 } from "@holochain/client";
 import {
+    DeliveryEntryKind, DeliveryEntryKindType,
+    DeliveryEntryType,
     DeliveryGossipProtocolType,
     DeliveryNotice, DeliverySignal, DeliverySignalProtocol, DeliverySignalProtocolType,
     DeliveryState,
     Distribution,
-    DistributionState,
+    DistributionState, EntryInfo, EntryStateChange,
     NoticeState,
     ParcelManifest,
 } from "../bindings/delivery.types";
@@ -72,141 +74,135 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** */
     async handleDeliverySignal(deliverySignal: DeliverySignalProtocol, from: AgentPubKeyB64): Promise<void> {
-        if (DeliverySignalProtocolType.NewLocalManifest in deliverySignal) {
-            console.log("signal NewLocalManifest", deliverySignal.NewLocalManifest);
-            const manifestEh = encodeHashToBase64(deliverySignal.NewLocalManifest[0]);
-            const ts = deliverySignal.NewLocalManifest[1];
-            const manifest = deliverySignal.NewLocalManifest[2];
-            this.storeManifest(manifestEh, ts, manifest);
-        }
-        if (DeliverySignalProtocolType.NewLocalChunk in deliverySignal) {
-            console.log("signal NewLocalChunk", deliverySignal.NewLocalChunk);
-            const chunkEh = encodeHashToBase64(deliverySignal.NewLocalChunk[0]);
-            const chunk = deliverySignal.NewLocalChunk[1];
-            /** Update notice state if Chunk is not from us */
-            const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
-            if (manifestPair) {
-                const manifestEh = manifestPair[0];
-                const noticeEh = this._perspective.noticeByParcel[manifestEh];
-                if (noticeEh) {
-                    this._perspective.notices[noticeEh][3].delete(chunkEh);
-                    if (this._perspective.notices[noticeEh][3].size == 0) {
-                        this.zomeProxy.completeManifest(decodeHashFromBase64(manifestEh));
-                    } else {
-                        // Ask for next chunk?
+        if (DeliverySignalProtocolType.Entry in deliverySignal) {
+            const [entryInfo, entryKind] = deliverySignal.Entry;
+            const hash = encodeHashToBase64(entryInfo.hash);
+            const author = encodeHashToBase64(entryInfo.author);
+            if (DeliveryEntryKindType.ParcelManifest in entryKind) {
+                console.log("signal ParcelManifest", entryKind.ParcelManifest);
+                const manifest = entryKind.ParcelManifest;
+                if (entryInfo.state != EntryStateChange.Deleted) {
+                    this.storeManifest(hash, entryInfo.ts, manifest);
+                }
+            }
+            if (DeliveryEntryKindType.ParcelChunk in entryKind) {
+                console.log("signal NewLocalChunk", entryKind.ParcelChunk);
+                const chunk = entryKind.ParcelChunk;
+                /** Update notice state if Chunk is not from us */
+                const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
+                if (manifestPair) {
+                    const manifestEh = manifestPair[0];
+                    const noticeEh = this._perspective.noticeByParcel[manifestEh];
+                    if (noticeEh) {
+                        this._perspective.notices[noticeEh][3].delete(hash);
+                        if (this._perspective.notices[noticeEh][3].size == 0) {
+                            this.zomeProxy.completeManifest(decodeHashFromBase64(manifestEh));
+                        } else {
+                            // Ask for next chunk?
+                        }
                     }
                 }
             }
-        }
-        if (DeliverySignalProtocolType.NewDistribution in deliverySignal) {
-            console.log("signal NewDistribution", deliverySignal.NewDistribution);
-            const distribAh = encodeHashToBase64(deliverySignal.NewDistribution[0]);
-            const distribution = deliverySignal.NewDistribution[2];
-            const ts = deliverySignal.NewDistribution[1];
-            this._perspective.distributions[distribAh] = [distribution, ts, DistributionState.Unsent, {}];
-            const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
-            this._perspective.distributions[distribAh] = [distribution, ts, fullState, deliveryStates];
-            ;
-        }
-        if (DeliverySignalProtocolType.NewNotice in deliverySignal) {
-            console.log("signal NewNotice", deliverySignal.NewNotice);
-            const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
-            const notice = deliverySignal.NewNotice[2];
-            const ts = deliverySignal.NewNotice[1];
-            this._perspective.notices[noticeEh] = [notice, ts, NoticeState.Unreplied, new Set()];
-            this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = noticeEh;
+            if (DeliveryEntryKindType.Distribution in entryKind) {
+                console.log("signal Distribution", entryKind.Distribution);
+                const distribAh = hash;
+                const distribution = entryKind.Distribution;
+                this._perspective.distributions[distribAh] = [distribution, entryInfo.ts, DistributionState.Unsent, {}];
+                const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
+                this._perspective.distributions[distribAh] = [distribution, entryInfo.ts, fullState, deliveryStates];
+                ;
+            }
+            if (DeliveryEntryKindType.DeliveryNotice in entryKind) {
+                console.log("signal DeliveryNotice", entryKind.DeliveryNotice);
+                const notice = entryKind.DeliveryNotice;
+                this._perspective.notices[hash] = [notice, entryInfo.ts, NoticeState.Unreplied, new Set()];
+                this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = hash;
 
-            const [state, pct] = await this.getNoticeState(noticeEh);
-            this._perspective.notices[noticeEh] = [notice, ts, state, pct];
-            this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = noticeEh;
+                const [state, pct] = await this.getNoticeState(hash);
+                this._perspective.notices[hash] = [notice, entryInfo.ts, state, pct];
+                this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = hash;
 
-        }
-        if (DeliverySignalProtocolType.NewNoticeAck in deliverySignal) {
-            console.log("signal NewNoticeAck", deliverySignal.NewNoticeAck);
-            const noticeAck = deliverySignal.NewNoticeAck[2];
-            const ts = deliverySignal.NewNoticeAck[1];
-            const distribAh = encodeHashToBase64(noticeAck.distribution_ah);
-            const recipient = encodeHashToBase64(noticeAck.recipient);
-            if (!this._perspective.noticeAcks[distribAh]) {
-                this._perspective.noticeAcks[distribAh] = {};
             }
-            this._perspective.noticeAcks[distribAh][recipient] = [noticeAck, ts];
-            const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
-            this._perspective.distributions[distribAh][2] = fullState;
-            this._perspective.distributions[distribAh][3] = deliveryStates;
+            if (DeliveryEntryKindType.NoticeAck in entryKind) {
+                console.log("signal NewNoticeAck", entryKind.NoticeAck);
+                const noticeAck = entryKind.NoticeAck;
+                const distribAh = encodeHashToBase64(noticeAck.distribution_ah);
+                const recipient = encodeHashToBase64(noticeAck.recipient);
+                if (!this._perspective.noticeAcks[distribAh]) {
+                    this._perspective.noticeAcks[distribAh] = {};
+                }
+                this._perspective.noticeAcks[distribAh][recipient] = [noticeAck, entryInfo.ts];
+                const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
+                this._perspective.distributions[distribAh][2] = fullState;
+                this._perspective.distributions[distribAh][3] = deliveryStates;
 
-        }
-        if (DeliverySignalProtocolType.NewReply in deliverySignal) {
-            console.log("signal NewReply", deliverySignal.NewReply);
-            const reply = deliverySignal.NewReply[2];
-            const noticeEh = encodeHashToBase64((reply.notice_eh));
-            this._perspective.replies[noticeEh] = reply;
-            this._perspective.notices[noticeEh][2] = NoticeState.Refused;
-            if (reply.has_accepted) {
-                this._perspective.notices[noticeEh][2] = NoticeState.Accepted;
             }
-        }
-        if (DeliverySignalProtocolType.NewReplyAck in deliverySignal) {
-            console.log("signal NewReplyAck", deliverySignal.NewReplyAck);
-            const replyAck = deliverySignal.NewReplyAck[2];
-            const ts = deliverySignal.NewReplyAck[1];
-            const distribAh = encodeHashToBase64(replyAck.distribution_ah);
-            const recipient = encodeHashToBase64(replyAck.recipient);
-            if (!this._perspective.replyAcks[distribAh]) {
-                this._perspective.replyAcks[distribAh] = {};
+            if (DeliveryEntryKindType.NoticeReply in entryKind) {
+                console.log("signal NoticeReply", entryKind.NoticeReply);
+                const reply = entryKind.NoticeReply;
+                const noticeEh = encodeHashToBase64((reply.notice_eh));
+                this._perspective.replies[noticeEh] = reply;
+                this._perspective.notices[noticeEh][2] = NoticeState.Refused;
+                if (reply.has_accepted) {
+                    this._perspective.notices[noticeEh][2] = NoticeState.Accepted;
+                }
             }
-            this._perspective.replyAcks[distribAh][recipient] = [replyAck, ts];
-            const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
-            this._perspective.distributions[distribAh][2] = fullState;
-            this._perspective.distributions[distribAh][3] = deliveryStates;
-        }
-        if (DeliverySignalProtocolType.NewReceptionProof in deliverySignal) {
-            console.log("signal NewReceptionProof", deliverySignal.NewReceptionProof);
-            const receptionProof = deliverySignal.NewReceptionProof[2];
-            const ts = deliverySignal.NewReceptionProof[1];
-            const noticeEh = encodeHashToBase64(receptionProof.notice_eh);
-            this._perspective.receptions[noticeEh] = [receptionProof, ts];
-            this._perspective.notices[noticeEh][2] = NoticeState.Received;
-        }
-        if (DeliverySignalProtocolType.NewReceptionAck in deliverySignal) {
-            console.log("signal NewReceptionAck", deliverySignal.NewReceptionAck);
-            const receptionAck = deliverySignal.NewReceptionAck[2];
-            const ts = deliverySignal.NewReceptionAck[1];
-            const distribAh = encodeHashToBase64(receptionAck.distribution_ah);
-            const recipient = encodeHashToBase64(receptionAck.recipient);
-            if (!this._perspective.receptionAcks[distribAh]) {
-                this._perspective.receptionAcks[distribAh] = {};
+            if (DeliveryEntryKindType.ReplyAck in entryKind) {
+                console.log("signal ReplyAck", entryKind.ReplyAck);
+                const replyAck = entryKind.ReplyAck;
+                const distribAh = encodeHashToBase64(replyAck.distribution_ah);
+                const recipient = encodeHashToBase64(replyAck.recipient);
+                if (!this._perspective.replyAcks[distribAh]) {
+                    this._perspective.replyAcks[distribAh] = {};
+                }
+                this._perspective.replyAcks[distribAh][recipient] = [replyAck, entryInfo.ts];
+                const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
+                this._perspective.distributions[distribAh][2] = fullState;
+                this._perspective.distributions[distribAh][3] = deliveryStates;
             }
-            this._perspective.receptionAcks[distribAh][recipient] = [receptionAck, ts];
-            const [fullState, deliveryStates] = await this.getDistributionState(distribAh)
-            this._perspective.distributions[distribAh][2] = fullState;
-            this._perspective.distributions[distribAh][3] = deliveryStates;
-        }
-        if (DeliverySignalProtocolType.NewPendingItem in deliverySignal) {
-            console.log("signal NewPendingItem", deliverySignal.NewPendingItem);
-        }
-        if (DeliverySignalProtocolType.NewPublicParcel in deliverySignal) {
-            console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-            const parcelAuthor = encodeHashToBase64(deliverySignal.NewPublicParcel[3]);
-            const pr = deliverySignal.NewPublicParcel[2];
-            const ts = deliverySignal.NewPublicParcel[1];
-            const prEh = encodeHashToBase64(deliverySignal.NewPublicParcel[0]);
-            const parcelEh = encodeHashToBase64(pr.parcel_eh);
-            this._perspective.publicParcels[parcelEh] = {prEh, parcelEh, description: pr.description, creationTs: ts, author: parcelAuthor};
-            this._perspective.parcelReferences[prEh] = parcelEh;
-        }
-        if (DeliverySignalProtocolType.DeletedPublicParcel in deliverySignal) {
-            console.log("signal DeletedPublicParcel", deliverySignal.DeletedPublicParcel);
-            const deleteAuthor = encodeHashToBase64(deliverySignal.DeletedPublicParcel[3]);
-            const pr = deliverySignal.DeletedPublicParcel[2];
-            const del_ts = deliverySignal.DeletedPublicParcel[1];
-            //const pr_eh = deliverySignal.PublicParcelRemoved[0];
-            const parcelEh = encodeHashToBase64(pr.parcel_eh);
-            const created = this._perspective.publicParcels[parcelEh];
-            if (created) {
-                this._perspective.publicParcels[parcelEh].deleteInfo = [del_ts, deleteAuthor];
-            } else {
-                console.warn("Unknown deleted PublicParcel", parcelEh);
+            if (DeliveryEntryKindType.ReceptionProof in entryKind) {
+                console.log("signal ReceptionProof", entryKind.ReceptionProof);
+                const receptionProof = entryKind.ReceptionProof;
+                const noticeEh = encodeHashToBase64(receptionProof.notice_eh);
+                this._perspective.receptions[noticeEh] = [receptionProof, entryInfo.ts];
+                this._perspective.notices[noticeEh][2] = NoticeState.Received;
+            }
+            if (DeliveryEntryKindType.ReceptionAck in entryKind) {
+                console.log("signal NewReceptionAck", entryKind.ReceptionAck);
+                const receptionAck = entryKind.ReceptionAck;
+                const distribAh = encodeHashToBase64(receptionAck.distribution_ah);
+                const recipient = encodeHashToBase64(receptionAck.recipient);
+                if (!this._perspective.receptionAcks[distribAh]) {
+                    this._perspective.receptionAcks[distribAh] = {};
+                }
+                this._perspective.receptionAcks[distribAh][recipient] = [receptionAck, entryInfo.ts];
+                const [fullState, deliveryStates] = await this.getDistributionState(distribAh)
+                this._perspective.distributions[distribAh][2] = fullState;
+                this._perspective.distributions[distribAh][3] = deliveryStates;
+            }
+            // if (DeliveryEntryKindType.PendingItem in entryKind) {
+            //     console.log("signal PendingItem", entryKind.PendingItem);
+            // }
+            if (DeliveryEntryKindType.PublicParcel in entryKind) {
+                console.log("signal PublicParcel", entryKind.PublicParcel);
+                const pr = entryKind.PublicParcel
+                const parcelEh = encodeHashToBase64(pr.parcel_eh);
+                this._perspective.publicParcels[parcelEh] = {
+                    prEh: hash,
+                    parcelEh,
+                    description: pr.description,
+                    creationTs: entryInfo.ts,
+                    author,
+                };
+                this._perspective.parcelReferences[hash] = parcelEh;
+                if (entryInfo.state == EntryStateChange.Deleted) {
+                    const created = this._perspective.publicParcels[parcelEh];
+                    if (created) {
+                        this._perspective.publicParcels[parcelEh].deleteInfo = [entryInfo.ts, author];
+                    } else {
+                        console.warn("Unknown deleted PublicParcel", parcelEh);
+                    }
+                }
             }
         }
         if (DeliverySignalProtocolType.Gossip in deliverySignal) {

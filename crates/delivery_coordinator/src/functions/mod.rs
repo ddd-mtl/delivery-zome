@@ -19,6 +19,7 @@ mod scan_incomplete_manifests;
 mod scan_orphan_chunks;
 mod determine_missing_chunks;
 mod unpublish_public_parcel;
+mod query_all;
 
 
 pub use get_distribution_state::*;

@@ -43,3 +43,34 @@ pub fn emit_system_signal(sys: SystemSignalProtocol) -> ExternResult<()> {
   };
   return emit_signal(&signal);
 }
+
+
+///
+pub fn emit_entry_signal(state: EntryStateChange, create: &Create, kind: DeliveryEntryKind) -> ExternResult<()> {
+  let dsp = entry_signal(state, create, kind);
+  return emit_self_signal(dsp);
+}
+
+
+///
+pub fn entry_signal(state: EntryStateChange, create: &Create, kind: DeliveryEntryKind) -> DeliverySignalProtocol {
+  let info = EntryInfo {
+    hash: AnyDhtHash::from(create.entry_hash.clone()),
+    ts: create.timestamp,
+    author: create.author.clone(),
+    state,
+  };
+  DeliverySignalProtocol::Entry((info, kind))
+}
+
+
+///
+pub fn entry_signal_ah(state: EntryStateChange, create: &Create, kind: DeliveryEntryKind, ah: ActionHash) -> DeliverySignalProtocol {
+  let info = EntryInfo {
+    hash: AnyDhtHash::from(ah),
+    ts: create.timestamp,
+    author: create.author.clone(),
+    state,
+  };
+  DeliverySignalProtocol::Entry((info, kind))
+}

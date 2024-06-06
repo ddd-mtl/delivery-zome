@@ -14,6 +14,7 @@ use hdi::prelude::*;
 
 use zome_delivery_types::*;
 
+
 /// List of all Link kinds handled by this Zome
 #[hdk_link_types]
 #[derive(Serialize, Deserialize)]
@@ -67,4 +68,23 @@ pub fn entry_index_to_variant(entry_index: EntryDefIndex) -> ExternResult<Delive
       i += 1;
    }
    return Err(wasm_error!(format!("Unknown EntryDefIndex: {}", entry_index.0)));
+}
+
+
+pub fn entry2Kind(entry: Entry, entry_type: DeliveryEntryTypes) -> ExternResult<DeliveryEntryKind> {
+   Ok(match entry_type {
+      DeliveryEntryTypes::Distribution => DeliveryEntryKind::Distribution(Distribution::try_from(entry)?),
+      DeliveryEntryTypes::DeliveryNotice => DeliveryEntryKind::DeliveryNotice(DeliveryNotice::try_from(entry)?),
+      DeliveryEntryTypes::NoticeAck => DeliveryEntryKind::NoticeAck(NoticeAck::try_from(entry)?),
+      DeliveryEntryTypes::NoticeReply => DeliveryEntryKind::NoticeReply(NoticeReply::try_from(entry)?),
+      DeliveryEntryTypes::ReplyAck => DeliveryEntryKind::ReplyAck(ReplyAck::try_from(entry)?),
+      DeliveryEntryTypes::PrivateChunk => DeliveryEntryKind::ParcelChunk(ParcelChunk::try_from(entry)?),
+      DeliveryEntryTypes::PrivateManifest => DeliveryEntryKind::ParcelManifest(ParcelManifest::try_from(entry)?),
+      DeliveryEntryTypes::ReceptionProof => DeliveryEntryKind::ReceptionProof(ReceptionProof::try_from(entry)?),
+      DeliveryEntryTypes::ReceptionAck => DeliveryEntryKind::ReceptionAck(ReceptionAck::try_from(entry)?),
+      DeliveryEntryTypes::PendingItem => DeliveryEntryKind::PendingItem(PendingItem::try_from(entry)?),
+      DeliveryEntryTypes::PublicChunk => DeliveryEntryKind::ParcelChunk(ParcelChunk::try_from(entry)?),
+      DeliveryEntryTypes::PublicManifest => DeliveryEntryKind::ParcelManifest(ParcelManifest::try_from(entry)?),
+      DeliveryEntryTypes::PublicParcel => DeliveryEntryKind::PublicParcel(ParcelReference::try_from(entry)?),
+   })
 }

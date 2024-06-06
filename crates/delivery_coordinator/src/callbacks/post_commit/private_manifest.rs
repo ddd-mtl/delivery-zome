@@ -5,20 +5,15 @@ use crate::*;
 
 
 /// Try to retrieve every chunk
-pub fn post_commit_PrivateManifest(sah: &SignedActionHashed, entry: Entry, manifest_eh: &EntryHash) -> ExternResult<()> {
-   debug!("post_commit_ParcelManifest() {:?}", manifest_eh);
+pub fn post_commit_create_PrivateManifest(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
+   debug!("post_commit_create_PrivateManifest() {:?}", create.entry_hash);
    let manifest = ParcelManifest::try_from(entry)?;
-   /// Emit signal
-   let res = emit_self_signal(DeliverySignalProtocol::NewLocalManifest((manifest_eh.to_owned(), sah.hashed.content.timestamp(), manifest.clone())));
-   if let Err(err) = res {
-      error!("Emit signal failed: {}", err);
-   }
    /// Find notice
-   let notices = query_DeliveryNotice(DeliveryNoticeQueryField::Parcel(manifest_eh.clone()))?;
+   let notices = query_DeliveryNotice(DeliveryNoticeQueryField::Parcel(create.entry_hash.clone()))?;
    if notices.is_empty() {
       warn!("No DeliveryNotice found for post-committed ParcelManifest");
       /// Normal if agent is original creator of ParcelManifest
-      return Ok(())
+      return Ok(DeliveryEntryKind::ParcelManifest(manifest));
    }
    let notice_eh = hash_entry(notices[0].0.clone())?;
    /// Try to retrieve parcel if it has been accepted
@@ -40,5 +35,5 @@ pub fn post_commit_PrivateManifest(sah: &SignedActionHashed, entry: Entry, manif
    debug!("commit_received_chunks() response: {:?}", response);
    assert!(matches!(response, ZomeCallResponse::Ok { .. }));
    /// Done
-   Ok(())
+   Ok(DeliveryEntryKind::ParcelManifest(manifest))
 }

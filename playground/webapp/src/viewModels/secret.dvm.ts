@@ -6,7 +6,7 @@ import {
   ParcelKindType,
   ParcelManifest,
   DeliverySignalProtocol,
-  DeliverySignalProtocolType,
+  DeliverySignalProtocolType, DeliveryEntryKindType, EntryStateChange,
 } from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
@@ -68,37 +68,36 @@ export class SecretDvm extends DnaViewModel {
 
   /** */
   async handleDeliverySignal(deliverySignal: DeliverySignalProtocol, from: AgentPubKeyB64): Promise<void> {
-    /** Automatically accept parcel from secret zome */
-    if (DeliverySignalProtocolType.NewNotice in deliverySignal) {
-      console.log("ADDING DeliveryNotice. parcel_description:", deliverySignal.NewNotice[2].summary.parcel_reference.description);
-      const noticeEh = encodeHashToBase64(deliverySignal.NewNotice[0]);
-      if (ParcelKindType.AppEntry in deliverySignal.NewNotice[2].summary.parcel_reference.description.kind_info) {
-        if ("secret_integrity" === deliverySignal.NewNotice[2].summary.parcel_reference.description.zome_origin) {
-          this.deliveryZvm.acceptDelivery(noticeEh);
+    if (DeliverySignalProtocolType.Entry in deliverySignal) {
+      const [entryInfo, entryKind] = deliverySignal.Entry;
+      const hash = encodeHashToBase64(entryInfo.hash);
+      const author = encodeHashToBase64(entryInfo.author);
+      /** Automatically accept parcel from secret zome */
+      if (DeliveryEntryKindType.DeliveryNotice in entryKind) {
+        const notice = entryKind.DeliveryNotice;
+        console.log("ADDING DeliveryNotice. parcel_description:", notice.summary.parcel_reference.description);
+        if (ParcelKindType.AppEntry in notice.summary.parcel_reference.description.kind_info) {
+          if ("secret_integrity" === notice.summary.parcel_reference.description.zome_origin) {
+            this.deliveryZvm.acceptDelivery(hash);
+          }
+        } else {
+         /// split_secret is a Manifest reference
+         // if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
+         //  this.deliveryZvm.acceptDelivery(noticeEh);
+         // }
         }
-      } else {
-       /// split_secret is a Manifest reference
-       // if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
-       //  this.deliveryZvm.acceptDelivery(noticeEh);
-       // }
       }
-    }
-
-    if (DeliverySignalProtocolType.NewReceptionProof in deliverySignal) {
-      console.log("ADDING NewReceptionProof. parcel_eh:", encodeHashToBase64(deliverySignal.NewReceptionProof[2].parcel_eh));
-    }
-    if (DeliverySignalProtocolType.NewPublicParcel in deliverySignal) {
-      console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-      const parcelEh = encodeHashToBase64(deliverySignal.NewPublicParcel[2].parcel_eh);
-      const auth = encodeHashToBase64(deliverySignal.NewPublicParcel[3]);
-      this.handlePublicParcelPublished(parcelEh, this.cell.agentPubKey);
-    }
-    if (DeliverySignalProtocolType.DeletedPublicParcel in deliverySignal) {
-      console.log("signal DeletedPublicParcel", deliverySignal.DeletedPublicParcel);
-      const parcelEh = encodeHashToBase64(deliverySignal.DeletedPublicParcel[2].parcel_eh);
-      //const auth = encodeHashToBase64(deliverySignal.DeletedPublicParcel[3]);
-      delete this._perspective.publicMessages[parcelEh];
-      this.notifySubscribers();
+      if (DeliveryEntryKindType.PublicParcel in entryKind) {
+        console.log("signal PublicParcel", entryKind.PublicParcel);
+        const parcelEh = encodeHashToBase64(entryKind.PublicParcel.parcel_eh);
+        if (entryInfo.state == EntryStateChange.Deleted) {
+          //const auth = encodeHashToBase64(deliverySignal.DeletedPublicParcel[3]);
+          delete this._perspective.publicMessages[parcelEh];
+          this.notifySubscribers();
+        } else {
+          this.handlePublicParcelPublished(parcelEh, this.cell.agentPubKey);
+        }
+      }
     }
     if (DeliverySignalProtocolType.Gossip in deliverySignal) {
       console.log("signal Gossip", deliverySignal.Gossip);
