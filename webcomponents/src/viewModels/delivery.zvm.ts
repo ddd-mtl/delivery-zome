@@ -225,7 +225,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 console.log("Gossip signal PublicParcelUnpublished", gossip.PublicParcelUnpublished);
                 const pr = gossip.PublicParcelUnpublished[2];
                 const del_ts = gossip.PublicParcelUnpublished[1];
-                //const pr_eh = gossip.PublicParcelRemoved[0];
+                //const pr_eh = gossip.PublicParcelUnpublished[0];
                 const parcelEh = encodeHashToBase64(pr.parcel_eh);
                 const created = this._perspective.publicParcels[parcelEh];
                 if (created) {
