@@ -29,7 +29,7 @@ pub fn find_notice_with_parcel(parcel_eh: EntryHash) -> ExternResult<Vec<Deliver
     let mut res = Vec::new();
     for notice_el in notices {
         let notice: DeliveryNotice = get_typed_from_record(notice_el)?;
-        let summary_eh = &notice.summary.parcel_reference.eh;
+        let summary_eh = &notice.summary.parcel_reference.parcel_eh;
         if summary_eh == &parcel_eh {
             res.push(notice);
         }

@@ -39,39 +39,60 @@ use crate::{emit_system_signal};
 /// Zome Callback
 #[hdk_extern(infallible)]
 fn post_commit(signedActionList: Vec<SignedActionHashed>) {
-   debug!("DELIVERY post_commit() called for {} actions", signedActionList.len());
+   debug!("DELIVERY post_commit() called for {} actions. ({})", signedActionList.len(), zome_info().unwrap().id);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Process each Action
    for sah in signedActionList {
       //debug!(" - {}", sah.action());
-      let action = sah.action();
-      if action.entry_type().is_none() {
-         continue;
-      }
-      let (eh, entry_type) = action.entry_data().unwrap();
-      match entry_type {
-         EntryType::AgentPubKey => {},
-         EntryType::CapClaim => {},
-         EntryType::CapGrant => {},
-         EntryType::App(app_entry_def) => {
+      match sah.action() {
+         ///
+         Action::DeleteLink(delete_link) => {
+            let Ok(Some(record)) = get(delete_link.link_add_address.clone(), GetOptions::local())
+              else { error!("Failed to get CreateLink action"); continue };
+            let Action::CreateLink(create_link) = record.action()
+              else { error!("Record should be a CreateLink"); continue };
+            let Ok(Some(link_type)) = LinkTypes::from_type(create_link.zome_index, create_link.link_type)
+              else { error!("CreateLink should have a LinkType"); continue };
+            match link_type {
+               LinkTypes::PublicParcels => gossip_public_parcel(create_link, sah.hashed.content.timestamp(), false),
+               _ => (),
+            }
+         },
+         ///
+         Action::CreateLink(create_link) => {
+            let Ok(Some(link_type)) = LinkTypes::from_type(create_link.zome_index, create_link.link_type)
+              else { error!("CreateLink should have a LinkType. Could be a Link from a different zome: {} ({})", create_link.link_type.0, create_link.zome_index); continue };
+            match link_type {
+               LinkTypes::PublicParcels => gossip_public_parcel(create_link, sah.hashed.content.timestamp(), true),
+               _ => (),
+            }
+         },
+         ///
+         Action::Delete(_delete) => {},
+         Action::Update(_update) => {},
+         ///
+         Action::Create(create) => {
+            let EntryType::App(app_entry_def) = &create.entry_type
+              else { continue };
             let variant_name = format!("{:?}", entry_index_to_variant(app_entry_def.entry_index).unwrap());
-            let _ = emit_system_signal(SystemSignalProtocol::PostCommitStart {entry_type: variant_name.clone()});
-            let result = post_commit_app_entry(&sah, eh, app_entry_def);
-            let _ = emit_system_signal(SystemSignalProtocol::PostCommitEnd {entry_type: variant_name, succeeded: result.is_ok()});
+            let _ = emit_system_signal(SystemSignalProtocol::PostCommitStart { entry_type: variant_name.clone() });
+            let result = post_commit_create_app_entry(&sah, &create.entry_hash, &app_entry_def);
+            let _ = emit_system_signal(SystemSignalProtocol::PostCommitEnd { entry_type: variant_name, succeeded: result.is_ok() });
             if let Err(e) = result {
                error!("<< post_commit() failed: {:?}", e);
             } else {
                debug!("<< post_commit() SUCCEEDED");
             }
          },
+         _ => (),
       }
    }
 }
 
 
 ///
-fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
-   debug!(">> post_commit_app_entry() called for a {:?}", app_entry_def);
+fn post_commit_create_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def: &AppEntryDef) -> ExternResult<()> {
+   debug!(">> post_commit_create_app_entry() called for a {:?}", app_entry_def);
    let variant = entry_index_to_variant(app_entry_def.entry_index)?;
 
    /// Get Entry from local chain
@@ -86,7 +107,7 @@ fn post_commit_app_entry(sah: &SignedActionHashed, eh: &EntryHash, app_entry_def
    //
    let entry = must_get_entry(eh.clone())?.content;
 
-   debug!("post_commit_app_entry() entry found");
+   debug!("post_commit_create_app_entry() entry found");
    //let entry = records[0].entry().as_option().unwrap().to_owned();
    /// Deserialize it and call its post_commit()
    let Entry::App(ref entry_bytes) = entry

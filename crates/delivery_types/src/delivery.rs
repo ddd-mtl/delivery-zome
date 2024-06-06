@@ -101,7 +101,7 @@ pub struct DeliverySummary {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct ParcelReference {
-   pub eh: EntryHash,
+   pub parcel_eh: EntryHash,
    pub description: ParcelDescription,
 }
 

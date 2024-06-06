@@ -13,7 +13,7 @@ pub fn broadcast_public_parcel_gossip(input: BroadcastInput) -> ExternResult<()>
     let eh = hash_entry(input.pr.clone())?;
     let tuple = (eh, input.timestamp, input.pr);
     let msg = if input.removed {
-        DeliveryGossipProtocol::PublicParcelRemoved(tuple)
+        DeliveryGossipProtocol::PublicParcelUnpublished(tuple)
     } else {
         DeliveryGossipProtocol::PublicParcelPublished(tuple)
     };

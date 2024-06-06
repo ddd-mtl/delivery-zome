@@ -65,6 +65,7 @@ export class SecretDvm extends DnaViewModel {
     }
   }
 
+
   /** */
   async handleDeliverySignal(deliverySignal: DeliverySignalProtocol, from: AgentPubKeyB64): Promise<void> {
     /** Automatically accept parcel from secret zome */
@@ -88,29 +89,42 @@ export class SecretDvm extends DnaViewModel {
     }
     if (DeliverySignalProtocolType.NewPublicParcel in deliverySignal) {
       console.log("signal NewPublicParcel", deliverySignal.NewPublicParcel);
-      const ppEh = encodeHashToBase64(deliverySignal.NewPublicParcel[2].eh);
+      const parcelEh = encodeHashToBase64(deliverySignal.NewPublicParcel[2].parcel_eh);
       const auth = encodeHashToBase64(deliverySignal.NewPublicParcel[3]);
-      this.handlePublicParcelPublished(ppEh, auth);
+      this.handlePublicParcelPublished(parcelEh, this.cell.agentPubKey);
+    }
+    if (DeliverySignalProtocolType.DeletedPublicParcel in deliverySignal) {
+      console.log("signal DeletedPublicParcel", deliverySignal.DeletedPublicParcel);
+      const parcelEh = encodeHashToBase64(deliverySignal.DeletedPublicParcel[2].parcel_eh);
+      //const auth = encodeHashToBase64(deliverySignal.DeletedPublicParcel[3]);
+      delete this._perspective.publicMessages[parcelEh];
+      this.notifySubscribers();
     }
     if (DeliverySignalProtocolType.Gossip in deliverySignal) {
       console.log("signal Gossip", deliverySignal.Gossip);
       const gossip = deliverySignal.Gossip;
       if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {
         console.log("Gossip signal PublicParcelPublished", gossip.PublicParcelPublished);
-        const ppEh = encodeHashToBase64(gossip.PublicParcelPublished[2].eh);
-        this.handlePublicParcelPublished(ppEh, from);
+        const parcelEh = encodeHashToBase64(gossip.PublicParcelPublished[2].parcel_eh);
+        this.handlePublicParcelPublished(parcelEh, from);
+      }
+      if (DeliveryGossipProtocolType.PublicParcelUnpublished in gossip) {
+        console.log("Gossip signal PublicParcelUnpublished", gossip.PublicParcelUnpublished);
+        const parcelEh = encodeHashToBase64(gossip.PublicParcelUnpublished[2].parcel_eh);
+        delete this._perspective.publicMessages[parcelEh];
+        this.notifySubscribers();
       }
     }
   }
 
 
   /** */
-  handlePublicParcelPublished(ppEh: EntryHashB64, from: AgentPubKeyB64) {
+  handlePublicParcelPublished(parcelEh: EntryHashB64, from: AgentPubKeyB64) {
     if (from != this.cell.agentPubKey) {
       this.probeAll();
     } else {
-      this.deliveryZvm.getParcelData(ppEh).then((msg: string) => {
-        this._perspective.publicMessages[ppEh] = msg;
+      this.deliveryZvm.getParcelData(parcelEh).then((msg: string) => {
+        this._perspective.publicMessages[parcelEh] = msg;
         this.notifySubscribers();
       })
     }
@@ -123,8 +137,8 @@ export class SecretDvm extends DnaViewModel {
     await this.deliveryZvm.probeDht();
     const pds = Object.entries(this.deliveryZvm.perspective.publicParcels);
     console.log("probePublicMessages() PublicParcels count", Object.entries(pds).length);
-    for (const [ppEh, tuple] of pds) {
-      publicMessages[ppEh] = await this.deliveryZvm.getParcelData(ppEh);
+    for (const [parcelEh, tuple] of pds) {
+      publicMessages[parcelEh] = await this.deliveryZvm.getParcelData(parcelEh);
     }
     this._perspective.publicMessages = publicMessages;
     this.notifySubscribers();
@@ -147,7 +161,7 @@ export class SecretDvm extends DnaViewModel {
        visibility: "Public" //{Public: null}
      },
    };
-   const eh = await this.deliveryZvm.zomeProxy.publishManifest(manifest);
+   const eh = await this.deliveryZvm.zomeProxy.publishPublicParcel(manifest);
    return [encodeHashToBase64(eh), manifest];
   }
 }

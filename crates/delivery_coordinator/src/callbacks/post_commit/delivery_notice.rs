@@ -34,7 +34,7 @@ pub fn post_commit_DeliveryNotice(sah: &SignedActionHashed, entry: Entry, notice
         warn!("send_item() during DeliveryNotice::post_commit() failed: {}", e);
     }
     /// Check for duplicate Parcel
-    let has_parcel = has_entry(notice.summary.parcel_reference.eh)?;
+    let has_parcel = has_entry(notice.summary.parcel_reference.parcel_eh)?;
     if has_parcel {
         /// Automatically reject notice
         debug!("Already have this parcel");

@@ -9,7 +9,7 @@ mod query;
 mod get_distribution_state;
 mod get_notice_state;
 mod get_delivery_state;
-mod publish_manifest;
+mod publish_public_parcel;
 mod publish_chunks;
 mod pull_public_parcels;
 mod fetch_public_manifest;
@@ -18,7 +18,7 @@ mod broadcast_public_parcel_gossip;
 mod scan_incomplete_manifests;
 mod scan_orphan_chunks;
 mod determine_missing_chunks;
-mod remove_public_parcel;
+mod unpublish_public_parcel;
 
 
 pub use get_distribution_state::*;
@@ -36,7 +36,7 @@ pub use self::{
    query::*,
    respond_to_notice::*,
    get_delivery_state::*,
-   publish_manifest::*,
+   publish_public_parcel::*,
    publish_chunks::*,
    broadcast_public_parcel_gossip::*,
    scan_incomplete_manifests::*,

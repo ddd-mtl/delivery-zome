@@ -42,7 +42,7 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
     if maybe_deletes.len() > 0 {
       let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
         else { panic!("get_link_details() should return a DeleteLink Action") };
-      signals.push(DeliverySignalProtocol::RemovedPublicParcel((pr_eh, delete.timestamp, pr, delete.author)));
+      signals.push(DeliverySignalProtocol::DeletedPublicParcel((pr_eh, delete.timestamp, pr, delete.author)));
     }
   }
   debug!(" signals count: {}", signals.len());

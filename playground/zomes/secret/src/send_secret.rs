@@ -42,7 +42,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<ActionHash> {
       recipients: input.recipients,
       strategy: input.strategy,
       parcel_reference: ParcelReference {
-         eh: input.secret_eh,
+         parcel_eh: input.secret_eh,
          description: parcel_description,
       },
    };

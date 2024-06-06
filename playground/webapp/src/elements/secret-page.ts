@@ -74,7 +74,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     let res = await this._dvm.publishMessage(textInput.value);
     console.log("onPublishMessage() res:", res);
     /** Notify peers that we published something */
-    const pr = {description: res[1].description, eh: decodeHashFromBase64(res[0])} as ParcelReference;
+    const pr = {description: res[1].description, parcel_eh: decodeHashFromBase64(res[0])} as ParcelReference;
     const timestamp = Date.now();
     const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
     console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
@@ -180,17 +180,17 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     // )
 
     const ppLi = Object.entries(this._dvm.perspective.publicMessages).map(
-      ([ppEh, msg]) => {
+      ([parcelEh, msg]) => {
         //console.log("" + index + ". " + agentIdB64)
-        const pprm = this._dvm.deliveryZvm.perspective.publicParcels[ppEh];
+        const pprm = this._dvm.deliveryZvm.perspective.publicParcels[parcelEh];
         if (pprm.deleteInfo) {
           return html``;
         }
         const prEh = decodeHashFromBase64(pprm.prEh);
         return html`<li>${msg} <button style="margin-left:20px" @click=${async (e:any) => {
-          const res = await this._dvm.deliveryZvm.zomeProxy.removePublicParcel(prEh);
+          const res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(prEh);
             /** Notify peers that we published something */
-            const pr = {description: pprm.description, eh: decodeHashFromBase64(ppEh)} as ParcelReference;
+            const pr = {description: pprm.description, parcel_eh: decodeHashFromBase64(parcelEh)} as ParcelReference;
             const timestamp = Date.now();
             const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
             console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
@@ -200,12 +200,12 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     )
 
     const remLi = Object.entries(this._dvm.deliveryZvm.perspective.publicParcels).map(
-      ([ppEh, pprm]) => {
+      ([_parcelEh, pprm]) => {
         //console.log("remLi:", pprm.deleteInfo);
         if (!pprm.deleteInfo) {
           return html``;
         }
-        //const prEh = decodeHashFromBase64(this._dvm.deliveryZvm.perspective.publicParcels[ppEh][0]);
+        //const prEh = decodeHashFromBase64(this._dvm.deliveryZvm.perspective.publicParcels[parcelEh][0]);
         const msg = `[${pprm.deleteInfo[0]}] ${pprm.description.name} | by ${pprm.deleteInfo[1]}`
         return html`<li>${msg}</li>`
       }

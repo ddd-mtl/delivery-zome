@@ -34,7 +34,7 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
 
 /// Try to retrieve the parcel entry
 pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Option<Link>)>> {
-   debug!("request_parcel() {:?}", notice.summary.parcel_reference.eh);
+   debug!("request_parcel() {:?}", notice.summary.parcel_reference.parcel_eh);
    /// Request Parcel
    /// Check Inbox first
    if notice.summary.distribution_strategy.can_dht() {
@@ -60,7 +60,7 @@ pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Opt
       if let DeliveryProtocol::ParcelResponse(entry) = response {
          /// Check entry
          let received_eh = hash_entry(entry.clone())?;
-         if received_eh != notice.summary.parcel_reference.eh {
+         if received_eh != notice.summary.parcel_reference.parcel_eh {
             warn!("The entry the sender sent does not match notice's Parcel EntryHash");
             return Ok(None);
          }

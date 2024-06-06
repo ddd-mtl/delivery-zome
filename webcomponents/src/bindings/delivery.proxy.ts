@@ -224,8 +224,8 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('publish_chunk', chunk);
   }
 
-  async publishManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
-    return this.callZomeBlockPostCommit('PublicParcel','publish_manifest', manifestArg);
+  async publishPublicParcel(manifestArg: ParcelManifest): Promise<EntryHash> {
+    return this.callZomeBlockPostCommit('PublicParcel','publish_public_parcel', manifestArg);
   }
 
   async pullInbox(): Promise<ActionHash[]> {
@@ -300,10 +300,6 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_all_private_chunks', null);
   }
 
-  async removePublicParcel(prEh: EntryHash): Promise<ActionHash> {
-    return this.callBlocking('remove_public_parcel', prEh);
-  }
-
   async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {
     return this.call('respond_to_notice', input);
   }
@@ -314,6 +310,10 @@ export class DeliveryProxy extends ZomeProxy {
 
   async scanOrphanChunks(): Promise<[EntryHash[], EntryHash[]]> {
     return this.call('scan_orphan_chunks', null);
+  }
+
+  async unpublishPublicParcel(ppEh: EntryHash): Promise<ActionHash> {
+    return this.callBlocking('unpublish_public_parcel', ppEh);
   }
 
   async pullChunk(input: FetchChunkInput): Promise<[ParcelChunk, Link | null] | null> {

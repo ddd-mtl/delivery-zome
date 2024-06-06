@@ -8,7 +8,7 @@ use crate::determine_parcel_size;
 ///
 #[hdk_extern]
 #[feature(zits_blocking = "PublicParcel")]
-pub fn publish_manifest(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
+pub fn publish_public_parcel(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
    debug!(" START - {}", manifest_arg.description.name);
    std::panic::set_hook(Box::new(zome_panic_hook));
    if manifest_arg.chunks.is_empty() {
@@ -27,12 +27,12 @@ pub fn publish_manifest(manifest_arg: ParcelManifest) -> ExternResult<EntryHash>
 
    /// Create Description
    let pr = ParcelReference {
-      eh: manifest_eh,
+      parcel_eh: manifest_eh,
       description: manifest.description,
    };
    /// Commit PublicParcel entry
-   let desc_eh = hash_entry(pr.clone())?;
+   let pp_eh = hash_entry(pr.clone())?;
    let _ = create_entry_relaxed(DeliveryEntry::PublicParcel(pr))?;
    /// Done
-   Ok(desc_eh)
+   Ok(pp_eh)
 }

@@ -201,7 +201,7 @@ export interface DeliverySummary {
 
 /**  */
 export interface ParcelReference {
-  eh: EntryHash
+  parcel_eh: EntryHash
   description: ParcelDescription
 }
 
@@ -327,16 +327,16 @@ export enum ItemKind {
 /** Protocol for sending data between agents */
 export enum DeliveryGossipProtocolType {
 	PublicParcelPublished = 'PublicParcelPublished',
-	PublicParcelRemoved = 'PublicParcelRemoved',
+	PublicParcelUnpublished = 'PublicParcelUnpublished',
 	Ping = 'Ping',
 	Pong = 'Pong',
 }
 export type DeliveryGossipProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
-export type DeliveryGossipProtocolVariantPublicParcelRemoved = {PublicParcelRemoved: [EntryHash, Timestamp, ParcelReference]}
+export type DeliveryGossipProtocolVariantPublicParcelUnpublished = {PublicParcelUnpublished: [EntryHash, Timestamp, ParcelReference]}
 export type DeliveryGossipProtocolVariantPing = {Ping: null}
 export type DeliveryGossipProtocolVariantPong = {Pong: null}
 export type DeliveryGossipProtocol = 
- | DeliveryGossipProtocolVariantPublicParcelPublished | DeliveryGossipProtocolVariantPublicParcelRemoved | DeliveryGossipProtocolVariantPing | DeliveryGossipProtocolVariantPong;
+ | DeliveryGossipProtocolVariantPublicParcelPublished | DeliveryGossipProtocolVariantPublicParcelUnpublished | DeliveryGossipProtocolVariantPing | DeliveryGossipProtocolVariantPong;
 
 export interface DistributeParcelInput {
   recipients: AgentPubKey[]
@@ -474,7 +474,7 @@ export enum DeliverySignalProtocolType {
 	NewReceptionAck = 'NewReceptionAck',
 	NewPendingItem = 'NewPendingItem',
 	NewPublicParcel = 'NewPublicParcel',
-	RemovedPublicParcel = 'RemovedPublicParcel',
+	DeletedPublicParcel = 'DeletedPublicParcel',
 }
 export type DeliverySignalProtocolVariantSystem = {System: SystemSignalProtocol}
 export type DeliverySignalProtocolVariantGossip = {Gossip: DeliveryGossipProtocol}
@@ -490,9 +490,9 @@ export type DeliverySignalProtocolVariantNewReceptionProof = {NewReceptionProof:
 export type DeliverySignalProtocolVariantNewReceptionAck = {NewReceptionAck: [EntryHash, Timestamp, ReceptionAck]}
 export type DeliverySignalProtocolVariantNewPendingItem = {NewPendingItem: [EntryHash, PendingItem]}
 export type DeliverySignalProtocolVariantNewPublicParcel = {NewPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
-export type DeliverySignalProtocolVariantRemovedPublicParcel = {RemovedPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
+export type DeliverySignalProtocolVariantDeletedPublicParcel = {DeletedPublicParcel: [EntryHash, Timestamp, ParcelReference, AgentPubKey]}
 export type DeliverySignalProtocol = 
- | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantNewLocalManifest | DeliverySignalProtocolVariantNewLocalChunk | DeliverySignalProtocolVariantReceivedChunk | DeliverySignalProtocolVariantNewDistribution | DeliverySignalProtocolVariantNewNotice | DeliverySignalProtocolVariantNewNoticeAck | DeliverySignalProtocolVariantNewReply | DeliverySignalProtocolVariantNewReplyAck | DeliverySignalProtocolVariantNewReceptionProof | DeliverySignalProtocolVariantNewReceptionAck | DeliverySignalProtocolVariantNewPendingItem | DeliverySignalProtocolVariantNewPublicParcel | DeliverySignalProtocolVariantRemovedPublicParcel;
+ | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantNewLocalManifest | DeliverySignalProtocolVariantNewLocalChunk | DeliverySignalProtocolVariantReceivedChunk | DeliverySignalProtocolVariantNewDistribution | DeliverySignalProtocolVariantNewNotice | DeliverySignalProtocolVariantNewNoticeAck | DeliverySignalProtocolVariantNewReply | DeliverySignalProtocolVariantNewReplyAck | DeliverySignalProtocolVariantNewReceptionProof | DeliverySignalProtocolVariantNewReceptionAck | DeliverySignalProtocolVariantNewPendingItem | DeliverySignalProtocolVariantNewPublicParcel | DeliverySignalProtocolVariantDeletedPublicParcel;
 
 /** List of all Link kinds handled by this Zome */
 export enum LinkTypes {

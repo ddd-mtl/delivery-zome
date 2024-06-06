@@ -20,7 +20,7 @@ import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, decodeHashFromBase64,
 /** */
 export interface PublicParcelRecordMat {
     prEh: EntryHashB64,
-    ppEh: EntryHashB64,
+    parcelEh: EntryHashB64,
     description: ParcelDescription,
     creationTs: Timestamp,
     author: AgentPubKeyB64,
@@ -143,7 +143,7 @@ export function dematerializeParcelManifest(pm: ParcelManifestMat): ParcelManife
 export function materializePublicParcelRecord(ppr: PublicParcelRecord): PublicParcelRecordMat {
     return {
         prEh: encodeHashToBase64(ppr.pr_eh),
-        ppEh: encodeHashToBase64(ppr.pp_eh),
+        parcelEh: encodeHashToBase64(ppr.pp_eh),
         description: ppr.description,
         creationTs: ppr.creation_ts,
         author: encodeHashToBase64(ppr.author),
@@ -155,7 +155,7 @@ export function materializePublicParcelRecord(ppr: PublicParcelRecord): PublicPa
 export function dematerializePublicParcelRecord(ppr: PublicParcelRecordMat): PublicParcelRecord {
     return {
         pr_eh: decodeHashFromBase64(ppr.prEh),
-        pp_eh: decodeHashFromBase64(ppr.ppEh),
+        pp_eh: decodeHashFromBase64(ppr.parcelEh),
         description: ppr.description,
         creation_ts: ppr.creationTs,
         author: decodeHashFromBase64(ppr.author),

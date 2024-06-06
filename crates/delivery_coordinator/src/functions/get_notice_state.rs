@@ -29,12 +29,12 @@ pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, Vec<
    }
    /// If its a manifest, see if we have it and how many chunks
    if let ParcelKind::Manifest(_) = notice.summary.parcel_reference.description.kind_info {
-      let maybe_manifest = get_typed_from_eh::<ParcelManifest>(notice.summary.parcel_reference.eh.clone());
+      let maybe_manifest = get_typed_from_eh::<ParcelManifest>(notice.summary.parcel_reference.parcel_eh.clone());
       if maybe_manifest.is_err() {
          return Ok((NoticeState::Accepted, vec![]));
       }
 
-      let missing_chunks = determine_missing_chunks(notice.summary.parcel_reference.eh)?;
+      let missing_chunks = determine_missing_chunks(notice.summary.parcel_reference.parcel_eh)?;
       return Ok((NoticeState::PartiallyReceived, missing_chunks));
    }
    /// Done
