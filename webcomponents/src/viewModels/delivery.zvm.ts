@@ -1,4 +1,4 @@
-import {delay, Dictionary, ZomeViewModel} from "@ddd-qc/lit-happ";
+import {delay, Dictionary, LitHappSignal, prettyDate, SignalLog, SignalType, ZomeViewModel} from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {
     ActionHashB64,
@@ -15,7 +15,7 @@ import {
     Distribution,
     DistributionState, EntryInfo, EntryStateChange,
     NoticeState,
-    ParcelManifest,
+    ParcelManifest, ParcelReference,
 } from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 import {
@@ -231,6 +231,34 @@ export class DeliveryZvm extends ZomeViewModel {
                 }
             }
         }
+    }
+
+
+    /** */
+    dumpSignalLogs(signalLogs: SignalLog[]) {
+        console.warn(`App signals from zome "${this.zomeName}"`);
+        let appSignals: any[] = [];
+        signalLogs
+          .filter((log) => log.type == SignalType.LitHapp)
+          .map((log) => {
+              const signal = log.payload as LitHappSignal;
+              const delSignals = signal.signal as DeliverySignalProtocol[];
+              const from = encodeHashToBase64(signal.from) == this.cell.agentPubKey? "self" : encodeHashToBase64(signal.from);
+              for (const signal of delSignals) {
+                  if (DeliverySignalProtocolType.Gossip in signal) {
+                      const subType = Object.keys(signal.Gossip)[0];
+                      const pr = ((signal.Gossip as any)[subType] as any)[2] as ParcelReference;
+                      appSignals.push({timestamp: prettyDate(new Date(log.ts)), from, type: DeliverySignalProtocolType.Gossip, subType, hash: encodeHashToBase64(pr.parcel_eh)});
+                  }
+                  if (DeliverySignalProtocolType.Entry in signal) {
+                      const [entryInfo, deliveryEntryKind] = signal.Entry;
+                      const entryType = Object.keys(deliveryEntryKind)[0];
+                      appSignals.push({timestamp: prettyDate(new Date(log.ts)), from, type: DeliverySignalProtocolType.Entry, subType: entryType, payload: entryInfo.state, hash: encodeHashToBase64(entryInfo.hash)});
+                  }
+              }
+
+          });
+        console.table(appSignals);
     }
 
 

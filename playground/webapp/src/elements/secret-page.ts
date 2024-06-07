@@ -215,7 +215,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     return html`
       <div>
         <h1>Playground: secret 
-            <button type="button" @click=${() => {this._dvm.dumpLogs();}}>dump</button>
+            <button type="button" @click=${() => {this._dvm.dumpCallLogs();this._dvm.dumpSignalLogs("zDelivery");}}>dump</button>
             <button type="button" @click=${this.refresh}>Refresh</button>
         </h1>
         <div>
