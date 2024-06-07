@@ -187,21 +187,26 @@ export class DeliveryZvm extends ZomeViewModel {
                 console.log("signal PublicParcel", entryKind.PublicParcel);
                 const pr = entryKind.PublicParcel
                 const parcelEh = encodeHashToBase64(pr.parcel_eh);
-                this._perspective.publicParcels[parcelEh] = {
-                    prEh: hash,
-                    parcelEh,
-                    description: pr.description,
-                    creationTs: entryInfo.ts,
-                    author,
-                };
                 this._perspective.parcelReferences[hash] = parcelEh;
                 if (entryInfo.state == EntryStateChange.Deleted) {
                     const created = this._perspective.publicParcels[parcelEh];
-                    if (created) {
-                        this._perspective.publicParcels[parcelEh].deleteInfo = [entryInfo.ts, author];
-                    } else {
+                    if (!created) {
                         console.warn("Unknown deleted PublicParcel", parcelEh);
+                        this._perspective.publicParcels[parcelEh] = {
+                            prEh: hash,
+                            parcelEh,
+                            description: pr.description,
+                        };
                     }
+                    this._perspective.publicParcels[parcelEh].deleteInfo = [entryInfo.ts, author];
+                } else {
+                    this._perspective.publicParcels[parcelEh] = {
+                        prEh: hash,
+                        parcelEh,
+                        description: pr.description,
+                        creationTs: entryInfo.ts,
+                        author,
+                    };
                 }
             }
         }
@@ -491,7 +496,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 continue;
             }
             const [manifest, _ts2] = await this.fetchManifest(parcelEh, true);
-            manifests.push([materializeParcelManifest(manifest), pprm.creationTs, pprm.author]);
+            manifests.push([materializeParcelManifest(manifest), pprm.creationTs!, pprm.author!]);
         }
         this.notifySubscribers();
         return manifests;

@@ -22,8 +22,8 @@ export interface PublicParcelRecordMat {
     prEh: EntryHashB64,
     parcelEh: EntryHashB64,
     description: ParcelDescription,
-    creationTs: Timestamp,
-    author: AgentPubKeyB64,
+    creationTs?: Timestamp,
+    author?: AgentPubKeyB64,
     deleteInfo?: [Timestamp, AgentPubKeyB64],
 }
 
@@ -152,13 +152,13 @@ export function materializePublicParcelRecord(ppr: PublicParcelRecord): PublicPa
 }
 
 
-export function dematerializePublicParcelRecord(ppr: PublicParcelRecordMat): PublicParcelRecord {
-    return {
-        pr_eh: decodeHashFromBase64(ppr.prEh),
-        pp_eh: decodeHashFromBase64(ppr.parcelEh),
-        description: ppr.description,
-        creation_ts: ppr.creationTs,
-        author: decodeHashFromBase64(ppr.author),
-        deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], decodeHashFromBase64(ppr.deleteInfo[1])] : undefined,
-    }
-}
+// export function dematerializePublicParcelRecord(ppr: PublicParcelRecordMat): PublicParcelRecord {
+//     return {
+//         pr_eh: decodeHashFromBase64(ppr.prEh),
+//         pp_eh: decodeHashFromBase64(ppr.parcelEh),
+//         description: ppr.description,
+//         creation_ts: ppr.creationTs,
+//         author: decodeHashFromBase64(ppr.author),
+//         deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], decodeHashFromBase64(ppr.deleteInfo[1])] : undefined,
+//     }
+// }
