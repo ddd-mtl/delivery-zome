@@ -38,13 +38,17 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
       else { continue };
     let Ok(pr) = ParcelReference::try_from(details.entry)
       else { continue };
-    let first = DeliveryGossipProtocol::PublicParcelPublished((pr_eh.clone(), create.timestamp, pr.clone()));
-    signals.push(DeliverySignalProtocol::Gossip(first));
+    let pr_eh = AnyDhtHash::try_from(hash_entry(pr.clone())?).unwrap();
+    let kind = DeliveryEntryKind::PublicParcel(pr.clone());
+    let first = (EntryInfo {hash: pr_eh.clone(), state: EntryStateChange::Created, author: create.author, ts: create.timestamp}, kind.clone());
+    //let first = DeliveryEnty::Entry((pr_eh.clone(), create.timestamp, pr.clone()));
+    signals.push(DeliverySignalProtocol::Entry(first));
     if maybe_deletes.len() > 0 {
       let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
         else { panic!("get_link_details() should return a DeleteLink Action") };
-      let second = DeliveryGossipProtocol::PublicParcelUnpublished((pr_eh, delete.timestamp, pr));
-      signals.push(DeliverySignalProtocol::Gossip(second));
+      let second = (EntryInfo {hash: pr_eh.clone(), state: EntryStateChange::Deleted, author: delete.author, ts: delete.timestamp}, kind);
+      //let second = DeliveryGossipProtocol::PublicParcelUnpublished((pr_eh, delete.timestamp, pr));
+      signals.push(DeliverySignalProtocol::Entry(second));
     }
   }
   debug!(" signals count: {}", signals.len());

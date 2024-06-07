@@ -256,7 +256,6 @@ export class DeliveryZvm extends ZomeViewModel {
                       appSignals.push({timestamp: prettyDate(new Date(log.ts)), from, type: DeliverySignalProtocolType.Entry, subType: entryType, payload: entryInfo.state, hash: encodeHashToBase64(entryInfo.hash)});
                   }
               }
-
           });
         console.table(appSignals);
     }
