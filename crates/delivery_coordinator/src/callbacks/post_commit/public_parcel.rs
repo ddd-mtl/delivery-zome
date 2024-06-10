@@ -30,7 +30,7 @@ pub fn gossip_public_parcel(create_link: &CreateLink, ts: Timestamp, isCreate: b
    /// Get ParcelReference
    let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
    debug!("gossip_public_parcel({}) {}", isCreate, pr_eh);
-   let Ok(pr_record) = get_local_from_eh(pr_eh.clone())
+   let Ok(Some(pr_record)) = get(pr_eh.clone(), GetOptions::network())
      else { error!("Failed to get ParcelReference record"); return };
    let Ok(pr) = get_typed_from_record::<ParcelReference>(pr_record)
      else { error!("Failed to get ParcelReference"); return };
