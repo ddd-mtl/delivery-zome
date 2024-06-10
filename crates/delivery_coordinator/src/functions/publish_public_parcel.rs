@@ -23,7 +23,7 @@ pub fn publish_public_parcel(manifest_arg: ParcelManifest) -> ExternResult<Entry
    debug!(" Size : {} == {}?", manifest.description.size, computed_size);
    /// Commit PublicManifest entry
    let manifest_eh = hash_entry(manifest.clone())?;
-   let _ = create_entry_relaxed(DeliveryEntry::PublicManifest(manifest.clone()))?;
+   let _ = create_entry(DeliveryEntry::PublicManifest(manifest.clone()))?;
 
    /// Create Description
    let pr = ParcelReference {
@@ -31,8 +31,8 @@ pub fn publish_public_parcel(manifest_arg: ParcelManifest) -> ExternResult<Entry
       description: manifest.description,
    };
    /// Commit PublicParcel entry
-   let pp_eh = hash_entry(pr.clone())?;
-   let _ = create_entry_relaxed(DeliveryEntry::PublicParcel(pr))?;
+   let pr_eh = hash_entry(pr.clone())?;
+   let _ = create_entry(DeliveryEntry::PublicParcel(pr))?;
    /// Done
-   Ok(pp_eh)
+   Ok(pr_eh)
 }

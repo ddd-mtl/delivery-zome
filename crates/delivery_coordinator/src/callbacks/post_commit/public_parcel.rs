@@ -6,7 +6,7 @@ use crate::{DeliveryGossip, emit_gossip_signal};
 
 ///
 pub fn post_commit_create_PublicParcel(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
-   debug!("post_commit_PublicParcel() {:?}", create.entry_hash);
+   debug!("post_commit_create_PublicParcel() {:?}", create.entry_hash);
    let parcel_reference = ParcelReference::try_from(entry)?;
    /// Create Anchor
    let response = call_self("link_public_parcel", create.entry_hash.clone())?;
