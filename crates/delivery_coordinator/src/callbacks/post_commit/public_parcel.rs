@@ -8,7 +8,7 @@ use crate::{DeliveryGossip, emit_gossip_signal};
 pub fn post_commit_create_PublicParcel(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
    debug!("post_commit_create_PublicParcel() create: {}", create.entry_hash);
    let parcel_reference = ParcelReference::try_from(entry)?;
-   debug!("post_commit_create_PublicParcel() pr_eh = {}", hash_entry(parcel_reference.clone()).unwrap());
+   //debug!("post_commit_create_PublicParcel() pr_eh = {}", hash_entry(parcel_reference.clone()).unwrap());
    /// Create Anchor
    let response = call_self("link_public_parcel", create.entry_hash.clone())?;
    let _ah = decode_response::<ActionHash>(response)?;
@@ -30,10 +30,11 @@ pub fn post_commit_create_PublicParcel(_sah: &SignedActionHashed, create: &Creat
 pub fn gossip_public_parcel(create_link: &CreateLink, ts: Timestamp, isCreate: bool) {
    /// Get ParcelReference
    let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
-   debug!("gossip_public_parcel({}) {}", isCreate, pr_eh);
+   let base_eh = EntryHash::try_from(create_link.base_address.clone()).unwrap();
+   debug!("gossip_public_parcel({}) {} | base: {}", isCreate, pr_eh, base_eh);
    let maybe = get(pr_eh.clone(), GetOptions::local());
    if let Err(e) = maybe {
-      error!("Failed to get ParcelReference record: {:?}", e);
+      error!("get() ParcelReference record failed: {:?}", e);
       return;
    }
    let Some(pr_record) = maybe.unwrap()
