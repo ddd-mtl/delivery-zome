@@ -28,9 +28,9 @@ pub fn post_commit_create_PublicParcel(_sah: &SignedActionHashed, create: &Creat
 ///
 pub fn gossip_public_parcel(create_link: &CreateLink, ts: Timestamp, isCreate: bool) {
    /// Get ParcelReference
-   let pp_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
-   debug!("gossip_public_parcel({}) {}", isCreate, pp_eh);
-   let Ok(Some(pr_record)) = get(pp_eh.clone(), GetOptions::local())
+   let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
+   debug!("gossip_public_parcel({}) {}", isCreate, pr_eh);
+   let Ok(pr_record) = get_local_from_eh(pr_eh.clone())
      else { error!("Failed to get ParcelReference record"); return };
    let Ok(pr) = get_typed_from_record::<ParcelReference>(pr_record)
      else { error!("Failed to get ParcelReference"); return };
@@ -38,9 +38,9 @@ pub fn gossip_public_parcel(create_link: &CreateLink, ts: Timestamp, isCreate: b
    let dg = DeliveryGossip {
       from: agent_info().unwrap().agent_latest_pubkey,
       gossip: if isCreate {
-         DeliveryGossipProtocol::PublicParcelPublished((pp_eh, ts, pr))
+         DeliveryGossipProtocol::PublicParcelPublished((pr_eh, ts, pr))
       } else {
-         DeliveryGossipProtocol::PublicParcelUnpublished((pp_eh, ts, pr))
+         DeliveryGossipProtocol::PublicParcelUnpublished((pr_eh, ts, pr))
       },
    };
    let res = emit_gossip_signal(dg);
