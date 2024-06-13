@@ -60,8 +60,8 @@ export class SecretDvm extends DnaViewModel {
       return;
     }
     const sig = signal.payload as DeliverySignal;
-    for (const signal of sig.signal) {
-      /*await*/ this.handleDeliverySignal(signal, encodeHashToBase64(sig.from));
+    for (const pulse of sig.pulses) {
+      /*await*/ this.handleDeliverySignal(pulse, encodeHashToBase64(sig.from));
     }
   }
 

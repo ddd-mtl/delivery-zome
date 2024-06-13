@@ -11,7 +11,7 @@ pub struct SystemSignal {
 #[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
 pub struct DeliverySignal {
     pub from: AgentPubKey,
-    pub signal: Vec<DeliverySignalProtocol>,
+    pub pulses: Vec<DeliverySignalProtocol>,
 }
 
 

@@ -10,7 +10,7 @@ pub fn emit_self_signals(signals: Vec<DeliverySignalProtocol>) -> ExternResult<(
   }
   let signal = DeliverySignal {
     from: agent_info()?.agent_latest_pubkey,
-    signal: signals,
+    pulses: signals,
   };
   return emit_signal(&signal);
 }
@@ -20,7 +20,7 @@ pub fn emit_self_signals(signals: Vec<DeliverySignalProtocol>) -> ExternResult<(
 pub fn emit_self_signal(signal: DeliverySignalProtocol) -> ExternResult<()> {
   let signal = DeliverySignal {
     from: agent_info()?.agent_latest_pubkey,
-    signal: vec![signal],
+    pulses: vec![signal],
   };
   return emit_signal(&signal);
 }
@@ -30,7 +30,17 @@ pub fn emit_self_signal(signal: DeliverySignalProtocol) -> ExternResult<()> {
 pub fn emit_gossip_signal(dg: DeliveryGossip) -> ExternResult<()> {
   let signal = DeliverySignal {
     from: dg.from,
-    signal: vec![DeliverySignalProtocol::Gossip(dg.gossip)],
+    pulses: vec![DeliverySignalProtocol::Gossip(dg.gossip)],
+  };
+  return emit_signal(&signal);
+}
+
+
+///
+pub fn emit_self_gossip_signal(gossip: DeliveryGossipProtocol) -> ExternResult<()> {
+  let signal = DeliverySignal {
+    from: agent_info()?.agent_latest_pubkey,
+    pulses: vec![DeliverySignalProtocol::Gossip(gossip)],
   };
   return emit_signal(&signal);
 }

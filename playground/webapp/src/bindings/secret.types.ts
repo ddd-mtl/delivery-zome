@@ -428,7 +428,7 @@ export interface SystemSignal {
 
 export interface DeliverySignal {
   from: AgentPubKey
-  signal: DeliverySignalProtocol[]
+  pulses: DeliverySignalProtocol[]
 }
 
 /** Protocol for notifying the ViewModel (UI) of system level events */

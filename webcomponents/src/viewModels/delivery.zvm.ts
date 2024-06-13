@@ -62,11 +62,11 @@ export class DeliveryZvm extends ZomeViewModel {
     mySignalHandler(appSignal: AppSignal): void {
         const sig = appSignal.payload as DeliverySignal;
         console.log("DELIVERY received signal", sig);
-        if (!("signal" in sig)) {
+        if (!("pulses" in sig)) {
             return;
         }
-        for (const signal of sig.signal) {
-            /*await*/ this.handleDeliverySignal(signal, encodeHashToBase64(sig.from));
+        for (const pulse of sig.pulses) {
+            /*await*/ this.handleDeliverySignal(pulse, encodeHashToBase64(sig.from));
         }
         this.notifySubscribers();
     }
@@ -247,16 +247,16 @@ export class DeliveryZvm extends ZomeViewModel {
           .filter((log) => log.type == SignalType.LitHapp)
           .map((log) => {
               const signal = log.payload as LitHappSignal;
-              const delSignals = signal.signal as DeliverySignalProtocol[];
+              const pulses = signal.pulses as DeliverySignalProtocol[];
               const from = encodeHashToBase64(signal.from) == this.cell.agentPubKey? "self" : encodeHashToBase64(signal.from);
-              for (const signal of delSignals) {
-                  if (DeliverySignalProtocolType.Gossip in signal) {
-                      const subType = Object.keys(signal.Gossip)[0];
-                      const pr = ((signal.Gossip as any)[subType] as any)[2] as ParcelReference;
+              for (const pulse of pulses) {
+                  if (DeliverySignalProtocolType.Gossip in pulse) {
+                      const subType = Object.keys(pulse.Gossip)[0];
+                      const pr = ((pulse.Gossip as any)[subType] as any)[2] as ParcelReference;
                       appSignals.push({timestamp: prettyDate(new Date(log.ts)), from, type: DeliverySignalProtocolType.Gossip, subType, hash: encodeHashToBase64(pr.parcel_eh)});
                   }
-                  if (DeliverySignalProtocolType.Entry in signal) {
-                      const [entryInfo, deliveryEntryKind] = signal.Entry;
+                  if (DeliverySignalProtocolType.Entry in pulse) {
+                      const [entryInfo, deliveryEntryKind] = pulse.Entry;
                       const entryType = Object.keys(deliveryEntryKind)[0];
                       appSignals.push({timestamp: prettyDate(new Date(log.ts)), from, type: DeliverySignalProtocolType.Entry, subType: entryType, payload: entryInfo.state, hash: encodeHashToBase64(entryInfo.hash)});
                   }

@@ -24,7 +24,7 @@ use zome_delivery_types::*;
 use crate::*;
 
 
-/// Zome Callback
+///
 #[hdk_extern(infallible)]
 fn post_commit(signedActionList: Vec<SignedActionHashed>) {
    debug!("DELIVERY post_commit() called for {} actions. ({})", signedActionList.len(), zome_info().unwrap().id);
@@ -42,7 +42,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
             let Ok(Some(link_type)) = LinkTypes::from_type(create_link.zome_index, create_link.link_type)
               else { error!("CreateLink should have a LinkType"); continue };
             match link_type {
-               LinkTypes::PublicParcels => gossip_public_parcel(create_link, sah.hashed.content.timestamp(), false),
+               LinkTypes::PublicParcels => self_gossip_public_parcel(create_link, sah.hashed.content.timestamp(), false),
                _ => (),
             }
          },
@@ -52,7 +52,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
               else { error!("CreateLink should have a LinkType. Could be a Link from a different zome: {} ({})", create_link.link_type.0, create_link.zome_index); continue };
             debug!("CreateLink: {:?} ({}, {:?})", link_type, create_link.zome_index, create_link.link_type);
             match link_type {
-               LinkTypes::PublicParcels => gossip_public_parcel(create_link, sah.hashed.content.timestamp(), true),
+               LinkTypes::PublicParcels => self_gossip_public_parcel(create_link, sah.hashed.content.timestamp(), true),
                _ => (),
             }
          },

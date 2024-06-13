@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_types::*;
-use crate::{DeliveryGossip, emit_gossip_signal};
+use crate::{DeliveryGossip, emit_gossip_signal, emit_self_gossip_signal};
 
 
 ///
@@ -16,8 +16,8 @@ pub fn post_commit_create_PublicParcel(_sah: &SignedActionHashed, create: &Creat
 }
 
 
-///
-pub fn gossip_public_parcel(create_link: &CreateLink, ts: Timestamp, isCreate: bool) {
+/// TODO: Change this. Should not gossip self
+pub fn self_gossip_public_parcel(create_link: &CreateLink, ts: Timestamp, isCreate: bool) {
    /// Get ParcelReference
    let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
    let base_eh = EntryHash::try_from(create_link.base_address.clone()).unwrap();
@@ -32,15 +32,12 @@ pub fn gossip_public_parcel(create_link: &CreateLink, ts: Timestamp, isCreate: b
    let Ok(pr) = get_typed_from_record::<ParcelReference>(pr_record)
      else { error!("Failed to convert entry to ParcelReference"); return };
    /// Emit Signal
-   let dg = DeliveryGossip {
-      from: agent_info().unwrap().agent_latest_pubkey,
-      gossip: if isCreate {
-         DeliveryGossipProtocol::PublicParcelPublished((pr_eh, ts, pr))
-      } else {
-         DeliveryGossipProtocol::PublicParcelUnpublished((pr_eh, ts, pr))
-      },
+   let gossip = if isCreate {
+      DeliveryGossipProtocol::PublicParcelPublished((pr_eh, ts, pr))
+   } else {
+      DeliveryGossipProtocol::PublicParcelUnpublished((pr_eh, ts, pr))
    };
-   let res = emit_gossip_signal(dg);
+   let res = emit_self_gossip_signal(gossip);
    if let Err(e) = res {
       error!("Failed to get emit gossip signal: {:?}", e);
    }
