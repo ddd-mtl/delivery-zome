@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_delivery_types::*;
-use crate::{DeliveryGossip, emit_gossip_signal, emit_self_gossip_signal};
+use crate::*;
 
 
 ///
