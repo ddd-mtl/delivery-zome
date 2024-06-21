@@ -60,14 +60,24 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** Update the perspective accordingly */
     mySignalHandler(appSignal: AppSignal): void {
-        const sig = appSignal.payload as DeliverySignal;
-        console.log("DELIVERY received signal", sig);
-        if (!("pulses" in sig)) {
+        const deliverySignal = appSignal.payload as DeliverySignal;
+        console.log("DELIVERY received signal", deliverySignal);
+        if (!("pulses" in deliverySignal)) {
             return;
         }
-        for (const pulse of sig.pulses) {
-            /*await*/ this.handleDeliverySignal(pulse, encodeHashToBase64(sig.from));
+        /*await*/ this.handleSignal(deliverySignal);
+    }
+
+
+    /** */
+    async handleSignal(signal: DeliverySignal): Promise<void> {
+        const from = encodeHashToBase64(signal.from);
+        let all = [];
+        for (const pulse of signal.pulses) {
+            all.push(this.handleDeliverySignal(pulse, from));
         }
+        await Promise.all(all);
+        //console.log("deliveryZvm.handleSignal() notifySubscribers");
         this.notifySubscribers();
     }
 
