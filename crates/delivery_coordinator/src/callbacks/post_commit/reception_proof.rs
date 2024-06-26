@@ -4,8 +4,8 @@ use zome_delivery_types::*;
 use crate::*;
 
 ///
-pub fn post_commit_create_ReceptionProof(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
-   debug!("post_commit_ReceptionProof() {:?}", create.entry_hash);
+pub fn post_commit_create_ReceptionProof(_sah: &SignedActionHashed, eh: &EntryHash, entry: Entry) -> ExternResult<()> {
+   debug!("post_commit_ReceptionProof() {:?}", eh);
    let reception_proof = ReceptionProof::try_from(entry)?;
    /// Get DeliveryNotice
    let notice: DeliveryNotice = get_typed_from_eh(reception_proof.notice_eh.clone())?;
@@ -22,5 +22,5 @@ pub fn post_commit_create_ReceptionProof(_sah: &SignedActionHashed, create: &Cre
       notice.summary.distribution_strategy,
    )?;
    /// Done
-   Ok(DeliveryEntryKind::ReceptionProof(reception_proof))
+   Ok(())
 }

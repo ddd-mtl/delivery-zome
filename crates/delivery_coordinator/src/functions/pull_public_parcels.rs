@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use zome_utils::*;
-
+use zome_signals::*;
 use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 use crate::*;
@@ -29,29 +29,34 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
   let links = get_link_details(anchor_eh, LinkTypes::PublicParcels, None, GetOptions::network())?;
   //debug!(" pull_public_parcels_details() get_link_details = {}", links.clone().into_inner().len());
   debug!("   links count: {}", links.clone().into_inner().len());
-  let mut signals: Vec<DeliverySignalProtocol> = Vec::new();
+  let mut pulses: Vec<ZomeSignalProtocol> = Vec::new();
   for (create_sah, maybe_deletes) in links.into_inner() {
-    let Action::CreateLink(create) = create_sah.hashed.content
+    let Action::CreateLink(create_link) = create_sah.hashed.content
       else { panic!("get_link_details() should return a CreateLink Action") };
-    let pr_eh = EntryHash::try_from(create.target_address).unwrap();
+    let pr_eh = EntryHash::try_from(create_link.target_address).unwrap();
     let Ok(Some(Details::Entry(details))) = get_details(pr_eh.clone(), GetOptions::network())
       else { continue };
-    let Ok(pr) = ParcelReference::try_from(details.entry)
-      else { continue };
-    let pr_eh = AnyDhtHash::try_from(hash_entry(pr.clone())?).unwrap();
-    let kind = DeliveryEntryKind::PublicParcel(pr.clone());
-    let first = (EntryInfo {hash: pr_eh.clone(), author: create.author, ts: create.timestamp, state: EntryStateChange::Created}, kind.clone());
-    signals.push(DeliverySignalProtocol::Entry(first));
+    let Ok(_pr) = ParcelReference::try_from(details.entry.clone())
+      else { warn!("CreateLink to an entry which is not a ParcelReference"); continue };
+    assert!(!details.actions.is_empty());
+    let create_sah = details.actions[0].clone();
+    let create_record = Record::new(create_sah.clone(), Some(details.entry.clone()));
+    //let pr_eh = create_sah.action().entry_address();
+    //let pr_eh = AnyDhtHash::try_from(hash_entry(pr.clone())?).unwrap();
+    let entry_pulse = EntryPulse::try_from_new_record(create_record, false)?;
+    //let first = (EntryPulse {hash: pr_eh.clone(), author: create_link.author, ts: create_link.timestamp, state: EntryStateChange::Created}, kind.clone());
+    pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
     if maybe_deletes.len() > 0 {
-      let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
+      let Action::DeleteLink(_delete) = maybe_deletes[0].clone().hashed.content
         else { panic!("get_link_details() should return a DeleteLink Action") };
-      let second = (EntryInfo {hash: pr_eh.clone(), author: delete.author, ts: delete.timestamp, state: EntryStateChange::Deleted}, kind);
-      signals.push(DeliverySignalProtocol::Entry(second));
+      //let second = (EntryPulse {hash: pr_eh.clone(), author: delete.author, ts: delete.timestamp, state: EntryStateChange::Deleted}, kind);
+      let entry_pulse = EntryPulse::try_from_delete_record(create_sah.hashed, details.entry, false)?;
+      pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
     }
   }
-  debug!(" signals count: {}", signals.len());
-  /// Return as signals
-  emit_self_signals(signals)?;
+  debug!(" pulses count: {}", pulses.len());
+  /// Return as signal
+  emit_zome_signal(pulses)?;
   /// Done
   Ok(())
 }

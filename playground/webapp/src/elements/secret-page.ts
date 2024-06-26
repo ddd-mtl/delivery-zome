@@ -4,7 +4,7 @@ import { DnaElement } from "@ddd-qc/lit-happ";
 import { SecretDvm } from "../viewModels/secret.dvm";
 import {AgentPubKeyB64, decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {SecretPerspective} from "../viewModels/secret.zvm";
-import {ParcelReference} from "@ddd-qc/delivery";
+import {ParcelReference, TipProtocol, TipProtocolType} from "@ddd-qc/delivery";
 
 
 /**
@@ -78,7 +78,9 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     const timestamp = Date.now();
     const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
     console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
-    this._dvm.deliveryZvm.zomeProxy.broadcastPublicParcelGossip({peers, timestamp, pr, removed: false});
+    // FIXME
+    //const tip: TipProtocol = {timestamp, pr, removed: false}
+    //this._dvm.deliveryZvm.zomeProxy.castTip({peers, tip});
     /** */
     textInput.value = "";
   }
@@ -194,7 +196,8 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
             const timestamp = Date.now();
             const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
             console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
-            this._dvm.deliveryZvm.zomeProxy.broadcastPublicParcelGossip({peers, timestamp, pr, removed: true});
+            // FIXME
+            // this._dvm.deliveryZvm.zomeProxy.castTip({peers, timestamp, pr, removed: true});
         }}>Remove</button></li>`
       }
     )

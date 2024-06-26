@@ -9,6 +9,7 @@ use std::fmt::Debug;
 use hdk::prelude::*;
 
 use zome_utils::*;
+use zome_signals::*;
 use zome_delivery_types::*;
 
 /// Helper function for calling the delivery-zome via inter-zome call
@@ -71,14 +72,4 @@ pub fn call_delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> E
       }
    }
    Ok(())
-}
-
-
-///
-fn emit_system_signal(signal: SystemSignalProtocol) -> ExternResult<()> {
-   let signal = DeliverySignal {
-      from: agent_info()?.agent_latest_pubkey,
-      pulses: vec![DeliverySignalProtocol::System(signal)],
-   };
-   return emit_signal(&signal);
 }

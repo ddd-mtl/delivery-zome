@@ -17,7 +17,6 @@ mod utils_parcel;
 mod unpack_item;
 mod pack_item;
 mod broadcast_gossip;
-mod emit_signal;
 
 pub use dm_protocol::*;
 pub use receive::*;
@@ -27,7 +26,6 @@ pub use utils_parcel::*;
 pub use functions::*;
 pub use pack_item::*;
 pub use broadcast_gossip::*;
-pub use emit_signal::*;
 
 pub use callbacks::*;
 pub use self_call::*;

@@ -5,19 +5,15 @@ use crate::*;
 
 ///  Protocol for sending data between agents
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, SerializedBytes)]
-pub enum DeliveryGossipProtocol {
+pub enum DeliveryTipProtocol {
   PublicParcelPublished((EntryHash, Timestamp, ParcelReference)),
   PublicParcelUnpublished((EntryHash, Timestamp, ParcelReference)),
-  Ping,
-  Pong,
 }
-impl fmt::Display for DeliveryGossipProtocol {
+impl fmt::Display for DeliveryTipProtocol {
   fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
     let str: String = match self {
-      DeliveryGossipProtocol::PublicParcelPublished((_pr_eh, _ts, _pr, )) => format!("PublicParcel Published"),
-      DeliveryGossipProtocol::PublicParcelUnpublished((_pr_eh, _ts, _pr, )) => format!("PublicParcel Unpublished"),
-      DeliveryGossipProtocol::Ping => "Ping".to_owned(),
-      DeliveryGossipProtocol::Pong => "Pong".to_owned(),
+      DeliveryTipProtocol::PublicParcelPublished((_pr_eh, _ts, _pr, )) => format!("PublicParcel Published"),
+      DeliveryTipProtocol::PublicParcelUnpublished((_pr_eh, _ts, _pr, )) => format!("PublicParcel Unpublished"),
     };
     fmt.write_str(&str)?;
     Ok(())

@@ -9,13 +9,11 @@ mod constants;
 mod entry_types;
 mod inputs;
 mod properties;
-mod signal_protocol;
-mod gossip_protocol;
+mod tip_protocol;
 
 pub use delivery::*;
 pub use constants::*;
 pub use entry_types::*;
 pub use inputs::*;
 pub use properties::*;
-pub use signal_protocol::*;
-pub use gossip_protocol::*;
+pub use tip_protocol::*;

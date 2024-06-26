@@ -148,6 +148,112 @@ ValidationReceipt,
 /** User defined external dependencies */
 import {EntryDefIndex} from './deps.types';
 
+export interface CastTipInput {
+  tip: TipProtocol
+  peers: AgentPubKey[]
+}
+
+/**  */
+export interface ZomeSignal {
+  from: AgentPubKey
+  pulses: ZomeSignalProtocol[]
+}
+
+/**  */
+export enum ZomeSignalProtocolType {
+	System = 'System',
+	Entry = 'Entry',
+	Link = 'Link',
+	Tip = 'Tip',
+}
+export type ZomeSignalProtocolVariantSystem = {System: SystemSignalProtocol}
+export type ZomeSignalProtocolVariantEntry = {Entry: EntryPulse}
+export type ZomeSignalProtocolVariantLink = {Link: LinkPulse}
+export type ZomeSignalProtocolVariantTip = {Tip: TipProtocol}
+export type ZomeSignalProtocol = 
+ | ZomeSignalProtocolVariantSystem | ZomeSignalProtocolVariantEntry | ZomeSignalProtocolVariantLink | ZomeSignalProtocolVariantTip;
+
+/** Protocol for notifying the ViewModel (UI) of system level events */
+export type SystemSignalProtocolVariantPostCommitNewStart = {
+  type: "PostCommitNewStart"
+  app_entry_type: string
+}
+export type SystemSignalProtocolVariantPostCommitNewEnd = {
+  type: "PostCommitNewEnd"
+  app_entry_type: string
+  succeeded: boolean
+}
+export type SystemSignalProtocolVariantPostCommitDeleteStart = {
+  type: "PostCommitDeleteStart"
+  app_entry_type: string
+}
+export type SystemSignalProtocolVariantPostCommitDeleteEnd = {
+  type: "PostCommitDeleteEnd"
+  app_entry_type: string
+  succeeded: boolean
+}
+export type SystemSignalProtocolVariantSelfCallStart = {
+  type: "SelfCallStart"
+  zome_name: string
+  fn_name: string
+}
+export type SystemSignalProtocolVariantSelfCallEnd = {
+  type: "SelfCallEnd"
+  zome_name: string
+  fn_name: string
+  succeeded: boolean
+}
+export type SystemSignalProtocol =
+  | SystemSignalProtocolVariantPostCommitNewStart
+  | SystemSignalProtocolVariantPostCommitNewEnd
+  | SystemSignalProtocolVariantPostCommitDeleteStart
+  | SystemSignalProtocolVariantPostCommitDeleteEnd
+  | SystemSignalProtocolVariantSelfCallStart
+  | SystemSignalProtocolVariantSelfCallEnd;
+
+/** Used by UI ONLY. That's why we use B64 here. */
+export enum TipProtocolType {
+	Ping = 'Ping',
+	Pong = 'Pong',
+	Entry = 'Entry',
+	Link = 'Link',
+	App = 'App',
+}
+export type TipProtocolVariantPing = {Ping: AgentPubKey}
+export type TipProtocolVariantPong = {Pong: AgentPubKey}
+export type TipProtocolVariantEntry = {Entry: EntryPulse}
+export type TipProtocolVariantLink = {Link: LinkPulse}
+export type TipProtocolVariantApp = {App: Uint8Array}
+export type TipProtocol = 
+ | TipProtocolVariantPing | TipProtocolVariantPong | TipProtocolVariantEntry | TipProtocolVariantLink | TipProtocolVariantApp;
+
+/** Bool: True if state change just happened (real-time) */
+export enum StateChangeType {
+	Create = 'Create',
+	Update = 'Update',
+	Delete = 'Delete',
+}
+export type StateChangeVariantCreate = {Create: boolean}
+export type StateChangeVariantUpdate = {Update: boolean}
+export type StateChangeVariantDelete = {Delete: boolean}
+export type StateChange = 
+ | StateChangeVariantCreate | StateChangeVariantUpdate | StateChangeVariantDelete;
+
+export interface LinkPulse {
+  link: Link
+  state: StateChange
+}
+
+export interface EntryPulse {
+  ah: ActionHash
+  state: StateChange
+  ts: Timestamp
+  author: AgentPubKey
+  eh: EntryHash
+  def: AppEntryDef
+  bytes: Uint8Array
+}
+
 export const REMOTE_ENDPOINT = "receive_delivery_dm";
 
 export const DIRECT_SEND_TIMEOUT_MS = 1000;
@@ -324,20 +430,6 @@ export enum ItemKind {
 	AppEntryBytes = 'AppEntryBytes',
 }
 
-/** Protocol for sending data between agents */
-export enum DeliveryGossipProtocolType {
-	PublicParcelPublished = 'PublicParcelPublished',
-	PublicParcelUnpublished = 'PublicParcelUnpublished',
-	Ping = 'Ping',
-	Pong = 'Pong',
-}
-export type DeliveryGossipProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
-export type DeliveryGossipProtocolVariantPublicParcelUnpublished = {PublicParcelUnpublished: [EntryHash, Timestamp, ParcelReference]}
-export type DeliveryGossipProtocolVariantPing = {Ping: null}
-export type DeliveryGossipProtocolVariantPong = {Pong: null}
-export type DeliveryGossipProtocol = 
- | DeliveryGossipProtocolVariantPublicParcelPublished | DeliveryGossipProtocolVariantPublicParcelUnpublished | DeliveryGossipProtocolVariantPing | DeliveryGossipProtocolVariantPong;
-
 export interface DistributeParcelInput {
   recipients: AgentPubKey[]
   strategy: DistributionStrategy
@@ -422,94 +514,15 @@ export interface DeliveryProperties {
   minParcelNameLength: number
 }
 
-export interface SystemSignal {
-  System: SystemSignalProtocol
+/** Protocol for sending data between agents */
+export enum DeliveryTipProtocolType {
+	PublicParcelPublished = 'PublicParcelPublished',
+	PublicParcelUnpublished = 'PublicParcelUnpublished',
 }
-
-export interface DeliverySignal {
-  from: AgentPubKey
-  pulses: DeliverySignalProtocol[]
-}
-
-/** Protocol for notifying the ViewModel (UI) of system level events */
-export type SystemSignalProtocolVariantPostCommitStart = {
-  type: "PostCommitStart"
-  entry_type: string
-}
-export type SystemSignalProtocolVariantPostCommitEnd = {
-  type: "PostCommitEnd"
-  entry_type: string
-  succeeded: boolean
-}
-export type SystemSignalProtocolVariantSelfCallStart = {
-  type: "SelfCallStart"
-  zome_name: string
-  fn_name: string
-}
-export type SystemSignalProtocolVariantSelfCallEnd = {
-  type: "SelfCallEnd"
-  zome_name: string
-  fn_name: string
-  succeeded: boolean
-}
-export type SystemSignalProtocol =
-  | SystemSignalProtocolVariantPostCommitStart
-  | SystemSignalProtocolVariantPostCommitEnd
-  | SystemSignalProtocolVariantSelfCallStart
-  | SystemSignalProtocolVariantSelfCallEnd;
-
-/** Protocol for notifying the ViewModel (UI) */
-export enum DeliverySignalProtocolType {
-	System = 'System',
-	Gossip = 'Gossip',
-	Entry = 'Entry',
-}
-export type DeliverySignalProtocolVariantSystem = {System: SystemSignalProtocol}
-export type DeliverySignalProtocolVariantGossip = {Gossip: DeliveryGossipProtocol}
-export type DeliverySignalProtocolVariantEntry = {Entry: [EntryInfo, DeliveryEntryKind]}
-export type DeliverySignalProtocol = 
- | DeliverySignalProtocolVariantSystem | DeliverySignalProtocolVariantGossip | DeliverySignalProtocolVariantEntry;
-
-export enum EntryStateChange {
-	None = 'None',
-	Created = 'Created',
-	Deleted = 'Deleted',
-	Updated = 'Updated',
-}
-
-export interface EntryInfo {
-  hash: AnyDhtHash
-  ts: Timestamp
-  author: AgentPubKey
-  state: EntryStateChange
-}
-
-export enum DeliveryEntryKindType {
-	DeliveryNotice = 'DeliveryNotice',
-	ReceptionAck = 'ReceptionAck',
-	NoticeReply = 'NoticeReply',
-	Distribution = 'Distribution',
-	ParcelManifest = 'ParcelManifest',
-	ParcelChunk = 'ParcelChunk',
-	NoticeAck = 'NoticeAck',
-	ReplyAck = 'ReplyAck',
-	ReceptionProof = 'ReceptionProof',
-	PendingItem = 'PendingItem',
-	PublicParcel = 'PublicParcel',
-}
-export type DeliveryEntryKindVariantDeliveryNotice = {DeliveryNotice: DeliveryNotice}
-export type DeliveryEntryKindVariantReceptionAck = {ReceptionAck: ReceptionAck}
-export type DeliveryEntryKindVariantNoticeReply = {NoticeReply: NoticeReply}
-export type DeliveryEntryKindVariantDistribution = {Distribution: Distribution}
-export type DeliveryEntryKindVariantParcelManifest = {ParcelManifest: ParcelManifest}
-export type DeliveryEntryKindVariantParcelChunk = {ParcelChunk: ParcelChunk}
-export type DeliveryEntryKindVariantNoticeAck = {NoticeAck: NoticeAck}
-export type DeliveryEntryKindVariantReplyAck = {ReplyAck: ReplyAck}
-export type DeliveryEntryKindVariantReceptionProof = {ReceptionProof: ReceptionProof}
-export type DeliveryEntryKindVariantPendingItem = {PendingItem: PendingItem}
-export type DeliveryEntryKindVariantPublicParcel = {PublicParcel: ParcelReference}
-export type DeliveryEntryKind = 
- | DeliveryEntryKindVariantDeliveryNotice | DeliveryEntryKindVariantReceptionAck | DeliveryEntryKindVariantNoticeReply | DeliveryEntryKindVariantDistribution | DeliveryEntryKindVariantParcelManifest | DeliveryEntryKindVariantParcelChunk | DeliveryEntryKindVariantNoticeAck | DeliveryEntryKindVariantReplyAck | DeliveryEntryKindVariantReceptionProof | DeliveryEntryKindVariantPendingItem | DeliveryEntryKindVariantPublicParcel;
+export type DeliveryTipProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
+export type DeliveryTipProtocolVariantPublicParcelUnpublished = {PublicParcelUnpublished: [EntryHash, Timestamp, ParcelReference]}
+export type DeliveryTipProtocol = 
+ | DeliveryTipProtocolVariantPublicParcelPublished | DeliveryTipProtocolVariantPublicParcelUnpublished;
 
 /** List of all Link kinds handled by this Zome */
 export enum LinkTypes {
@@ -549,12 +562,6 @@ export type DeliveryEntryVariantPublicChunk = {PublicChunk: ParcelChunk}
 export type DeliveryEntryVariantPublicParcel = {PublicParcel: ParcelReference}
 export type DeliveryEntry = 
  | DeliveryEntryVariantDeliveryNotice | DeliveryEntryVariantReceptionAck | DeliveryEntryVariantNoticeReply | DeliveryEntryVariantDistribution | DeliveryEntryVariantPrivateChunk | DeliveryEntryVariantPrivateManifest | DeliveryEntryVariantReceptionProof | DeliveryEntryVariantNoticeAck | DeliveryEntryVariantReplyAck | DeliveryEntryVariantPendingItem | DeliveryEntryVariantPublicManifest | DeliveryEntryVariantPublicChunk | DeliveryEntryVariantPublicParcel;
-
-/**  */
-export interface DeliveryGossip {
-  from: AgentPubKey
-  gossip: DeliveryGossipProtocol
-}
 
 /**  */
 export interface DeliveryMessage {

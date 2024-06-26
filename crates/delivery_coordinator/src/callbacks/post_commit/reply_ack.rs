@@ -5,12 +5,12 @@ use zome_delivery_types::*;
 
 
 ///
-pub fn post_commit_create_ReplyAck(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
-   debug!("post_commit_create_ReplyAck() {:?}", create.entry_hash);
-   let reply_ack = ReplyAck::try_from(entry)?;
+pub fn post_commit_create_ReplyAck(_sah: &SignedActionHashed, eh: &EntryHash, entry: Entry) -> ExternResult<()> {
+   debug!("post_commit_create_ReplyAck() {:?}", eh);
+   let _reply_ack = ReplyAck::try_from(entry)?;
    /// Check signature
    // FIXME
    //let valid = verify_signature(reply.recipient, reply.recipient_signature, )?;
    /// Done
-   Ok(DeliveryEntryKind::ReplyAck(reply_ack))
+   Ok(())
 }

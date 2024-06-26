@@ -7,15 +7,22 @@ import {
     encodeHashToBase64, EntryHashB64, Timestamp
 } from "@holochain/client";
 import {
-    DeliveryEntryKind, DeliveryEntryKindType,
     DeliveryEntryType,
-    DeliveryGossipProtocolType,
-    DeliveryNotice, DeliverySignal, DeliverySignalProtocol, DeliverySignalProtocolType,
+    DeliveryNotice,
     DeliveryState,
     Distribution,
-    DistributionState, EntryInfo, EntryStateChange,
+    DistributionState,
+    EntryPulse,
+    LinkPulse, NoticeAck, NoticeReply,
     NoticeState,
-    ParcelManifest, ParcelReference,
+    ParcelChunk,
+    ParcelManifest,
+    ParcelReference, ReceptionAck, ReceptionProof, ReplyAck,
+    StateChangeType,
+    TipProtocol, TipProtocolVariantApp, TipProtocolVariantEntry, TipProtocolVariantLink,
+    ZomeSignal,
+    ZomeSignalProtocol,
+    ZomeSignalProtocolType, ZomeSignalProtocolVariantEntry, ZomeSignalProtocolVariantLink,
 } from "../bindings/delivery.types";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 import {
@@ -24,6 +31,16 @@ import {
     materializeParcelManifest,
     ParcelManifestMat,
 } from "./delivery.perspective";
+import {getVariantByIndex, prettyState} from "../utils";
+import {decode, encode} from "@msgpack/msgpack";
+
+
+/** */
+export interface CastLog {
+    ts: Timestamp,
+    tip: TipProtocol,
+    peers: AgentPubKeyB64[],
+}
 
 
 /**
@@ -58,9 +75,13 @@ export class DeliveryZvm extends ZomeViewModel {
 
     signalHandler?: AppSignalCb = this.mySignalHandler;
 
+
     /** Update the perspective accordingly */
     mySignalHandler(appSignal: AppSignal): void {
-        const deliverySignal = appSignal.payload as DeliverySignal;
+        if (appSignal.zome_name !== DeliveryZvm.DEFAULT_ZOME_NAME) {
+            return;
+        }
+        const deliverySignal = appSignal.payload as ZomeSignal;
         console.log("DELIVERY received signal", deliverySignal);
         if (!("pulses" in deliverySignal)) {
             return;
@@ -70,11 +91,26 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async handleSignal(signal: DeliverySignal): Promise<void> {
+    async handleSignal(signal: ZomeSignal): Promise<void> {
         const from = encodeHashToBase64(signal.from);
         let all = [];
-        for (const pulse of signal.pulses) {
-            all.push(this.handleDeliverySignal(pulse, from));
+        for (let pulse of signal.pulses) {
+            /** -- Handle Signal according to type -- */
+            /** Change tip to Entry or Link signal */
+            if (ZomeSignalProtocolType.Tip in pulse) {
+                pulse = this.handleTip(pulse.Tip as TipProtocol, from)!;
+                if (!pulse) {
+                    continue;
+                }
+            }
+            if (ZomeSignalProtocolType.Entry in pulse) {
+                all.push(this.handleEntrySignal(pulse.Entry as EntryPulse, from));
+                continue;
+            }
+            // if (ZomeSignalProtocolType.Link in pulse) {
+            //     all.push(this.handleLinkSignal(pulse.Link as LinkPulse, from));
+            //     continue;
+            // }
         }
         await Promise.all(all);
         //console.log("deliveryZvm.handleSignal() notifySubscribers");
@@ -83,28 +119,29 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async handleDeliverySignal(deliverySignal: DeliverySignalProtocol, from: AgentPubKeyB64): Promise<void> {
-        if (DeliverySignalProtocolType.Entry in deliverySignal) {
-            const [entryInfo, entryKind] = deliverySignal.Entry;
-            const hash = encodeHashToBase64(entryInfo.hash);
-            const author = encodeHashToBase64(entryInfo.author);
-            if (DeliveryEntryKindType.ParcelManifest in entryKind) {
-                console.log("signal ParcelManifest", entryKind.ParcelManifest);
-                const manifest = entryKind.ParcelManifest;
-                if (entryInfo.state != EntryStateChange.Deleted) {
-                    this.storeManifest(hash, entryInfo.ts, manifest);
+    async handleEntrySignal(pulse: EntryPulse, from: AgentPubKeyB64): Promise<void> {
+        const entryType = getVariantByIndex(DeliveryEntryType, pulse.def.entry_index);
+        const author = encodeHashToBase64(pulse.author);
+        const ah = encodeHashToBase64(pulse.ah);
+        const eh = encodeHashToBase64(pulse.eh);
+        const state = Object.keys(pulse.state)[0];
+        //const isNew = pulse.state[state];
+        switch(entryType) {
+            case "ParcelManifest":
+                const manifest = decode(pulse.bytes) as ParcelManifest;
+                if (state != StateChangeType.Delete) {
+                    this.storeManifest(eh, pulse.ts, manifest);
                 }
-            }
-            if (DeliveryEntryKindType.ParcelChunk in entryKind) {
-                console.log("signal ParcelChunk", entryKind.ParcelChunk);
-                const chunk = entryKind.ParcelChunk;
+            break;
+            case "ParcelChunk":
+                const chunk = decode(pulse.bytes) as ParcelChunk;
                 /** Update notice state if Chunk is not from us */
                 const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
                 if (manifestPair) {
                     const manifestEh = manifestPair[0];
                     const noticeEh = this._perspective.noticeByParcel[manifestEh];
                     if (noticeEh) {
-                        this._perspective.notices[noticeEh][3].delete(hash);
+                        this._perspective.notices[noticeEh][3].delete(eh);
                         if (this._perspective.notices[noticeEh][3].size == 0) {
                             this.zomeProxy.completeManifest(decodeHashFromBase64(manifestEh));
                         } else {
@@ -112,44 +149,37 @@ export class DeliveryZvm extends ZomeViewModel {
                         }
                     }
                 }
+            break;
+            case "Distribution": {
+                const distribution = decode(pulse.bytes) as Distribution;
+                this._perspective.distributions[ah] = [distribution, pulse.ts, DistributionState.Unsent, {}];
+                const [fullState, deliveryStates] = await this.getDistributionState(ah);
+                this._perspective.distributions[ah] = [distribution, pulse.ts, fullState, deliveryStates];
             }
-            if (DeliveryEntryKindType.Distribution in entryKind) {
-                console.log("signal Distribution", entryKind.Distribution);
-                const distribAh = hash;
-                const distribution = entryKind.Distribution;
-                this._perspective.distributions[distribAh] = [distribution, entryInfo.ts, DistributionState.Unsent, {}];
-                const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
-                this._perspective.distributions[distribAh] = [distribution, entryInfo.ts, fullState, deliveryStates];
-                ;
-            }
-            if (DeliveryEntryKindType.DeliveryNotice in entryKind) {
-                console.log("signal DeliveryNotice", entryKind.DeliveryNotice);
-                const notice = entryKind.DeliveryNotice;
-                this._perspective.notices[hash] = [notice, entryInfo.ts, NoticeState.Unreplied, new Set()];
-                this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = hash;
-
-                const [state, pct] = await this.getNoticeState(hash);
-                this._perspective.notices[hash] = [notice, entryInfo.ts, state, pct];
-                this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = hash;
-
-            }
-            if (DeliveryEntryKindType.NoticeAck in entryKind) {
-                console.log("signal NoticeAck", entryKind.NoticeAck);
-                const noticeAck = entryKind.NoticeAck;
+            break;
+            case "DeliveryNotice":
+                const notice = decode(pulse.bytes) as DeliveryNotice;
+                this._perspective.notices[eh] = [notice, pulse.ts, NoticeState.Unreplied, new Set()];
+                this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = eh;
+                const [noticeState, pct] = await this.getNoticeState(eh);
+                this._perspective.notices[eh] = [notice, pulse.ts, noticeState, pct];
+                this._perspective.noticeByParcel[encodeHashToBase64(notice.summary.parcel_reference.parcel_eh)] = eh;
+            break;
+            case "NoticeAck": {
+                const noticeAck = decode(pulse.bytes) as NoticeAck;
                 const distribAh = encodeHashToBase64(noticeAck.distribution_ah);
                 const recipient = encodeHashToBase64(noticeAck.recipient);
                 if (!this._perspective.noticeAcks[distribAh]) {
                     this._perspective.noticeAcks[distribAh] = {};
                 }
-                this._perspective.noticeAcks[distribAh][recipient] = [noticeAck, entryInfo.ts];
+                this._perspective.noticeAcks[distribAh][recipient] = [noticeAck, pulse.ts];
                 const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
                 this._perspective.distributions[distribAh][2] = fullState;
                 this._perspective.distributions[distribAh][3] = deliveryStates;
-
             }
-            if (DeliveryEntryKindType.NoticeReply in entryKind) {
-                console.log("signal NoticeReply", entryKind.NoticeReply);
-                const reply = entryKind.NoticeReply;
+            break;
+            case "NoticeReply": {
+                const reply = decode(pulse.bytes) as NoticeReply;
                 const noticeEh = encodeHashToBase64((reply.notice_eh));
                 this._perspective.replies[noticeEh] = reply;
                 this._perspective.notices[noticeEh][2] = NoticeState.Refused;
@@ -157,119 +187,180 @@ export class DeliveryZvm extends ZomeViewModel {
                     this._perspective.notices[noticeEh][2] = NoticeState.Accepted;
                 }
             }
-            if (DeliveryEntryKindType.ReplyAck in entryKind) {
-                console.log("signal ReplyAck", entryKind.ReplyAck);
-                const replyAck = entryKind.ReplyAck;
+            break;
+            case "ReplyAck": {
+                const replyAck = decode(pulse.bytes) as ReplyAck;
                 const distribAh = encodeHashToBase64(replyAck.distribution_ah);
                 const recipient = encodeHashToBase64(replyAck.recipient);
                 if (!this._perspective.replyAcks[distribAh]) {
                     this._perspective.replyAcks[distribAh] = {};
                 }
-                this._perspective.replyAcks[distribAh][recipient] = [replyAck, entryInfo.ts];
+                this._perspective.replyAcks[distribAh][recipient] = [replyAck, pulse.ts];
                 const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
                 this._perspective.distributions[distribAh][2] = fullState;
                 this._perspective.distributions[distribAh][3] = deliveryStates;
             }
-            if (DeliveryEntryKindType.ReceptionProof in entryKind) {
-                console.log("signal ReceptionProof", entryKind.ReceptionProof);
-                const receptionProof = entryKind.ReceptionProof;
+            break;
+            case "ReceptionProof": {
+                const receptionProof = decode(pulse.bytes) as ReceptionProof;
                 const noticeEh = encodeHashToBase64(receptionProof.notice_eh);
-                this._perspective.receptions[noticeEh] = [receptionProof, entryInfo.ts];
+                this._perspective.receptions[noticeEh] = [receptionProof, pulse.ts];
                 this._perspective.notices[noticeEh][2] = NoticeState.Received;
             }
-            if (DeliveryEntryKindType.ReceptionAck in entryKind) {
-                console.log("signal NewReceptionAck", entryKind.ReceptionAck);
-                const receptionAck = entryKind.ReceptionAck;
+            break;
+            case "NewReceptionAck": {
+                const receptionAck = decode(pulse.bytes) as ReceptionAck;
                 const distribAh = encodeHashToBase64(receptionAck.distribution_ah);
                 const recipient = encodeHashToBase64(receptionAck.recipient);
                 if (!this._perspective.receptionAcks[distribAh]) {
                     this._perspective.receptionAcks[distribAh] = {};
                 }
-                this._perspective.receptionAcks[distribAh][recipient] = [receptionAck, entryInfo.ts];
+                this._perspective.receptionAcks[distribAh][recipient] = [receptionAck, pulse.ts];
                 const [fullState, deliveryStates] = await this.getDistributionState(distribAh)
                 this._perspective.distributions[distribAh][2] = fullState;
                 this._perspective.distributions[distribAh][3] = deliveryStates;
             }
-            // if (DeliveryEntryKindType.PendingItem in entryKind) {
-            //     console.log("signal PendingItem", entryKind.PendingItem);
-            // }
-            if (DeliveryEntryKindType.PublicParcel in entryKind) {
-                console.log("signal PublicParcel", entryKind.PublicParcel);
-                const pr = entryKind.PublicParcel
+            break;
+            case "PublicParcel": {
+                const pr = decode(pulse.bytes) as ParcelReference;
                 const parcelEh = encodeHashToBase64(pr.parcel_eh);
-                this._perspective.parcelReferences[hash] = parcelEh;
-                if (entryInfo.state == EntryStateChange.Deleted) {
+                this._perspective.parcelReferences[eh] = parcelEh;
+                if (state == StateChangeType.Delete) {
                     const created = this._perspective.publicParcels[parcelEh];
                     if (!created) {
                         console.warn("Unknown deleted PublicParcel", parcelEh);
                         this._perspective.publicParcels[parcelEh] = {
-                            prEh: hash,
+                            prEh: eh,
                             parcelEh,
                             description: pr.description,
                         };
                     }
-                    this._perspective.publicParcels[parcelEh].deleteInfo = [entryInfo.ts, author];
+                    this._perspective.publicParcels[parcelEh].deleteInfo = [pulse.ts, author];
                 } else {
                     this._perspective.publicParcels[parcelEh] = {
-                        prEh: hash,
+                        prEh: eh,
                         parcelEh,
                         description: pr.description,
-                        creationTs: entryInfo.ts,
+                        creationTs: pulse.ts,
                         author,
                     };
                 }
             }
-        }
-        if (DeliverySignalProtocolType.Gossip in deliverySignal) {
-            console.log("signal Gossip", deliverySignal.Gossip);
-            const gossip = deliverySignal.Gossip;
-            if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {
-                console.log("Gossip signal PublicParcelPublished", gossip.PublicParcelPublished);
-                const pr = gossip.PublicParcelPublished[2];
-                const ts = gossip.PublicParcelPublished[1];
-                const prEh = encodeHashToBase64(gossip.PublicParcelPublished[0]);
-                const parcelEh = encodeHashToBase64(pr.parcel_eh);
-                this._perspective.publicParcels[parcelEh] = {prEh, parcelEh: parcelEh, description: pr.description, creationTs: ts, author: from};
-                this._perspective.parcelReferences[prEh] = parcelEh;
-            }
-            if (DeliveryGossipProtocolType.PublicParcelUnpublished in gossip) {
-                console.log("Gossip signal PublicParcelUnpublished", gossip.PublicParcelUnpublished);
-                const pr = gossip.PublicParcelUnpublished[2];
-                const del_ts = gossip.PublicParcelUnpublished[1];
-                //const pr_eh = gossip.PublicParcelUnpublished[0];
-                const parcelEh = encodeHashToBase64(pr.parcel_eh);
-                const created = this._perspective.publicParcels[parcelEh];
-                if (created) {
-                    this._perspective.publicParcels[parcelEh].deleteInfo = [del_ts, from];
-                } else {
-                    console.warn("Unknown unpublished PublicParcel", parcelEh);
-                }
-            }
+            break;
         }
     }
 
 
     /** */
+    handleTip(tip: TipProtocol, from: AgentPubKeyB64): ZomeSignalProtocol | undefined {
+        const type = Object.keys(tip)[0];
+        console.log("handleTip()", type, tip);
+        /* Handle tip according to its type */
+        switch (type) {
+            case "Ping":
+            case "Pong":
+                break;
+            case "Entry": return {Entry: (tip as TipProtocolVariantEntry).Entry} as ZomeSignalProtocolVariantEntry; break;
+            case "Link": return {Link: (tip as TipProtocolVariantLink).Link} as ZomeSignalProtocolVariantLink; break;
+            case "App": {
+                // const gossip = decode((tip as TipProtocolVariantApp).App) as DeliveryGossipProtocol;
+                // if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {
+                //     console.log("Gossip signal PublicParcelPublished", gossip.PublicParcelPublished);
+                //     const pr = gossip.PublicParcelPublished[2];
+                //     const ts = gossip.PublicParcelPublished[1];
+                //     const prEh = encodeHashToBase64(gossip.PublicParcelPublished[0]);
+                //     const parcelEh = encodeHashToBase64(pr.parcel_eh);
+                //     this._perspective.publicParcels[parcelEh] = {
+                //         prEh,
+                //         parcelEh: parcelEh,
+                //         description: pr.description,
+                //         creationTs: ts,
+                //         author: from
+                //     };
+                //     this._perspective.parcelReferences[prEh] = parcelEh;
+                // }
+                // if (DeliveryGossipProtocolType.PublicParcelUnpublished in gossip) {
+                //     console.log("Gossip signal PublicParcelUnpublished", gossip.PublicParcelUnpublished);
+                //     const pr = gossip.PublicParcelUnpublished[2];
+                //     const del_ts = gossip.PublicParcelUnpublished[1];
+                //     //const pr_eh = gossip.PublicParcelUnpublished[0];
+                //     const parcelEh = encodeHashToBase64(pr.parcel_eh);
+                //     const created = this._perspective.publicParcels[parcelEh];
+                //     if (created) {
+                //         this._perspective.publicParcels[parcelEh].deleteInfo = [del_ts, from];
+                //     } else {
+                //         console.warn("Unknown unpublished PublicParcel", parcelEh);
+                //     }
+                // }
+            }
+        }
+    }
+
+
+    private _castLogs: CastLog[] = [];
+
+    /** */
+    async broadcastTip(tip: TipProtocol, agents?: Array<AgentPubKeyB64>): Promise<void> {
+        agents = agents? agents : this._dvmParent.livePeers;
+        /** Skip if no recipients or sending to self only */
+        const filtered = agents.filter((key) => key != this.cell.agentPubKey);
+        const tipType = Object.keys(tip)[0];
+        console.log(`ThreadsZvm.broadcastTip() Sending Tip "${tipType}" to`, filtered, this.cell.agentPubKey);
+        //if (!agents || agents.length == 1 && agents[0] === this._cellProxy.cell.agentPubKey) {
+        if (!filtered || filtered.length == 0) {
+            console.log("ThreadsZvm.broadcastTip() aborted: No recipients")
+            return;
+        }
+        /** Broadcast */
+        const peers = agents.map((key) => decodeHashFromBase64(key));
+        await this.zomeProxy.castTip({tip, peers});
+        /** Log */
+        this._castLogs.push({ts: Date.now(), tip, peers: agents});
+    }
+
+
+    /** */
+    dumpCastLogs() {
+        console.warn(`Tips sent from zome "${this.zomeName}"`);
+        let appSignals: any[] = [];
+        this._castLogs.map((log) => {
+            const type = Object.keys(log.tip)[0];
+            const payload = (log.tip as any)[type];
+            appSignals.push({timestamp: prettyDate(new Date(log.ts)), type, payload, count: log.peers.length, first: log.peers[0]});
+        });
+        console.table(appSignals);
+    }
+
+
+    /** */
     dumpSignalLogs(signalLogs: SignalLog[]) {
-        console.warn(`App signals from zome "${this.zomeName}"`);
+        this.dumpCastLogs();
+        console.warn(`Signals received from zome "${this.zomeName}"`);
         let appSignals: any[] = [];
         signalLogs
           .filter((log) => log.type == SignalType.LitHapp)
           .map((log) => {
               const signal = log.payload as LitHappSignal;
-              const pulses = signal.pulses as DeliverySignalProtocol[];
+              const pulses = signal.pulses as ZomeSignalProtocol[];
+              const timestamp = prettyDate(new Date(log.ts));
               const from = encodeHashToBase64(signal.from) == this.cell.agentPubKey? "self" : encodeHashToBase64(signal.from);
               for (const pulse of pulses) {
-                  if (DeliverySignalProtocolType.Gossip in pulse) {
-                      const subType = Object.keys(pulse.Gossip)[0];
-                      const pr = ((pulse.Gossip as any)[subType] as any)[2] as ParcelReference;
-                      appSignals.push({timestamp: prettyDate(new Date(log.ts)), from, type: DeliverySignalProtocolType.Gossip, subType, hash: encodeHashToBase64(pr.parcel_eh)});
+                  if (ZomeSignalProtocolType.Tip in pulse) {
+                      const tip: TipProtocol = pulse.Tip;
+                      const subType = Object.keys(tip)[0];
+                      appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Tip, subType, payload: tip});
                   }
-                  if (DeliverySignalProtocolType.Entry in pulse) {
-                      const [entryInfo, deliveryEntryKind] = pulse.Entry;
-                      const entryType = Object.keys(deliveryEntryKind)[0];
-                      appSignals.push({timestamp: prettyDate(new Date(log.ts)), from, type: DeliverySignalProtocolType.Entry, subType: entryType, payload: entryInfo.state, hash: encodeHashToBase64(entryInfo.hash)});
+                  if (ZomeSignalProtocolType.Entry in pulse) {
+                      const entryPulse = pulse.Entry;
+                      const entryType = getVariantByIndex(DeliveryEntryType, entryPulse.def.entry_index);
+                      const threadsEntry = decode(entryPulse.bytes); //as ThreadsEntry;
+                      appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Entry, subType: entryType, state: prettyState(entryPulse.state), payload: threadsEntry, hash: encodeHashToBase64(entryPulse.ah)});
                   }
+                  // if (ZomeSignalProtocolType.Link in pulse) {
+                  //     const linkPulse = pulse.Link;
+                  //     const hash = `${encodeHashToBase64((linkPulse.link as any).base)} -> ${encodeHashToBase64(linkPulse.link.target)}`;
+                  //     appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Link, subType: getVariantByIndex(DeliveryLinkType, linkPulse.link.link_type), state: prettyState(linkPulse.state), payload: linkPulse.link.tag, hash});
+                  // }
               }
           });
         console.table(appSignals);

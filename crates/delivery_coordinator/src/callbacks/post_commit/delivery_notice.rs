@@ -6,8 +6,8 @@ use crate::*;
 
 
 ///
-pub fn post_commit_create_DeliveryNotice(_sah: &SignedActionHashed, create: &Create, entry: Entry) -> ExternResult<DeliveryEntryKind> {
-    debug!("post_commit_DeliveryNotice() {:?}", create.entry_hash);
+pub fn post_commit_create_DeliveryNotice(_sah: &SignedActionHashed, eh: &EntryHash, entry: Entry) -> ExternResult<()> {
+    debug!("post_commit_DeliveryNotice() {:?}", eh);
     let me = agent_info()?.agent_latest_pubkey;
     let notice = DeliveryNotice::try_from(entry)?;
     /// Create NoticeAck and pack it
@@ -34,12 +34,12 @@ pub fn post_commit_create_DeliveryNotice(_sah: &SignedActionHashed, create: &Cre
         /// Automatically reject notice
         debug!("Already have this parcel");
         let input = RespondToNoticeInput {
-            notice_eh: create.entry_hash.clone(),
+            notice_eh: eh.to_owned(),
             has_accepted: false,
         };
         let _response = call_self("respond_to_notice", input)?;
         //let _reply_eh: EntryHash = decode_response(response)?;
     }
     /// Done
-    Ok(DeliveryEntryKind::DeliveryNotice(notice))
+    Ok(())
 }

@@ -8,12 +8,12 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"entry_defs", 
 	"get_zome_info", 
 	"get_dna_info",
+	"cast_tip",
 
 
 
 
 
-	"broadcast_public_parcel_gossip",
 	"commit_pending_item",
 	"commit_private_chunks",
 	"commit_private_manifest",
