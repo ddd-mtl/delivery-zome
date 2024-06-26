@@ -96,7 +96,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 }
             }
             if (DeliveryEntryKindType.ParcelChunk in entryKind) {
-                console.log("signal NewLocalChunk", entryKind.ParcelChunk);
+                console.log("signal ParcelChunk", entryKind.ParcelChunk);
                 const chunk = entryKind.ParcelChunk;
                 /** Update notice state if Chunk is not from us */
                 const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
@@ -134,7 +134,7 @@ export class DeliveryZvm extends ZomeViewModel {
 
             }
             if (DeliveryEntryKindType.NoticeAck in entryKind) {
-                console.log("signal NewNoticeAck", entryKind.NoticeAck);
+                console.log("signal NoticeAck", entryKind.NoticeAck);
                 const noticeAck = entryKind.NoticeAck;
                 const distribAh = encodeHashToBase64(noticeAck.distribution_ah);
                 const recipient = encodeHashToBase64(noticeAck.recipient);
