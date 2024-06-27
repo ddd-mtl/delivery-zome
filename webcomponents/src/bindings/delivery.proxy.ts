@@ -156,7 +156,7 @@ import {deliveryFunctionNames} from './delivery.fn';
  *
  */
 export class DeliveryProxy extends ZomeProxy {
-  static readonly DEFAULT_ZOME_NAME = "delivery"
+  static readonly DEFAULT_ZOME_NAME = "zDelivery"
   static readonly FN_NAMES = deliveryFunctionNames
  
   async castTip(input: CastTipInput): Promise<void> {

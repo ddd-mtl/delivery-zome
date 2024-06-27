@@ -1,17 +1,17 @@
 import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import { DnaElement } from "@ddd-qc/lit-happ";
-import { SecretDvm } from "../viewModels/secret.dvm";
+import {SecretDvm, SecretDvmPerspective} from "../viewModels/secret.dvm";
 import {AgentPubKeyB64, decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {SecretPerspective} from "../viewModels/secret.zvm";
-import {ParcelReference, TipProtocol, TipProtocolType} from "@ddd-qc/delivery";
+import {DeliveryPerspective, ParcelReference, TipProtocol, TipProtocolType} from "@ddd-qc/delivery";
 
 
 /**
  * @element
  */
 @customElement("secret-page")
-export class SecretPage extends DnaElement<unknown, SecretDvm> {
+export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
   constructor() {
     super(SecretDvm.DEFAULT_BASE_ROLE_NAME)
@@ -31,6 +31,9 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
   @property({type: Object, attribute: false, hasChanged: (_v, _old) => true})
   secretPerspective!: SecretPerspective;
 
+  @property({type: Object, attribute: false, hasChanged: (_v, _old) => true})
+  deliveryPerspective!: DeliveryPerspective;
+
   /** -- Methods -- */
 
   /** */
@@ -39,21 +42,15 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     if (oldDvm) {
       console.log("\t Unsubscribed to secretZvm's roleName = ", oldDvm.secretZvm.cell.name)
       oldDvm.secretZvm.unsubscribe(this);
+      oldDvm.deliveryZvm.unsubscribe(this);
     }
     newDvm.secretZvm.subscribe(this, 'secretPerspective');
+    newDvm.deliveryZvm.subscribe(this, 'deliveryPerspective');
     console.log("\t Subscribed secretZvm's roleName = ", newDvm.secretZvm.cell.name)
     newDvm.probeAll();
     this._sender = undefined;
-    //this.taskerPerspective = emptyTaskerPerspective;
     this._initialized = true;
   }
-
-
-
-  // /** After first render only */
-  // async firstUpdated() {
-  //   this._initialized = true;
-  // }
 
 
   /** */
@@ -73,14 +70,6 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     }
     let res = await this._dvm.publishMessage(textInput.value);
     console.log("onPublishMessage() res:", res);
-    /** Notify peers that we published something */
-    const pr = {description: res[1].description, parcel_eh: decodeHashFromBase64(res[0])} as ParcelReference;
-    const timestamp = Date.now();
-    const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
-    console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
-    // FIXME
-    //const tip: TipProtocol = {timestamp, pr, removed: false}
-    //this._dvm.deliveryZvm.zomeProxy.castTip({peers, tip});
     /** */
     textInput.value = "";
   }
@@ -98,27 +87,6 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     console.log("onSendSecret() res:", res);
     textInput.value = "";
   }
-
-
-  // /** */
-  // async onCreateTask(e: any) {
-  //   //console.log("onCreateTask() CALLED", e)
-  //   if (!this._selectedListEh) {
-  //     return;
-  //   }
-  //   /* Assignee */
-  //   const assigneeSelect = this.shadowRoot!.getElementById("selectedAgent") as HTMLSelectElement;
-  //   const assignee = assigneeSelect.value;
-  //   //console.log("Assignee value:", assignee);
-  //   /* Title */
-  //   const input = this.shadowRoot!.getElementById("itemTitleInput") as HTMLInputElement;
-  //   //console.log(input)
-  //   let res = this._dvm.taskerZvm.createTaskItem(input.value, assignee, this._selectedListEh!);
-  //   //console.log("onCreateList res:", res)
-  //   input.value = "";
-  // }
-
-
 
 
   /** */
@@ -152,7 +120,7 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
 
   /** */
   render() {
-    console.log("<secret-page.render()> render()", this._initialized, this._sender, this.secretPerspective);
+    console.log("<secret-page.render()> render()", this._initialized, this._sender, this.secretPerspective, this._dvm.perspective);
     if (!this._initialized) {
       return html`<span>Loading...</span>`;
     }
@@ -175,34 +143,35 @@ export class SecretPage extends DnaElement<unknown, SecretDvm> {
     )
 
 
-    // const ppLi = Object.values(this._dvm.deliveryZvm.perspective.publicParcels).map(
-    //   (pd) => {
-    //     return html`<li value="${pd.reference.eh}">${encodeHashToBase64(pd.reference.eh)} (${pd.size} octets)</li>`
+    // const ppLi = Object.values(this.deliveryPerspective.publicParcels).map(
+    //   (pprm) => {
+    //     //return html`<li value="${pd.reference.eh}">${encodeHashToBase64(pd.reference.eh)} (${pd.size} octets)</li>`
+    //     //console.log("" + index + ". " + agentIdB64)
+    //     if (pprm.deleteInfo) {
+    //       return html``;
+    //     }
+    //     const prEh = decodeHashFromBase64(pprm.prEh);
+    //     return html`<li>${msg} <button style="margin-left:20px" @click=${async (e:any) => {
+    //       const _res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(prEh);
+    //     }}>Remove</button></li>`
     //   }
     // )
 
     const ppLi = Object.entries(this._dvm.perspective.publicMessages).map(
       ([parcelEh, msg]) => {
         //console.log("" + index + ". " + agentIdB64)
-        const pprm = this._dvm.deliveryZvm.perspective.publicParcels[parcelEh];
+        const pprm = this.deliveryPerspective.publicParcels[parcelEh];
         if (pprm.deleteInfo) {
           return html``;
         }
         const prEh = decodeHashFromBase64(pprm.prEh);
         return html`<li>${msg} <button style="margin-left:20px" @click=${async (e:any) => {
-          const res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(prEh);
-            /** Notify peers that we published something */
-            const pr = {description: pprm.description, parcel_eh: decodeHashFromBase64(parcelEh)} as ParcelReference;
-            const timestamp = Date.now();
-            const peers = this._dvm.agentDirectoryZvm.perspective.agents.map((peer) => decodeHashFromBase64(peer));
-            console.log("onPublishMessage(). notifying...", peers.map((p) => encodeHashToBase64(p)));
-            // FIXME
-            // this._dvm.deliveryZvm.zomeProxy.castTip({peers, timestamp, pr, removed: true});
+          const _res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(prEh);
         }}>Remove</button></li>`
       }
     )
 
-    const remLi = Object.entries(this._dvm.deliveryZvm.perspective.publicParcels).map(
+    const remLi = Object.entries(this.deliveryPerspective.publicParcels).map(
       ([_parcelEh, pprm]) => {
         //console.log("remLi:", pprm.deleteInfo);
         if (!pprm.deleteInfo) {

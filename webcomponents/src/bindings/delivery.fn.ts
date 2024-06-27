@@ -64,5 +64,5 @@ export function generateDeliveryZomeFunctionsArray(zomeName: ZomeName): [ZomeNam
 }
 
 
-/** Tuple array of all zome function names with default zome name "delivery" */
-export const deliveryZomeFunctions: [ZomeName, FunctionName][] = generateDeliveryZomeFunctionsArray("delivery");
+/** Tuple array of all zome function names with default zome name "zDelivery" */
+export const deliveryZomeFunctions: [ZomeName, FunctionName][] = generateDeliveryZomeFunctionsArray("zDelivery");

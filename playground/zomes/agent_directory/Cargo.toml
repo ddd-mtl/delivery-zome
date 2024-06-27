@@ -8,5 +8,5 @@ crate-type = ["cdylib", "rlib"]
 
 
 [dependencies]
-agent_directory_zome = {git = "https://github.com/ddd-mtl/agent-directory-zome", package = "agent_directory"}
+agent_directory_zome = {git = "https://github.com/ddd-mtl/agent-directory-zome", package = "agent_directory", branch = "hdk-3.1"}
 hdk.workspace = true

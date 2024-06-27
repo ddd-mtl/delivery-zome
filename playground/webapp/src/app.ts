@@ -4,7 +4,7 @@ import { SecretDvm } from "./viewModels/secret.dvm";
 import {
   HvmDef, HappElement, Cell
 } from "@ddd-qc/lit-happ";
-import {AgentPubKeyB64, DnaDefinition} from "@holochain/client";
+import {AdminWebsocket, AgentPubKeyB64, DnaDefinition, ListAppsResponse} from "@holochain/client";
 
 
 /**
@@ -14,8 +14,11 @@ export class SecretApp extends HappElement {
 
   /** Ctor */
   constructor() {
-    super(Number(process.env.HC_PORT), undefined, process.env.ADMIN_PORT? new URL(`ws://localhost:${process.env.ADMIN_PORT}`) : undefined);
+    const adminUrl = process.env.ADMIN_PORT? new URL(`ws://localhost:${process.env.ADMIN_PORT}`) : undefined;
+    console.log("SecretApp.ctor()", adminUrl);
+    super(Number(process.env.HC_PORT), undefined, adminUrl);
   }
+
 
   /** HvmDef */
   static readonly HVM_DEF: HvmDef = {

@@ -23,7 +23,7 @@ pub fn post_commit_create_NoticeReply(_sah: &SignedActionHashed, eh: &EntryHash,
     } else {
         /// Fetch parcel if it has been accepted by this agent (recipient)
         if let SendSuccessKind::OK_DIRECT(_signature) = res.unwrap() {
-            // FIXME
+            // TODO: verify_signature
             // let valid = verify_signature(recipient.clone(), signature.clone(), pending_item.clone())?;
             // if !valid {
             //     warn!("Sender failed to sign NoticeReply. Suspicious behavior.");

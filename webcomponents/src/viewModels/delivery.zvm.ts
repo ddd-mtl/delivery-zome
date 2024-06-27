@@ -54,6 +54,9 @@ export class DeliveryZvm extends ZomeViewModel {
         return this._zomeProxy as DeliveryProxy;
     }
 
+    private _castLogs: CastLog[] = [];
+
+
     /** -- ViewModel -- */
 
     private _perspective: DeliveryPerspective = createDeliveryPerspective();
@@ -78,6 +81,7 @@ export class DeliveryZvm extends ZomeViewModel {
 
     /** Update the perspective accordingly */
     mySignalHandler(appSignal: AppSignal): void {
+        console.log("DeliveryZvm.mySignalHandler()", appSignal, DeliveryZvm.DEFAULT_ZOME_NAME);
         if (appSignal.zome_name !== DeliveryZvm.DEFAULT_ZOME_NAME) {
             return;
         }
@@ -113,7 +117,7 @@ export class DeliveryZvm extends ZomeViewModel {
             // }
         }
         await Promise.all(all);
-        //console.log("deliveryZvm.handleSignal() notifySubscribers");
+        console.log("deliveryZvm.handleSignal() notifySubscribers");
         this.notifySubscribers();
     }
 
@@ -125,7 +129,8 @@ export class DeliveryZvm extends ZomeViewModel {
         const ah = encodeHashToBase64(pulse.ah);
         const eh = encodeHashToBase64(pulse.eh);
         const state = Object.keys(pulse.state)[0];
-        //const isNew = pulse.state[state];
+        const isNew = (pulse.state as any)[state];
+        let tip: TipProtocol | undefined = undefined;
         switch(entryType) {
             case "ParcelManifest":
                 const manifest = decode(pulse.bytes) as ParcelManifest;
@@ -245,8 +250,15 @@ export class DeliveryZvm extends ZomeViewModel {
                         author,
                     };
                 }
+                if (isNew && from != this.cell.agentPubKey) {
+                    tip = {Entry: pulse}
+                }
             }
             break;
+        }
+        /** */
+        if (tip) {
+            await this.broadcastTip(tip);
         }
     }
 
@@ -254,7 +266,7 @@ export class DeliveryZvm extends ZomeViewModel {
     /** */
     handleTip(tip: TipProtocol, from: AgentPubKeyB64): ZomeSignalProtocol | undefined {
         const type = Object.keys(tip)[0];
-        console.log("handleTip()", type, tip);
+        console.log("handleTip()", type, from, tip);
         /* Handle tip according to its type */
         switch (type) {
             case "Ping":
@@ -262,42 +274,11 @@ export class DeliveryZvm extends ZomeViewModel {
                 break;
             case "Entry": return {Entry: (tip as TipProtocolVariantEntry).Entry} as ZomeSignalProtocolVariantEntry; break;
             case "Link": return {Link: (tip as TipProtocolVariantLink).Link} as ZomeSignalProtocolVariantLink; break;
-            case "App": {
-                // const gossip = decode((tip as TipProtocolVariantApp).App) as DeliveryGossipProtocol;
-                // if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {
-                //     console.log("Gossip signal PublicParcelPublished", gossip.PublicParcelPublished);
-                //     const pr = gossip.PublicParcelPublished[2];
-                //     const ts = gossip.PublicParcelPublished[1];
-                //     const prEh = encodeHashToBase64(gossip.PublicParcelPublished[0]);
-                //     const parcelEh = encodeHashToBase64(pr.parcel_eh);
-                //     this._perspective.publicParcels[parcelEh] = {
-                //         prEh,
-                //         parcelEh: parcelEh,
-                //         description: pr.description,
-                //         creationTs: ts,
-                //         author: from
-                //     };
-                //     this._perspective.parcelReferences[prEh] = parcelEh;
-                // }
-                // if (DeliveryGossipProtocolType.PublicParcelUnpublished in gossip) {
-                //     console.log("Gossip signal PublicParcelUnpublished", gossip.PublicParcelUnpublished);
-                //     const pr = gossip.PublicParcelUnpublished[2];
-                //     const del_ts = gossip.PublicParcelUnpublished[1];
-                //     //const pr_eh = gossip.PublicParcelUnpublished[0];
-                //     const parcelEh = encodeHashToBase64(pr.parcel_eh);
-                //     const created = this._perspective.publicParcels[parcelEh];
-                //     if (created) {
-                //         this._perspective.publicParcels[parcelEh].deleteInfo = [del_ts, from];
-                //     } else {
-                //         console.warn("Unknown unpublished PublicParcel", parcelEh);
-                //     }
-                // }
-            }
+            case "App":
+                break;
         }
     }
 
-
-    private _castLogs: CastLog[] = [];
 
     /** */
     async broadcastTip(tip: TipProtocol, agents?: Array<AgentPubKeyB64>): Promise<void> {

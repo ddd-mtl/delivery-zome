@@ -1,13 +1,25 @@
 import {Dictionary, DnaViewModel, ZvmDef} from "@ddd-qc/lit-happ";
 import {
+  DeliveryEntryType,
+  DeliveryNotice,
   DeliveryZvm,
+  EntryPulse,
   ParcelKindType,
-  ParcelManifest, StateChangeType, ZomeSignal, ZomeSignalProtocol, ZomeSignalProtocolType,
+  ParcelManifest,
+  ParcelReference,
+  StateChangeType,
+  TipProtocol,
+  TipProtocolVariantEntry, TipProtocolVariantLink,
+  ZomeSignal,
+  ZomeSignalProtocol,
+  ZomeSignalProtocolType, ZomeSignalProtocolVariantEntry, ZomeSignalProtocolVariantLink,
 } from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
 import {AgentPubKey, AgentPubKeyB64, AppSignalCb, encodeHashToBase64, EntryHashB64, ZomeName} from "@holochain/client";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
+import {getVariantByIndex} from "@ddd-qc/delivery/dist/utils";
+import {decode} from "@msgpack/msgpack";
 
 
 /** */
@@ -48,82 +60,96 @@ export class SecretDvm extends DnaViewModel {
   private _perspective: SecretDvmPerspective = {publicMessages: {}};
 
 
-
-  /** */
-  mySignalHandler(signal: AppSignal): void {
-    console.log("secretDvm received signal", signal);
-    if (!("signal" in (signal.payload as Object))) {
+  /** Update the perspective accordingly */
+  mySignalHandler(appSignal: AppSignal): void {
+    console.log("secretDvm received signal", appSignal);
+    if (appSignal.zome_name !== DeliveryZvm.DEFAULT_ZOME_NAME) {
       return;
     }
-    const sig = signal.payload as ZomeSignal;
-    for (const pulse of sig.pulses) {
-      /*await*/ this.handleDeliverySignal(pulse, encodeHashToBase64(sig.from));
+    const deliverySignal = appSignal.payload as ZomeSignal;
+    if (!("pulses" in deliverySignal)) {
+      return;
+    }
+    for (const pulse of deliverySignal.pulses) {
+      /*await*/ this.handleDeliverySignal(pulse, encodeHashToBase64(deliverySignal.from));
     }
   }
 
 
   /** */
-  async handleDeliverySignal(deliverySignal: ZomeSignalProtocol, from: AgentPubKeyB64): Promise<void> {
-    // if (ZomeSignalProtocolType.Entry in deliverySignal) {
-    //   const [entryInfo, entryKind] = deliverySignal.Entry;
-    //   const hash = encodeHashToBase64(entryInfo.hash);
-    //   const author = encodeHashToBase64(entryInfo.author);
-    //   /** Automatically accept parcel from secret zome */
-    //   if (ZomeSignalProtocolType.DeliveryNotice in entryKind) {
-    //     const notice = entryKind.DeliveryNotice;
-    //     console.log("ADDING DeliveryNotice. parcel_description:", notice.summary.parcel_reference.description);
-    //     if (ParcelKindType.AppEntry in notice.summary.parcel_reference.description.kind_info) {
-    //       if ("secret_integrity" === notice.summary.parcel_reference.description.zome_origin) {
-    //         this.deliveryZvm.acceptDelivery(hash);
-    //       }
-    //     } else {
-    //      /// split_secret is a Manifest reference
-    //      // if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
-    //      //  this.deliveryZvm.acceptDelivery(noticeEh);
-    //      // }
-    //     }
-    //   }
-    //   if (ZomeSignalProtocolType.PublicParcel in entryKind) {
-    //     console.log("signal PublicParcel", entryKind.PublicParcel);
-    //     const parcelEh = encodeHashToBase64(entryKind.PublicParcel.parcel_eh);
-    //     if (entryInfo.state == StateChangeType.Delete) {
-    //       //const auth = encodeHashToBase64(deliverySignal.DeletedPublicParcel[3]);
-    //       delete this._perspective.publicMessages[parcelEh];
-    //       this.notifySubscribers();
-    //     } else {
-    //       this.handlePublicParcelPublished(parcelEh, this.cell.agentPubKey);
-    //     }
-    //   }
-    // }
-    // /** */
-    // if (ZomeSignalProtocolType.Tip in deliverySignal) {
-    //   console.log("signal Gossip", deliverySignal.Gossip);
-    //   const gossip = deliverySignal.Gossip;
-    //   if (DeliveryGossipProtocolType.PublicParcelPublished in gossip) {
-    //     console.log("Gossip signal PublicParcelPublished", gossip.PublicParcelPublished);
-    //     const parcelEh = encodeHashToBase64(gossip.PublicParcelPublished[2].parcel_eh);
-    //     this.handlePublicParcelPublished(parcelEh, from);
-    //   }
-    //   if (DeliveryGossipProtocolType.PublicParcelUnpublished in gossip) {
-    //     console.log("Gossip signal PublicParcelUnpublished", gossip.PublicParcelUnpublished);
-    //     const parcelEh = encodeHashToBase64(gossip.PublicParcelUnpublished[2].parcel_eh);
-    //     delete this._perspective.publicMessages[parcelEh];
-    //     this.notifySubscribers();
-    //   }
-    // }
+  async handleDeliverySignal(pulse: ZomeSignalProtocol, from: AgentPubKeyB64): Promise<void> {
+    /** Handle Tip first: change tip to Entry pulse */
+    if (ZomeSignalProtocolType.Tip in pulse) {
+      const tip = pulse.Tip as TipProtocol;
+      const tipType = Object.keys(tip)[0];
+      /* Handle tip according to its type */
+      switch (tipType) {
+        case "Ping":
+        case "Pong":
+          break;
+        case "Entry": {
+          const entryPulse = (tip as TipProtocolVariantEntry).Entry;
+          pulse = {Entry: entryPulse}
+        } break;
+        case "Link":
+        case "App":
+          break;
+      }
+    }
+    /** */
+    if (ZomeSignalProtocolType.Entry in pulse) {
+      const entryPulse = pulse.Entry as EntryPulse;
+      const entryType = getVariantByIndex(DeliveryEntryType, entryPulse.def.entry_index);
+      const author = encodeHashToBase64(entryPulse.author);
+      const ah = encodeHashToBase64(entryPulse.ah);
+      const eh = encodeHashToBase64(entryPulse.eh);
+      const state = Object.keys(entryPulse.state)[0];
+      const isNew = (entryPulse.state as any)[state];
+      /** Automatically accept parcel from secret zome */
+      switch (entryType) {
+        case "DeliveryNotice": {
+          const notice = decode(entryPulse.bytes) as DeliveryNotice;
+          console.log("ADDING DeliveryNotice. parcel_description:", notice.summary.parcel_reference.description);
+          if (ParcelKindType.AppEntry in notice.summary.parcel_reference.description.kind_info) {
+            if ("secret_integrity" === notice.summary.parcel_reference.description.zome_origin) {
+              this.deliveryZvm.acceptDelivery(eh);
+            }
+          } else {
+            /// split_secret is a Manifest reference
+            // if ("secret_integrity" === deliverySignal.NewNotice[1].summary.parcel_reference.Manifest.from_zome) {
+            //  this.deliveryZvm.acceptDelivery(noticeEh);
+            // }
+          }
+        }
+        break;
+        case "PublicParcel": {
+          const pr = decode(entryPulse.bytes) as ParcelReference;
+          const parcelEh = encodeHashToBase64(pr.parcel_eh);
+          if (state == StateChangeType.Delete) {
+            //const auth = encodeHashToBase64(deliverySignal.DeletedPublicParcel[3]);
+            delete this._perspective.publicMessages[parcelEh];
+            this.notifySubscribers();
+          } else {
+            this.handlePublicParcelPublished(parcelEh, this.cell.agentPubKey);
+          }
+        }
+        break;
+      }
+    }
   }
 
 
   /** */
   handlePublicParcelPublished(parcelEh: EntryHashB64, from: AgentPubKeyB64) {
-    if (from != this.cell.agentPubKey) {
-      this.probeAll();
-    } else {
+    console.log("SecretDvm.handlePublicParcelPublished()", parcelEh, from);
+    // if (from != this.cell.agentPubKey) {
+    //   this.probeAll();
+    // } else {
       this.deliveryZvm.getParcelData(parcelEh).then((msg: string) => {
         this._perspective.publicMessages[parcelEh] = msg;
         this.notifySubscribers();
       })
-    }
+    //}
   }
 
 
