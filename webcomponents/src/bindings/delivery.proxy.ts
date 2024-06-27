@@ -168,10 +168,6 @@ export class DeliveryProxy extends ZomeProxy {
 
 
 
-  async commitPendingItem(input: CommitPendingItemInput): Promise<ActionHash> {
-    return this.callBlocking('commit_pending_item', input);
-  }
-
   async commitPrivateChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
     return this.callBlocking('commit_private_chunks', chunks);
   }
@@ -216,6 +212,10 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_notice_state', noticeEh);
   }
 
+  async processInbox(): Promise<ActionHash[]> {
+    return this.call('process_inbox', null);
+  }
+
   async publishChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
     return this.call('publish_chunks', chunks);
   }
@@ -224,12 +224,12 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('publish_chunk', chunk);
   }
 
-  async publishPublicParcel(manifestArg: ParcelManifest): Promise<EntryHash> {
-    return this.callZomeBlockPostCommit('PublicParcel','publish_public_parcel', manifestArg);
+  async publishPendingItem(input: CommitPendingItemInput): Promise<ActionHash> {
+    return this.callBlocking('publish_pending_item', input);
   }
 
-  async pullInbox(): Promise<ActionHash[]> {
-    return this.call('pull_inbox', null);
+  async publishPublicParcel(manifestArg: ParcelManifest): Promise<EntryHash> {
+    return this.callZomeBlockPostCommit('PublicParcel','publish_public_parcel', manifestArg);
   }
 
   async pullPublicParcelsDetails(): Promise<void> {

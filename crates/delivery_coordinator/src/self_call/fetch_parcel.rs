@@ -38,7 +38,7 @@ pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Opt
    /// Request Parcel
    /// Check Inbox first
    if notice.summary.distribution_strategy.can_dht() {
-      let pending_parcel_pairs = get_all_inbox_items(Some(ItemKind::AppEntryBytes))?;
+      let pending_parcel_pairs = probe_all_inbox_items(Some(ItemKind::AppEntryBytes))?;
       /// Check each Inbox link
       for (pending_parcel, link) in &pending_parcel_pairs {
          assert!(pending_parcel.kind == ItemKind::AppEntryBytes);

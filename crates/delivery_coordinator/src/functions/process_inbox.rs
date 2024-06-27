@@ -6,15 +6,14 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 use crate::*;
 
-/// Zome Function
 /// Get All inbox items waiting for this agent (pending links) and process them.
 /// Return ActionHashs of parcels committed during the pull
 #[hdk_extern]
-pub fn pull_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
+pub fn process_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    debug!("START");
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all inbox items
-   let pending_pairs = get_all_inbox_items(None)?;
+   let pending_pairs = probe_all_inbox_items(None)?;
    debug!("pending items count: {}", pending_pairs.len());
    /// Convert Each Item
    let mut entry_map = HashMap::new();

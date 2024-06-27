@@ -61,7 +61,7 @@ pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
 
 
 ///
-pub fn get_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
+pub fn probe_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
     /// Get typed targets
     let my_agent_eh = EntryHash::from(agent_info()?.agent_latest_pubkey);
     let mut pending_pairs = get_typed_from_links::<PendingItem>(link_input(

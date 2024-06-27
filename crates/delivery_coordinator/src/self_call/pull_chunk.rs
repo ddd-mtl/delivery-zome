@@ -27,7 +27,7 @@ fn pull_chunk_inner(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
    if notice.summary.distribution_strategy.can_dht() {
-      let pending_chunk_pairs = get_all_inbox_items(Some(ItemKind::ParcelChunk))?;
+      let pending_chunk_pairs = probe_all_inbox_items(Some(ItemKind::ParcelChunk))?;
       /// Check each Inbox link
       for (pending_chunk, link) in &pending_chunk_pairs {
          assert!(pending_chunk.kind == ItemKind::ParcelChunk);

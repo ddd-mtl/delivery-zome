@@ -18,7 +18,6 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
       entry: entry.clone(),
       maybe_link_ah: maybe_link_ah.clone(),
    };
-
    /// Make sure CreateLink exists
    if let Some(link_hh) = maybe_link_ah {
       let maybe_el = get(link_hh.clone(), GetOptions::default())?;
@@ -26,10 +25,11 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
          return zome_error!("call_commit_parcel(): CreateLink not found.");
       }
    }
-
+   /// Get zome_name
    debug!("call_commit_parcel() zome_names = {:?}", dna_info()?.zome_names);
    let zome_name = dna_info()?.zome_names[notice.summary.parcel_reference.description.zome_index().0 as usize].clone();
    debug!("call_commit_parcel()  zome_name = {}", zome_name);
+   /// call_remote
    let response = call_remote(
       agent_info()?.agent_latest_pubkey,
       DELIVERY_ZOME_NAME, //zome_name,

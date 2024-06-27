@@ -427,7 +427,7 @@ export class DeliveryZvm extends ZomeViewModel {
     async probeDht(denyNotify?: boolean): Promise<void> {
         //this._perspective.publicParcels = {};
         await this.zomeProxy.pullPublicParcelsDetails();
-        const inbox = await this.zomeProxy.pullInbox();
+        const inbox = await this.zomeProxy.processInbox();
         this._perspective.inbox = inbox.map((ah) => encodeHashToBase64(ah));
         this._perspective.probeDhtCount += 1;
         if (denyNotify == undefined) this.notifySubscribers();
@@ -435,10 +435,9 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async fetchManifest(manifestEh: EntryHashB64, preventNotify?: boolean): Promise<[ParcelManifest, Timestamp]> {
+    async fetchManifest(manifestEh: EntryHashB64): Promise<[ParcelManifest, Timestamp, AgentPubKeyB64]> {
         const [manifest, ts, author] = await this.zomeProxy.fetchPublicManifest(decodeHashFromBase64(manifestEh));
-        this.storeManifest(manifestEh, ts, manifest);
-        return [manifest, ts];
+        return [manifest, ts, encodeHashToBase64(author)];
     }
 
 
@@ -448,7 +447,7 @@ export class DeliveryZvm extends ZomeViewModel {
         // if (!pd) {
         //     return Promise.reject("Unknown PublicParcel");
         // }
-        const [manifest, _ts] = await this.fetchManifest(parcelEh);
+        const [manifest, _ts, _author] = await this.fetchManifest(parcelEh);
         let dataB64 = "";
         for (const chunk_eh of manifest.chunks) {
             let chunk = await this.zomeProxy.fetchChunk(chunk_eh);
@@ -579,10 +578,9 @@ export class DeliveryZvm extends ZomeViewModel {
             if (pprm.deleteInfo) {
                 continue;
             }
-            const [manifest, _ts2] = await this.fetchManifest(parcelEh, true);
+            const [manifest, _ts2, _author] = await this.fetchManifest(parcelEh);
             manifests.push([materializeParcelManifest(manifest), pprm.creationTs!, pprm.author!]);
         }
-        this.notifySubscribers();
         return manifests;
     }
 
