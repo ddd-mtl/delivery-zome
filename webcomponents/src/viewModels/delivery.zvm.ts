@@ -321,9 +321,9 @@ export class DeliveryZvm extends ZomeViewModel {
         console.warn(`Signals received from zome "${this.zomeName}"`);
         let appSignals: any[] = [];
         signalLogs
-          .filter((log) => log.type == SignalType.LitHapp)
+          .filter((log) => log.type == SignalType.Zome)
           .map((log) => {
-              const signal = log.payload as LitHappSignal;
+              const signal = log.zomeSignal as ZomeSignal;
               const pulses = signal.pulses as ZomeSignalProtocol[];
               const timestamp = prettyDate(new Date(log.ts));
               const from = encodeHashToBase64(signal.from) == this.cell.agentPubKey? "self" : encodeHashToBase64(signal.from);
