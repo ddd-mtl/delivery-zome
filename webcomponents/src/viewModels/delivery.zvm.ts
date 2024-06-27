@@ -32,7 +32,7 @@ import {
     ParcelManifestMat,
 } from "./delivery.perspective";
 import {getVariantByIndex, prettyState} from "../utils";
-import {decode, encode} from "@msgpack/msgpack";
+import {decode} from "@msgpack/msgpack";
 
 
 /** */
@@ -132,13 +132,15 @@ export class DeliveryZvm extends ZomeViewModel {
         const isNew = (pulse.state as any)[state];
         let tip: TipProtocol | undefined = undefined;
         switch(entryType) {
-            case "ParcelManifest":
+            case "PrivateManifest":
+            case "PublicManifest":
                 const manifest = decode(pulse.bytes) as ParcelManifest;
                 if (state != StateChangeType.Delete) {
                     this.storeManifest(eh, pulse.ts, manifest);
                 }
             break;
-            case "ParcelChunk":
+            case "PrivateChunk":
+            case "PublicChunk":
                 const chunk = decode(pulse.bytes) as ParcelChunk;
                 /** Update notice state if Chunk is not from us */
                 const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
@@ -286,10 +288,10 @@ export class DeliveryZvm extends ZomeViewModel {
         /** Skip if no recipients or sending to self only */
         const filtered = agents.filter((key) => key != this.cell.agentPubKey);
         const tipType = Object.keys(tip)[0];
-        console.log(`ThreadsZvm.broadcastTip() Sending Tip "${tipType}" to`, filtered, this.cell.agentPubKey);
+        console.log(`broadcastTip() Sending Tip "${tipType}" to`, filtered, this.cell.agentPubKey);
         //if (!agents || agents.length == 1 && agents[0] === this._cellProxy.cell.agentPubKey) {
         if (!filtered || filtered.length == 0) {
-            console.log("ThreadsZvm.broadcastTip() aborted: No recipients")
+            console.log("broadcastTip() aborted: No recipients")
             return;
         }
         /** Broadcast */
