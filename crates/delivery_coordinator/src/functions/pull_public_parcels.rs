@@ -33,7 +33,7 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
   for (create_sah, maybe_deletes) in links.into_inner() {
     let Action::CreateLink(create_link) = create_sah.hashed.content
       else { panic!("get_link_details() should return a CreateLink Action") };
-    let pr_eh = EntryHash::try_from(create_link.target_address).unwrap();
+    let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
     let Ok(Some(Details::Entry(details))) = get_details(pr_eh.clone(), GetOptions::network())
       else { continue };
     let Ok(_pr) = ParcelReference::try_from(details.entry.clone())
@@ -47,11 +47,13 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
     //let first = (EntryPulse {hash: pr_eh.clone(), author: create_link.author, ts: create_link.timestamp, state: EntryStateChange::Created}, kind.clone());
     pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
     if maybe_deletes.len() > 0 {
-      let Action::DeleteLink(_delete) = maybe_deletes[0].clone().hashed.content
+      let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
         else { panic!("get_link_details() should return a DeleteLink Action") };
       //let second = (EntryPulse {hash: pr_eh.clone(), author: delete.author, ts: delete.timestamp, state: EntryStateChange::Deleted}, kind);
       let entry_pulse = EntryPulse::try_from_delete_record(create_sah.hashed, details.entry, false)?;
       pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
+      let link_pulse = LinkPulse { link: link_from_delete(&delete, &create_link), state: StateChange::Delete(false) };
+      pulses.push(ZomeSignalProtocol::Link(link_pulse));
     }
   }
   debug!(" pulses count: {}", pulses.len());

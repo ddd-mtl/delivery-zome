@@ -1,22 +1,22 @@
-import {Dictionary, DnaViewModel, ZvmDef} from "@ddd-qc/lit-happ";
+import {delay, Dictionary, DnaViewModel, ZvmDef} from "@ddd-qc/lit-happ";
 import {
   DeliveryEntryType,
   DeliveryNotice,
   DeliveryZvm,
-  EntryPulse,
+  EntryPulse, LinkTypes,
   ParcelKindType,
   ParcelManifest,
   ParcelReference,
   StateChangeType,
   TipProtocol,
-  TipProtocolVariantEntry, TipProtocolVariantLink,
+  TipProtocolVariantEntry,
   ZomeSignal,
   ZomeSignalProtocol,
-  ZomeSignalProtocolType, ZomeSignalProtocolVariantEntry, ZomeSignalProtocolVariantLink,
+  ZomeSignalProtocolType,
 } from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
-import {AgentPubKey, AgentPubKeyB64, AppSignalCb, encodeHashToBase64, EntryHashB64, ZomeName} from "@holochain/client";
+import {AgentPubKeyB64, AppSignalCb, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
 import {getVariantByIndex} from "@ddd-qc/delivery/dist/utils";
 import {decode} from "@msgpack/msgpack";
@@ -133,7 +133,30 @@ export class SecretDvm extends DnaViewModel {
             delete this._perspective.publicMessages[parcelEh];
             this.notifySubscribers();
           } else {
-            this.handlePublicParcelPublished(parcelEh, from);
+            /*await */ this.handlePublicParcelPublished(parcelEh, from);
+          }
+        }
+        break;
+      }
+    }
+    /** */
+    if (ZomeSignalProtocolType.Link in pulse) {
+      const link = pulse.Link.link;
+      const linkAh = encodeHashToBase64(link.create_link_hash);
+      const author = encodeHashToBase64(link.author);
+      const base = encodeHashToBase64((link as any).base);
+      const target = encodeHashToBase64(link.target);
+      const state = Object.keys(pulse.Link.state)[0];
+      const isNew = (pulse.Link.state as any)[state];
+      /** */
+      switch (getVariantByIndex(LinkTypes, link.link_type)) {
+        case LinkTypes.PublicParcels: {
+          const parcelEh = this.deliveryZvm.perspective.parcelReferences[target];
+          console.log("secretDvm handle link signal: PublicParcels", parcelEh, state);
+          if (state == StateChangeType.Delete) {
+            if (parcelEh) {
+              delete this._perspective.publicMessages[parcelEh];
+            }
           }
         }
         break;
@@ -143,16 +166,17 @@ export class SecretDvm extends DnaViewModel {
 
 
   /** */
-  handlePublicParcelPublished(parcelEh: EntryHashB64, from: AgentPubKeyB64) {
+  async handlePublicParcelPublished(parcelEh: EntryHashB64, from: AgentPubKeyB64) {
     console.log("SecretDvm.handlePublicParcelPublished()", parcelEh, from);
-    // if (from != this.cell.agentPubKey) {
-    //   this.probeAll();
-    // } else {
-      this.deliveryZvm.getParcelData(parcelEh).then((msg: string) => {
+    let msg = undefined;
+    do  {
+      try {
+        await delay(1000);
+        msg = await this.deliveryZvm.fetchParcelData(parcelEh);
         this._perspective.publicMessages[parcelEh] = msg;
         this.notifySubscribers();
-      })
-    //}
+      } catch(e) {}
+    } while(!msg);
   }
 
 
@@ -163,7 +187,7 @@ export class SecretDvm extends DnaViewModel {
     const pds = Object.entries(this.deliveryZvm.perspective.publicParcels);
     console.log("probePublicMessages() PublicParcels count", Object.entries(pds).length);
     for (const [parcelEh, tuple] of pds) {
-      publicMessages[parcelEh] = await this.deliveryZvm.getParcelData(parcelEh);
+      publicMessages[parcelEh] = await this.deliveryZvm.fetchParcelData(parcelEh);
     }
     this._perspective.publicMessages = publicMessages;
     this.notifySubscribers();

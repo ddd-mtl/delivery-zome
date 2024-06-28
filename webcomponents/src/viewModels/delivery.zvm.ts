@@ -146,6 +146,10 @@ export class DeliveryZvm extends ZomeViewModel {
                         return;
                     }
                     this._perspective.publicParcels[parcelEh].deleteInfo = [link.timestamp, author];
+                    if (isNew && from == this.cell.agentPubKey) {
+                        let tip: TipProtocol = {Link: pulse};
+                        await this.broadcastTip(tip);
+                    }
                 }
             }
             break;
@@ -276,6 +280,9 @@ export class DeliveryZvm extends ZomeViewModel {
                         author,
                     };
                 }
+                // else {
+                //     delete this._perspective.publicParcels[parcelEh];
+                // }
                 if (isNew && from == this.cell.agentPubKey) {
                     tip = {Entry: pulse}
                 }
@@ -459,19 +466,19 @@ export class DeliveryZvm extends ZomeViewModel {
 
 
     /** */
-    async fetchManifest(manifestEh: EntryHashB64): Promise<[ParcelManifest, Timestamp, AgentPubKeyB64]> {
+    async fetchPublicManifest(manifestEh: EntryHashB64): Promise<[ParcelManifest, Timestamp, AgentPubKeyB64]> {
         const [manifest, ts, author] = await this.zomeProxy.fetchPublicManifest(decodeHashFromBase64(manifestEh));
         return [manifest, ts, encodeHashToBase64(author)];
     }
 
 
     /** Return base64 data string */
-    async getParcelData(parcelEh: EntryHashB64): Promise<string> {
+    async fetchParcelData(parcelEh: EntryHashB64): Promise<string> {
         // const pd = this._perspective.publicParcels[parcelEh];
         // if (!pd) {
         //     return Promise.reject("Unknown PublicParcel");
         // }
-        const [manifest, _ts, _author] = await this.fetchManifest(parcelEh);
+        const [manifest, _ts, _author] = await this.fetchPublicManifest(parcelEh);
         let dataB64 = "";
         for (const chunk_eh of manifest.chunks) {
             let chunk = await this.zomeProxy.fetchChunk(chunk_eh);
@@ -602,7 +609,7 @@ export class DeliveryZvm extends ZomeViewModel {
             if (pprm.deleteInfo) {
                 continue;
             }
-            const [manifest, _ts2, _author] = await this.fetchManifest(parcelEh);
+            const [manifest, _ts2, _author] = await this.fetchPublicManifest(parcelEh);
             manifests.push([materializeParcelManifest(manifest), pprm.creationTs!, pprm.author!]);
         }
         return manifests;
