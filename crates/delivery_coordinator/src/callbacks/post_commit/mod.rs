@@ -64,7 +64,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
                error!("Emitting CreateLink signal failed: {:?}", e);
             }
          },
-         ///
+         /// NewEntryAction
          Action::Update(_) |
          Action::Create(_) => {
             let EntryType::App(app_entry_def) = sah.action().entry_type().unwrap()
@@ -84,8 +84,29 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
                debug!("<< post_commit() SUCCEEDED");
             }
          },
-         ///
-         Action::Delete(_delete) => {/* FIXME */},
+         /// DeleteAction
+         Action::Delete(delete) => {
+            let Ok(new_sah) = must_get_action(delete.deletes_address.clone())
+              else { error!("Deleted action not found."); continue; };
+            let Ok(he) = must_get_entry(delete.deletes_entry_address.clone())
+              else { error!("Deleted entry not found."); continue; };
+            let Some(EntryType::App(app_entry_def)) = new_sah.action().entry_type()
+              else { error!("Deleted action should have entry_type."); continue; };
+            let variant = entry_index_to_variant(app_entry_def.entry_index).unwrap();
+            /// Emit System Signal
+            let variant_name = format!("{:?}", variant);
+            let _ = emit_system_signal(SystemSignalProtocol::PostCommitDeleteStart { app_entry_type: variant_name.clone() });
+            /// handle post_commit_delete()
+            let result = post_commit_delete_app_entry(delete.clone(), variant, new_sah, he.content);
+            /// Emit System Signal
+            let _ = emit_system_signal(SystemSignalProtocol::PostCommitDeleteEnd { app_entry_type: variant_name, succeeded: result.is_ok() });
+            ///
+            if let Err(e) = result {
+               error!("<< post_commit() failed: {:?}", e);
+            } else {
+               debug!("<< post_commit() SUCCEEDED");
+            }
+         },
          ///
          _ => (),
       }
@@ -120,5 +141,20 @@ fn post_commit_new_app_entry(sah: &SignedActionHashed, variant: DeliveryEntryTyp
    };
    /// Emit Entry Signal
    emit_new_entry_signal(record, true)?;
+   Ok(())
+}
+
+
+///
+fn post_commit_delete_app_entry(delete: Delete, variant: DeliveryEntryTypes, new_sah: SignedActionHashed, entry: Entry) -> ExternResult<()> {
+   if let DeliveryEntryTypes::PublicParcel = variant {
+      debug!("post_commit_delete_PublicParcel() delete: {}", delete.deletes_entry_address.clone());
+      let response = call_self("unlink_public_parcel", delete.deletes_entry_address.clone())?;
+      /// FIXME: delete ParcelManifest
+      let _ah = decode_response::<ActionHash>(response)?;
+   }
+   /// Emit Entry Signal
+   let _ = emit_delete_entry_signal(new_sah.hashed, entry, true)?;
+   ///
    Ok(())
 }
