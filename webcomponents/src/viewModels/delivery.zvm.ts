@@ -215,7 +215,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 this._perspective.notices[noticeEh][2] = NoticeState.Received;
             }
             break;
-            case "NewReceptionAck": {
+            case "ReceptionAck": {
                 const receptionAck = decode(pulse.bytes) as ReceptionAck;
                 const distribAh = encodeHashToBase64(receptionAck.distribution_ah);
                 const recipient = encodeHashToBase64(receptionAck.recipient);
@@ -252,7 +252,7 @@ export class DeliveryZvm extends ZomeViewModel {
                         author,
                     };
                 }
-                if (isNew && from != this.cell.agentPubKey) {
+                if (isNew && from == this.cell.agentPubKey) {
                     tip = {Entry: pulse}
                 }
             }
