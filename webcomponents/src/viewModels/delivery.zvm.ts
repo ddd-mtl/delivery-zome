@@ -13,7 +13,7 @@ import {
     Distribution,
     DistributionState,
     EntryPulse,
-    LinkPulse, NoticeAck, NoticeReply,
+    LinkPulse, LinkTypes, NoticeAck, NoticeReply,
     NoticeState,
     ParcelChunk,
     ParcelManifest,
@@ -111,14 +111,49 @@ export class DeliveryZvm extends ZomeViewModel {
                 all.push(this.handleEntrySignal(pulse.Entry as EntryPulse, from));
                 continue;
             }
-            // if (ZomeSignalProtocolType.Link in pulse) {
-            //     all.push(this.handleLinkSignal(pulse.Link as LinkPulse, from));
-            //     continue;
-            // }
+            if (ZomeSignalProtocolType.Link in pulse) {
+                all.push(this.handleLinkSignal(pulse.Link as LinkPulse, from));
+                continue;
+            }
         }
         await Promise.all(all);
         console.log("deliveryZvm.handleSignal() notifySubscribers");
         this.notifySubscribers();
+    }
+
+
+    /** */
+    async handleLinkSignal(pulse: LinkPulse, from: AgentPubKeyB64): Promise<void> {
+        const link = pulse.link;
+        const linkAh = encodeHashToBase64(link.create_link_hash);
+        const author = encodeHashToBase64(link.author);
+        const base = encodeHashToBase64((link as any).base);
+        const target = encodeHashToBase64(link.target);
+        const state = Object.keys(pulse.state)[0];
+        const isNew = (pulse.state as any)[state];
+        /** */
+        switch(getVariantByIndex(LinkTypes, link.link_type)) {
+            case LinkTypes.PublicParcels: {
+                if (state == StateChangeType.Delete) {
+                    const parcelEh = this._perspective.parcelReferences[target];
+                    if (!parcelEh) {
+                        console.warn("Unknown deleted PublicParcel", parcelEh);
+                        return;
+                    }
+                    const pprm = this._perspective.publicParcels[parcelEh];
+                    if (!pprm) {
+                        console.warn("Unknown deleted Parcel", parcelEh);
+                        return;
+                    }
+                    this._perspective.publicParcels[parcelEh].deleteInfo = [link.timestamp, author];
+                }
+            }
+            break;
+            case LinkTypes.Inbox:
+            case LinkTypes.Members:
+            case LinkTypes.Pendings:
+            break;
+        }
     }
 
 
@@ -232,18 +267,7 @@ export class DeliveryZvm extends ZomeViewModel {
                 const pr = decode(pulse.bytes) as ParcelReference;
                 const parcelEh = encodeHashToBase64(pr.parcel_eh);
                 this._perspective.parcelReferences[eh] = parcelEh;
-                if (state == StateChangeType.Delete) {
-                    const created = this._perspective.publicParcels[parcelEh];
-                    if (!created) {
-                        console.warn("Unknown deleted PublicParcel", parcelEh);
-                        this._perspective.publicParcels[parcelEh] = {
-                            prEh: eh,
-                            parcelEh,
-                            description: pr.description,
-                        };
-                    }
-                    this._perspective.publicParcels[parcelEh].deleteInfo = [pulse.ts, author];
-                } else {
+                if (state != StateChangeType.Delete) {
                     this._perspective.publicParcels[parcelEh] = {
                         prEh: eh,
                         parcelEh,

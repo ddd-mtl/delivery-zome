@@ -45,9 +45,9 @@ export interface DeliveryPerspectiveCore {
     /** -- -- */
     inbox: ActionHashB64[],
 
-    /** pp_eh -> (pr_eh, ParcelDescription, ...)  */
+    /** parcel_eh -> (pp_eh, ParcelDescription, ...)  */
     publicParcels: Dictionary<PublicParcelRecordMat>,
-    /** pr_eh -> pp_eh */
+    /** pp_eh -> parcel_eh */
     parcelReferences: Dictionary<EntryHashB64>
 
     /** Parcels */

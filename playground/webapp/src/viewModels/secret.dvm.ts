@@ -63,6 +63,9 @@ export class SecretDvm extends DnaViewModel {
   /** Update the perspective accordingly */
   mySignalHandler(appSignal: AppSignal): void {
     console.log("secretDvm received signal", appSignal);
+     this.agentDirectoryZvm.zomeProxy.getRegisteredAgents().then((agents) => {
+       this._livePeers = agents.map(a => encodeHashToBase64(a));
+    })
     if (appSignal.zome_name !== DeliveryZvm.DEFAULT_ZOME_NAME) {
       return;
     }
@@ -130,7 +133,7 @@ export class SecretDvm extends DnaViewModel {
             delete this._perspective.publicMessages[parcelEh];
             this.notifySubscribers();
           } else {
-            this.handlePublicParcelPublished(parcelEh, this.cell.agentPubKey);
+            this.handlePublicParcelPublished(parcelEh, from);
           }
         }
         break;
