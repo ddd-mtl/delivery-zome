@@ -151,6 +151,7 @@ export type EntryDefIndex = number;
 
 import {ZomeProxy} from '@ddd-qc/lit-happ';
 import {secretFunctionNames} from './secret.fn';
+import {SecretUnitEnum, SecretLinkType} from './secret.integrity';
 
 /**
  *
@@ -158,6 +159,8 @@ import {secretFunctionNames} from './secret.fn';
 export class SecretProxy extends ZomeProxy {
   static readonly DEFAULT_ZOME_NAME = "zSecret";
   static readonly FN_NAMES = secretFunctionNames;
+  static readonly ENTRY_TYPES = Object.values(SecretUnitEnum);
+  static readonly LINK_TYPES = Object.values(SecretLinkType);
  
   async createSecret(value: string): Promise<EntryHash> {
     return this.call('create_secret', value);

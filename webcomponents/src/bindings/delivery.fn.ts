@@ -46,6 +46,7 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"scan_orphan_chunks",
 	"unpublish_public_parcel",
 	"pull_chunk",
+	"cast_tip",
 ];
 
 

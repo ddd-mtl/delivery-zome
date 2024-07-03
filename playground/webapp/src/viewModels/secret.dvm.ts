@@ -1,30 +1,37 @@
-import {delay, Dictionary, DnaViewModel, ZvmDef} from "@ddd-qc/lit-happ";
+import {
+  AgentId,
+  delay,
+  DnaViewModel, EntryId, EntryIdMap,
+  EntryPulse,
+  LinkPulse,
+  materializeEntryPulse, materializeLinkPulse,
+  StateChangeType,
+  TipProtocol,
+  TipProtocolVariantEntry, TipProtocolVariantLink,
+  ZomeSignal,
+  ZomeSignalProtocol,
+  ZomeSignalProtocolType,
+  ZvmDef
+} from "@ddd-qc/lit-happ";
 import {
   DeliveryEntryType,
   DeliveryNotice,
   DeliveryZvm,
-  EntryPulse, LinkTypes,
   ParcelKindType,
   ParcelManifest,
-  ParcelReference,
-  StateChangeType,
-  TipProtocol,
-  TipProtocolVariantEntry,
-  ZomeSignal,
-  ZomeSignalProtocol,
-  ZomeSignalProtocolType,
+  ParcelReference, PublicParcelRecordMat,
 } from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
-import {AgentPubKeyB64, AppSignalCb, encodeHashToBase64, EntryHashB64} from "@holochain/client";
+import {AppSignalCb} from "@holochain/client";
 import {AppSignal} from "@holochain/client/lib/api/app/types";
-import {getVariantByIndex} from "@ddd-qc/delivery/dist/utils";
 import {decode} from "@msgpack/msgpack";
+import {DeliveryLinkType} from "@ddd-qc/delivery/dist/bindings/delivery.integrity";
 
 
 /** */
 export interface SecretDvmPerspective {
-  publicMessages:  Dictionary<string>
+  publicMessages:  EntryIdMap<string>
 }
 
 
@@ -57,14 +64,14 @@ export class SecretDvm extends DnaViewModel {
 
   get perspective(): SecretDvmPerspective {return this._perspective}
 
-  private _perspective: SecretDvmPerspective = {publicMessages: {}};
+  private _perspective: SecretDvmPerspective = {publicMessages: new EntryIdMap()};
 
 
   /** Update the perspective accordingly */
   mySignalHandler(appSignal: AppSignal): void {
     console.log("secretDvm received signal", appSignal);
      this.agentDirectoryZvm.zomeProxy.getRegisteredAgents().then((agents) => {
-       this._livePeers = agents.map(a => encodeHashToBase64(a));
+       this._livePeers = agents.map(a => new AgentId(a));
     })
     if (appSignal.zome_name !== DeliveryZvm.DEFAULT_ZOME_NAME) {
       return;
@@ -74,14 +81,14 @@ export class SecretDvm extends DnaViewModel {
       return;
     }
     for (const pulse of deliverySignal.pulses) {
-      /*await*/ this.handleDeliverySignal(pulse, encodeHashToBase64(deliverySignal.from));
+      /*await*/ this.handleDeliverySignal(pulse, new AgentId(deliverySignal.from));
     }
   }
 
 
   /** */
-  async handleDeliverySignal(pulse: ZomeSignalProtocol, from: AgentPubKeyB64): Promise<void> {
-    /** Handle Tip first: change tip to Entry pulse */
+  async handleDeliverySignal(pulse: ZomeSignalProtocol, from: AgentId): Promise<void> {
+    /** Handle Tip first: change tip to Entry/Link pulse */
     if (ZomeSignalProtocolType.Tip in pulse) {
       const tip = pulse.Tip as TipProtocol;
       const tipType = Object.keys(tip)[0];
@@ -93,29 +100,28 @@ export class SecretDvm extends DnaViewModel {
         case "Entry": {
           const entryPulse = (tip as TipProtocolVariantEntry).Entry;
           pulse = {Entry: entryPulse}
+          console.log("Changed Tip to entryPulse:", entryPulse);
         } break;
-        case "Link":
+        case "Link": {
+          const linkPulse = (tip as TipProtocolVariantLink).Link;
+          pulse = {Link: linkPulse}
+          console.log("Changed Tip to linkPulse:", linkPulse);
+        } break;
         case "App":
           break;
       }
     }
     /** */
     if (ZomeSignalProtocolType.Entry in pulse) {
-      const entryPulse = pulse.Entry as EntryPulse;
-      const entryType = getVariantByIndex(DeliveryEntryType, entryPulse.def.entry_index);
-      const author = encodeHashToBase64(entryPulse.author);
-      const ah = encodeHashToBase64(entryPulse.ah);
-      const eh = encodeHashToBase64(entryPulse.eh);
-      const state = Object.keys(entryPulse.state)[0];
-      const isNew = (entryPulse.state as any)[state];
+      const entryPulse = materializeEntryPulse(pulse.Entry as EntryPulse, Object.values(DeliveryEntryType));
       /** Automatically accept parcel from secret zome */
-      switch (entryType) {
-        case "DeliveryNotice": {
+      switch (entryPulse.entryType) {
+        case DeliveryEntryType.DeliveryNotice: {
           const notice = decode(entryPulse.bytes) as DeliveryNotice;
-          console.log("ADDING DeliveryNotice. parcel_description:", notice.summary.parcel_reference.description);
+          console.log("ADDING DeliveryNotice:", notice, entryPulse);
           if (ParcelKindType.AppEntry in notice.summary.parcel_reference.description.kind_info) {
-            if ("secret_integrity" === notice.summary.parcel_reference.description.zome_origin) {
-              this.deliveryZvm.acceptDelivery(eh);
+            if (entryPulse.isNew && from != this.cell.agentId && "secret_integrity" === notice.summary.parcel_reference.description.zome_origin) {
+              this.deliveryZvm.acceptDelivery(entryPulse.eh);
             }
           } else {
             /// split_secret is a Manifest reference
@@ -125,12 +131,12 @@ export class SecretDvm extends DnaViewModel {
           }
         }
         break;
-        case "PublicParcel": {
+        case DeliveryEntryType.PublicParcel: {
           const pr = decode(entryPulse.bytes) as ParcelReference;
-          const parcelEh = encodeHashToBase64(pr.parcel_eh);
-          if (state == StateChangeType.Delete) {
+          const parcelEh = new EntryId(pr.parcel_eh);
+          if (entryPulse.state == StateChangeType.Delete) {
             //const auth = encodeHashToBase64(deliverySignal.DeletedPublicParcel[3]);
-            delete this._perspective.publicMessages[parcelEh];
+            this._perspective.publicMessages.delete(parcelEh);
             this.notifySubscribers();
           } else {
             /*await */ this.handlePublicParcelPublished(parcelEh, from);
@@ -141,21 +147,15 @@ export class SecretDvm extends DnaViewModel {
     }
     /** */
     if (ZomeSignalProtocolType.Link in pulse) {
-      const link = pulse.Link.link;
-      const linkAh = encodeHashToBase64(link.create_link_hash);
-      const author = encodeHashToBase64(link.author);
-      const base = encodeHashToBase64((link as any).base);
-      const target = encodeHashToBase64(link.target);
-      const state = Object.keys(pulse.Link.state)[0];
-      const isNew = (pulse.Link.state as any)[state];
+      const linkPulse = materializeLinkPulse(pulse.Link as LinkPulse, Object.values(DeliveryLinkType));
       /** */
-      switch (getVariantByIndex(LinkTypes, link.link_type)) {
-        case LinkTypes.PublicParcels: {
-          const parcelEh = this.deliveryZvm.perspective.parcelReferences[target];
-          console.log("secretDvm handle link signal: PublicParcels", parcelEh, state);
-          if (state == StateChangeType.Delete) {
+      switch (linkPulse.link_type) {
+        case DeliveryLinkType.PublicParcels: {
+          const parcelEh = this.deliveryZvm.perspective.parcelReferences.get(linkPulse.target);
+          console.log("secretDvm handle link signal: PublicParcels", parcelEh, linkPulse.state);
+          if (linkPulse.state == StateChangeType.Delete) {
             if (parcelEh) {
-              delete this._perspective.publicMessages[parcelEh];
+              this._perspective.publicMessages.delete(parcelEh);
             }
           }
         }
@@ -166,14 +166,14 @@ export class SecretDvm extends DnaViewModel {
 
 
   /** */
-  async handlePublicParcelPublished(parcelEh: EntryHashB64, from: AgentPubKeyB64) {
+  async handlePublicParcelPublished(parcelEh: EntryId, from: AgentId) {
     console.log("SecretDvm.handlePublicParcelPublished()", parcelEh, from);
     let msg = undefined;
     do  {
       try {
         await delay(1000);
         msg = await this.deliveryZvm.fetchParcelData(parcelEh);
-        this._perspective.publicMessages[parcelEh] = msg;
+        this._perspective.publicMessages.set(parcelEh, msg);
         this.notifySubscribers();
       } catch(e) {}
     } while(!msg);
@@ -181,22 +181,21 @@ export class SecretDvm extends DnaViewModel {
 
 
   /** */
-  async probePublicMessages(): Promise<Dictionary<string>> {
-    let publicMessages: Dictionary<string> = {};
+  async probePublicMessages(): Promise<void> {
+    this._perspective.publicMessages.clear();
     await this.deliveryZvm.probeDht();
-    const pds = Object.entries(this.deliveryZvm.perspective.publicParcels);
-    console.log("probePublicMessages() PublicParcels count", Object.entries(pds).length);
-    for (const [parcelEh, tuple] of pds) {
-      publicMessages[parcelEh] = await this.deliveryZvm.fetchParcelData(parcelEh);
+    const pds: [EntryId, PublicParcelRecordMat][] = Array.from(this.deliveryZvm.perspective.publicParcels.entries());
+    console.log("probePublicMessages() PublicParcels count", pds.length);
+    for (const [parcelEh, _tuple] of pds) {
+      const str = await this.deliveryZvm.fetchParcelData(parcelEh);
+      this._perspective.publicMessages.set(parcelEh, str);
     }
-    this._perspective.publicMessages = publicMessages;
     this.notifySubscribers();
-    return publicMessages;
   }
 
 
   /** */
-  async publishMessage(message: string): Promise<[EntryHashB64, ParcelManifest]> {
+  async publishMessage(message: string): Promise<[EntryId, ParcelManifest]> {
    const data_hash = message; // should be an actual hash, but we don't care in this example code.
    const chunk_ehs = await this.deliveryZvm.zomeProxy.publishChunks([{data_hash, data: message}]);
    const manifest: ParcelManifest = {
@@ -211,6 +210,6 @@ export class SecretDvm extends DnaViewModel {
      },
    };
    const eh = await this.deliveryZvm.zomeProxy.publishPublicParcel(manifest);
-   return [encodeHashToBase64(eh), manifest];
+   return [new EntryId(eh), manifest];
   }
 }

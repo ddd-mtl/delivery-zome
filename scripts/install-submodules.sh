@@ -24,9 +24,6 @@ rm -rf submodules
 mkdir submodules
 cd submodules
 
-echo \* Download zome-signals repo
-git clone -b $branchname --depth 1 https://github.com/ddd-mtl/zome-signals.git
-
 echo \* Download latest install scripts
 git clone --depth 1 https://github.com/ddd-mtl/hc-prebuilt
 

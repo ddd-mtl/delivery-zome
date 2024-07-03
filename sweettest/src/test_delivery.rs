@@ -71,7 +71,7 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
    //billy.assert_notice_state(distribution_eh.clone(), NoticeState::Accepted or NoticeState::Received).await;
 
    /// Have A receive reply and send Parcel
-   println!("\n A receive reply; pull_inbox()...\n");
+   println!("\n A receive reply; process_inbox()...\n");
    alex.pull_and_wait_for_signal(SignalKind::ReceivedReply, &distribution_eh).await.expect("Should have received reply");
    alex.print_chain(0).await;
    let state: DistributionState = alex.call_any_zome("delivery", "get_distribution_state", distribution_eh.clone()).await;
@@ -80,9 +80,9 @@ pub async fn test_delivery(strategy: DistributionStrategy) {
 
    /// B gets secret
    if strategy.can_dht() {
-      println!("\n B trying to get secret pull_inbox()...\n");
-      // let _: Vec<ActionHash> = conductors[1].call(&cells[1].zome("delivery"), "pull_inbox", ()).await;
-      let _: Vec<ActionHash> = billy.try_call_zome("delivery", "pull_inbox", (),
+      println!("\n B trying to get secret process_inbox()...\n");
+      // let _: Vec<ActionHash> = conductors[1].call(&cells[1].zome("delivery"), "process_inbox", ()).await;
+      let _: Vec<ActionHash> = billy.try_call_zome("delivery", "process_inbox", (),
                                              |result: &Vec<ActionHash>| { result.len() == 1 })
          .await;
    }
@@ -138,7 +138,7 @@ pub async fn test_delivery_manifest(strategy: DistributionStrategy) {
    billy.print_chain(10 * 1000).await;
 
    /// Have A receive reply and send Parcel
-   println!("\n A receive reply; pull_inbox()...\n");
+   println!("\n A receive reply; process_inbox()...\n");
    alex.pull_and_wait_for_signal(SignalKind::ReceivedReply, &distribution_eh).await.expect("Should have received reply");
    //alex.assert_distribution_state(distribution_eh.clone(), DistributionState::AllRepliesReceived).await;
 

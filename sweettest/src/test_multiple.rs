@@ -53,7 +53,7 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    camille.print_chain(10 * 1000).await;
 
    /// Have A receive reply and send Parcel
-   println!("\n A receive reply; pull_inbox()...\n");
+   println!("\n A receive reply; process_inbox()...\n");
    alex.pull_and_wait_for_signal(SignalKind::ReceivedReply, &distribution1_ah).await.expect("Alex should have received reply");
    alex.pull_and_wait_for_signals(SignalKind::ReceivedReply, &distribution2_ah, 2).await.expect("Alex should have received replies");
    alex.print_chain(0).await;
@@ -103,7 +103,7 @@ pub async fn test_multiple_delivery(strategy: DistributionStrategy) {
    billy.print_chain(2 * 1000).await;
 
    /// Have A receive reply and send Parcel 3
-   println!("\n A receive reply for secret 3; pull_inbox()...\n");
+   println!("\n A receive reply for secret 3; process_inbox()...\n");
    alex.pull_and_wait_for_signal(SignalKind::ReceivedReply, &distribution3_eh).await.expect("Should have received reply");
    alex.print_chain(0).await;
 

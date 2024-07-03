@@ -98,7 +98,7 @@ pub fn process_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    let replies_tuples = get_all_typed_local::<NoticeReply>(EntryType::App(DeliveryEntryTypes::NoticeReply.try_into().unwrap()))?;
    debug!("my_replies: {}", replies_tuples.len());
    for (_, _, reply) in replies_tuples {
-      //debug!("pull_inbox() reply: {:?}", reply);
+      //debug!("process_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
          let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
          unreceived_entries.insert(notice.summary.parcel_reference.parcel_eh.clone(), notice.clone());
@@ -128,7 +128,7 @@ pub fn process_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
          let maybe_el = get(link.create_link_hash.clone(), GetOptions::default())?;
          if maybe_el.is_none() {
             warn!("CreateLink not found.");
-            // return Err(WasmError::Guest("pull_inbox(): CreateLink not found.".to_string()));
+            // return Err(WasmError::Guest("process_inbox(): CreateLink not found.".to_string()));
             continue;
          }
 

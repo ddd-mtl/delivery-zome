@@ -5,20 +5,20 @@ import {
     prettyDate,
     SignalLog,
     SignalType,
-    ZomeViewModel,
     ActionId,
     EntryId,
     AgentId,
     enc64,
-    dec64,
-    intoLinkableId,
     ZomeSignalProtocol,
     ZomeSignalProtocolType,
-    ZomeSignalProtocolVariantEntry,
-    ZomeSignalProtocolVariantLink,
     AgentIdMap,
     EntryIdMap,
     ActionIdMap,
+    ZomeViewModelWithSignals,
+    StateChangeType,
+    EntryPulseMat,
+    TipProtocol,
+    LinkPulseMat, prettyState, getVariantByIndex,
 } from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {Timestamp} from "@holochain/client";
@@ -28,14 +28,11 @@ import {
     DeliveryState,
     Distribution,
     DistributionState,
-    EntryPulse,
-    LinkPulse, LinkTypes, NoticeAck, NoticeReply,
+    NoticeAck, NoticeReply,
     NoticeState,
     ParcelChunk,
     ParcelManifest,
     ParcelReference, ReceptionAck, ReceptionProof, ReplyAck,
-    StateChangeType,
-    TipProtocol,
 } from "../bindings/delivery.types";
 import {
     createDeliveryPerspective,
@@ -43,8 +40,8 @@ import {
     materializeParcelManifest,
     ParcelManifestMat,
 } from "./delivery.perspective";
-import {getVariantByIndex, prettyState} from "../utils";
 import {decode} from "@msgpack/msgpack";
+import {DeliveryLinkType} from "../bindings/delivery.integrity";
 
 
 /**
@@ -79,19 +76,11 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** */
-    async handleLinkPulse(pulse: LinkPulse, from: AgentId): Promise<void> {
-        const link = pulse.link;
-        const linkAh = new ActionId(link.create_link_hash);
-        const author = new AgentId(link.author);
-        const base = intoLinkableId((link as any).base);
-        const target = intoLinkableId(link.target);
-        const state = Object.keys(pulse.state)[0];
-        const isNew = (pulse.state as any)[state];
-        /** */
-        switch(getVariantByIndex(LinkTypes, link.link_type)) {
-            case LinkTypes.PublicParcels: {
-                if (state == StateChangeType.Delete) {
-                    const parcelEh = this._perspective.parcelReferences.get(target);
+    async handleLinkPulse(pulse: LinkPulseMat, from: AgentId): Promise<void> {
+        switch(pulse.link_type) {
+            case DeliveryLinkType.PublicParcels: {
+                if (pulse.state == StateChangeType.Delete) {
+                    const parcelEh = this._perspective.parcelReferences.get(pulse.target);
                     if (!parcelEh) {
                         console.warn("Unknown deleted PublicParcel", parcelEh);
                         return;
@@ -102,38 +91,27 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                         return;
                     }
                     const current = this._perspective.publicParcels.get(parcelEh);
-                    current.deleteInfo = [link.timestamp, author];
+                    current.deleteInfo = [pulse.timestamp, pulse.author];
                     this._perspective.publicParcels.set(parcelEh, current);
-                    if (isNew && from.b64 == this.cell.agentId.b64) {
-                        let tip: TipProtocol = {Link: pulse};
-                        await this.broadcastTip(tip);
-                    }
                 }
             }
             break;
-            case LinkTypes.Inbox:
-            case LinkTypes.Members:
-            case LinkTypes.Pendings:
+            case DeliveryLinkType.Inbox:
+            case DeliveryLinkType.Members:
+            case DeliveryLinkType.Pendings:
             break;
         }
     }
 
 
     /** */
-    async handleEntryPulse(pulse: EntryPulse, from: AgentId): Promise<void> {
-        const entryType = getVariantByIndex(DeliveryEntryType, pulse.def.entry_index);
-        const author = new AgentId(pulse.author);
-        const ah = new ActionId(pulse.ah);
-        const eh = new EntryId(pulse.eh);
-        const state = Object.keys(pulse.state)[0];
-        const isNew = (pulse.state as any)[state];
-        let tip: TipProtocol | undefined = undefined;
-        switch(entryType) {
+    async handleEntryPulse(pulse: EntryPulseMat, from: AgentId): Promise<void> {
+        switch(pulse.entryType) {
             case "PrivateManifest":
             case "PublicManifest":
                 const manifest = decode(pulse.bytes) as ParcelManifest;
-                if (state != StateChangeType.Delete) {
-                    this.storeManifest(eh, pulse.ts, manifest);
+                if (pulse.state != StateChangeType.Delete) {
+                    this.storeManifest(pulse.eh, pulse.ts, manifest);
                 }
             break;
             case "PrivateChunk":
@@ -145,7 +123,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                     const manifestEh = manifestPair[0];
                     const noticeEh = this._perspective.noticeByParcel.get(manifestEh);
                     if (noticeEh) {
-                        this._perspective.notices.get(noticeEh)[3].delete(eh);
+                        this._perspective.notices.get(noticeEh)[3].delete(pulse.eh);
                         if (this._perspective.notices.get(noticeEh)[3].size == 0) {
                             this.zomeProxy.completeManifest(manifestEh.hash);
                         } else {
@@ -156,19 +134,19 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             break;
             case "Distribution": {
                 const distribution = decode(pulse.bytes) as Distribution;
-                this._perspective.distributions.set(ah, [distribution, pulse.ts, DistributionState.Unsent, {}]);
-                const [fullState, deliveryStates] = await this.getDistributionState(ah);
-                this._perspective.distributions.set(ah, [distribution, pulse.ts, fullState, deliveryStates]);
+                this._perspective.distributions.set(pulse.ah, [distribution, pulse.ts, DistributionState.Unsent, new AgentIdMap<DeliveryState>()]);
+                const [fullState, deliveryStates] = await this.getDistributionState(pulse.ah);
+                this._perspective.distributions.set(pulse.ah, [distribution, pulse.ts, fullState, deliveryStates]);
             }
             break;
             case "DeliveryNotice":
                 const notice = decode(pulse.bytes) as DeliveryNotice;
                 const parcelId = new EntryId(notice.summary.parcel_reference.parcel_eh);
-                this._perspective.notices.set(eh, [notice, pulse.ts, NoticeState.Unreplied, new Set()]);
-                this._perspective.noticeByParcel.set(parcelId, eh);
-                const [noticeState, pct] = await this.getNoticeState(eh);
-                this._perspective.notices.set(eh, [notice, pulse.ts, noticeState, pct]);
-                this._perspective.noticeByParcel.set(parcelId, eh);
+                this._perspective.notices.set(pulse.eh, [notice, pulse.ts, NoticeState.Unreplied, new Set()]);
+                this._perspective.noticeByParcel.set(parcelId, pulse.eh);
+                const [noticeState, pct] = await this.getNoticeState(pulse.eh);
+                this._perspective.notices.set(pulse.eh, [notice, pulse.ts, noticeState, pct]);
+                this._perspective.noticeByParcel.set(parcelId, pulse.eh);
             break;
             case "NoticeAck": {
                 const noticeAck = decode(pulse.bytes) as NoticeAck;
@@ -229,28 +207,21 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case "PublicParcel": {
                 const pr = decode(pulse.bytes) as ParcelReference;
                 const parcelEh = new EntryId(pr.parcel_eh);
-                this._perspective.parcelReferences.set(eh, parcelEh);
-                if (state != StateChangeType.Delete) {
+                this._perspective.parcelReferences.set(pulse.eh, parcelEh);
+                if (pulse.state != StateChangeType.Delete) {
                     this._perspective.publicParcels.set(parcelEh, {
-                        prEh: eh,
+                        prEh: pulse.eh,
                         parcelEh,
                         description: pr.description,
                         creationTs: pulse.ts,
-                        author,
-                    };
+                        author: pulse.author,
+                    });
                 }
                 // else {
                 //     delete this._perspective.publicParcels[parcelEh];
                 // }
-                if (isNew && from.b64 == this.cell.agentId.b64) {
-                    tip = {Entry: pulse}
-                }
             }
             break;
-        }
-        /** */
-        if (tip) {
-            await this.broadcastTip(tip);
         }
     }
 
@@ -266,7 +237,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
               const signal = log.zomeSignal as ZomeSignal;
               const pulses = signal.pulses as ZomeSignalProtocol[];
               const timestamp = prettyDate(new Date(log.ts));
-              const from = enc64(signal.from) == this.cell.agent.b64? "self" : new AgentId(signal.from);
+              const from = enc64(signal.from) == this.cell.agentId.b64? "self" : new AgentId(signal.from);
               for (const pulse of pulses) {
                   if (ZomeSignalProtocolType.Tip in pulse) {
                       const tip: TipProtocol = pulse.Tip;
@@ -277,11 +248,11 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                       const entryPulse = pulse.Entry;
                       const entryType = getVariantByIndex(DeliveryEntryType, entryPulse.def.entry_index);
                       const threadsEntry = decode(entryPulse.bytes); //as ThreadsEntry;
-                      appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Entry, subType: entryType, state: prettyState(entryPulse.state), payload: threadsEntry, hash: encodeHashToBase64(entryPulse.ah)});
+                      appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Entry, subType: entryType, state: prettyState(entryPulse.state), payload: threadsEntry, hash: enc64(entryPulse.ah)});
                   }
                   // if (ZomeSignalProtocolType.Link in pulse) {
                   //     const linkPulse = pulse.Link;
-                  //     const hash = `${encodeHashToBase64((linkPulse.link as any).base)} -> ${encodeHashToBase64(linkPulse.link.target)}`;
+                  //     const hash = `${encodeHashToBase64(linkPulse.link.base)} -> ${encodeHashToBase64(linkPulse.link.target)}`;
                   //     appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Link, subType: getVariantByIndex(DeliveryLinkType, linkPulse.link.link_type), state: prettyState(linkPulse.state), payload: linkPulse.link.tag, hash});
                   // }
               }

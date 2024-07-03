@@ -62,7 +62,7 @@ export interface DeliveryPerspectiveCore {
 
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
-    distributions: ActionIdMap<[Distribution, Timestamp, DistributionState, Dictionary<DeliveryState>]>,
+    distributions: ActionIdMap<[Distribution, Timestamp, DistributionState, AgentIdMap<DeliveryState>]>,
     /** distrib_ah -> (recipientKey -> NoticeAck) */
     noticeAcks: ActionIdMap<AgentIdMap<[NoticeAck, Timestamp]>>,
     /** distrib_ah -> (recipientKey -> ReplyAck) */

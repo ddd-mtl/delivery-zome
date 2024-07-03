@@ -8,6 +8,10 @@
 use hdi::prelude::*;
 
 
+#[hdk_link_types]
+pub enum LinkTypes {
+   Default
+}
 
 #[hdk_entry_types]
 #[unit_enum(SecretEntryTypes)]
@@ -22,3 +26,5 @@ pub enum SecretEntry {
 pub struct Secret {
    pub value: String,
 }
+
+

@@ -1,8 +1,7 @@
 import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
-import { ZomeElement } from "@ddd-qc/lit-happ";
+import {ActionId, enc64, EntryId, ZomeElement} from "@ddd-qc/lit-happ";
 import {DeliveryZvm} from "../viewModels/delivery.zvm";
-import {ActionHashB64, decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {DeliveryPerspective} from "../viewModels/delivery.perspective";
 
 
@@ -47,15 +46,15 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
         /* Li */
         console.log("distributions", this.perspective.distributions);
-        const myDistribsLi = Object.entries(this.perspective.distributions).map(
-            ([distribAh, fullState]) => {
+        const myDistribsLi = Array.from(this.perspective.distributions.entries()).map(
+            ([distribAh, [distribution, ts, distribState, statePerAgent]]) => {
                 //console.log("MembraneLi", MembraneLi)
-              const deliveryLi = Object.entries(fullState[1]).map(
-                  ([agent, deliveryState]) => {
+              const deliveryLi = Array.from(statePerAgent.entries()).map(
+                  ([agentId, deliveryState]) => {
                       return html `
-                      <li style="margin-top:10px;" title=${agent}>
-                          ${JSON.stringify(deliveryState)}<b> Recipient: </b> ${agent.slice(-5)}
-                          <button type="button" @click=${() => {this._zvm.getDeliveryState(distribAh, agent)}}>refresh</button>
+                      <li style="margin-top:10px;" title=${agentId}>
+                          ${JSON.stringify(deliveryState)}<b> Recipient: </b> ${agentId.short}
+                          <button type="button" @click=${() => {this._zvm.getDeliveryState(distribAh, agentId)}}>refresh</button>
                       </li>`
                   }
               );
@@ -63,8 +62,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
               /** */
               return html `
               <li style="margin-top:10px;" title=${distribAh}>
-                  <b>${this.distrib2str(distribAh)}</b>: ${JSON.stringify(fullState[0])}
-                  <button type="button" @click=${() => {this._zvm.zomeProxy.getDistributionState(decodeHashFromBase64(distribAh))}}>refresh</button>
+                  <b>${this.distrib2str(distribAh)}</b>: ${JSON.stringify(distribution)}
+                  <button type="button" @click=${() => {this._zvm.zomeProxy.getDistributionState(distribAh.hash)}}>refresh</button>
                   <ul>
                       ${deliveryLi}
                   </ul>
@@ -72,7 +71,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const distribsLi = Object.entries(this.perspective.distributions).map(
+        const distribsLi = Array.from(this.perspective.distributions.entries()).map(
             ([distribAh, _pair]) => {
                 return html `
           <li style="margin-top:10px;" title=${distribAh}>
@@ -81,36 +80,36 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const receivedNoticesLi = Object.entries(this.perspective.noticeAcks).map(
+        const receivedNoticesLi = Array.from(this.perspective.noticeAcks.entries()).map(
             ([distribAh, receiveds]) => {
-                return Object.entries(receiveds).map(
+                return Array.from(receiveds.entries()).map(
                   ([recipientKey, [_received, _ts]]) => {
                     return html `
                       <li style="margin-top:10px;" title=${distribAh}>
-                          ${this.distrib2str(distribAh)}: ${recipientKey.slice(-5)}
+                          ${this.distrib2str(distribAh)}: ${recipientKey.short}
                       </li>`;
                 });
             });
 
-        const receivedRepliesLi = Object.entries(this.perspective.replyAcks).map(
+        const receivedRepliesLi = Array.from(this.perspective.replyAcks.entries()).map(
             ([distribAh, receiveds]) => {
-              return Object.entries(receiveds).map(
+              return Array.from(receiveds.entries()).map(
                 ([recipientKey, [received, _ts]]) => {
                   return html `
                     <li style="margin-top:10px;" title=${distribAh}>
-                        ${this.distrib2str(distribAh)}: ${recipientKey.slice(-5)} ${received.has_accepted? "accepted" : "declined"}
+                        ${this.distrib2str(distribAh)}: ${recipientKey.short} ${received.has_accepted? "accepted" : "declined"}
                     </li>`
                 });
             });
 
 
-        const receptionAcksLi = Object.entries(this.perspective.receptionAcks).map(
+        const receptionAcksLi = Array.from(this.perspective.receptionAcks.entries()).map(
             ([distribAh, receiveds]) => {
-              return Object.entries(receiveds).map(
+              return Array.from(receiveds.entries()).map(
                 ([recipientKey, [_receptionAck, _ts]]) => {
                   return html `
                     <li style="margin-top:10px;" title=${distribAh}>
-                        ${this.distrib2str(distribAh)}: ${recipientKey.slice(-5)}
+                        ${this.distrib2str(distribAh)}: ${recipientKey.short}
                     </li>`
           });
         });
@@ -119,9 +118,9 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         /* Li */
         const [unreplieds, _] = this._zvm.inbounds();
         console.log("unreplieds", unreplieds);
-        const newNoticesLi = Object.entries(unreplieds).map(
+        const newNoticesLi = Array.from(unreplieds.entries()).map(
             ([noticeEh, [_notice, _ts]]) => {
-                let content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(decodeHashFromBase64(noticeEh))}}>refresh</button>
+                let content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(noticeEh.hash)}}>refresh</button>
                     <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
                     <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>`;
                 return html `
@@ -132,7 +131,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const noticesLi = Object.entries(this.perspective.notices).map(
+        const noticesLi = Array.from(this.perspective.notices.entries()).map(
             ([eh, _pair]) => {
                 return html`
           <li style="margin-top:10px;" title=${eh}>
@@ -142,30 +141,30 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         )
 
 
-        const repliesLi = Object.entries(this.perspective.replies).map(
+        const repliesLi = Array.from(this.perspective.replies.entries()).map(
             ([eh, reply]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
-              ${this.notice2str(encodeHashToBase64(reply.notice_eh))}: ${reply.has_accepted? "accepted" : "declined"}
+              ${this.notice2str(new EntryId(reply.notice_eh))}: ${reply.has_accepted? "accepted" : "declined"}
           </li>`
             }
         )
 
-        const receptionsLi = Object.entries(this.perspective.receptions).map(
+        const receptionsLi = Array.from(this.perspective.receptions.entries()).map(
             ([eh, [receptionProof, _ts]]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh}>
-              ${this.notice2str(encodeHashToBase64(receptionProof.notice_eh))}: ${encodeHashToBase64(receptionProof.parcel_eh).slice(-5)}
+              ${this.notice2str(new EntryId(receptionProof.notice_eh))}: ${enc64(receptionProof.parcel_eh).slice(-5)}
           </li>`
             }
         )
 
         const manifestsLi = Object.entries(this.perspective.localManifestByData).map(
             ([dataHash, [manifestEh, _isPrivate]]) => {
-                if (!this.perspective.privateManifests[manifestEh]) {
+                if (!this.perspective.privateManifests.get(manifestEh)) {
                   return html`__privateManifest__`; // TODO
                 }
-                const [manifest, _ts] = this.perspective.privateManifests[manifestEh];
+                const [manifest, _ts] = this.perspective.privateManifests.get(manifestEh);
                 return html `
           <li style="margin-top:10px;" title=${dataHash}>
               ${dataHash} | ${manifest.chunks.length} chunks
@@ -230,27 +229,27 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
     /** -- Utils -- */
 
     /** */
-    distrib2str(distribAh: ActionHashB64): string {
-        const tuple = this.perspective.distributions[distribAh];
+    distrib2str(distribAh: ActionId): string {
+        const tuple = this.perspective.distributions.get(distribAh);
         if (!tuple) {
             return "unknown";
         }
         const date = new Date(tuple[1] / 1000); // Holochain timestamp is in micro-seconds, Date wants milliseconds
         const date_str = date.toLocaleString('en-US', {hour12: false});
-        const agent_str = encodeHashToBase64(tuple[0].recipients[0]).slice(-5);
+        const agent_str = enc64(tuple[0].recipients[0]).slice(-5);
         return "[" + date_str + "] to " + agent_str + " (" + tuple[0].recipients.length + ")";
     }
 
 
     /** */
-    notice2str(noticeEh: EntryHashB64): string {
-        const tuple = this.perspective.notices[noticeEh];
+    notice2str(noticeEh: EntryId): string {
+        const tuple = this.perspective.notices.get(noticeEh);
         if (!tuple) {
             return "unknown";
         }
         const date = new Date(tuple[1] / 1000); // Holochain timestamp is in micro-seconds, Date wants milliseconds
         const date_str = date.toLocaleString('en-US', {hour12: false});
-        const agent_str = encodeHashToBase64(tuple[0].sender).slice(-5);
+        const agent_str = enc64(tuple[0].sender).slice(-5);
         return "[" + date_str + "] from " + agent_str;
     }
 }

@@ -122,8 +122,8 @@ impl SecretAgent {
 
 
    ///
-   pub async fn pull_inbox(&self) -> Vec<ActionHash> {
-      return self.call_any_zome("delivery", "pull_inbox", ()).await;
+   pub async fn process_inbox(&self) -> Vec<ActionHash> {
+      return self.call_any_zome("delivery", "process_inbox", ()).await;
    }
 
 
@@ -200,7 +200,7 @@ impl SecretAgent {
    ///
    pub async fn pull_and_wait_for_signal(&mut self, kind: SignalKind, eh: &EntryHash) -> Result<(), ()> {
       for _ in 0..10u32 {
-         let _ = self.pull_inbox().await;
+         let _ = self.process_inbox().await;
          let _ = self.drain_signals().await;
          if self.has_signal(&kind, eh) {
             return Ok(())
@@ -214,7 +214,7 @@ impl SecretAgent {
    ///
    pub async fn pull_and_wait_for_signals(&mut self, kind: SignalKind, eh: &EntryHash, expected_count: u32) -> Result<(), ()> {
       for _ in 0..10u32 {
-         let _ = self.pull_inbox().await;
+         let _ = self.process_inbox().await;
          let _ = self.drain_signals().await;
          if self.has_signals(&kind, eh, expected_count) {
             return Ok(())

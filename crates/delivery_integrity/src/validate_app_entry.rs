@@ -119,3 +119,16 @@ fn validate_ParcelManifest(entry: Entry) -> ExternResult<ValidateCallbackResult>
     /// Done
     Ok(ValidateCallbackResult::Valid)
 }
+
+
+///
+fn entry_index_to_variant(entry_index: EntryDefIndex) -> ExternResult<DeliveryEntryTypes> {
+    let mut i = 0;
+    for variant in DeliveryEntryTypes::iter() {
+        if i == entry_index.0 {
+            return Ok(variant);
+        }
+        i += 1;
+    }
+    return Err(wasm_error!(format!("Unknown EntryDefIndex: {}", entry_index.0)));
+}

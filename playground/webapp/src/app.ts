@@ -2,9 +2,10 @@ import { html } from "lit";
 import {property, state} from "lit/decorators.js";
 import { SecretDvm } from "./viewModels/secret.dvm";
 import {
-  HvmDef, HappElement, Cell
+  HvmDef, HappElement, Cell, AgentId
 } from "@ddd-qc/lit-happ";
-import {AdminWebsocket, AgentPubKeyB64, DnaDefinition, ListAppsResponse} from "@holochain/client";
+import {AdminWebsocket, DnaDefinition, ListAppsResponse} from "@holochain/client";
+import {Dictionary, EntryDef} from "@ddd-qc/cell-proxy";
 
 
 /**
@@ -35,7 +36,7 @@ export class SecretApp extends HappElement {
 
   private _pageDisplayIndex: number = 0;
   /** ZomeName -> (AppEntryDefName, isPublic) */
-  private _allAppEntryTypes: Record<string, [string, boolean][]> = {};
+  private _allAppEntryTypes: Dictionary<Dictionary<EntryDef>> = {};
 
 
   @state() private _cell?: Cell;
@@ -71,7 +72,7 @@ export class SecretApp extends HappElement {
     if (!this._loaded) {
       return html`<span>Loading...</span>`;
     }
-    let knownAgents: AgentPubKeyB64[] = this.secret.agentDirectoryZvm.perspective.agents;
+    let knownAgents: AgentId[] = this.secret.agentDirectoryZvm.perspective.agents;
     //console.log({coordinator_zomes: this._dnaDef?.coordinator_zomes})
     const zomeNames = this._dnaDef?.coordinator_zomes.map((zome) => { return zome[0]; });
     console.log({zomeNames})
@@ -94,7 +95,8 @@ export class SecretApp extends HappElement {
           <input type="button" value="Agent Directory" @click=${() => {this._pageDisplayIndex = 2; this.requestUpdate()}} >
         </div>
         <button type="button" @click=${this.refresh}>Refresh</button>
-        <span><abbr title=${this.secret.cell.agentPubKey}>Agent</abbr>: <b>${this.secret.cell.agentPubKey.slice(-5)}</b></span>
+        <span><abbr title=${this.secret.cell.agentId.b64}>Agent</abbr>: <b>${this.secret.cell.agentId.short}</b></span>
+        <!--<dvm-inspect .dnaViewModel=${this.secret}></dvm-inspect> -->          
         <hr class="solid">      
         ${page}
       </cell-context>        

@@ -104,7 +104,7 @@ pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
 #[hdk_extern]
 pub fn get_secrets_from(sender: AgentPubKey) -> ExternResult<Vec<EntryHash>> {
    debug!("get_secrets_from() START: {:?}", sender);
-   let response = call_delivery_zome("pull_inbox", ())?;
+   let response = call_delivery_zome("process_inbox", ())?;
    let inbox_items: Vec<ActionHash> = decode_response(response)?;
    debug!("get_secrets_from() - inbox_items: {}", inbox_items.len());
    debug!("get_secrets_from() - query_DeliveryNotice");
@@ -171,8 +171,8 @@ pub fn respond_to_secret(parcel_eh: EntryHash, has_accepted: bool) -> ExternResu
 
 // /// Zome Function
 // #[hdk_extern]
-// pub fn pull_inbox(_: ()) -> ExternResult<()> {
-//    let response = call_delivery_zome("pull_inbox", ())?;
+// pub fn process_inbox(_: ()) -> ExternResult<()> {
+//    let response = call_delivery_zome("process_inbox", ())?;
 //    let _: Vec<ActionHash> = decode_response(response)?;
 //    Ok(())
 // }

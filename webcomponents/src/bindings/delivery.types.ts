@@ -418,14 +418,6 @@ export type DeliveryTipProtocolVariantPublicParcelUnpublished = {PublicParcelUnp
 export type DeliveryTipProtocol = 
  | DeliveryTipProtocolVariantPublicParcelPublished | DeliveryTipProtocolVariantPublicParcelUnpublished;
 
-/** List of all Link kinds handled by this Zome */
-export enum LinkTypes {
-	Members = 'Members',
-	Inbox = 'Inbox',
-	Pendings = 'Pendings',
-	PublicParcels = 'PublicParcels',
-}
-
 export enum DeliveryEntryType {
 	DeliveryNotice = 'DeliveryNotice',
 	ReceptionAck = 'ReceptionAck',

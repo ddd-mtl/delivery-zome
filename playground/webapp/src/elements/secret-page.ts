@@ -1,10 +1,9 @@
 import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
-import { DnaElement } from "@ddd-qc/lit-happ";
+import { DnaElement, AgentId, EntryId } from "@ddd-qc/lit-happ";
 import {SecretDvm, SecretDvmPerspective} from "../viewModels/secret.dvm";
-import {AgentPubKeyB64, decodeHashFromBase64, encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {SecretPerspective} from "../viewModels/secret.zvm";
-import {DeliveryPerspective, ParcelReference, TipProtocol, TipProtocolType} from "@ddd-qc/delivery";
+import {DeliveryPerspective} from "@ddd-qc/delivery";
 
 
 /**
@@ -19,9 +18,9 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
   /** -- Fields -- */
   @state() private _initialized = false;
-  @state() private _sender?: AgentPubKeyB64;
-  @state() private _selectedSecretEh?: EntryHashB64;
-  @state() private _senderSecrets: EntryHashB64[] = [];
+  @state() private _sender?: AgentId;
+  @state() private _selectedSecretEh?: EntryId;
+  @state() private _senderSecrets: EntryId[] = [];
 
 
   @property({ type: Boolean, attribute: 'debug' })
@@ -83,8 +82,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
       alert("secret string is empty");
       return;
     }
-    let res = await this._dvm.secretZvm.sendSecretToOne(textInput.value, agentSelect.value, canSplitChk.checked);
-    console.log("onSendSecret() res:", res);
+    let _res = await this._dvm.secretZvm.sendSecretToOne(textInput.value, new AgentId(agentSelect.value), canSplitChk.checked);
     textInput.value = "";
   }
 
@@ -97,10 +95,9 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
       console.warn("No list selector value", selector);
       return;
     }
-    console.log("onSenderSelected() value", selector.value)
-    this._senderSecrets = await this._dvm.secretZvm.getSecretsFrom(selector.value);
-    //this._senderSecrets = this._dvm.secretZvm.perspective.secretsByAgent[selector.value];
-    this._sender = selector.value;
+    console.log("onSenderSelected() value", selector.value);
+    this._sender = new AgentId(selector.value);
+    this._senderSecrets = await this._dvm.secretZvm.getSecretsFrom(this._sender);
   }
 
 
@@ -113,7 +110,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
       return;
     }
     console.log("onSenderSelected() value", selector.value)
-    this._selectedSecretEh = selector.value;
+    this._selectedSecretEh = new EntryId(selector.value);
   }
 
 
@@ -126,19 +123,19 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
     }
 
     //const secrets = this._dvm.secretZvm.secrets;
-    let agents: AgentPubKeyB64[] = this._dvm.agentDirectoryZvm.perspective.agents;
+    let agents: AgentId[] = this._dvm.agentDirectoryZvm.perspective.agents;
 
-    const AgentOptions = Object.entries(agents).map(
-      ([_index, agentIdB64]) => {
+    const AgentOptions = agents.map(
+      (agentId) => {
         //console.log("" + index + ". " + agentIdB64)
-        return html `<option value="${agentIdB64}">${agentIdB64.slice(-5)}</option>`
+        return html `<option value=${agentId}>${agentId.short}</option>`
       }
     )
 
     const secretOptions = Object.values(this._senderSecrets).map(
       (secretEh) => {
         //console.log("" + index + ". " + agentIdB64)
-        return html `<option value=${secretEh}>${secretEh.slice(-5)}</option>`
+        return html `<option value=${secretEh}>${secretEh.short}</option>`
       }
     )
 
@@ -157,21 +154,20 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
     //   }
     // )
 
-    const ppLi = Object.entries(this._dvm.perspective.publicMessages).map(
+    const ppLi = Array.from(this._dvm.perspective.publicMessages.entries()).map(
       ([parcelEh, msg]) => {
         //console.log("" + index + ". " + agentIdB64)
-        const pprm = this.deliveryPerspective.publicParcels[parcelEh];
+        const pprm = this.deliveryPerspective.publicParcels.get(parcelEh);
         if (pprm.deleteInfo) {
           return html``;
         }
-        const prEh = decodeHashFromBase64(pprm.prEh);
         return html`<li>${msg} <button style="margin-left:20px" @click=${async (e:any) => {
-          const _res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(prEh);
+          const _res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(pprm.prEh.hash);
         }}>Remove</button></li>`
       }
     )
 
-    const remLi = Object.entries(this.deliveryPerspective.publicParcels).map(
+    const remLi = Array.from(this.deliveryPerspective.publicParcels.entries()).map(
       ([_parcelEh, pprm]) => {
         //console.log("remLi:", pprm.deleteInfo);
         if (!pprm.deleteInfo) {
@@ -213,7 +209,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
             ${secretOptions}
           </select>
           <div style="margin-top:15px;">
-            ${this._selectedSecretEh? this.secretPerspective.secrets[this._selectedSecretEh] : "n/a"}
+            ${this._selectedSecretEh? this.secretPerspective.secrets.get(this._selectedSecretEh) : "n/a"}
           </div>
         </h2>
         <hr/>

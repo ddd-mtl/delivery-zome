@@ -1,22 +1,14 @@
 import {SecretProxy} from '../bindings/secret.proxy';
-import {ZomeViewModel, CellProxy, DnaViewModel} from "@ddd-qc/lit-happ";
-import {
-  AgentPubKey,
-  AgentPubKeyB64,
-  decodeHashFromBase64,
-  encodeHashToBase64,
-  EntryHash,
-  EntryHashB64
-} from "@holochain/client";
+import {AgentIdMap, EntryId, EntryIdMap, ZomeViewModel, AgentId, ActionId} from "@ddd-qc/lit-happ";
 import {DistributionStrategy} from "../bindings/secret.types";
 
 
 /** */
 export interface SecretPerspective {
-  /** AgentPubKey -> secret_eh */
-  secretsByAgent: Record<AgentPubKeyB64, EntryHashB64[]>,
+  /** AgentPubKey -> secret_eh[] */
+  secretsByAgent: AgentIdMap<EntryId[]>,
  /** secret_eh -> Value */
-  secrets: Record<EntryHashB64, string>,
+  secrets: EntryIdMap<string>,
 }
 
 
@@ -32,7 +24,7 @@ export class SecretZvm extends ZomeViewModel {
 
   /** -- ViewModel -- */
 
-  private _perspective: SecretPerspective = {secretsByAgent: {}, secrets: {}}
+  private _perspective: SecretPerspective = {secretsByAgent: new AgentIdMap(), secrets: new EntryIdMap()}
 
   /* */
   get perspective(): SecretPerspective {return this._perspective}
@@ -62,32 +54,29 @@ export class SecretZvm extends ZomeViewModel {
 
 
   /** */
-  async sendSecretToOne(text: string, recipient: AgentPubKeyB64, canSplit: boolean): Promise<EntryHashB64> {
+  async sendSecretToOne(text: string, recipient: AgentId, canSplit: boolean): Promise<ActionId> {
     const secret_eh = canSplit
         ? await this.zomeProxy.createSplitSecret(text)
         : await this.zomeProxy.createSecret(text)
     const input = {
       secret_eh,
       strategy: DistributionStrategy.Normal,
-      recipients: [decodeHashFromBase64(recipient)],
+      recipients: [recipient.hash],
     }
     const res = await this.zomeProxy.sendSecret(input);
-    return encodeHashToBase64(res);
+    return new ActionId(res);
   }
 
 
   /** */
-  async getSecretsFrom(sender: AgentPubKeyB64): Promise<EntryHashB64[]> {
+  async getSecretsFrom(sender: AgentId): Promise<EntryId[]> {
     console.log("getSecretsFrom()", sender);
-    const res = await this.zomeProxy.getSecretsFrom(decodeHashFromBase64(sender));
+    const res = (await this.zomeProxy.getSecretsFrom(sender.hash)).map(hash => new EntryId(hash));
 
     for (const secretEh of res) {
-      this._perspective.secrets[encodeHashToBase64(secretEh)] = await this.zomeProxy.getSecret(secretEh);
+      this._perspective.secrets.set(secretEh, await this.zomeProxy.getSecret(secretEh.hash));
     }
-
-    const final = Object.values(res).map((eh) => encodeHashToBase64(eh));
-    console.log(" getSecretsFrom():  final", final);
-    this._perspective.secretsByAgent[sender] = final;
-    return final;
+    this._perspective.secretsByAgent.set(sender, res);
+    return res;
   }
 }
