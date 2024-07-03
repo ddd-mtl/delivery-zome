@@ -31,7 +31,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
    /// Process each Action
    for sah in signedActionList {
       // debug!(" - {}", sah.action());
-      let ah = sah_to_ah(sah.clone());
+      let ah = sah.action_address().to_owned();
       match sah.action() {
          ///
          Action::DeleteLink(delete_link) => {

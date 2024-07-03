@@ -13,18 +13,18 @@ import {
     ReceptionProof,
     ReplyAck,
 } from "../bindings/delivery.types";
-import {Dictionary} from "@ddd-qc/lit-happ";
-import {ActionHashB64, AgentPubKeyB64, encodeHashToBase64, decodeHashFromBase64, EntryHashB64, Timestamp} from "@holochain/client";
+import {Dictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap} from "@ddd-qc/lit-happ";
+import {Timestamp} from "@holochain/client";
 
 
 /** */
 export interface PublicParcelRecordMat {
-    prEh: EntryHashB64,
-    parcelEh: EntryHashB64,
+    prEh: EntryId,
+    parcelEh: EntryId,
     description: ParcelDescription,
     creationTs?: Timestamp,
-    author?: AgentPubKeyB64,
-    deleteInfo?: [Timestamp, AgentPubKeyB64],
+    author?: AgentId,
+    deleteInfo?: [Timestamp, AgentId],
 }
 
 
@@ -34,51 +34,51 @@ export type DeliveryPerspective = DeliveryPerspectiveCore & DeliveryPerspectiveL
 export interface DeliveryPerspectiveLive {
     probeDhtCount: number,
     /** -- PROBLEMS -- */
-    orphanPublicChunks: EntryHashB64[],
-    orphanPrivateChunks: EntryHashB64[],
-    //incompleteManifests: EntryHashB64[],
+    orphanPublicChunks: EntryId[],
+    orphanPrivateChunks: EntryId[],
+    //incompleteManifests: EntryId[],
 }
 
 
 /** */
 export interface DeliveryPerspectiveCore {
     /** -- -- */
-    inbox: ActionHashB64[],
+    inbox: ActionId[],
 
     /** parcel_eh -> (pp_eh, ParcelDescription, ...)  */
-    publicParcels: Dictionary<PublicParcelRecordMat>,
+    publicParcels: EntryIdMap<PublicParcelRecordMat>,
     /** pp_eh -> parcel_eh */
-    parcelReferences: Dictionary<EntryHashB64>
+    parcelReferences: EntryIdMap<EntryId>
 
     /** Parcels */
     /** manifest_eh -> (ParcelManifest, timestamp) */
-    privateManifests: Dictionary<[ParcelManifest, Timestamp]>,
+    privateManifests: EntryIdMap<[ParcelManifest, Timestamp]>,
     /** manifest_eh -> ParcelManifest */
-    localPublicManifests: Dictionary<[ParcelManifest, Timestamp]>,
+    localPublicManifests: EntryIdMap<[ParcelManifest, Timestamp]>,
     /** data_hash -> [manifest_eh, isPrivate] */
-    localManifestByData: Dictionary<[EntryHashB64, boolean]>,
+    localManifestByData: Dictionary<[EntryId, boolean]>,
     // /** data_hash -> number of chunks on chain */
     // chunkCounts: Dictionary<number>,
 
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
-    distributions: Dictionary<[Distribution, Timestamp, DistributionState, Dictionary<DeliveryState>]>,
+    distributions: ActionIdMap<[Distribution, Timestamp, DistributionState, Dictionary<DeliveryState>]>,
     /** distrib_ah -> (recipientKey -> NoticeAck) */
-    noticeAcks: Dictionary<Dictionary<[NoticeAck, Timestamp]>>,
+    noticeAcks: ActionIdMap<AgentIdMap<[NoticeAck, Timestamp]>>,
     /** distrib_ah -> (recipientKey -> ReplyAck) */
-    replyAcks: Dictionary<Dictionary<[ReplyAck, Timestamp]>>,
+    replyAcks: ActionIdMap<AgentIdMap<[ReplyAck, Timestamp]>>,
     /** distrib_ah -> (recipientKey -> ReceptionAck) */
-    receptionAcks: Dictionary<Dictionary<[ReceptionAck, Timestamp]>>,
+    receptionAcks: ActionIdMap<AgentIdMap<[ReceptionAck, Timestamp]>>,
 
     /** -- INBOUND -- */
     /** notice_eh -> Timestamp, Notice, State, Missing chunks */
-    notices: Dictionary<[DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]>,
+    notices: EntryIdMap<[DeliveryNotice, Timestamp, NoticeState, Set<EntryId>]>,
     /** parcel_eh -> notice_eh */
-    noticeByParcel: Dictionary<EntryHashB64>,
+    noticeByParcel: EntryIdMap<EntryId>,
     /** notice_eh -> NoticeReply */
-    replies: Dictionary<NoticeReply>,
+    replies: EntryIdMap<NoticeReply>,
     /** notice_eh -> ReceptionProof */
-    receptions: Dictionary<[ReceptionProof, Timestamp]>,
+    receptions: EntryIdMap<[ReceptionProof, Timestamp]>,
 }
 
 
@@ -86,41 +86,42 @@ export interface DeliveryPerspectiveCore {
 export function createDeliveryPerspective(): DeliveryPerspective {
     return {
         inbox: [],
-        publicParcels: {},
-        parcelReferences: {},
-        privateManifests: {},
-        localPublicManifests: {},
+        publicParcels: new EntryIdMap(),
+        parcelReferences: new EntryIdMap(),
+        privateManifests: new EntryIdMap(),
+        localPublicManifests: new EntryIdMap(),
         localManifestByData: {},
         //chunkCounts: {},
-        /* Problems */
+
+        //incompleteManifests: [],
+        /** Outbound */
+        distributions: new ActionIdMap(),
+        noticeAcks: new ActionIdMap(),
+        replyAcks: new ActionIdMap(),
+        receptionAcks: new ActionIdMap(),
+        /** Inbound */
+        notices: new EntryIdMap(),
+        noticeByParcel: new EntryIdMap(),
+        replies: new EntryIdMap(),
+        receptions: new EntryIdMap(),
+
+        /* Live */
         orphanPublicChunks: [],
         orphanPrivateChunks: [],
-        //incompleteManifests: [],
-        /** Inbound */
-        distributions: {},
-        noticeAcks: {},
-        replyAcks: {},
-        receptionAcks: {},
-        /** Outbound */
-        notices: {},
-        noticeByParcel: {},
-        replies: {},
-        receptions: {},
-        /** meta */
         probeDhtCount: 0,
     };
 }
 
 
 export interface ParcelManifestMat {
-    description: ParcelDescription
-    data_hash: string
-    chunks: EntryHashB64[]
+    description: ParcelDescription,
+    data_hash: string,
+    chunks: EntryId[],
 }
 
 
 export function materializeParcelManifest(pm: ParcelManifest): ParcelManifestMat {
-    const chunks = pm.chunks.map((eh) => encodeHashToBase64(eh));
+    const chunks = pm.chunks.map((eh) => new EntryId(eh));
     return {
         description: pm.description,
         data_hash: pm.data_hash,
@@ -130,7 +131,7 @@ export function materializeParcelManifest(pm: ParcelManifest): ParcelManifestMat
 
 
 export function dematerializeParcelManifest(pm: ParcelManifestMat): ParcelManifest {
-    const chunks = pm.chunks.map((eh) => decodeHashFromBase64(eh));
+    const chunks = pm.chunks.map((id) => (id.hash));
     return {
         description: pm.description,
         data_hash: pm.data_hash,
@@ -142,12 +143,12 @@ export function dematerializeParcelManifest(pm: ParcelManifestMat): ParcelManife
 
 export function materializePublicParcelRecord(ppr: PublicParcelRecord): PublicParcelRecordMat {
     return {
-        prEh: encodeHashToBase64(ppr.pr_eh),
-        parcelEh: encodeHashToBase64(ppr.pp_eh),
+        prEh: new EntryId(ppr.pr_eh),
+        parcelEh: new EntryId(ppr.pp_eh),
         description: ppr.description,
         creationTs: ppr.creation_ts,
-        author: encodeHashToBase64(ppr.author),
-        deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], encodeHashToBase64(ppr.deleteInfo[1])] : undefined,
+        author: new AgentId(ppr.author),
+        deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], new AgentId(ppr.deleteInfo[1])] : undefined,
     }
 }
 

@@ -8,12 +8,6 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"entry_defs", 
 	"get_zome_info", 
 	"get_dna_info",
-	"cast_tip",
-
-
-
-
-
 	"commit_private_chunks",
 	"commit_private_manifest",
 	"complete_manifest",
@@ -51,7 +45,8 @@ export const deliveryFunctionNames: FunctionName[] = [
 	"scan_incomplete_manifests",
 	"scan_orphan_chunks",
 	"unpublish_public_parcel",
-	"pull_chunk",];
+	"pull_chunk",
+];
 
 
 /** Generate tuple array of function names with given zomeName */

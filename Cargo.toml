@@ -14,8 +14,16 @@ members = [
 
 [workspace.package]
 version = "0.1.0"
-rust-version = "1.73.0"
+rust-version = "1.75.0"
 edition = "2021"
+
+[workspace.lints.rust]
+non_upper_case_globals = "allow"
+unused_doc_comments = "allow"
+non_camel_case_types = "allow"
+non_snake_case = "allow"
+unused_attributes = "allow"
+ill_formed_attribute_input = "allow"
 
 [workspace.dependencies]
 serde = { version = "=1.0.197", default-features = false }
