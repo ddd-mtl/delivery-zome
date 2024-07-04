@@ -72,7 +72,7 @@ export class SecretZvm extends ZomeViewModel {
   async getSecretsFrom(sender: AgentId): Promise<EntryId[]> {
     console.log("getSecretsFrom()", sender);
     const res = (await this.zomeProxy.getSecretsFrom(sender.hash)).map(hash => new EntryId(hash));
-
+    console.log("getSecretsFrom() res", res);
     for (const secretEh of res) {
       this._perspective.secrets.set(secretEh, await this.zomeProxy.getSecret(secretEh.hash));
     }

@@ -21,7 +21,7 @@ import {
     LinkPulseMat, prettyState, getVariantByIndex,
 } from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
-import {Timestamp} from "@holochain/client";
+import {EntryHashB64, Timestamp} from "@holochain/client";
 import {
     DeliveryEntryType,
     DeliveryNotice,
@@ -117,14 +117,17 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case "PrivateChunk":
             case "PublicChunk":
                 const chunk = decode(pulse.bytes) as ParcelChunk;
+                //console.log("Received Chunk", chunk, pulse.visibility, pulse.eh);
                 /** Update notice state if Chunk is not from us */
                 const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
                 if (manifestPair) {
                     const manifestEh = manifestPair[0];
                     const noticeEh = this._perspective.noticeByParcel.get(manifestEh);
                     if (noticeEh) {
-                        this._perspective.notices.get(noticeEh)[3].delete(pulse.eh);
-                        if (this._perspective.notices.get(noticeEh)[3].size == 0) {
+                        const noticeTuple = this._perspective.notices.get(noticeEh);
+                        noticeTuple[3].delete(pulse.eh.b64);
+                        this._perspective.notices.set(noticeEh, noticeTuple);
+                        if (noticeTuple[3].size == 0) {
                             this.zomeProxy.completeManifest(manifestEh.hash);
                         } else {
                             // Ask for next chunk?
@@ -142,10 +145,11 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case "DeliveryNotice":
                 const notice = decode(pulse.bytes) as DeliveryNotice;
                 const parcelId = new EntryId(notice.summary.parcel_reference.parcel_eh);
+                //console.log("Received DeliveryNotice", this._perspective, parcelId, notice);
                 this._perspective.notices.set(pulse.eh, [notice, pulse.ts, NoticeState.Unreplied, new Set()]);
                 this._perspective.noticeByParcel.set(parcelId, pulse.eh);
-                const [noticeState, pct] = await this.getNoticeState(pulse.eh);
-                this._perspective.notices.set(pulse.eh, [notice, pulse.ts, noticeState, pct]);
+                const [noticeState, chunks] = await this.getNoticeState(pulse.eh);
+                this._perspective.notices.set(pulse.eh, [notice, pulse.ts, noticeState, chunks]);
                 this._perspective.noticeByParcel.set(parcelId, pulse.eh);
             break;
             case "NoticeAck": {
@@ -164,10 +168,13 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case "NoticeReply": {
                 const reply = decode(pulse.bytes) as NoticeReply;
                 const noticeEh = new EntryId((reply.notice_eh));
+                //console.log("Received NoticeReply", this._perspective, noticeEh, reply);
                 this._perspective.replies.set(noticeEh, reply);
-                this._perspective.notices.get(noticeEh)[2] = NoticeState.Refused;
-                if (reply.has_accepted) {
-                    this._perspective.notices.get(noticeEh)[2] = NoticeState.Accepted;
+                if (this._perspective.notices.get(noticeEh)) {
+                    this._perspective.notices.get(noticeEh)[2] = NoticeState.Refused;
+                    if (reply.has_accepted) {
+                        this._perspective.notices.get(noticeEh)[2] = NoticeState.Accepted;
+                    }
                 }
             }
             break;
@@ -187,8 +194,11 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case "ReceptionProof": {
                 const receptionProof = decode(pulse.bytes) as ReceptionProof;
                 const noticeEh = new EntryId(receptionProof.notice_eh);
+                //console.log("Received ReceptionProof", noticeEh, receptionProof);
                 this._perspective.receptions.set(noticeEh, [receptionProof, pulse.ts]);
-                this._perspective.notices.get(noticeEh)[2] = NoticeState.Received;
+                if (this._perspective.notices.get(noticeEh)) {
+                    this._perspective.notices.get(noticeEh)[2] = NoticeState.Received;
+                }
             }
             break;
             case "ReceptionAck": {
@@ -272,7 +282,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             const maybeNoticeEh = this._perspective.noticeByParcel.get(manifestEh);
             if (maybeNoticeEh) {
                 this._perspective.notices.get(maybeNoticeEh)[2] = NoticeState.PartiallyReceived;
-                this._perspective.notices.get(maybeNoticeEh)[3] = new Set(manifest.chunks.map((eh) => new EntryId(eh)));
+                this._perspective.notices.get(maybeNoticeEh)[3] = new Set(manifest.chunks.map((eh) => enc64(eh)));
             }
         } else {
             this._perspective.localPublicManifests.set(manifestEh, [manifest, ts]);
@@ -373,10 +383,10 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
      *  - unreplieds: notice_eh -> [notice, Timestamp]
      *  - incompletes: notice_eh -> [notice, Timestamp, MissingChunks]
      */
-    inbounds(): [EntryIdMap<[DeliveryNotice, Timestamp]>, EntryIdMap<[DeliveryNotice, Timestamp, Set<EntryId>]>] {
+    inbounds(): [EntryIdMap<[DeliveryNotice, Timestamp]>, EntryIdMap<[DeliveryNotice, Timestamp, Set<EntryHashB64>]>] {
         //console.log("inbounds() allNotices count", Object.entries(this._perspective.notices).length);
         let unreplieds: EntryIdMap<[DeliveryNotice, Timestamp]> = new EntryIdMap();
-        let incompletes: EntryIdMap<[DeliveryNotice, Timestamp, Set<EntryId>]> = new EntryIdMap();
+        let incompletes: EntryIdMap<[DeliveryNotice, Timestamp, Set<EntryHashB64>]> = new EntryIdMap();
         for (const [noticeEh, [notice, ts, state, missingChunks]] of this._perspective.notices.entries()) {
             //const sender = encodeHashToBase64(notice.sender);
             //console.log("inbounds() state", state);
@@ -475,9 +485,9 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** */
-    async getNoticeState(noticeEh: EntryId): Promise<[NoticeState, Set<EntryId>]> {
+    async getNoticeState(noticeEh: EntryId): Promise<[NoticeState, Set<EntryHashB64>]> {
         const [state, missing_chunks] = await this.zomeProxy.getNoticeState(noticeEh.hash);
-        const missingChunks = missing_chunks.map((chunk_eh) => new EntryId(chunk_eh));
+        const missingChunks = missing_chunks.map((chunk_eh) => enc64(chunk_eh));
         return [state, new Set(missingChunks)];
     }
 

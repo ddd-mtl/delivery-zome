@@ -50,7 +50,6 @@ fn delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> ExternResu
          Action::Create(_) => {
             let Some(EntryType::App(app_entry_def)) = sah.action().entry_type()
               else { return zome_error!("Create action malformed."); };
-            warn!("delivery_post_commit() zome_name = {}", zome_names[app_entry_def.zome_index.0 as usize]);
             /// Bail if from other zome
             if zome_names[app_entry_def.zome_index.0 as usize].0 != "zDeliveryIntegrity" { // Hack: hardcoded name
                continue;
@@ -65,7 +64,6 @@ fn delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> ExternResu
               else { return zome_error!("Deleted action not found."); };
             let Some(EntryType::App(app_entry_def)) = new_sah.action().entry_type()
               else { return zome_error!("Deleted action should have entry_type."); };
-            warn!("delivery_post_commit() zome_name = {}", zome_names[app_entry_def.zome_index.0 as usize]);
             /// Bail if from other zome
             if zome_names[app_entry_def.zome_index.0 as usize].0 != "zDeliveryIntegrity" { // Hack: hardcoded name
                continue;
@@ -116,7 +114,7 @@ fn filter_action_from_this_zome(signedActionList: Vec<SignedActionHashed>) -> Ex
          ///
          _ => continue,
       };
-      warn!("delivery_post_commit() zome_name = {}", zome_names[zome_index.0 as usize]);
+      //warn!("delivery_post_commit() zome_name = {}", zome_names[zome_index.0 as usize]);
       if zome_names[zome_index.0 as usize].0 == "zDeliveryIntegrity" { // Hack: hardcoded name
          res.push(sah);
       }

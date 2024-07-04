@@ -14,7 +14,7 @@ import {
     ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap} from "@ddd-qc/lit-happ";
-import {Timestamp} from "@holochain/client";
+import {EntryHashB64, Timestamp} from "@holochain/client";
 
 
 /** */
@@ -72,7 +72,7 @@ export interface DeliveryPerspectiveCore {
 
     /** -- INBOUND -- */
     /** notice_eh -> Timestamp, Notice, State, Missing chunks */
-    notices: EntryIdMap<[DeliveryNotice, Timestamp, NoticeState, Set<EntryId>]>,
+    notices: EntryIdMap<[DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]>,
     /** parcel_eh -> notice_eh */
     noticeByParcel: EntryIdMap<EntryId>,
     /** notice_eh -> NoticeReply */

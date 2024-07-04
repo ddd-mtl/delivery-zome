@@ -10,15 +10,10 @@
   </head>
   <body style="margin:0px;background: #FAF1EA;height:100vh;">
     <secret-app></secret-app>
-
     <script type="module">
       console.log("   HC_PORT:", process.env.HC_PORT);
-      console.log("ADMIN_PORT:", process.env.ADMIN_PORT);   
-      //import {ContextRoot} from '@lit-labs/context';
-      //const root = new ContextRoot();
-      //root.attach(document.body);         
-      import { SecretApp } from "./dist";
-      customElements.define("secret-app", SecretApp);
+      console.log("ADMIN_PORT:", process.env.ADMIN_PORT);
+      import { SecretApp } from "./";
     </script>
 
   </body>

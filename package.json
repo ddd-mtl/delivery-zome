@@ -26,7 +26,7 @@
     "build:playground"       : "npm run build -w playground/webapp",
     "build:all"              : "npm run clean:hc & npm run build:happ && npm run build:bindings && npm run build:webcomponents && npm run build:playground",
 
-    "devtest"                : "npm run build:all && concurrently \"npm run build:watch -w webcomponents\" \"npm run build:watch -w playground/webapp\" \"npm run start\"",
+    "devtest"                : "npm run build:all && concurrently \"npm run build:watch -w webcomponents\" \"npm run build:watch -w playground/webapp\" \"npm run start:mem\"",
     "watch:webcomponents"    : "npm run build:watch -w webcomponents",
 
     "start:happ:mem"         : "RUST_LOG=warn echo \"pass\" | $npm_package_config_bin/hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network mem",
@@ -61,10 +61,10 @@
   },
   "dependencies": {
     "@ddd-qc/cell-proxy"            : "=0.26.1",
-    "@ddd-qc/lit-happ"              : "=0.26.1",
+    "@ddd-qc/lit-happ"              : "=0.26.2",
     "@holochain-open-dev/core-types": "0.7.0",
     "@holochain/client"             : "^0.18.0-dev.4",
-    "@lit-labs/context"             : "0.5.1",
+    "@lit/context"                  : "1.0.1",
     "lit"                           : "3.0.2"
   },
   "engines": {

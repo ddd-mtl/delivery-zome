@@ -117,7 +117,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
   /** */
   render() {
-    console.log("<secret-page.render()> render()", this._initialized, this._sender, this.secretPerspective, this._dvm.perspective);
+    console.log("<secret-page.render()> render()", this._initialized, this._sender, this.secretPerspective, this._dvm.perspective, this._dvm.deliveryZvm.perspective);
     if (!this._initialized) {
       return html`<span>Loading...</span>`;
     }

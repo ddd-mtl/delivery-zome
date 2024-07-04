@@ -1,16 +1,15 @@
 import { html } from "lit";
-import {property, state} from "lit/decorators.js";
+import {property, state, customElement} from "lit/decorators.js";
 import { SecretDvm } from "./viewModels/secret.dvm";
-import {
-  HvmDef, HappElement, Cell, AgentId
-} from "@ddd-qc/lit-happ";
-import {AdminWebsocket, DnaDefinition, ListAppsResponse} from "@holochain/client";
+import {HvmDef, HappElement, Cell, AgentId} from "@ddd-qc/lit-happ";
+import {DnaDefinition} from "@holochain/client";
 import {Dictionary, EntryDef} from "@ddd-qc/cell-proxy";
 
 
 /**
  *
  */
+@customElement("secret-app")
 export class SecretApp extends HappElement {
 
   /** Ctor */
