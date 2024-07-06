@@ -151,7 +151,8 @@ export class SecretDvm extends DnaViewModel {
       /** */
       switch (linkPulse.link_type) {
         case DeliveryLinkType.PublicParcels: {
-          const parcelEh = this.deliveryZvm.perspective.parcelReferences.get(linkPulse.target);
+          const ppEh = EntryId.from(linkPulse.target);
+          const parcelEh = this.deliveryZvm.perspective.parcelReferences.get(ppEh);
           console.log("secretDvm handle link signal: PublicParcels", parcelEh, linkPulse.state);
           if (linkPulse.state == StateChangeType.Delete) {
             if (parcelEh) {

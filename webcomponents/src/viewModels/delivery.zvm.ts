@@ -80,7 +80,8 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         switch(pulse.link_type) {
             case DeliveryLinkType.PublicParcels: {
                 if (pulse.state == StateChangeType.Delete) {
-                    const parcelEh = this._perspective.parcelReferences.get(pulse.target);
+                    const ppEh = EntryId.from(pulse.target);
+                    const parcelEh = this._perspective.parcelReferences.get(ppEh);
                     if (!parcelEh) {
                         console.warn("Unknown deleted PublicParcel", parcelEh);
                         return;
