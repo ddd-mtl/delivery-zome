@@ -36,7 +36,7 @@ pub fn unlink_public_parcel(pp_eh: EntryHash) -> ExternResult<ActionHash> {
         else { return zome_error!("get_link_details() should return a CreateLink Action")};
       let target = EntryHash::try_from(create.target_address).unwrap();
       if target == pp_eh {
-         return delete_link(create_sah.hashed.hash);
+         return delete_link_relaxed(create_sah.hashed.hash);
       }
    }
    return zome_error!("Link to PublicParcel not found");
