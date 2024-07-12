@@ -117,7 +117,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
   /** */
   render() {
-    console.log("<secret-page.render()> render()", this._initialized, this._sender, this.secretPerspective, this._dvm.perspective, this._dvm.deliveryZvm.perspective);
+    console.log("<secret-page> render()", this._initialized, this._sender, this.secretPerspective, this._dvm.perspective, this._dvm.deliveryZvm.perspective);
     if (!this._initialized) {
       return html`<span>Loading...</span>`;
     }
@@ -128,14 +128,14 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
     const AgentOptions = agents.map(
       (agentId) => {
         //console.log("" + index + ". " + agentIdB64)
-        return html `<option value=${agentId}>${agentId.short}</option>`
+        return html `<option value=${agentId.b64}>${agentId.short}</option>`
       }
     )
 
     const secretOptions = Object.values(this._senderSecrets).map(
       (secretEh) => {
         //console.log("" + index + ". " + agentIdB64)
-        return html `<option value=${secretEh}>${secretEh.short}</option>`
+        return html `<option value=${secretEh.b64}>${secretEh.short}</option>`
       }
     )
 
@@ -174,7 +174,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
           return html``;
         }
         //const prEh = decodeHashFromBase64(this._dvm.deliveryZvm.perspective.publicParcels[parcelEh][0]);
-        const msg = `[${pprm.deleteInfo[0]}] ${pprm.description.name} | by ${pprm.deleteInfo[1]}`
+        const msg = `[${pprm.deleteInfo[0]}] ${pprm.description.name} | by ${pprm.deleteInfo[1].b64}`
         return html`<li>${msg}</li>`
       }
     )

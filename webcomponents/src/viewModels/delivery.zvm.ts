@@ -248,7 +248,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
               const signal = log.zomeSignal as ZomeSignal;
               const pulses = signal.pulses as ZomeSignalProtocol[];
               const timestamp = prettyDate(new Date(log.ts));
-              const from = enc64(signal.from) == this.cell.agentId.b64? "self" : new AgentId(signal.from);
+              const from = this.cell.agentId.equals(signal.from)? "self" : new AgentId(signal.from);
               for (const pulse of pulses) {
                   if (ZomeSignalProtocolType.Tip in pulse) {
                       const tip: TipProtocol = pulse.Tip;
@@ -407,9 +407,9 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** Return distrib_ah -> [distrib, Timestamp, recipient -> state] */
-    outbounds(): ActionIdMap<[Distribution, Timestamp, Dictionary<DeliveryState>]> {
+    outbounds(): ActionIdMap<[Distribution, Timestamp, AgentIdMap<DeliveryState>]> {
         //console.log("outbounds() allDistributions count", Object.entries(this._perspective.distributions).length);
-        let res: ActionIdMap<[Distribution, Timestamp, Dictionary<DeliveryState>]> = new ActionIdMap();
+        let res: ActionIdMap<[Distribution, Timestamp, AgentIdMap<DeliveryState>]> = new ActionIdMap();
         for (const [distribAh, [distrib, ts, state, deliveryStates]] of this._perspective.distributions.entries()) {
             //console.log("outbounds() distrib state", state);
             if (DistributionState.Unsent == state
@@ -418,13 +418,13 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
               || DistributionState.AllRepliesReceived == state
             ) {
                 //console.log("outbounds() recipients", distrib.recipients.length);
-                for (const [recipient, state] of Object.entries(deliveryStates)) {
+                for (const [recipient, state] of Array.from(deliveryStates.entries())) {
                     //console.log("outbounds() state", deliveryStates[agentB64], agentB64);
                     if (!(DeliveryState.ParcelDelivered == state)) {
                         if (!res.get(distribAh)) {
-                            res.set(distribAh, [distrib, ts, {}]);
+                            res.set(distribAh, [distrib, ts, new AgentIdMap()]);
                         }
-                        res.get(distribAh)[2][recipient] = state;
+                        res.get(distribAh)[2].set(recipient, state);
                     }
                 }
             }

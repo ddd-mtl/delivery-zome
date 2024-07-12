@@ -47,12 +47,12 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         /* Li */
         console.log("distributions", this.perspective.distributions);
         const myDistribsLi = Array.from(this.perspective.distributions.entries()).map(
-            ([distribAh, [distribution, ts, distribState, statePerAgent]]) => {
+            ([distribAh, [distribution, _ts, _distribState, statePerAgent]]) => {
                 //console.log("MembraneLi", MembraneLi)
               const deliveryLi = Array.from(statePerAgent.entries()).map(
                   ([agentId, deliveryState]) => {
                       return html `
-                      <li style="margin-top:10px;" title=${agentId}>
+                      <li style="margin-top:10px;" title=${agentId.b64}>
                           ${JSON.stringify(deliveryState)}<b> Recipient: </b> ${agentId.short}
                           <button type="button" @click=${() => {this._zvm.getDeliveryState(distribAh, agentId)}}>refresh</button>
                       </li>`
@@ -61,7 +61,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
               /** */
               return html `
-              <li style="margin-top:10px;" title=${distribAh}>
+              <li style="margin-top:10px;" title=${distribAh.b64}>
                   <b>${this.distrib2str(distribAh)}</b>: ${JSON.stringify(distribution)}
                   <button type="button" @click=${() => {this._zvm.zomeProxy.getDistributionState(distribAh.hash)}}>refresh</button>
                   <ul>
@@ -74,7 +74,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         const distribsLi = Array.from(this.perspective.distributions.entries()).map(
             ([distribAh, _pair]) => {
                 return html `
-          <li style="margin-top:10px;" title=${distribAh}>
+          <li style="margin-top:10px;" title=${distribAh.b64}>
               ${this.distrib2str(distribAh)}
           </li>`
             }
@@ -85,7 +85,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
                 return Array.from(receiveds.entries()).map(
                   ([recipientKey, [_received, _ts]]) => {
                     return html `
-                      <li style="margin-top:10px;" title=${distribAh}>
+                      <li style="margin-top:10px;" title=${distribAh.b64}>
                           ${this.distrib2str(distribAh)}: ${recipientKey.short}
                       </li>`;
                 });
@@ -96,7 +96,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
               return Array.from(receiveds.entries()).map(
                 ([recipientKey, [received, _ts]]) => {
                   return html `
-                    <li style="margin-top:10px;" title=${distribAh}>
+                    <li style="margin-top:10px;" title=${distribAh.b64}>
                         ${this.distrib2str(distribAh)}: ${recipientKey.short} ${received.has_accepted? "accepted" : "declined"}
                     </li>`
                 });
@@ -108,7 +108,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
               return Array.from(receiveds.entries()).map(
                 ([recipientKey, [_receptionAck, _ts]]) => {
                   return html `
-                    <li style="margin-top:10px;" title=${distribAh}>
+                    <li style="margin-top:10px;" title=${distribAh.b64}>
                         ${this.distrib2str(distribAh)}: ${recipientKey.short}
                     </li>`
           });
@@ -124,7 +124,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
                     <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
                     <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>`;
                 return html `
-              <li style="margin-top:10px;" title=${noticeEh}>
+              <li style="margin-top:10px;" title=${noticeEh.b64}>
                   ${this.notice2str(noticeEh)}
                   ${content}
               </li>`
@@ -134,7 +134,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         const noticesLi = Array.from(this.perspective.notices.entries()).map(
             ([eh, _pair]) => {
                 return html`
-          <li style="margin-top:10px;" title=${eh}>
+          <li style="margin-top:10px;" title=${eh.b64}>
               ${this.notice2str(eh)}
           </li>`
             }
@@ -144,7 +144,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         const repliesLi = Array.from(this.perspective.replies.entries()).map(
             ([eh, reply]) => {
                 return html `
-          <li style="margin-top:10px;" title=${eh}>
+          <li style="margin-top:10px;" title=${eh.b64}>
               ${this.notice2str(new EntryId(reply.notice_eh))}: ${reply.has_accepted? "accepted" : "declined"}
           </li>`
             }
@@ -153,7 +153,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         const receptionsLi = Array.from(this.perspective.receptions.entries()).map(
             ([eh, [receptionProof, _ts]]) => {
                 return html `
-          <li style="margin-top:10px;" title=${eh}>
+          <li style="margin-top:10px;" title=${eh.b64}>
               ${this.notice2str(new EntryId(receptionProof.notice_eh))}: ${enc64(receptionProof.parcel_eh).slice(-5)}
           </li>`
             }
@@ -181,6 +181,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
               const json = this._zvm.exportPerspective();
               this.downloadTextFile("dump.json", json);
             }}>Export</button>
+            
             <h2>Local Parcels</h2>
             <ul>${manifestsLi}</ul>
             
@@ -217,10 +218,10 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             <ul>${receptionAcksLi}</ul>
             
             <hr style="border: dotted 1px grey"/>
-
+            
             <h3>Distributions</h3>
             <ul>${myDistribsLi}</ul>
-            
+
               
         </div>
         `;

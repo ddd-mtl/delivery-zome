@@ -71,7 +71,7 @@ export class SecretApp extends HappElement {
     if (!this._loaded) {
       return html`<span>Loading...</span>`;
     }
-    let knownAgents: AgentId[] = this.secret.agentDirectoryZvm.perspective.agents;
+    //let knownAgents: AgentId[] = this.secret.agentDirectoryZvm.perspective.agents;
     //console.log({coordinator_zomes: this._dnaDef?.coordinator_zomes})
     const zomeNames = this._dnaDef?.coordinator_zomes.map((zome) => { return zome[0]; });
     console.log({zomeNames})
