@@ -112,8 +112,13 @@ export class DeliveryPerspective implements DeliveryPerspectiveCore {
     private _orphanPrivateChunks: EntryId[] = [];
     //private _probeDhtCount = 0;
 
+    /** -- Getters -- */
 
-    /** -- Methods -- */
+    get orphanPublicChunks() { return this._orphanPublicChunks;}
+    get orphanPrivateChunks() { return this._orphanPrivateChunks;}
+
+
+    /** -- Store -- */
 
     /** */
     storeManifest(manifestEh: EntryId, ts: Timestamp, manifest: ParcelManifest) {

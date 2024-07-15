@@ -285,6 +285,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     private _probeDhtCount = 0;
+    get probeDhtCount() {return this._probeDhtCount}
 
     /** */
     async probeDht(denyNotify?: boolean): Promise<void> {
