@@ -1,24 +1,17 @@
 import {
     delay,
-    Dictionary,
-    ZomeSignal,
-    prettyDate,
-    SignalLog,
-    SignalType,
     ActionId,
     EntryId,
     AgentId,
     enc64,
-    ZomeSignalProtocol,
-    ZomeSignalProtocolType,
     AgentIdMap,
     EntryIdMap,
     ActionIdMap,
     ZomeViewModelWithSignals,
     StateChangeType,
     EntryPulseMat,
-    TipProtocol,
-    LinkPulseMat, prettyState, getVariantByIndex,
+
+    LinkPulseMat,
 } from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {EntryHashB64, Timestamp} from "@holochain/client";
@@ -35,8 +28,7 @@ import {
     ParcelReference, ReceptionAck, ReceptionProof, ReplyAck,
 } from "../bindings/delivery.types";
 import {
-    createDeliveryPerspective,
-    DeliveryPerspective,
+    DeliveryPerspective, DeliveryPerspectiveSnapshot,
     materializeParcelManifest,
     ParcelManifestMat,
 } from "./delivery.perspective";
@@ -57,7 +49,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** -- ViewModel -- */
 
-    private _perspective: DeliveryPerspective = createDeliveryPerspective();
+    private _perspective: DeliveryPerspective = new DeliveryPerspective();
 
 
     /* */
@@ -76,7 +68,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** */
-    async handleLinkPulse(pulse: LinkPulseMat, from: AgentId): Promise<void> {
+    async handleLinkPulse(pulse: LinkPulseMat, _from: AgentId): Promise<void> {
         switch(pulse.link_type) {
             case DeliveryLinkType.PublicParcels: {
                 if (pulse.state == StateChangeType.Delete) {
@@ -106,17 +98,17 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** */
-    async handleEntryPulse(pulse: EntryPulseMat, from: AgentId): Promise<void> {
+    async handleEntryPulse(pulse: EntryPulseMat, _from: AgentId): Promise<void> {
         switch(pulse.entryType) {
-            case "PrivateManifest":
-            case "PublicManifest":
+            case DeliveryEntryType.PrivateManifest:
+            case DeliveryEntryType.PublicManifest:
                 const manifest = decode(pulse.bytes) as ParcelManifest;
                 if (pulse.state != StateChangeType.Delete) {
-                    this.storeManifest(pulse.eh, pulse.ts, manifest);
+                    this.perspective.storeManifest(pulse.eh, pulse.ts, manifest);
                 }
             break;
-            case "PrivateChunk":
-            case "PublicChunk":
+            case DeliveryEntryType.PrivateChunk:
+            case DeliveryEntryType.PublicChunk:
                 const chunk = decode(pulse.bytes) as ParcelChunk;
                 //console.log("Received Chunk", chunk, pulse.visibility, pulse.eh);
                 /** Update notice state if Chunk is not from us */
@@ -136,14 +128,14 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                     }
                 }
             break;
-            case "Distribution": {
+            case DeliveryEntryType.Distribution: {
                 const distribution = decode(pulse.bytes) as Distribution;
                 this._perspective.distributions.set(pulse.ah, [distribution, pulse.ts, DistributionState.Unsent, new AgentIdMap<DeliveryState>()]);
                 const [fullState, deliveryStates] = await this.getDistributionState(pulse.ah);
                 this._perspective.distributions.set(pulse.ah, [distribution, pulse.ts, fullState, deliveryStates]);
             }
             break;
-            case "DeliveryNotice":
+            case DeliveryEntryType.DeliveryNotice:
                 const notice = decode(pulse.bytes) as DeliveryNotice;
                 const parcelId = new EntryId(notice.summary.parcel_reference.parcel_eh);
                 //console.log("Received DeliveryNotice", this._perspective, parcelId, notice);
@@ -153,7 +145,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 this._perspective.notices.set(pulse.eh, [notice, pulse.ts, noticeState, chunks]);
                 this._perspective.noticeByParcel.set(parcelId, pulse.eh);
             break;
-            case "NoticeAck": {
+            case DeliveryEntryType.NoticeAck: {
                 const noticeAck = decode(pulse.bytes) as NoticeAck;
                 const distribAh = new ActionId(noticeAck.distribution_ah);
                 const recipient = new AgentId(noticeAck.recipient);
@@ -166,7 +158,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 this._perspective.distributions.get(distribAh)[3] = deliveryStates;
             }
             break;
-            case "NoticeReply": {
+            case DeliveryEntryType.NoticeReply: {
                 const reply = decode(pulse.bytes) as NoticeReply;
                 const noticeEh = new EntryId((reply.notice_eh));
                 //console.log("Received NoticeReply", this._perspective, noticeEh, reply);
@@ -179,7 +171,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 }
             }
             break;
-            case "ReplyAck": {
+            case DeliveryEntryType.ReplyAck: {
                 const replyAck = decode(pulse.bytes) as ReplyAck;
                 const distribAh = new ActionId(replyAck.distribution_ah);
                 const recipient = new AgentId(replyAck.recipient);
@@ -192,7 +184,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 this._perspective.distributions.get(distribAh)[3] = deliveryStates;
             }
             break;
-            case "ReceptionProof": {
+            case DeliveryEntryType.ReceptionProof: {
                 const receptionProof = decode(pulse.bytes) as ReceptionProof;
                 const noticeEh = new EntryId(receptionProof.notice_eh);
                 //console.log("Received ReceptionProof", noticeEh, receptionProof);
@@ -202,7 +194,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 }
             }
             break;
-            case "ReceptionAck": {
+            case DeliveryEntryType.ReceptionAck: {
                 const receptionAck = decode(pulse.bytes) as ReceptionAck;
                 const distribAh = new ActionId(receptionAck.distribution_ah);
                 const recipient = new AgentId(receptionAck.recipient);
@@ -215,7 +207,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 this._perspective.distributions.get(distribAh)[3] = deliveryStates;
             }
             break;
-            case "PublicParcel": {
+            case DeliveryEntryType.PublicParcel: {
                 const pr = decode(pulse.bytes) as ParcelReference;
                 const parcelEh = new EntryId(pr.parcel_eh);
                 this._perspective.parcelReferences.set(pulse.eh, parcelEh);
@@ -233,60 +225,6 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 // }
             }
             break;
-        }
-    }
-
-
-    /** */
-    dumpSignalLogs(signalLogs: SignalLog[]) {
-        this.dumpCastLogs();
-        console.warn(`Signals received from zome "${this.zomeName}"`);
-        let appSignals: any[] = [];
-        signalLogs
-          .filter((log) => log.type == SignalType.Zome)
-          .map((log) => {
-              const signal = log.zomeSignal as ZomeSignal;
-              const pulses = signal.pulses as ZomeSignalProtocol[];
-              const timestamp = prettyDate(new Date(log.ts));
-              const from = this.cell.agentId.equals(signal.from)? "self" : new AgentId(signal.from);
-              for (const pulse of pulses) {
-                  if (ZomeSignalProtocolType.Tip in pulse) {
-                      const tip: TipProtocol = pulse.Tip;
-                      const subType = Object.keys(tip)[0];
-                      appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Tip, subType, payload: tip});
-                  }
-                  if (ZomeSignalProtocolType.Entry in pulse) {
-                      const entryPulse = pulse.Entry;
-                      const entryType = getVariantByIndex(DeliveryEntryType, entryPulse.def.entry_index);
-                      const threadsEntry = decode(entryPulse.bytes); //as ThreadsEntry;
-                      appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Entry, subType: entryType, state: prettyState(entryPulse.state), payload: threadsEntry, hash: enc64(entryPulse.ah)});
-                  }
-                  // if (ZomeSignalProtocolType.Link in pulse) {
-                  //     const linkPulse = pulse.Link;
-                  //     const hash = `${encodeHashToBase64(linkPulse.link.base)} -> ${encodeHashToBase64(linkPulse.link.target)}`;
-                  //     appSignals.push({timestamp, from, type: ZomeSignalProtocolType.Link, subType: getVariantByIndex(DeliveryLinkType, linkPulse.link.link_type), state: prettyState(linkPulse.state), payload: linkPulse.link.tag, hash});
-                  // }
-              }
-          });
-        console.table(appSignals);
-    }
-
-
-    /** -- Store -- */
-
-    /** */
-    storeManifest(manifestEh: EntryId, ts: Timestamp, manifest: ParcelManifest) {
-        const isPrivate = "Private" === manifest.description.visibility;
-        this._perspective.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
-        if (isPrivate) {
-            this._perspective.privateManifests.set(manifestEh, [manifest, ts]);
-            const maybeNoticeEh = this._perspective.noticeByParcel.get(manifestEh);
-            if (maybeNoticeEh) {
-                this._perspective.notices.get(maybeNoticeEh)[2] = NoticeState.PartiallyReceived;
-                this._perspective.notices.get(maybeNoticeEh)[3] = new Set(manifest.chunks.map((eh) => enc64(eh)));
-            }
-        } else {
-            this._perspective.localPublicManifests.set(manifestEh, [manifest, ts]);
         }
     }
 
@@ -311,8 +249,9 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         // this._perspective.incompleteManifests = (await this.zomeProxy.scanIncompleteManifests())
         //   .map((eh) => encodeHashToBase64(eh));
         const [publicOrphans, privateOrphans] = await this.zomeProxy.scanOrphanChunks();
-        this._perspective.orphanPublicChunks = publicOrphans.map((eh) => new EntryId(eh));
-        this._perspective.orphanPrivateChunks = privateOrphans.map((eh) => new EntryId(eh));
+        const orphanPublicChunks = publicOrphans.map((eh) => new EntryId(eh));
+        const orphanPrivateChunks = privateOrphans.map((eh) => new EntryId(eh));
+        this._perspective.storeOrphans(orphanPublicChunks, orphanPrivateChunks);
     }
 
 
@@ -345,13 +284,15 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     }
 
 
+    private _probeDhtCount = 0;
+
     /** */
     async probeDht(denyNotify?: boolean): Promise<void> {
         //this._perspective.publicParcels = {};
         await this.zomeProxy.pullPublicParcelsDetails();
         const inbox = await this.zomeProxy.processInbox();
         this._perspective.inbox = inbox.map((ah) => new ActionId(ah));
-        this._perspective.probeDhtCount += 1;
+        this._probeDhtCount += 1;
         if (denyNotify == undefined) this.notifySubscribers();
     }
 
@@ -508,9 +449,17 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** Dump perspective as JSON  (caller should call getAllPublicManifest() first) */
-    exportPerspective(/*originalsZvm: AuthorshipZvm*/): string {
-        const manifests: [ParcelManifestMat, Timestamp][] = Array.from(this._perspective.localPublicManifests.values()).map(([manifest, ts]) => [materializeParcelManifest(manifest), ts])
-        return JSON.stringify(manifests, null, 2);
+    export(/*originalsZvm: AuthorshipZvm*/): string {
+        const snapshot = this._perspective.makeSnapshot();
+        return JSON.stringify(snapshot, null, 2);
+    }
+
+    /** */
+    import(json: string, _canPublish: boolean) {
+        const snapshot = JSON.parse(json) as DeliveryPerspectiveSnapshot;
+        // if (canPublish) {
+        // }
+        this._perspective.restore(snapshot)
     }
 
 }

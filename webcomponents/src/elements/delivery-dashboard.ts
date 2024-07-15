@@ -178,7 +178,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             <h1 style="text-decoration:underline;">Delivery Dashboard</h1>
             <button @click=${async (_e: any) => {
               await this._zvm.fetchAllPublicManifest();
-              const json = this._zvm.exportPerspective();
+              const json = this._zvm.export();
               this.downloadTextFile("dump.json", json);
             }}>Export</button>
             

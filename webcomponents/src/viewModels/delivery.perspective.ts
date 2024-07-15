@@ -13,7 +13,7 @@ import {
     ReceptionProof,
     ReplyAck,
 } from "../bindings/delivery.types";
-import {Dictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap} from "@ddd-qc/lit-happ";
+import {Dictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap, enc64} from "@ddd-qc/lit-happ";
 import {EntryHashB64, Timestamp} from "@holochain/client";
 
 
@@ -27,17 +27,20 @@ export interface PublicParcelRecordMat {
     deleteInfo?: [Timestamp, AgentId],
 }
 
-
-export type DeliveryPerspective = DeliveryPerspectiveCore & DeliveryPerspectiveLive;
-
 /** */
-export interface DeliveryPerspectiveLive {
-    probeDhtCount: number,
-    /** -- PROBLEMS -- */
-    orphanPublicChunks: EntryId[],
-    orphanPrivateChunks: EntryId[],
-    //incompleteManifests: EntryId[],
+export interface DeliveryPerspectiveSnapshot {
+    manifests: [ParcelManifestMat, Timestamp][],
+    // FIXME
 }
+
+// /** */
+// export interface DeliveryPerspectiveLive {
+//     probeDhtCount: number,
+//     /** -- PROBLEMS -- */
+//     orphanPublicChunks: EntryId[],
+//     orphanPrivateChunks: EntryId[],
+//     //incompleteManifests: EntryId[],
+// }
 
 
 /** */
@@ -83,33 +86,96 @@ export interface DeliveryPerspectiveCore {
 
 
 /** */
-export function createDeliveryPerspective(): DeliveryPerspective {
-    return {
-        inbox: [],
-        publicParcels: new EntryIdMap(),
-        parcelReferences: new EntryIdMap(),
-        privateManifests: new EntryIdMap(),
-        localPublicManifests: new EntryIdMap(),
-        localManifestByData: {},
-        //chunkCounts: {},
+export class DeliveryPerspective implements DeliveryPerspectiveCore {
+    inbox: ActionId[] = [];
+    publicParcels = new EntryIdMap<PublicParcelRecordMat>();
+    parcelReferences = new EntryIdMap<EntryId>();
+    privateManifests = new EntryIdMap<[ParcelManifest, Timestamp]>();
+    localPublicManifests = new EntryIdMap<[ParcelManifest, Timestamp]>();
+    localManifestByData: Dictionary<[EntryId, boolean]> = {};
+    //chunkCounts: {},
 
-        //incompleteManifests: [],
-        /** Outbound */
-        distributions: new ActionIdMap(),
-        noticeAcks: new ActionIdMap(),
-        replyAcks: new ActionIdMap(),
-        receptionAcks: new ActionIdMap(),
-        /** Inbound */
-        notices: new EntryIdMap(),
-        noticeByParcel: new EntryIdMap(),
-        replies: new EntryIdMap(),
-        receptions: new EntryIdMap(),
+    //incompleteManifests: [],
+    /** Outbound */
+    distributions = new ActionIdMap<[Distribution, Timestamp, DistributionState, AgentIdMap<DeliveryState>]>();
+    noticeAcks = new ActionIdMap<AgentIdMap<[NoticeAck, Timestamp]>>();
+    replyAcks = new ActionIdMap<AgentIdMap<[ReplyAck, Timestamp]>>();
+    receptionAcks = new ActionIdMap<AgentIdMap<[ReceptionAck, Timestamp]>>();
+    /** Inbound */
+    notices = new EntryIdMap<[DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]>();
+    noticeByParcel = new EntryIdMap<EntryId>();
+    replies = new EntryIdMap<NoticeReply>();
+    receptions = new EntryIdMap<[ReceptionProof, Timestamp]>();
 
-        /* Live */
-        orphanPublicChunks: [],
-        orphanPrivateChunks: [],
-        probeDhtCount: 0,
-    };
+    /* Live */
+    private _orphanPublicChunks: EntryId[] = [];
+    private _orphanPrivateChunks: EntryId[] = [];
+    //private _probeDhtCount = 0;
+
+
+    /** -- Methods -- */
+
+    /** */
+    storeManifest(manifestEh: EntryId, ts: Timestamp, manifest: ParcelManifest) {
+        const isPrivate = "Private" === manifest.description.visibility;
+        this.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
+        if (isPrivate) {
+            this.privateManifests.set(manifestEh, [manifest, ts]);
+            const maybeNoticeEh = this.noticeByParcel.get(manifestEh);
+            if (maybeNoticeEh) {
+                this.notices.get(maybeNoticeEh)[2] = NoticeState.PartiallyReceived;
+                this.notices.get(maybeNoticeEh)[3] = new Set(manifest.chunks.map((eh) => enc64(eh)));
+            }
+        } else {
+            this.localPublicManifests.set(manifestEh, [manifest, ts]);
+        }
+    }
+
+    /** */
+    storeOrphans(orphanPublicChunks: EntryId[], orphanPrivateChunks: EntryId[]) {
+        this._orphanPublicChunks = orphanPublicChunks;
+        this._orphanPrivateChunks = orphanPrivateChunks;
+    }
+
+
+    /** -- Memento -- */
+
+    /** TODO: deep copy */
+    makeSnapshot(): DeliveryPerspectiveSnapshot {
+        // FIXME
+        const manifests: [ParcelManifestMat, Timestamp][] = Array.from(this.localPublicManifests.values())
+          .map(([manifest, ts]) => [materializeParcelManifest(manifest), ts]);
+        /** */
+        return {
+            manifests,
+        }
+    }
+
+
+    /** */
+    restore(snapshot: DeliveryPerspectiveSnapshot) {
+        /** Clear */
+        this.inbox = [];
+        this.publicParcels.clear();
+        this.parcelReferences.clear();
+        this.privateManifests.clear();
+        this.localPublicManifests.clear();
+        this.localManifestByData = {};
+        this.distributions.clear();
+        this.noticeAcks.clear();
+        this.replyAcks.clear();
+        this.receptionAcks.clear();
+        this.notices.clear();
+        this.noticeByParcel.clear();
+        this.replies.clear();
+        this.receptions.clear();
+        /* */
+        this._orphanPublicChunks = [];
+        this._orphanPrivateChunks = [];
+        /** Load */
+        // FIXME
+    }
+
 }
 
 
