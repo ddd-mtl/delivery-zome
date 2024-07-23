@@ -28,95 +28,74 @@ export interface PublicParcelRecordMat {
 }
 
 /** */
-export interface DeliveryPerspectiveSnapshot {
+export interface DeliverySnapshot {
     manifests: [ParcelManifestMat, Timestamp][],
     // FIXME
 }
 
-// /** */
-// export interface DeliveryPerspectiveLive {
-//     probeDhtCount: number,
-//     /** -- PROBLEMS -- */
-//     orphanPublicChunks: EntryId[],
-//     orphanPrivateChunks: EntryId[],
-//     //incompleteManifests: EntryId[],
-// }
-
 
 /** */
-export interface DeliveryPerspectiveCore {
+export class DeliveryPerspective {
     /** -- -- */
-    inbox: ActionId[],
-
+    inbox: ActionId[] = [];
     /** parcel_eh -> (pp_eh, ParcelDescription, ...)  */
-    publicParcels: EntryIdMap<PublicParcelRecordMat>,
+    publicParcels: EntryIdMap<PublicParcelRecordMat> = new EntryIdMap();
     /** pp_eh -> parcel_eh */
-    parcelReferences: EntryIdMap<EntryId>
-
+    parcelReferences: EntryIdMap<EntryId> = new EntryIdMap();
     /** Parcels */
     /** manifest_eh -> (ParcelManifest, timestamp) */
-    privateManifests: EntryIdMap<[ParcelManifest, Timestamp]>,
+    privateManifests: EntryIdMap<[ParcelManifest, Timestamp]> = new EntryIdMap();
     /** manifest_eh -> ParcelManifest */
-    localPublicManifests: EntryIdMap<[ParcelManifest, Timestamp]>,
+    localPublicManifests: EntryIdMap<[ParcelManifest, Timestamp]> = new EntryIdMap();
     /** data_hash -> [manifest_eh, isPrivate] */
-    localManifestByData: Dictionary<[EntryId, boolean]>,
+    localManifestByData: Dictionary<[EntryId, boolean]> = {};
     // /** data_hash -> number of chunks on chain */
     // chunkCounts: Dictionary<number>,
-
     /** -- OUTBOUND -- */
     /** distrib_ah -> [Distribution, Timestamp, DistributionState, AgentPubKey -> DeliveryState] */
-    distributions: ActionIdMap<[Distribution, Timestamp, DistributionState, AgentIdMap<DeliveryState>]>,
+    distributions: ActionIdMap<[Distribution, Timestamp, DistributionState, AgentIdMap<DeliveryState>]> = new ActionIdMap();
     /** distrib_ah -> (recipientKey -> NoticeAck) */
-    noticeAcks: ActionIdMap<AgentIdMap<[NoticeAck, Timestamp]>>,
+    noticeAcks: ActionIdMap<AgentIdMap<[NoticeAck, Timestamp]>> = new ActionIdMap();
     /** distrib_ah -> (recipientKey -> ReplyAck) */
-    replyAcks: ActionIdMap<AgentIdMap<[ReplyAck, Timestamp]>>,
+    replyAcks: ActionIdMap<AgentIdMap<[ReplyAck, Timestamp]>> = new ActionIdMap();
     /** distrib_ah -> (recipientKey -> ReceptionAck) */
-    receptionAcks: ActionIdMap<AgentIdMap<[ReceptionAck, Timestamp]>>,
-
+    receptionAcks: ActionIdMap<AgentIdMap<[ReceptionAck, Timestamp]>> = new ActionIdMap();
     /** -- INBOUND -- */
     /** notice_eh -> Timestamp, Notice, State, Missing chunks */
-    notices: EntryIdMap<[DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]>,
+    notices: EntryIdMap<[DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]> = new EntryIdMap();
     /** parcel_eh -> notice_eh */
-    noticeByParcel: EntryIdMap<EntryId>,
+    noticeByParcel: EntryIdMap<EntryId> = new EntryIdMap();
     /** notice_eh -> NoticeReply */
-    replies: EntryIdMap<NoticeReply>,
+    replies: EntryIdMap<NoticeReply> = new EntryIdMap();
     /** notice_eh -> ReceptionProof */
-    receptions: EntryIdMap<[ReceptionProof, Timestamp]>,
+    receptions: EntryIdMap<[ReceptionProof, Timestamp]> = new EntryIdMap();
+    /* */
+    orphanPublicChunks: EntryId[] = [];
+    orphanPrivateChunks: EntryId[] = [];
+    // probeDhtCount = 0;
+
+
+    /** -- Memento -- */
+
+    /** TODO: deep copy */
+    makeSnapshot(): DeliverySnapshot {
+        // FIXME
+        const manifests: [ParcelManifestMat, Timestamp][] = Array.from(this.localPublicManifests.values())
+          .map(([manifest, ts]) => [materializeParcelManifest(manifest), ts]);
+        /** */
+        return {
+            manifests,
+        }
+    }
 }
 
 
 /** */
-export class DeliveryPerspective implements DeliveryPerspectiveCore {
-    inbox: ActionId[] = [];
-    publicParcels = new EntryIdMap<PublicParcelRecordMat>();
-    parcelReferences = new EntryIdMap<EntryId>();
-    privateManifests = new EntryIdMap<[ParcelManifest, Timestamp]>();
-    localPublicManifests = new EntryIdMap<[ParcelManifest, Timestamp]>();
-    localManifestByData: Dictionary<[EntryId, boolean]> = {};
-    //chunkCounts: {},
+export class DeliveryPerspectiveMutable extends DeliveryPerspective {
 
-    //incompleteManifests: [],
-    /** Outbound */
-    distributions = new ActionIdMap<[Distribution, Timestamp, DistributionState, AgentIdMap<DeliveryState>]>();
-    noticeAcks = new ActionIdMap<AgentIdMap<[NoticeAck, Timestamp]>>();
-    replyAcks = new ActionIdMap<AgentIdMap<[ReplyAck, Timestamp]>>();
-    receptionAcks = new ActionIdMap<AgentIdMap<[ReceptionAck, Timestamp]>>();
-    /** Inbound */
-    notices = new EntryIdMap<[DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]>();
-    noticeByParcel = new EntryIdMap<EntryId>();
-    replies = new EntryIdMap<NoticeReply>();
-    receptions = new EntryIdMap<[ReceptionProof, Timestamp]>();
-
-    /* Live */
-    private _orphanPublicChunks: EntryId[] = [];
-    private _orphanPrivateChunks: EntryId[] = [];
-    //private _probeDhtCount = 0;
-
-    /** -- Getters -- */
-
-    get orphanPublicChunks() { return this._orphanPublicChunks;}
-    get orphanPrivateChunks() { return this._orphanPrivateChunks;}
-
+    get readonly(): DeliveryPerspective {
+        return this;
+    }
 
     /** -- Store -- */
 
@@ -138,27 +117,15 @@ export class DeliveryPerspective implements DeliveryPerspectiveCore {
 
     /** */
     storeOrphans(orphanPublicChunks: EntryId[], orphanPrivateChunks: EntryId[]) {
-        this._orphanPublicChunks = orphanPublicChunks;
-        this._orphanPrivateChunks = orphanPrivateChunks;
+        this.orphanPublicChunks = orphanPublicChunks;
+        this.orphanPrivateChunks = orphanPrivateChunks;
     }
 
 
     /** -- Memento -- */
 
-    /** TODO: deep copy */
-    makeSnapshot(): DeliveryPerspectiveSnapshot {
-        // FIXME
-        const manifests: [ParcelManifestMat, Timestamp][] = Array.from(this.localPublicManifests.values())
-          .map(([manifest, ts]) => [materializeParcelManifest(manifest), ts]);
-        /** */
-        return {
-            manifests,
-        }
-    }
-
-
     /** */
-    restore(snapshot: DeliveryPerspectiveSnapshot) {
+    restore(snapshot: DeliverySnapshot) {
         /** Clear */
         this.inbox = [];
         this.publicParcels.clear();
@@ -175,12 +142,11 @@ export class DeliveryPerspective implements DeliveryPerspectiveCore {
         this.replies.clear();
         this.receptions.clear();
         /* */
-        this._orphanPublicChunks = [];
-        this._orphanPrivateChunks = [];
+        this.orphanPublicChunks = [];
+        this.orphanPrivateChunks = [];
         /** Load */
         // FIXME
     }
-
 }
 
 

@@ -28,7 +28,8 @@ import {
     ParcelReference, ReceptionAck, ReceptionProof, ReplyAck,
 } from "../bindings/delivery.types";
 import {
-    DeliveryPerspective, DeliveryPerspectiveSnapshot,
+    DeliveryPerspective,
+    DeliveryPerspectiveMutable, DeliverySnapshot,
     materializeParcelManifest,
     ParcelManifestMat,
 } from "./delivery.perspective";
@@ -49,7 +50,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** -- ViewModel -- */
 
-    private _perspective: DeliveryPerspective = new DeliveryPerspective();
+    private _perspective: DeliveryPerspectiveMutable = new DeliveryPerspectiveMutable();
 
 
     /* */
@@ -104,7 +105,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case DeliveryEntryType.PublicManifest:
                 const manifest = decode(pulse.bytes) as ParcelManifest;
                 if (pulse.state != StateChangeType.Delete) {
-                    this.perspective.storeManifest(pulse.eh, pulse.ts, manifest);
+                    this._perspective.storeManifest(pulse.eh, pulse.ts, manifest);
                 }
             break;
             case DeliveryEntryType.PrivateChunk:
@@ -457,7 +458,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     import(json: string, _canPublish: boolean) {
-        const snapshot = JSON.parse(json) as DeliveryPerspectiveSnapshot;
+        const snapshot = JSON.parse(json) as DeliverySnapshot;
         // if (canPublish) {
         // }
         this._perspective.restore(snapshot)

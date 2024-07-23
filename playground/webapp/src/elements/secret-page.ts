@@ -3,7 +3,7 @@ import {property, state, customElement} from "lit/decorators.js";
 import { DnaElement, AgentId, EntryId } from "@ddd-qc/lit-happ";
 import {SecretDvm, SecretDvmPerspective} from "../viewModels/secret.dvm";
 import {SecretPerspective} from "../viewModels/secret.zvm";
-import {DeliveryPerspective} from "@ddd-qc/delivery";
+import {DeliveryPerspectiveMutable} from "@ddd-qc/delivery";
 
 
 /**
@@ -31,7 +31,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
   secretPerspective!: SecretPerspective;
 
   @property({type: Object, attribute: false, hasChanged: (_v, _old) => true})
-  deliveryPerspective!: DeliveryPerspective;
+  deliveryPerspective!: DeliveryPerspectiveMutable;
 
   /** -- Methods -- */
 

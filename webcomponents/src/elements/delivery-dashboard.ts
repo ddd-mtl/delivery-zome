@@ -2,14 +2,14 @@ import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import {ActionId, enc64, EntryId, ZomeElement} from "@ddd-qc/lit-happ";
 import {DeliveryZvm} from "../viewModels/delivery.zvm";
-import {DeliveryPerspective} from "../viewModels/delivery.perspective";
+import {DeliveryPerspectiveMutable} from "../viewModels/delivery.perspective";
 
 
 /**
  *
  */
 @customElement("delivery-dashboard")
-export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, DeliveryZvm>  {
+export class DeliveryDashboard extends ZomeElement<DeliveryPerspectiveMutable, DeliveryZvm>  {
 
     constructor() {
         super(DeliveryZvm.DEFAULT_ZOME_NAME)
