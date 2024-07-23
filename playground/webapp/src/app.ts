@@ -1,7 +1,7 @@
 import { html } from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import { SecretDvm } from "./viewModels/secret.dvm";
-import {HvmDef, HappElement, Cell, AgentId} from "@ddd-qc/lit-happ";
+import {HvmDef, HappElement, Cell} from "@ddd-qc/lit-happ";
 import {DnaDefinition} from "@holochain/client";
 import {Dictionary, EntryDef} from "@ddd-qc/cell-proxy";
 
@@ -94,7 +94,7 @@ export class SecretApp extends HappElement {
           <input type="button" value="Agent Directory" @click=${() => {this._pageDisplayIndex = 2; this.requestUpdate()}} >
         </div>
         <button type="button" @click=${this.refresh}>Refresh</button>
-        <span><abbr title=${this.secret.cell.agentId.b64}>Agent</abbr>: <b>${this.secret.cell.agentId.short}</b></span>
+        <span><abbr title=${this.secret.cell.address.agentId.b64}>Agent</abbr>: <b>${this.secret.cell.address.agentId.short}</b></span>
         <!--<dvm-inspect .dnaViewModel=${this.secret}></dvm-inspect> -->          
         <hr class="solid">      
         ${page}

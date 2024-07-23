@@ -120,7 +120,7 @@ export class SecretDvm extends DnaViewModel {
           const notice = decode(entryPulse.bytes) as DeliveryNotice;
           console.log("ADDING DeliveryNotice:", notice, entryPulse);
           if (ParcelKindType.AppEntry in notice.summary.parcel_reference.description.kind_info) {
-            if (entryPulse.isNew && !this.cell.agentId.equals(from) && "secret_integrity" === notice.summary.parcel_reference.description.zome_origin) {
+            if (entryPulse.isNew && !this.cell.address.agentId.equals(from) && "secret_integrity" === notice.summary.parcel_reference.description.zome_origin) {
               this.deliveryZvm.acceptDelivery(entryPulse.eh);
             }
           } else {

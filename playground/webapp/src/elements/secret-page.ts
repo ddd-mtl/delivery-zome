@@ -3,7 +3,8 @@ import {property, state, customElement} from "lit/decorators.js";
 import { DnaElement, AgentId, EntryId } from "@ddd-qc/lit-happ";
 import {SecretDvm, SecretDvmPerspective} from "../viewModels/secret.dvm";
 import {SecretPerspective} from "../viewModels/secret.zvm";
-import {DeliveryPerspectiveMutable} from "@ddd-qc/delivery";
+import {DeliveryPerspective} from "@ddd-qc/delivery";
+import {HoloHash} from "@holochain/client";
 
 
 /**
@@ -31,7 +32,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
   secretPerspective!: SecretPerspective;
 
   @property({type: Object, attribute: false, hasChanged: (_v, _old) => true})
-  deliveryPerspective!: DeliveryPerspectiveMutable;
+  deliveryPerspective!: DeliveryPerspective;
 
   /** -- Methods -- */
 
@@ -162,7 +163,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
           return html``;
         }
         return html`<li>${msg} <button style="margin-left:20px" @click=${async (e:any) => {
-          const _res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(pprm.prEh.hash);
+          const _res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(new HoloHash(pprm.prEh.hash));
         }}>Remove</button></li>`
       }
     )
@@ -183,7 +184,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
     return html`
       <div>
         <h1>Playground: secret 
-            <button type="button" @click=${() => {this._dvm.dumpCallLogs();this._dvm.dumpSignalLogs("zDelivery");}}>dump</button>
+            <button type="button" @click=${() => {this._dvm.dumpCallLogs(); this._dvm.dumpSignalLogs("zDelivery");}}>dump</button>
             <button type="button" @click=${this.refresh}>Refresh</button>
         </h1>
         <div>

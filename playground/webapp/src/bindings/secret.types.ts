@@ -3,14 +3,14 @@
 import {
 WebsocketConnectionOptions,
 /** types.ts */
-HoloHash,
-AgentPubKey,
-DnaHash,
-WasmHash,
-EntryHash,
-ActionHash,
-AnyDhtHash,
-ExternalHash,
+//HoloHash,
+//AgentPubKey,
+//DnaHash,
+//WasmHash,
+//EntryHash,
+//ActionHash,
+//AnyDhtHash,
+//ExternalHash,
 KitsuneAgent,
 KitsuneSpace,
 HoloHashB64,
@@ -123,6 +123,15 @@ NetworkSeed,
 ZomeLocation,
    } from '@holochain/client';
 
+
+/// Simple Hashes
+type AgentArray = Uint8Array;
+type DnaArray = Uint8Array;
+type WasmArray = Uint8Array;
+type EntryArray = Uint8Array;
+type ActionArray = Uint8Array;
+type AnyDhtArray = Uint8Array;
+
 import {
 /** Common */
 DhtOpHashB64,
@@ -201,7 +210,7 @@ export interface DeliverySummary {
 
 /**  */
 export interface ParcelReference {
-  parcel_eh: EntryHash
+  parcel_eh: EntryArray
   description: ParcelDescription
 }
 
@@ -233,36 +242,36 @@ export enum DistributionStrategy {
 
 /** Entry representing a request to send a Parcel to one or multiple recipients */
 export interface Distribution {
-  recipients: AgentPubKey[]
+  recipients: AgentArray[]
   delivery_summary: DeliverySummary
   summary_signature: Signature
 }
 
 /** Entry representing a received delivery request */
 export interface DeliveryNotice {
-  distribution_ah: ActionHash
+  distribution_ah: ActionArray
   summary: DeliverySummary
-  sender: AgentPubKey
+  sender: AgentArray
   sender_summary_signature: Signature
 }
 
 /** Entry for confirming a request has been well received by a recipient */
 export interface NoticeAck {
-  distribution_ah: ActionHash
-  recipient: AgentPubKey
+  distribution_ah: ActionArray
+  recipient: AgentArray
   recipient_summary_signature: Signature
 }
 
 /** Entry for accepting or refusing a delivery */
 export interface NoticeReply {
-  notice_eh: EntryHash
+  notice_eh: EntryArray
   has_accepted: boolean
 }
 
 /** Entry for confirming a recipient's reply on the sender's side */
 export interface ReplyAck {
-  distribution_ah: ActionHash
-  recipient: AgentPubKey
+  distribution_ah: ActionArray
+  recipient: AgentArray
   has_accepted: boolean
   recipient_signature: Signature
 }
@@ -281,7 +290,7 @@ export interface ParcelChunk {
 export interface ParcelManifest {
   description: ParcelDescription
   data_hash: string
-  chunks: EntryHash[]
+  chunks: EntryArray[]
 }
 
 /**
@@ -289,14 +298,14 @@ export interface ParcelManifest {
  * TODO: This should be a private link instead of an entry
  */
 export interface ReceptionProof {
-  notice_eh: EntryHash
-  parcel_eh: EntryHash
+  notice_eh: EntryArray
+  parcel_eh: EntryArray
 }
 
 /** Entry for confirming a delivery has been well received or refused by the recipient. */
 export interface ReceptionAck {
-  distribution_ah: ActionHash
-  recipient: AgentPubKey
+  distribution_ah: ActionArray
+  recipient: AgentArray
   recipient_signature: Signature
 }
 
@@ -308,10 +317,10 @@ export interface ReceptionAck {
  */
 export interface PendingItem {
   kind: ItemKind
-  author: AgentPubKey
+  author: AgentArray
   author_signature: Signature
   encrypted_data: unknown
-  distribution_ah: ActionHash
+  distribution_ah: ActionArray
 }
 
 /** List of structs that PendingItem can embed */
@@ -325,24 +334,24 @@ export enum ItemKind {
 }
 
 export interface DistributeParcelInput {
-  recipients: AgentPubKey[]
+  recipients: AgentArray[]
   strategy: DistributionStrategy
   parcel_reference: ParcelReference
 }
 
 export interface RespondToNoticeInput {
-  notice_eh: EntryHash
+  notice_eh: EntryArray
   has_accepted: boolean
 }
 
 export interface FetchChunkInput {
-  chunk_eh: EntryHash
-  notice_eh: EntryHash
+  chunk_eh: EntryArray
+  notice_eh: EntryArray
 }
 
 export interface GetNoticeOutput {
   notice: DeliveryNotice
-  state: [NoticeState, EntryHash[]]
+  state: [NoticeState, EntryArray[]]
 }
 
 export enum DeliveryNoticeQueryFieldType {
@@ -350,9 +359,9 @@ export enum DeliveryNoticeQueryFieldType {
 	Distribution = 'Distribution',
 	Parcel = 'Parcel',
 }
-export type DeliveryNoticeQueryFieldVariantSender = {Sender: AgentPubKey}
-export type DeliveryNoticeQueryFieldVariantDistribution = {Distribution: ActionHash}
-export type DeliveryNoticeQueryFieldVariantParcel = {Parcel: EntryHash}
+export type DeliveryNoticeQueryFieldVariantSender = {Sender: AgentArray}
+export type DeliveryNoticeQueryFieldVariantDistribution = {Distribution: ActionArray}
+export type DeliveryNoticeQueryFieldVariantParcel = {Parcel: EntryArray}
 export type DeliveryNoticeQueryField = 
  | DeliveryNoticeQueryFieldVariantSender | DeliveryNoticeQueryFieldVariantDistribution | DeliveryNoticeQueryFieldVariantParcel;
 
@@ -360,8 +369,8 @@ export enum ReceptionProofQueryFieldType {
 	Notice = 'Notice',
 	Parcel = 'Parcel',
 }
-export type ReceptionProofQueryFieldVariantNotice = {Notice: EntryHash}
-export type ReceptionProofQueryFieldVariantParcel = {Parcel: EntryHash}
+export type ReceptionProofQueryFieldVariantNotice = {Notice: EntryArray}
+export type ReceptionProofQueryFieldVariantParcel = {Parcel: EntryArray}
 export type ReceptionProofQueryField = 
  | ReceptionProofQueryFieldVariantNotice | ReceptionProofQueryFieldVariantParcel;
 
@@ -369,35 +378,35 @@ export enum NoticeAckQueryFieldType {
 	Recipient = 'Recipient',
 	Distribution = 'Distribution',
 }
-export type NoticeAckQueryFieldVariantRecipient = {Recipient: AgentPubKey}
-export type NoticeAckQueryFieldVariantDistribution = {Distribution: ActionHash}
+export type NoticeAckQueryFieldVariantRecipient = {Recipient: AgentArray}
+export type NoticeAckQueryFieldVariantDistribution = {Distribution: ActionArray}
 export type NoticeAckQueryField = 
  | NoticeAckQueryFieldVariantRecipient | NoticeAckQueryFieldVariantDistribution;
 
 export interface CommitPendingItemInput {
   item: PendingItem
-  recipient: AgentPubKey
+  recipient: AgentArray
 }
 
 export interface GetDeliveryStateInput {
-  distribution_ah: ActionHash
-  recipient: AgentPubKey
+  distribution_ah: ActionArray
+  recipient: AgentArray
 }
 
 export interface BroadcastInput {
-  peers: AgentPubKey[]
+  peers: AgentArray[]
   pr: ParcelReference
   timestamp: Timestamp
   removed: boolean
 }
 
 export interface PublicParcelRecord {
-  pr_eh: EntryHash
-  pp_eh: EntryHash
+  pr_eh: EntryArray
+  pp_eh: EntryArray
   description: ParcelDescription
   creation_ts: Timestamp
-  author: AgentPubKey
-  deleteInfo?: [Timestamp, AgentPubKey]
+  author: AgentArray
+  deleteInfo?: [Timestamp, AgentArray]
 }
 
 /** Dna properties */
@@ -413,15 +422,15 @@ export enum DeliveryTipProtocolType {
 	PublicParcelPublished = 'PublicParcelPublished',
 	PublicParcelUnpublished = 'PublicParcelUnpublished',
 }
-export type DeliveryTipProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryHash, Timestamp, ParcelReference]}
-export type DeliveryTipProtocolVariantPublicParcelUnpublished = {PublicParcelUnpublished: [EntryHash, Timestamp, ParcelReference]}
+export type DeliveryTipProtocolVariantPublicParcelPublished = {PublicParcelPublished: [EntryArray, Timestamp, ParcelReference]}
+export type DeliveryTipProtocolVariantPublicParcelUnpublished = {PublicParcelUnpublished: [EntryArray, Timestamp, ParcelReference]}
 export type DeliveryTipProtocol = 
  | DeliveryTipProtocolVariantPublicParcelPublished | DeliveryTipProtocolVariantPublicParcelUnpublished;
 
 export interface SendSecretInput {
-  secret_eh: EntryHash
+  secret_eh: EntryArray
   strategy: DistributionStrategy
-  recipients: AgentPubKey[]
+  recipients: AgentArray[]
 }
 
 export enum SecretEntryType {

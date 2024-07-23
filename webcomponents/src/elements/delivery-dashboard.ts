@@ -2,14 +2,15 @@ import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import {ActionId, enc64, EntryId, ZomeElement} from "@ddd-qc/lit-happ";
 import {DeliveryZvm} from "../viewModels/delivery.zvm";
-import {DeliveryPerspectiveMutable} from "../viewModels/delivery.perspective";
+import {DeliveryPerspective} from "../viewModels/delivery.perspective";
+import {HoloHash} from "@holochain/client";
 
 
 /**
  *
  */
 @customElement("delivery-dashboard")
-export class DeliveryDashboard extends ZomeElement<DeliveryPerspectiveMutable, DeliveryZvm>  {
+export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, DeliveryZvm>  {
 
     constructor() {
         super(DeliveryZvm.DEFAULT_ZOME_NAME)
@@ -63,7 +64,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspectiveMutable, D
               return html `
               <li style="margin-top:10px;" title=${distribAh.b64}>
                   <b>${this.distrib2str(distribAh)}</b>: ${JSON.stringify(distribution)}
-                  <button type="button" @click=${() => {this._zvm.zomeProxy.getDistributionState(distribAh.hash)}}>refresh</button>
+                  <button type="button" @click=${() => {this._zvm.zomeProxy.getDistributionState(new HoloHash(distribAh.hash))}}>refresh</button>
                   <ul>
                       ${deliveryLi}
                   </ul>
@@ -120,7 +121,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspectiveMutable, D
         console.log("unreplieds", unreplieds);
         const newNoticesLi = Array.from(unreplieds.entries()).map(
             ([noticeEh, [_notice, _ts]]) => {
-                let content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(noticeEh.hash)}}>refresh</button>
+                let content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(new HoloHash(noticeEh.hash))}}>refresh</button>
                     <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
                     <button type="button" @click=${() => {this._zvm.declineDelivery(noticeEh)}}>Decline</button>`;
                 return html `

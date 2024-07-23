@@ -4,14 +4,14 @@ import {DELIVERY_INTERGRITY_ZOME_NAME, DELIVERY_ZOME_NAME, DIRECTORY_PATH, DIREC
 import {
 WebsocketConnectionOptions,
 /** types.ts */
-HoloHash,
-AgentPubKey,
-DnaHash,
-WasmHash,
-EntryHash,
-ActionHash,
-AnyDhtHash,
-ExternalHash,
+//HoloHash,
+//AgentPubKey,
+//DnaHash,
+//WasmHash,
+//EntryHash,
+//ActionHash,
+//AnyDhtHash,
+//ExternalHash,
 KitsuneAgent,
 KitsuneSpace,
 HoloHashB64,
@@ -124,6 +124,15 @@ NetworkSeed,
 ZomeLocation,
    } from '@holochain/client';
 
+
+/// Simple Hashes
+type AgentArray = Uint8Array;
+type DnaArray = Uint8Array;
+type WasmArray = Uint8Array;
+type EntryArray = Uint8Array;
+type ActionArray = Uint8Array;
+type AnyDhtArray = Uint8Array;
+
 import {
 /** Common */
 DhtOpHashB64,
@@ -162,31 +171,31 @@ export class SecretProxy extends ZomeProxy {
   static readonly ENTRY_TYPES = Object.values(SecretUnitEnum);
   static readonly LINK_TYPES = Object.values(SecretLinkType);
  
-  async createSecret(value: string): Promise<EntryHash> {
+  async createSecret(value: string): Promise<EntryArray> {
     return this.call('create_secret', value);
   }
 
-  async createSplitSecret(value: string): Promise<EntryHash> {
+  async createSplitSecret(value: string): Promise<EntryArray> {
     return this.call('create_split_secret', value);
   }
 
-  async getSecret(eh: EntryHash): Promise<string> {
+  async getSecret(eh: EntryArray): Promise<string> {
     return this.call('get_secret', eh);
   }
 
-  async getSecretsFrom(sender: AgentPubKey): Promise<EntryHash[]> {
+  async getSecretsFrom(sender: AgentArray): Promise<EntryArray[]> {
     return this.call('get_secrets_from', sender);
   }
 
-  async refuseSecret(parcelEh: EntryHash): Promise<EntryHash> {
+  async refuseSecret(parcelEh: EntryArray): Promise<EntryArray> {
     return this.call('refuse_secret', parcelEh);
   }
 
-  async acceptSecret(parcelEh: EntryHash): Promise<EntryHash> {
+  async acceptSecret(parcelEh: EntryArray): Promise<EntryArray> {
     return this.call('accept_secret', parcelEh);
   }
 
-  async sendSecret(input: SendSecretInput): Promise<ActionHash> {
+  async sendSecret(input: SendSecretInput): Promise<ActionArray> {
     return this.call('send_secret', input);
   }
 }

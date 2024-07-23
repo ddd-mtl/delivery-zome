@@ -4,14 +4,14 @@ import {DELIVERY_INTERGRITY_ZOME_NAME, DELIVERY_ZOME_NAME, DIRECTORY_PATH, DIREC
 import {
 WebsocketConnectionOptions,
 /** types.ts */
-HoloHash,
-AgentPubKey,
-DnaHash,
-WasmHash,
-EntryHash,
-ActionHash,
-AnyDhtHash,
-ExternalHash,
+//HoloHash,
+//AgentPubKey,
+//DnaHash,
+//WasmHash,
+//EntryHash,
+//ActionHash,
+//AnyDhtHash,
+//ExternalHash,
 KitsuneAgent,
 KitsuneSpace,
 HoloHashB64,
@@ -124,6 +124,15 @@ NetworkSeed,
 ZomeLocation,
    } from '@holochain/client';
 
+
+/// Simple Hashes
+type AgentArray = Uint8Array;
+type DnaArray = Uint8Array;
+type WasmArray = Uint8Array;
+type EntryArray = Uint8Array;
+type ActionArray = Uint8Array;
+type AnyDhtArray = Uint8Array;
+
 import {
 /** Common */
 DhtOpHashB64,
@@ -162,31 +171,31 @@ export class DeliveryProxy extends ZomeProxy {
   static readonly ENTRY_TYPES = Object.values(DeliveryUnitEnum);
   static readonly LINK_TYPES = Object.values(DeliveryLinkType);
  
-  async commitPrivateChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
+  async commitPrivateChunks(chunks: ParcelChunk[]): Promise<EntryArray[]> {
     return this.callBlocking('commit_private_chunks', chunks);
   }
 
-  async commitPrivateManifest(manifestArg: ParcelManifest): Promise<EntryHash> {
+  async commitPrivateManifest(manifestArg: ParcelManifest): Promise<EntryArray> {
     return this.call('commit_private_manifest', manifestArg);
   }
 
-  async completeManifest(manifestEh: EntryHash): Promise<[EntryHash, EntryHash | EntryHash[]][] | null> {
+  async completeManifest(manifestEh: EntryArray): Promise<[EntryArray, EntryArray | EntryArray[]][] | null> {
     return this.call('complete_manifest', manifestEh);
   }
 
-  async determineMissingChunks(manifestEh: EntryHash): Promise<EntryHash[]> {
+  async determineMissingChunks(manifestEh: EntryArray): Promise<EntryArray[]> {
     return this.call('determine_missing_chunks', manifestEh);
   }
 
-  async distributeParcel(input: DistributeParcelInput): Promise<ActionHash> {
+  async distributeParcel(input: DistributeParcelInput): Promise<ActionArray> {
     return this.callBlocking('distribute_parcel', input);
   }
 
-  async fetchPublicManifest(manifestEh: EntryHash): Promise<[ParcelManifest, Timestamp, AgentPubKey]> {
+  async fetchPublicManifest(manifestEh: EntryArray): Promise<[ParcelManifest, Timestamp, AgentArray]> {
     return this.call('fetch_public_manifest', manifestEh);
   }
 
-  async fetchChunk(chunkEh: EntryHash): Promise<ParcelChunk> {
+  async fetchChunk(chunkEh: EntryArray): Promise<ParcelChunk> {
     return this.call('fetch_chunk', chunkEh);
   }
 
@@ -194,35 +203,35 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_delivery_state', input);
   }
 
-  async getDistributionState(distributionAh: ActionHash): Promise<FullDistributionState> {
+  async getDistributionState(distributionAh: ActionArray): Promise<FullDistributionState> {
     return this.call('get_distribution_state', distributionAh);
   }
 
-  async getNotice(distributionAh: ActionHash): Promise<GetNoticeOutput | null> {
+  async getNotice(distributionAh: ActionArray): Promise<GetNoticeOutput | null> {
     return this.call('get_notice', distributionAh);
   }
 
-  async getNoticeState(noticeEh: EntryHash): Promise<[NoticeState, EntryHash[]]> {
+  async getNoticeState(noticeEh: EntryArray): Promise<[NoticeState, EntryArray[]]> {
     return this.call('get_notice_state', noticeEh);
   }
 
-  async processInbox(): Promise<ActionHash[]> {
+  async processInbox(): Promise<ActionArray[]> {
     return this.call('process_inbox', null);
   }
 
-  async publishChunks(chunks: ParcelChunk[]): Promise<EntryHash[]> {
+  async publishChunks(chunks: ParcelChunk[]): Promise<EntryArray[]> {
     return this.call('publish_chunks', chunks);
   }
 
-  async publishChunk(chunk: ParcelChunk): Promise<EntryHash> {
+  async publishChunk(chunk: ParcelChunk): Promise<EntryArray> {
     return this.call('publish_chunk', chunk);
   }
 
-  async publishPendingItem(input: CommitPendingItemInput): Promise<ActionHash> {
+  async publishPendingItem(input: CommitPendingItemInput): Promise<ActionArray> {
     return this.callBlocking('publish_pending_item', input);
   }
 
-  async publishPublicParcel(manifestArg: ParcelManifest): Promise<EntryHash> {
+  async publishPublicParcel(manifestArg: ParcelManifest): Promise<EntryArray> {
     return this.callZomeBlockPostCommit('PublicParcel','publish_public_parcel', manifestArg);
   }
 
@@ -230,7 +239,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('pull_public_parcels_details', null);
   }
 
-  async fetchParcelRef(prEh: EntryHash): Promise<ParcelReference | null> {
+  async fetchParcelRef(prEh: EntryArray): Promise<ParcelReference | null> {
     return this.call('fetch_parcel_ref', prEh);
   }
 
@@ -242,7 +251,7 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_NoticeAck', field);
   }
 
-  async queryReceptionProof(field: ReceptionProofQueryField): Promise<[EntryHash, Timestamp, ReceptionProof] | null> {
+  async queryReceptionProof(field: ReceptionProofQueryField): Promise<[EntryArray, Timestamp, ReceptionProof] | null> {
     return this.call('query_ReceptionProof', field);
   }
 
@@ -294,19 +303,19 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('query_all_private_chunks', null);
   }
 
-  async respondToNotice(input: RespondToNoticeInput): Promise<EntryHash> {
+  async respondToNotice(input: RespondToNoticeInput): Promise<EntryArray> {
     return this.call('respond_to_notice', input);
   }
 
-  async scanIncompleteManifests(): Promise<EntryHash[]> {
+  async scanIncompleteManifests(): Promise<EntryArray[]> {
     return this.call('scan_incomplete_manifests', null);
   }
 
-  async scanOrphanChunks(): Promise<[EntryHash[], EntryHash[]]> {
+  async scanOrphanChunks(): Promise<[EntryArray[], EntryArray[]]> {
     return this.call('scan_orphan_chunks', null);
   }
 
-  async unpublishPublicParcel(ppEh: EntryHash): Promise<ActionHash> {
+  async unpublishPublicParcel(ppEh: EntryArray): Promise<ActionArray> {
     return this.callBlocking('unpublish_public_parcel', ppEh);
   }
 

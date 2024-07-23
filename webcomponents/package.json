@@ -1,6 +1,6 @@
 {
   "name": "@ddd-qc/delivery",
-  "version": "0.15.5",
+  "version": "0.15.6",
   "description": "Delivery zome webcomponents",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

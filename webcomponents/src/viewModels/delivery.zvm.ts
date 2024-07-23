@@ -14,7 +14,7 @@ import {
     LinkPulseMat,
 } from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
-import {EntryHashB64, Timestamp} from "@holochain/client";
+import {EntryHashB64, HoloHash, Timestamp} from "@holochain/client";
 import {
     DeliveryEntryType,
     DeliveryNotice,
@@ -55,7 +55,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /* */
     get perspective(): DeliveryPerspective {
-        return this._perspective;
+        return this._perspective.readonly;
     }
 
     /* */
@@ -122,7 +122,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                         noticeTuple[3].delete(pulse.eh.b64);
                         this._perspective.notices.set(noticeEh, noticeTuple);
                         if (noticeTuple[3].size == 0) {
-                            this.zomeProxy.completeManifest(manifestEh.hash);
+                            this.zomeProxy.completeManifest(new HoloHash(manifestEh.hash));
                         } else {
                             // Ask for next chunk?
                         }
@@ -264,7 +264,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             return;
         }
         const missingChunks = await this.zomeProxy.determineMissingChunks(notice[0].summary.parcel_reference.parcel_eh);
-        const notice_eh = noticeEh.hash;
+        const notice_eh = new HoloHash(noticeEh.hash);
         for (const chunk_eh of missingChunks) {
             this.zomeProxy.pullChunk({notice_eh, chunk_eh});
         }
@@ -301,7 +301,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     async fetchPublicManifest(manifestEh: EntryId): Promise<[ParcelManifest, Timestamp, AgentId]> {
-        const [manifest, ts, author] = await this.zomeProxy.fetchPublicManifest(manifestEh.hash);
+        const [manifest, ts, author] = await this.zomeProxy.fetchPublicManifest(new HoloHash(manifestEh.hash));
         return [manifest, ts, new AgentId(author)];
     }
 
@@ -385,7 +385,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         if (!notice) {
             console.error("Accepting unknown notice");
         }
-        const replyEh = await this.zomeProxy.respondToNotice({notice_eh: noticeEh.hash, has_accepted: true});
+        const replyEh = await this.zomeProxy.respondToNotice({notice_eh: new HoloHash(noticeEh.hash), has_accepted: true});
         return new EntryId(replyEh);
     }
 
@@ -395,7 +395,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         if (!notice) {
             console.error("Declining unknown notice");
         }
-        const eh = await this.zomeProxy.respondToNotice({notice_eh: noticeEh.hash, has_accepted: false});
+        const eh = await this.zomeProxy.respondToNotice({notice_eh: new HoloHash(noticeEh.hash), has_accepted: false});
         return new EntryId(eh);
     }
 
@@ -404,13 +404,13 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     async getDeliveryState(distribAh: ActionId, recipient: AgentId): Promise<DeliveryState> {
-        return this.zomeProxy.getDeliveryState({distribution_ah: distribAh.hash, recipient: recipient.hash});
+        return this.zomeProxy.getDeliveryState({distribution_ah: new HoloHash(distribAh.hash), recipient: new HoloHash(recipient.hash)});
     }
 
 
     /** */
     async getDistributionState(distribAh: ActionId, distribution?: Distribution): Promise<[DistributionState, AgentIdMap<DeliveryState>]> {
-        const fullState = await this.zomeProxy.getDistributionState(distribAh.hash);
+        const fullState = await this.zomeProxy.getDistributionState(new HoloHash(distribAh.hash));
         let deliveryStates: AgentIdMap<DeliveryState> = new AgentIdMap();
         let i = 0;
         if (!distribution) {
@@ -430,7 +430,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     async getNoticeState(noticeEh: EntryId): Promise<[NoticeState, Set<EntryHashB64>]> {
-        const [state, missing_chunks] = await this.zomeProxy.getNoticeState(noticeEh.hash);
+        const [state, missing_chunks] = await this.zomeProxy.getNoticeState(new HoloHash(noticeEh.hash));
         const missingChunks = missing_chunks.map((chunk_eh) => enc64(chunk_eh));
         return [state, new Set(missingChunks)];
     }
