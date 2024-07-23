@@ -1,7 +1,6 @@
 import {SecretProxy} from '../bindings/secret.proxy';
 import {AgentIdMap, EntryId, EntryIdMap, ZomeViewModel, AgentId, ActionId} from "@ddd-qc/lit-happ";
 import {DistributionStrategy} from "../bindings/secret.types";
-import {HoloHash} from "@holochain/client";
 
 
 /** */
@@ -62,7 +61,7 @@ export class SecretZvm extends ZomeViewModel {
     const input = {
       secret_eh,
       strategy: DistributionStrategy.Normal,
-      recipients: [new HoloHash(recipient.hash)],
+      recipients: [recipient.hash],
     }
     const res = await this.zomeProxy.sendSecret(input);
     return new ActionId(res);
@@ -72,10 +71,10 @@ export class SecretZvm extends ZomeViewModel {
   /** */
   async getSecretsFrom(sender: AgentId): Promise<EntryId[]> {
     console.log("getSecretsFrom()", sender);
-    const res = (await this.zomeProxy.getSecretsFrom(new HoloHash(sender.hash))).map(hash => new EntryId(hash));
+    const res = (await this.zomeProxy.getSecretsFrom(sender.hash)).map(hash => new EntryId(hash));
     console.log("getSecretsFrom() res", res);
     for (const secretEh of res) {
-      this._perspective.secrets.set(secretEh, await this.zomeProxy.getSecret(new HoloHash(secretEh.hash)));
+      this._perspective.secrets.set(secretEh, await this.zomeProxy.getSecret(secretEh.hash));
     }
     this._perspective.secretsByAgent.set(sender, res);
     return res;

@@ -14,7 +14,7 @@ import {
     ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap, enc64} from "@ddd-qc/lit-happ";
-import {EntryHashB64, HoloHash, Timestamp} from "@holochain/client";
+import {EntryHashB64, Timestamp} from "@holochain/client";
 
 
 /** */
@@ -168,7 +168,7 @@ export function materializeParcelManifest(pm: ParcelManifest): ParcelManifestMat
 
 
 export function dematerializeParcelManifest(pm: ParcelManifestMat): ParcelManifest {
-    const chunks = pm.chunks.map((id) => new HoloHash(id.hash));
+    const chunks = pm.chunks.map((id) =>  id.hash);
     return {
         description: pm.description,
         data_hash: pm.data_hash,
