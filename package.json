@@ -60,10 +60,10 @@
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@ddd-qc/cell-proxy"            : "=0.27.1",
+    "@ddd-qc/cell-proxy"            : "=0.27.4",
     "@ddd-qc/lit-happ"              : "=0.27.1",
     "@holochain-open-dev/core-types": "0.7.0",
-    "@holochain/client"             : "^0.18.0-dev.4",
+    "@holochain/client"             : "^0.18.0-dev.9",
     "@lit/context"                  : "1.0.1",
     "lit"                           : "3.0.2"
   },

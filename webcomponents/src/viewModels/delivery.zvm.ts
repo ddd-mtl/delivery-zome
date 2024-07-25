@@ -11,7 +11,7 @@ import {
     StateChangeType,
     EntryPulseMat,
 
-    LinkPulseMat,
+    LinkPulseMat, holoIdReviver,
 } from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {EntryHashB64, Timestamp} from "@holochain/client";
@@ -458,7 +458,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     import(json: string, _canPublish: boolean) {
-        const snapshot = JSON.parse(json) as DeliverySnapshot;
+        const snapshot = JSON.parse(json, holoIdReviver) as DeliverySnapshot;
         // if (canPublish) {
         // }
         this._perspective.restore(snapshot)
