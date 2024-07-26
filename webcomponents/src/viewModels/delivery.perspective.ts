@@ -14,7 +14,7 @@ import {
     ReplyAck,
 } from "../bindings/delivery.types";
 import {Dictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap, enc64} from "@ddd-qc/lit-happ";
-import {EntryHashB64, Timestamp} from "@holochain/client";
+import {AgentPubKeyB64, EntryHashB64, Timestamp} from "@holochain/client";
 
 
 /** */
@@ -29,7 +29,7 @@ export interface PublicParcelRecordMat {
 
 /** */
 export interface DeliverySnapshot {
-    manifests: [ParcelManifestMat, Timestamp][],
+    manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][],
     // FIXME
 }
 
@@ -46,7 +46,7 @@ export class DeliveryPerspective {
     /** manifest_eh -> (ParcelManifest, timestamp) */
     privateManifests: EntryIdMap<[ParcelManifest, Timestamp]> = new EntryIdMap();
     /** manifest_eh -> ParcelManifest */
-    localPublicManifests: EntryIdMap<[ParcelManifest, Timestamp]> = new EntryIdMap();
+    localPublicManifests: EntryIdMap<[ParcelManifest, Timestamp, AgentId]> = new EntryIdMap();
     /** data_hash -> [manifest_eh, isPrivate] */
     localManifestByData: Dictionary<[EntryId, boolean]> = {};
     // /** data_hash -> number of chunks on chain */
@@ -80,8 +80,8 @@ export class DeliveryPerspective {
     /** TODO: deep copy */
     makeSnapshot(): DeliverySnapshot {
         // FIXME
-        const manifests: [ParcelManifestMat, Timestamp][] = Array.from(this.localPublicManifests.values())
-          .map(([manifest, ts]) => [materializeParcelManifest(manifest), ts]);
+        const manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][] = Array.from(this.localPublicManifests.values())
+          .map(([manifest, ts, author]) => [materializeParcelManifest(manifest), ts, author.b64]);
         /** */
         return {
             manifests,
@@ -100,7 +100,7 @@ export class DeliveryPerspectiveMutable extends DeliveryPerspective {
     /** -- Store -- */
 
     /** */
-    storeManifest(manifestEh: EntryId, ts: Timestamp, manifest: ParcelManifest) {
+    storeManifest(manifestEh: EntryId, ts: Timestamp, author: AgentId, manifest: ParcelManifest) {
         const isPrivate = "Private" === manifest.description.visibility;
         this.localManifestByData[manifest.data_hash] = [manifestEh, isPrivate];
         if (isPrivate) {
@@ -111,7 +111,7 @@ export class DeliveryPerspectiveMutable extends DeliveryPerspective {
                 this.notices.get(maybeNoticeEh)[3] = new Set(manifest.chunks.map((eh) => enc64(eh)));
             }
         } else {
-            this.localPublicManifests.set(manifestEh, [manifest, ts]);
+            this.localPublicManifests.set(manifestEh, [manifest, ts, author]);
         }
     }
 

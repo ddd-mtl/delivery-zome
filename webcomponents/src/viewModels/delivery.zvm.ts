@@ -11,7 +11,7 @@ import {
     StateChangeType,
     EntryPulseMat,
 
-    LinkPulseMat, holoIdReviver,
+    LinkPulseMat, holoIdReviver, assertIsDefined,
 } from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {EntryHashB64, Timestamp} from "@holochain/client";
@@ -105,7 +105,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case DeliveryEntryType.PublicManifest:
                 const manifest = decode(pulse.bytes) as ParcelManifest;
                 if (pulse.state != StateChangeType.Delete) {
-                    this._perspective.storeManifest(pulse.eh, pulse.ts, manifest);
+                    this._perspective.storeManifest(pulse.eh, pulse.ts, pulse.author, manifest);
                 }
             break;
             case DeliveryEntryType.PrivateChunk:
@@ -301,6 +301,11 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     async fetchPublicManifest(manifestEh: EntryId): Promise<[ParcelManifest, Timestamp, AgentId]> {
+        assertIsDefined(manifestEh);
+        const maybeLocal = this._perspective.localPublicManifests.get(manifestEh);
+        if (maybeLocal) {
+            return maybeLocal;
+        }
         const [manifest, ts, author] = await this.zomeProxy.fetchPublicManifest(manifestEh.hash);
         return [manifest, ts, new AgentId(author)];
     }
@@ -308,10 +313,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** Return base64 data string */
     async fetchParcelData(parcelEh: EntryId): Promise<string> {
-        // const pd = this._perspective.publicParcels[parcelEh];
-        // if (!pd) {
-        //     return Promise.reject("Unknown PublicParcel");
-        // }
+        assertIsDefined(parcelEh);
         const [manifest, _ts, _author] = await this.fetchPublicManifest(parcelEh);
         let dataB64 = "";
         for (const chunk_eh of manifest.chunks) {
