@@ -2,7 +2,7 @@
   "name": "delivery-root",
   "config": {
     "hc_version": "0.3.1",
-    "zits_version": "1.16.0",
+    "zits_version": "1.16.1",
     "bin": "bin"
   },
   "private": true,
@@ -60,10 +60,10 @@
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@ddd-qc/cell-proxy"            : "=0.27.4",
-    "@ddd-qc/lit-happ"              : "=0.27.1",
+    "@ddd-qc/cell-proxy"            : "=0.27.6",
+    "@ddd-qc/lit-happ"              : "=0.27.6",
     "@holochain-open-dev/core-types": "0.7.0",
-    "@holochain/client"             : "^0.18.0-dev.9",
+    "@holochain/client"             : "=0.18.0-dev.4",
     "@lit/context"                  : "1.0.1",
     "lit"                           : "3.0.2"
   },
