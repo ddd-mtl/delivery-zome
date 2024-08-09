@@ -42,8 +42,8 @@ export class SecretDvm extends DnaViewModel {
 
   /** -- DnaViewModel Interface -- */
 
-  static readonly DEFAULT_BASE_ROLE_NAME = "rSecret";
-  static readonly ZVM_DEFS: ZvmDef[] = [
+  static override readonly DEFAULT_BASE_ROLE_NAME = "rSecret";
+  static override readonly ZVM_DEFS: ZvmDef[] = [
    SecretZvm,
    [DeliveryZvm, "zDelivery"],
    [AgentDirectoryZvm, "zAgentDirectory"],
@@ -201,12 +201,12 @@ export class SecretDvm extends DnaViewModel {
    const chunk_ehs = await this.deliveryZvm.zomeProxy.publishChunks([{data_hash, data: message}]);
    const manifest: ParcelManifest = {
      data_hash,
-     chunks: [chunk_ehs[0]],
+     chunks: [chunk_ehs[0]!],
      description: {
        size: 0,
        zome_origin: "secret_integrity",
        kind_info: {Manifest: "public_secret"},
-       name: message[0],
+       name: message[0]!,
        visibility: "Public" //{Public: null}
      },
    };

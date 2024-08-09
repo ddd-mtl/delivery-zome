@@ -1,4 +1,4 @@
-import {css, html} from "lit";
+import {html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import { DnaElement, AgentId, EntryId } from "@ddd-qc/lit-happ";
 import {SecretDvm, SecretDvmPerspective} from "../viewModels/secret.dvm";
@@ -18,7 +18,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
   /** -- Fields -- */
   @state() private _initialized = false;
-  @state() private _sender?: AgentId;
+  @state() private _sender: AgentId | undefined = undefined;
   @state() private _selectedSecretEh?: EntryId;
   @state() private _senderSecrets: EntryId[] = [];
 
@@ -36,7 +36,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
   /** -- Methods -- */
 
   /** */
-  protected async dvmUpdated(newDvm: SecretDvm, oldDvm?: SecretDvm): Promise<void> {
+  protected override async dvmUpdated(newDvm: SecretDvm, oldDvm?: SecretDvm): Promise<void> {
     console.log("<secret-page>.dvmUpdated()");
     if (oldDvm) {
       console.log("\t Unsubscribed to secretZvm's roleName = ", oldDvm.secretZvm.cell.name)
@@ -61,7 +61,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
 
   /** */
-  async onPublishMessage(e: any) {
+  async onPublishMessage(_e: any) {
     const textInput = this.shadowRoot!.getElementById("messageInput") as HTMLInputElement;
     if (textInput.value.length == 0) {
       alert("message string is empty");
@@ -74,7 +74,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
   }
 
   /** */
-  async onSendSecret(e: any) {
+  async onSendSecret(_e: any) {
     const textInput = this.shadowRoot!.getElementById("secretInput") as HTMLInputElement;
     const agentSelect = this.shadowRoot!.getElementById("recipientSelector") as HTMLSelectElement;
     const canSplitChk = this.shadowRoot!.getElementById("splitChk") as HTMLInputElement;
@@ -82,7 +82,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
       alert("secret string is empty");
       return;
     }
-    let _res = await this._dvm.secretZvm.sendSecretToOne(textInput.value, new AgentId(agentSelect.value), canSplitChk.checked);
+    await this._dvm.secretZvm.sendSecretToOne(textInput.value, new AgentId(agentSelect.value), canSplitChk.checked);
     textInput.value = "";
   }
 
@@ -116,7 +116,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
 
   /** */
-  render() {
+  override render() {
     console.log("<secret-page> render()", this._initialized, this._sender, this.secretPerspective, this._dvm.perspective, this._dvm.deliveryZvm.perspective);
     if (!this._initialized) {
       return html`<span>Loading...</span>`;
@@ -161,8 +161,8 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
         if (pprm.deleteInfo) {
           return html``;
         }
-        return html`<li>${msg} <button style="margin-left:20px" @click=${async (e:any) => {
-          const _res = await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(pprm.prEh.hash);
+        return html`<li>${msg} <button style="margin-left:20px" @click=${async (_e:any) => {
+          await this._dvm.deliveryZvm.zomeProxy.unpublishPublicParcel(pprm.prEh.hash);
         }}>Remove</button></li>`
       }
     )

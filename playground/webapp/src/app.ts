@@ -1,5 +1,5 @@
 import { html } from "lit";
-import {property, state, customElement} from "lit/decorators.js";
+import {state, customElement} from "lit/decorators.js";
 import { SecretDvm } from "./viewModels/secret.dvm";
 import {HvmDef, HappElement, Cell} from "@ddd-qc/lit-happ";
 import {DnaDefinition} from "@holochain/client";
@@ -21,7 +21,7 @@ export class SecretApp extends HappElement {
 
 
   /** HvmDef */
-  static readonly HVM_DEF: HvmDef = {
+  static override readonly HVM_DEF: HvmDef = {
     id: "hSecret",
     dvmDefs: [{ctor: SecretDvm, isClonable: true}],
   };
@@ -44,7 +44,7 @@ export class SecretApp extends HappElement {
   private _dnaDef?: DnaDefinition;
 
   /** */
-  async hvmConstructed() {
+  override async hvmConstructed() {
     console.log("hvmConstructed()")
     /** Probe */
     this._cell = this.secret.cell;
@@ -66,7 +66,7 @@ export class SecretApp extends HappElement {
 
 
   /** */
-  render() {
+  override render() {
     console.log("*** <secret-app> render()", this._loaded, this.secret.secretZvm.perspective)
     if (!this._loaded) {
       return html`<span>Loading...</span>`;

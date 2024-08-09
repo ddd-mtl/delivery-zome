@@ -125,7 +125,7 @@ export class DeliveryPerspectiveMutable extends DeliveryPerspective {
     /** -- Memento -- */
 
     /** */
-    restore(snapshot: DeliverySnapshot) {
+    restore(_snapshot: DeliverySnapshot) {
         /** Clear */
         this.inbox = [];
         this.publicParcels.clear();
@@ -186,7 +186,7 @@ export function materializePublicParcelRecord(ppr: PublicParcelRecord): PublicPa
         creationTs: ppr.creation_ts,
         author: new AgentId(ppr.author),
         deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], new AgentId(ppr.deleteInfo[1])] : undefined,
-    }
+    } as PublicParcelRecordMat;
 }
 
 

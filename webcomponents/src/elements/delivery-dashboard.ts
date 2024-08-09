@@ -1,5 +1,5 @@
-import {css, html} from "lit";
-import {property, state, customElement} from "lit/decorators.js";
+import {html} from "lit";
+import {state, customElement} from "lit/decorators.js";
 import {ActionId, enc64, EntryId, ZomeElement} from "@ddd-qc/lit-happ";
 import {DeliveryZvm} from "../viewModels/delivery.zvm";
 import {DeliveryPerspective} from "../viewModels/delivery.perspective";
@@ -19,7 +19,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
     /** After first render only */
-    async firstUpdated() {
+    override async firstUpdated() {
         //await this.refresh();
         this._initialized = true;
     }
@@ -38,7 +38,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
 
     /** */
-    render() {
+    override render() {
         console.log("<delivery-dashboard> render()", this._initialized, this.perspective);
         if (!this._initialized) {
             return html`<span>Loading...</span>`;
@@ -237,7 +237,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
         }
         const date = new Date(tuple[1] / 1000); // Holochain timestamp is in micro-seconds, Date wants milliseconds
         const date_str = date.toLocaleString('en-US', {hour12: false});
-        const agent_str = enc64(tuple[0].recipients[0]).slice(-5);
+        const agent_str = enc64(tuple[0].recipients[0]!).slice(-5);
         return "[" + date_str + "] to " + agent_str + " (" + tuple[0].recipients.length + ")";
     }
 

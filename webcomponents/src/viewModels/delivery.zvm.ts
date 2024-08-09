@@ -1,5 +1,4 @@
 import {
-    delay,
     ActionId,
     EntryId,
     AgentId,
@@ -42,7 +41,7 @@ import {DeliveryLinkType} from "../bindings/delivery.integrity";
  */
 export class DeliveryZvm extends ZomeViewModelWithSignals {
 
-    static readonly ZOME_PROXY = DeliveryProxy;
+    static override readonly ZOME_PROXY = DeliveryProxy;
     get zomeProxy(): DeliveryProxy {
         return this._zomeProxy as DeliveryProxy;
     }
@@ -69,7 +68,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** */
-    async handleLinkPulse(pulse: LinkPulseMat, _from: AgentId): Promise<void> {
+    override async handleLinkPulse(pulse: LinkPulseMat, _from: AgentId): Promise<void> {
         switch(pulse.link_type) {
             case DeliveryLinkType.PublicParcels: {
                 if (pulse.state == StateChangeType.Delete) {
@@ -99,7 +98,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** */
-    async handleEntryPulse(pulse: EntryPulseMat, _from: AgentId): Promise<void> {
+    override async handleEntryPulse(pulse: EntryPulseMat, _from: AgentId): Promise<void> {
         switch(pulse.entryType) {
             case DeliveryEntryType.PrivateManifest:
             case DeliveryEntryType.PublicManifest:
@@ -233,14 +232,14 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** -- Init -- */
 
     /** */
-    async initializePerspectiveOffline(): Promise<void> {
+    override async initializePerspectiveOffline(): Promise<void> {
         await this.zomeProxy.queryAll();
         await this.scanProblems();
     }
 
 
     /** */
-    async initializePerspectiveOnline(): Promise<void> {
+    override async initializePerspectiveOnline(): Promise<void> {
         await this.probeDht();
     }
 
@@ -274,7 +273,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** -- probe -- */
 
     /** */
-    async probeAllInner(): Promise<void> {
+    override async probeAllInner(): Promise<void> {
         console.log("DeliveryZvm.probeAllInner()");
         //console.trace();
         await this.zomeProxy.queryAll();
@@ -423,7 +422,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             }
         }
         for(const recipient of distribution.recipients) {
-            deliveryStates.set(new AgentId(recipient), fullState.delivery_states[i]);
+            deliveryStates.set(new AgentId(recipient), fullState.delivery_states[i]!);
             i += 1;
         }
         return [fullState.distribution_state, deliveryStates];

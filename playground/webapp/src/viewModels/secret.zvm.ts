@@ -17,7 +17,7 @@ export interface SecretPerspective {
  */
 export class SecretZvm extends ZomeViewModel {
 
-  static readonly ZOME_PROXY = SecretProxy;
+  static override readonly ZOME_PROXY = SecretProxy;
   get zomeProxy(): SecretProxy {return this._zomeProxy as SecretProxy;}
 
 
