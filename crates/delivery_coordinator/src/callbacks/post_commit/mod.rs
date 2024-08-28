@@ -26,7 +26,12 @@ use zome_delivery_integrity::*;
 ///
 #[hdk_extern(infallible)]
 fn post_commit(signedActionList: Vec<SignedActionHashed>) {
-   let filtered = filter_action_from_this_zome(signedActionList).unwrap();
+   let maybe_filtered = filter_action_from_this_zome(signedActionList);
+   if let Err(e) = maybe_filtered {
+      error!("<< delivery_post_commit() filter failed: {:?}", e);
+      return;
+   };
+   let filtered = maybe_filtered.unwrap();
    let result = delivery_post_commit(filtered.clone());
    if let Err(e) = result {
       error!("<< delivery_post_commit() failed: {:?}", e);
@@ -81,7 +86,7 @@ fn delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> ExternResu
 
 ///
 fn filter_action_from_this_zome(signedActionList: Vec<SignedActionHashed>) -> ExternResult<Vec<SignedActionHashed>> {
-   let zome_names = dna_info().unwrap().zome_names;
+   let zome_names = dna_info()?.zome_names;
    let mut res = Vec::new();
    /// Process each Action
    for sah in signedActionList.clone() {
