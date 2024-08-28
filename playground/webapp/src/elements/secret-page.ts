@@ -158,7 +158,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
       ([parcelEh, msg]) => {
         //console.log("" + index + ". " + agentIdB64)
         const pprm = this.deliveryPerspective.publicParcels.get(parcelEh);
-        if (pprm.deleteInfo) {
+        if (!pprm || pprm.deleteInfo) {
           return html``;
         }
         return html`<li>${msg} <button style="margin-left:20px" @click=${async (_e:any) => {

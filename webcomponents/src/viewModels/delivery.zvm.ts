@@ -83,9 +83,9 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                         console.warn("Unknown deleted Parcel", parcelEh);
                         return;
                     }
-                    const current = this._perspective.publicParcels.get(parcelEh);
-                    current.deleteInfo = [pulse.timestamp, pulse.author];
-                    this._perspective.publicParcels.set(parcelEh, current);
+                    //const current = this._perspective.publicParcels.get(parcelEh);
+                    pprm.deleteInfo = [pulse.timestamp, pulse.author];
+                    this._perspective.publicParcels.set(parcelEh, pprm);
                 }
             }
             break;
@@ -117,7 +117,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                     const manifestEh = manifestPair[0];
                     const noticeEh = this._perspective.noticeByParcel.get(manifestEh);
                     if (noticeEh) {
-                        const noticeTuple = this._perspective.notices.get(noticeEh);
+                        const noticeTuple = this._perspective.notices.get(noticeEh)!;
                         noticeTuple[3].delete(pulse.eh.b64);
                         this._perspective.notices.set(noticeEh, noticeTuple);
                         if (noticeTuple[3].size == 0) {
@@ -152,10 +152,10 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 if (!this._perspective.noticeAcks.get(distribAh)) {
                     this._perspective.noticeAcks.set(distribAh, new AgentIdMap());
                 }
-                this._perspective.noticeAcks.get(distribAh).set(recipient, [noticeAck, pulse.ts]);
+                this._perspective.noticeAcks.get(distribAh)!.set(recipient, [noticeAck, pulse.ts]);
                 const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
-                this._perspective.distributions.get(distribAh)[2] = fullState;
-                this._perspective.distributions.get(distribAh)[3] = deliveryStates;
+                this._perspective.distributions.get(distribAh)![2] = fullState;
+                this._perspective.distributions.get(distribAh)![3] = deliveryStates;
             }
             break;
             case DeliveryEntryType.NoticeReply: {
@@ -164,9 +164,9 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 //console.log("Received NoticeReply", this._perspective, noticeEh, reply);
                 this._perspective.replies.set(noticeEh, reply);
                 if (this._perspective.notices.get(noticeEh)) {
-                    this._perspective.notices.get(noticeEh)[2] = NoticeState.Refused;
+                    this._perspective.notices.get(noticeEh)![2] = NoticeState.Refused;
                     if (reply.has_accepted) {
-                        this._perspective.notices.get(noticeEh)[2] = NoticeState.Accepted;
+                        this._perspective.notices.get(noticeEh)![2] = NoticeState.Accepted;
                     }
                 }
             }
@@ -178,10 +178,10 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 if (!this._perspective.replyAcks.get(distribAh)) {
                     this._perspective.replyAcks.set(distribAh, new AgentIdMap());
                 }
-                this._perspective.replyAcks.get(distribAh).set(recipient, [replyAck, pulse.ts]);
+                this._perspective.replyAcks.get(distribAh)!.set(recipient, [replyAck, pulse.ts]);
                 const [fullState, deliveryStates] = await this.getDistributionState(distribAh);
-                this._perspective.distributions.get(distribAh)[2] = fullState;
-                this._perspective.distributions.get(distribAh)[3] = deliveryStates;
+                this._perspective.distributions.get(distribAh)![2] = fullState;
+                this._perspective.distributions.get(distribAh)![3] = deliveryStates;
             }
             break;
             case DeliveryEntryType.ReceptionProof: {
@@ -190,7 +190,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 //console.log("Received ReceptionProof", noticeEh, receptionProof);
                 this._perspective.receptions.set(noticeEh, [receptionProof, pulse.ts]);
                 if (this._perspective.notices.get(noticeEh)) {
-                    this._perspective.notices.get(noticeEh)[2] = NoticeState.Received;
+                    this._perspective.notices.get(noticeEh)![2] = NoticeState.Received;
                 }
             }
             break;
@@ -201,10 +201,10 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                 if (!this._perspective.receptionAcks.get(distribAh)) {
                     this._perspective.receptionAcks.set(distribAh, new AgentIdMap());
                 }
-                this._perspective.receptionAcks.get(distribAh).set(recipient, [receptionAck, pulse.ts]);
+                this._perspective.receptionAcks.get(distribAh)!.set(recipient, [receptionAck, pulse.ts]);
                 const [fullState, deliveryStates] = await this.getDistributionState(distribAh)
-                this._perspective.distributions.get(distribAh)[2] = fullState;
-                this._perspective.distributions.get(distribAh)[3] = deliveryStates;
+                this._perspective.distributions.get(distribAh)![2] = fullState;
+                this._perspective.distributions.get(distribAh)![3] = deliveryStates;
             }
             break;
             case DeliveryEntryType.PublicParcel: {
@@ -368,7 +368,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                         if (!res.get(distribAh)) {
                             res.set(distribAh, [distrib, ts, new AgentIdMap()]);
                         }
-                        res.get(distribAh)[2].set(recipient, state);
+                        res.get(distribAh)![2].set(recipient, state);
                     }
                 }
             }
@@ -382,8 +382,8 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     async acceptDelivery(noticeEh: EntryId): Promise<EntryId> {
-        const [_ts, notice] = this._perspective.notices.get(noticeEh);
-        if (!notice) {
+        const pair = this._perspective.notices.get(noticeEh);
+        if (!pair) {
             console.error("Accepting unknown notice");
         }
         const replyEh = await this.zomeProxy.respondToNotice({notice_eh:  noticeEh.hash, has_accepted: true});
@@ -392,8 +392,8 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     async declineDelivery(noticeEh: EntryId): Promise<EntryId> {
-        const [_ts, notice] = this._perspective.notices.get(noticeEh);
-        if (!notice) {
+        const pair = this._perspective.notices.get(noticeEh);
+        if (!pair) {
             console.error("Declining unknown notice");
         }
         const eh = await this.zomeProxy.respondToNotice({notice_eh: noticeEh.hash, has_accepted: false});
@@ -415,11 +415,12 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         let deliveryStates: AgentIdMap<DeliveryState> = new AgentIdMap();
         let i = 0;
         if (!distribution) {
-            distribution = this._perspective.distributions.get(distribAh)[0];
-            if (!distribution) {
+            const tuple = this._perspective.distributions.get(distribAh);
+            if (!tuple) {
                 console.error("Distribution not found");
                 return Promise.reject(new Error('Distribution not found'));
             }
+            distribution = tuple[0];
         }
         for(const recipient of distribution.recipients) {
             deliveryStates.set(new AgentId(recipient), fullState.delivery_states[i]!);

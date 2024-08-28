@@ -107,8 +107,8 @@ export class DeliveryPerspectiveMutable extends DeliveryPerspective {
             this.privateManifests.set(manifestEh, [manifest, ts]);
             const maybeNoticeEh = this.noticeByParcel.get(manifestEh);
             if (maybeNoticeEh) {
-                this.notices.get(maybeNoticeEh)[2] = NoticeState.PartiallyReceived;
-                this.notices.get(maybeNoticeEh)[3] = new Set(manifest.chunks.map((eh) => enc64(eh)));
+                this.notices.get(maybeNoticeEh)![2] = NoticeState.PartiallyReceived;
+                this.notices.get(maybeNoticeEh)![3] = new Set(manifest.chunks.map((eh) => enc64(eh)));
             }
         } else {
             this.localPublicManifests.set(manifestEh, [manifest, ts, author]);

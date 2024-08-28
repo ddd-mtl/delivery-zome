@@ -164,7 +164,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
                 if (!this.perspective.privateManifests.get(manifestEh)) {
                   return html`__privateManifest__`; // TODO
                 }
-                const [manifest, _ts] = this.perspective.privateManifests.get(manifestEh);
+                const [manifest, _ts] = this.perspective.privateManifests.get(manifestEh)!;
                 return html `
           <li style="margin-top:10px;" title=${dataHash}>
               ${dataHash} | ${manifest.chunks.length} chunks
