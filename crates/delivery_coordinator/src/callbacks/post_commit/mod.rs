@@ -54,7 +54,7 @@ fn delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> ExternResu
          Action::Update(_) |
          Action::Create(_) => {
             let Some(EntryType::App(app_entry_def)) = sah.action().entry_type()
-              else { return zome_error!("Create action malformed."); };
+              else { return zome_error!("Create action malformed: {:?}", sah.action()); };
             /// Bail if from other zome
             if zome_names[app_entry_def.zome_index.0 as usize].0 != "zDeliveryIntegrity" { // Hack: hardcoded name
                continue;
