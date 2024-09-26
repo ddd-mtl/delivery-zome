@@ -3,7 +3,6 @@ import {state, customElement} from "lit/decorators.js";
 import { SecretDvm } from "./viewModels/secret.dvm";
 import {HvmDef, HappElement, Cell} from "@ddd-qc/lit-happ";
 import {DnaDefinition} from "@holochain/client";
-import {Dictionary, EntryDef} from "@ddd-qc/cell-proxy";
 
 
 /**
@@ -34,9 +33,6 @@ export class SecretApp extends HappElement {
   @state() private _loaded = false;
 
   private _pageDisplayIndex: number = 0;
-  /** ZomeName -> (AppEntryDefName, isPublic) */
-  private _allAppEntryTypes: Dictionary<Dictionary<EntryDef>> = {};
-
 
   @state() private _cell?: Cell;
 
@@ -48,9 +44,6 @@ export class SecretApp extends HappElement {
     console.log("hvmConstructed()")
     /** Probe */
     this._cell = this.secret.cell;
-    //await this.hvm.probeAll();
-    this._allAppEntryTypes = await this.secret.fetchAllEntryDefs();
-    console.log("happInitialized(), _allAppEntryTypes", this._allAppEntryTypes);
     // TODO: Fix issue: zTasker entry_defs() not found. Maybe confusion with integrity zome name?
     /** Done */
     this._loaded = true;

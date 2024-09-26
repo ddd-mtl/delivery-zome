@@ -290,11 +290,11 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** */
     async probeDht(denyNotify?: boolean): Promise<void> {
         //this._perspective.publicParcels = {};
-        await this.zomeProxy.pullPublicParcelsDetails();
-        const inbox = await this.zomeProxy.processInbox();
-        this._perspective.inbox = inbox.map((ah) => new ActionId(ah));
-        this._probeDhtCount += 1;
-        if (denyNotify == undefined) this.notifySubscribers();
+            await this.zomeProxy.pullPublicParcelsDetails();
+            const inbox = await this.zomeProxy.processInbox();
+            this._perspective.inbox = inbox.map((ah) => new ActionId(ah));
+            this._probeDhtCount += 1;
+            if (denyNotify == undefined) this.notifySubscribers();
     }
 
 
