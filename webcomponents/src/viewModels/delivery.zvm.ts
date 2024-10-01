@@ -51,21 +51,13 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     private _perspective: DeliveryPerspectiveMutable = new DeliveryPerspectiveMutable();
 
-
     /* */
     get perspective(): DeliveryPerspective {
         return this._perspective.readonly;
     }
 
-    /* */
-    protected hasChanged(): boolean {
-        // TODO
-        return true;
-    }
-
 
     /** -- Signals -- */
-
 
     /** */
     override async handleLinkPulse(pulse: LinkPulseMat, _from: AgentId): Promise<void> {
