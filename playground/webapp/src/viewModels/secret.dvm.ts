@@ -23,8 +23,7 @@ import {
 } from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
-import {AppSignalCb} from "@holochain/client";
-import {AppSignal} from "@holochain/client/lib/api/app/types";
+import {SignalCb, Signal, SignalType, AppSignal} from "@holochain/client";
 import {decode} from "@msgpack/msgpack";
 import {DeliveryLinkType} from "@ddd-qc/delivery/dist/bindings/delivery.integrity";
 
@@ -49,7 +48,7 @@ export class SecretDvm extends DnaViewModel {
    [AgentDirectoryZvm, "zAgentDirectory"],
   ];
 
-  readonly signalHandler?: AppSignalCb = this.mySignalHandler;
+  readonly signalHandler?: SignalCb = this.mySignalHandler;
 
 
   /** QoL Helpers */
@@ -60,16 +59,18 @@ export class SecretDvm extends DnaViewModel {
 
   /** -- ViewModel Interface -- */
 
-  protected hasChanged(): boolean {return true}
-
   get perspective(): SecretDvmPerspective {return this._perspective}
 
   private _perspective: SecretDvmPerspective = {publicMessages: new EntryIdMap()};
 
 
   /** Update the perspective accordingly */
-  mySignalHandler(appSignal: AppSignal): void {
-    console.log("secretDvm received signal", appSignal);
+  mySignalHandler(signal: Signal): void {
+    console.log("secretDvm received signal", signal);
+    if (!(SignalType.App in signal)) {
+      return;
+    }
+    const appSignal: AppSignal = signal.App;
      this.agentDirectoryZvm.zomeProxy.getRegisteredAgents().then((agents) => {
        this._livePeers = agents.map(a => new AgentId(a));
     })

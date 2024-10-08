@@ -29,12 +29,6 @@ export class SecretZvm extends ZomeViewModel {
   /* */
   get perspective(): SecretPerspective {return this._perspective}
 
-  /* */
-  protected hasChanged(): boolean {
-    // TODO
-    return true;
-  }
-
 
   /** -- Methods -- */
 
