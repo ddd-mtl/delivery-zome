@@ -43,16 +43,16 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
     let create_record = Record::new(create_sah.clone(), Some(details.entry.clone()));
     //let pr_eh = create_sah.action().entry_address();
     //let pr_eh = AnyDhtHash::try_from(hash_entry(pr.clone())?).unwrap();
-    let entry_pulse = EntryPulse::try_from_new_record(create_record, false)?;
+    let entry_pulse = EntryPulse::try_from_new_record(create_record, ValidatedBy::Network, false)?;
     //let first = (EntryPulse {hash: pr_eh.clone(), author: create_link.author, ts: create_link.timestamp, state: EntryStateChange::Created}, kind.clone());
     pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
     if maybe_deletes.len() > 0 {
       let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
         else { panic!("get_link_details() should return a DeleteLink Action") };
       //let second = (EntryPulse {hash: pr_eh.clone(), author: delete.author, ts: delete.timestamp, state: EntryStateChange::Deleted}, kind);
-      let entry_pulse = EntryPulse::try_from_delete_record(create_sah.hashed, details.entry, false)?;
+      let entry_pulse = EntryPulse::try_from_delete_record(create_sah.hashed, details.entry, ValidatedBy::Network, false)?;
       pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
-      let link_pulse = LinkPulse { link: link_from_delete(&delete, &create_link), state: StateChange::Delete(false) };
+      let link_pulse = LinkPulse { link: link_from_delete(&delete, &create_link), state: StateChange::Delete(false), validation: ValidatedBy::Network };
       pulses.push(ZomeSignalProtocol::Link(link_pulse));
     }
   }
