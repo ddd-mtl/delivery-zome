@@ -19,7 +19,7 @@ pub enum SendSuccessKind {
 
 /// called from post_commit()
 pub fn send_item(
-   recipient: AgentPubKey,
+   recipient: ActionHash,
    pending_item: PendingItem,
    strategy: DistributionStrategy,
 ) -> ExternResult<SendSuccessKind> {
@@ -27,17 +27,22 @@ pub fn send_item(
    /// Try with DM
    if strategy.can_dm() {
       debug!("DM - {:?}", strategy);
-      /// Try sending directly to other Agent if Online
-      // let result = send_item_by_dm(recipient, distribution_ah, pending_item.clone(), signed_item);
-      let response_dm = send_dm(
-         recipient.clone(),
-         DeliveryProtocol::Item(pending_item.clone())
-         ,)?;
-      debug!("response_dm = {}", response_dm);
-      if let DeliveryProtocol::Success(signature) = response_dm {
-         return Ok(SendSuccessKind::OK_DIRECT(signature));
-      } else {
-         debug!("failed: {}", response_dm);
+      /// get owners
+      let owners = probe_owners(recipient)?;
+      if !owners.is_empty() {
+         let first_owner: AgentPubKey = owners[0];
+         /// Try sending directly to other Agent if Online
+         // let result = send_item_by_dm(recipient, distribution_ah, pending_item.clone(), signed_item);
+         let response_dm = send_dm(
+            first_owner.clone(),
+            DeliveryProtocol::Item(pending_item.clone())
+            , )?;
+         debug!("response_dm = {}", response_dm);
+         if let DeliveryProtocol::Success(signature) = response_dm {
+            return Ok(SendSuccessKind::OK_DIRECT(signature));
+         } else {
+            debug!("failed: {}", response_dm);
+         }
       }
    }
    /// Try with DHT by committing public PendingItem

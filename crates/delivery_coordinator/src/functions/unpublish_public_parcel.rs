@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use zome_utils::*;
-use zome_delivery_types::{ParcelReference};
+use zome_delivery_types::ParcelReference;
 
 
 ///

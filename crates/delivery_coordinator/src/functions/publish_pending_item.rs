@@ -39,7 +39,7 @@ fn publish_pending_item(input: CommitPendingItemInput) -> ExternResult<ActionHas
    /// Commit Inbox Link
    let tag = LinkTag::from(me.as_ref().to_vec());
    let maybe_link2_ah = create_link_relaxed(
-      EntryHash::from(input.recipient.clone()),
+      input.recipient.clone(),
       pending_item_eh,
       LinkTypes::Inbox,
       tag,

@@ -30,12 +30,6 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    /// Setup initial capabilities
    init_caps()?;
 
-   // ///
-   // let res = validate_properties()?;
-   // let InitCallbackResult::Pass = res
-   //    else { return Ok(res); };
-
-
    /// Done
    debug!("*** zDelivery.init() callback DONE");
    Ok(InitCallbackResult::Pass)
@@ -43,31 +37,31 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
 
 
 ///
-fn validate_properties() -> ExternResult<InitCallbackResult> {
+fn validate_properties() -> ExternResult<ValidateCallbackResult> {
    let maybe_properties = get_properties();
    //debug!("maybe_place_properties = {:?}", maybe_place_properties);
    if let Err(e) = &maybe_properties {
       let err_msg = format!("Failed parsing DNA properties: {:?}", e);
       error!(err_msg);
-      return Ok(InitCallbackResult::Fail(err_msg));
+      return Ok(ValidateCallbackResult::Invalid(err_msg));
    }
    let dna_properties = maybe_properties.unwrap();
    debug!("*** validate dna properties: {:?}", dna_properties);
    if dna_properties.max_chunk_size == 0 {
       let err_msg = format!("Invalid DNA property \"max_chunk_size\" must be bigger than 0 . value: {}", dna_properties.max_chunk_size);
-      return Ok(InitCallbackResult::Fail(err_msg));
+      return Ok(ValidateCallbackResult::Invalid(err_msg));
    }
    if dna_properties.max_chunk_size as u64 > dna_properties.max_parcel_size {
       let err_msg = format!("Invalid DNA property \"max_file_size\" must be bigger than \"max_chunk_size\" . values: {} | {} ", dna_properties.max_parcel_size, dna_properties.max_chunk_size);
-      return Ok(InitCallbackResult::Fail(err_msg));
+      return Ok(ValidateCallbackResult::Invalid(err_msg));
    }
    if dna_properties.max_parcel_name_length == 0 {
       let err_msg = format!("Invalid DNA property \"max_parcel_name_length\" must be bigger than 0 . value: {}", dna_properties.max_parcel_name_length);
-      return Ok(InitCallbackResult::Fail(err_msg));
+      return Ok(ValidateCallbackResult::Invalid(err_msg));
    }
    if dna_properties.min_parcel_name_length as u32 > dna_properties.max_parcel_name_length {
       let err_msg = format!("Invalid DNA property \"min_parcel_name_length\" must be bigger than \"max_parcel_name_length\" . values: {} | {} ", dna_properties.min_parcel_name_length, dna_properties.max_parcel_name_length);
-      return Ok(InitCallbackResult::Fail(err_msg));
+      return Ok(ValidateCallbackResult::Invalid(err_msg));
    }
-   Ok(InitCallbackResult::Pass)
+   Ok(ValidateCallbackResult::Valid)
 }

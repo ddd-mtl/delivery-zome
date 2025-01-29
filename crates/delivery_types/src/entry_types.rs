@@ -9,9 +9,9 @@ use crate::*;
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Distribution {
-   pub recipients: Vec<AgentPubKey>,
+   pub recipients: Vec<ActionHash>,
    pub delivery_summary: DeliverySummary,
-   pub summary_signature: Signature,
+   pub summary_signature: Signature, // signed by entry author
 }
 
 
@@ -31,7 +31,8 @@ pub struct DeliveryNotice {
 #[derive(Clone, PartialEq)]
 pub struct NoticeAck {
    pub distribution_ah: ActionHash,
-   pub recipient: AgentPubKey,
+   pub recipient: ActionHash,
+   pub signing_recipient: AgentPubKey,
    pub recipient_summary_signature: Signature,
 }
 
@@ -50,8 +51,9 @@ pub struct NoticeReply {
 #[derive(Clone, PartialEq)]
 pub struct ReplyAck {
    pub distribution_ah: ActionHash,
-   pub recipient: AgentPubKey,
+   pub recipient: ActionHash,
    pub has_accepted: bool,
+   pub signing_recipient: AgentPubKey,
    pub recipient_signature: Signature,
    //pub date_of_reply: u64,
 }
@@ -94,7 +96,8 @@ pub struct ReceptionProof {
 #[derive(Clone, PartialEq)]
 pub struct ReceptionAck {
    pub distribution_ah: ActionHash,
-   pub recipient: AgentPubKey,
+   pub recipient: ActionHash,
+   pub signing_recipient: AgentPubKey,
    pub recipient_signature: Signature,
    //pub date_of_reception: u64,
 }

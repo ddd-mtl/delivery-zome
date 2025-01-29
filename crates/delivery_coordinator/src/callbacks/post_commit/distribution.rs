@@ -26,10 +26,10 @@ pub fn post_commit_create_Distribution(sah: &SignedActionHashed, _eh: &EntryHash
 
 
 ///
-fn send_notice(notice: DeliveryNotice, recipient: AgentPubKey, distribution_strategy: DistributionStrategy) -> ExternResult<()> {
+fn send_notice(notice: DeliveryNotice, recipient: ActionHash, distribution_strategy: DistributionStrategy) -> ExternResult<()> {
     debug!("send_notice() for: {}", notice.summary.parcel_reference.description.name);
     /// Create PendingItem
-    let pending_item= pack_notice(
+    let pending_item = pack_notice(
         notice.clone(),
         recipient.clone(),
     )?;

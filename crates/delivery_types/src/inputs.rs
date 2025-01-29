@@ -6,7 +6,7 @@ use crate::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DistributeParcelInput {
-   pub recipients: Vec<AgentPubKey>,
+   pub recipients: Vec<ActionHash>,
    pub strategy: DistributionStrategy,
    pub parcel_reference: ParcelReference,
 }
@@ -34,7 +34,7 @@ pub struct GetNoticeOutput {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DeliveryNoticeQueryField {
-   Sender(AgentPubKey),
+   Sender(ActionHash),
    Distribution(ActionHash),
    Parcel(EntryHash)
 }
@@ -48,7 +48,7 @@ pub enum ReceptionProofQueryField {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum NoticeAckQueryField {
-   Recipient(AgentPubKey),
+   Recipient(ActionHash),
    Distribution(ActionHash)
 }
 
@@ -57,14 +57,14 @@ pub enum NoticeAckQueryField {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CommitPendingItemInput {
    pub item: PendingItem,
-   pub recipient: AgentPubKey,
+   pub recipient: ActionHash,
 }
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GetDeliveryStateInput {
    pub distribution_ah: ActionHash,
-   pub recipient: AgentPubKey,
+   pub recipient: ActionHash,
 }
 
 

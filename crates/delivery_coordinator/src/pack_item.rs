@@ -9,16 +9,16 @@ fn create_PendingItem<T>(
    kind: ItemKind,
    content: T,
    distribution_ah: ActionHash,
-   recipient: AgentPubKey,
+   recipient: ActionHash,
 ) -> ExternResult<PendingItem>
    where
       T: serde::Serialize + Clone + Sized + std::fmt::Debug
 {
    //debug!("create_pending_item() {:?} for {}", kind, snip(&recipient));
    assert!(kind != ItemKind::AppEntryBytes);
-   let me = agent_info()?.agent_latest_pubkey;
+   let author = agent_info()?.agent_latest_pubkey;
    /// Sign content
-   let author_signature = sign(me.clone(), content.clone())
+   let author_signature = sign(author.clone(), content.clone())
       .expect("Should be able to sign with my key");
    /// Serialize
    let data: XSalsa20Poly1305Data = bincode::serialize(&content).unwrap().into();
@@ -29,7 +29,7 @@ fn create_PendingItem<T>(
    /// Done
    let item = PendingItem {
       kind,
-      author: me,
+      author,
       encrypted_data,
       distribution_ah,
       author_signature,

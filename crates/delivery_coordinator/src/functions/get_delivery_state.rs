@@ -59,7 +59,7 @@ pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<Delivery
 
 
 ///
-pub fn find_PendingItem(distribution_ah: ActionHash, recipient: AgentPubKey, kind: ItemKind)
+pub fn find_PendingItem(distribution_ah: ActionHash, recipient: ActionHash, kind: ItemKind)
    -> ExternResult<Option<PendingItem>> {
    let mut pairs: Vec<(PendingItem, Link)> = get_typed_from_links( link_input_full(
        AnyLinkableHash::from(distribution_ah),
