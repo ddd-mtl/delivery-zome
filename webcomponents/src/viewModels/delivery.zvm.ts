@@ -112,7 +112,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                         const noticeTuple = this._perspective.notices.get(noticeEh)!;
                         noticeTuple[3].delete(pulse.eh.b64);
                         this._perspective.notices.set(noticeEh, noticeTuple);
-                        if (noticeTuple[3].size == 0) {
+                        if (this.isMainView && noticeTuple[3].size == 0) {
                             this.zomeProxy.completeManifest(manifestEh.hash);
                         } else {
                             // Ask for next chunk?
