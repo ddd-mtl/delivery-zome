@@ -197,7 +197,7 @@ export class SecretDvm extends DnaViewModel {
 
 
   /** */
-  async publishMessage(message: string): Promise<[EntryId, ParcelManifest]> {
+  async publishMessage(message: string)/*: Promise<[EntryId, ParcelManifest]>*/ {
    const data_hash = message; // should be an actual hash, but we don't care in this example code.
    const chunk_ehs = await this.deliveryZvm.zomeProxy.publishChunks([{data_hash, data: message}]);
    const manifest: ParcelManifest = {
@@ -211,7 +211,7 @@ export class SecretDvm extends DnaViewModel {
        visibility: "Public" //{Public: null}
      },
    };
-   const eh = await this.deliveryZvm.zomeProxy.publishPublicParcel(manifest);
-   return [new EntryId(eh), manifest];
+   /*const eh =*/ await this.deliveryZvm.zomeProxy.publishPublicParcel(manifest);
+   //return [new EntryId(eh), manifest];
   }
 }

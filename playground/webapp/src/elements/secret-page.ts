@@ -67,8 +67,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
       alert("message string is empty");
       return;
     }
-    let res = await this._dvm.publishMessage(textInput.value);
-    console.log("onPublishMessage() res:", res);
+    await this._dvm.publishMessage(textInput.value);
     /** */
     textInput.value = "";
   }
