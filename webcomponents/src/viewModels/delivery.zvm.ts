@@ -291,7 +291,25 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /** */
+    async fetchFileInfo(eh: EntryId): Promise<ParcelManifest> {
+        console.debug("DeliveryZvm.fetchFileInfo()", eh);
+        assertIsDefined(eh);
+        const maybe = this.perspective.privateManifests.get(eh);
+        if (maybe) {
+            return maybe[0];
+        }
+        const maybePublic = this.perspective.localPublicManifests.get(eh);
+        if (maybePublic) {
+            return maybePublic[0];
+        }
+        const [manifest, _ts, _author] = await this.zomeProxy.fetchPublicManifest(eh.hash);
+        return manifest;
+    }
+
+
+    /** */
     async fetchPublicManifest(manifestEh: EntryId): Promise<[ParcelManifest, Timestamp, AgentId]> {
+        console.debug("DeliveryZvm.fetchPublicManifest()", manifestEh);
         assertIsDefined(manifestEh);
         const maybeLocal = this._perspective.localPublicManifests.get(manifestEh);
         if (maybeLocal) {
@@ -304,8 +322,9 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** Return base64 data string */
     async fetchParcelData(parcelEh: EntryId): Promise<string> {
+        console.debug("DeliveryZvm.fetchParcelData()", parcelEh);
         assertIsDefined(parcelEh);
-        const [manifest, _ts, _author] = await this.fetchPublicManifest(parcelEh);
+        const manifest = await this.fetchFileInfo(parcelEh);
         let dataB64 = "";
         for (const chunk_eh of manifest.chunks) {
             let chunk = await this.zomeProxy.fetchChunk(chunk_eh);
