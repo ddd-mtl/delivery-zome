@@ -236,14 +236,16 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     }
 
 
-    /** */
+    /**
+     * FIXME: Disabled as for some unknown reason this timeouts once you have stored a couple of big files.
+     */
     async scanProblems(): Promise<void> {
-        // this._perspective.incompleteManifests = (await this.zomeProxy.scanIncompleteManifests())
-        //   .map((eh) => encodeHashToBase64(eh));
-        const [publicOrphans, privateOrphans] = await this.zomeProxy.scanOrphanChunks();
-        const orphanPublicChunks = publicOrphans.map((eh) => new EntryId(eh));
-        const orphanPrivateChunks = privateOrphans.map((eh) => new EntryId(eh));
-        this._perspective.storeOrphans(orphanPublicChunks, orphanPrivateChunks);
+        // // this._perspective.incompleteManifests = (await this.zomeProxy.scanIncompleteManifests())
+        // //   .map((eh) => encodeHashToBase64(eh));
+        // const [publicOrphans, privateOrphans] = await this.zomeProxy.scanOrphanChunks();
+        // const orphanPublicChunks = publicOrphans.map((eh) => new EntryId(eh));
+        // const orphanPrivateChunks = privateOrphans.map((eh) => new EntryId(eh));
+        // this._perspective.storeOrphans(orphanPublicChunks, orphanPrivateChunks);
     }
 
 
