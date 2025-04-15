@@ -17,6 +17,8 @@ pub fn query_all(_: ()) -> ExternResult<()> {
    query_all_ReceptionProof(())?;
    query_all_private_manifests(())?;
    query_all_public_manifests(())?;
+   query_all_private_chunks(())?;
+   query_all_public_chunks(())?;
    Ok(())
 }
 
