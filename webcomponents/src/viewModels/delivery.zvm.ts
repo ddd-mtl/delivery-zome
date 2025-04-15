@@ -102,7 +102,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case DeliveryEntryType.PrivateChunk:
             case DeliveryEntryType.PublicChunk:
                 const chunk = decode(pulse.bytes) as ParcelChunk;
-                //console.log("Received Chunk", chunk, pulse.visibility, pulse.eh);
+                console.debug("Received Chunk", pulse.visibility, pulse.eh);
                 /** Update notice state if Chunk is not from us */
                 const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
                 if (manifestPair) {
@@ -337,17 +337,17 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
 
     /**
-     * Return
+     * Return Notices that don't have state == Received
      *  - unreplieds: notice_eh -> [notice, Timestamp]
      *  - incompletes: notice_eh -> [notice, Timestamp, MissingChunks]
      */
     inbounds(): [EntryIdMap<[DeliveryNotice, Timestamp]>, EntryIdMap<[DeliveryNotice, Timestamp, Set<EntryHashB64>]>] {
-        //console.log("inbounds() allNotices count", Object.entries(this._perspective.notices).length);
+        console.debug("inbounds() allNotices count", Object.entries(this._perspective.notices).length);
         let unreplieds: EntryIdMap<[DeliveryNotice, Timestamp]> = new EntryIdMap();
         let incompletes: EntryIdMap<[DeliveryNotice, Timestamp, Set<EntryHashB64>]> = new EntryIdMap();
         for (const [noticeEh, [notice, ts, state, missingChunks]] of this._perspective.notices.entries()) {
             //const sender = encodeHashToBase64(notice.sender);
-            //console.log("inbounds() state", state);
+            console.debug("inbounds() state", state, missingChunks.size);
             if (NoticeState.Unreplied == state) {
                 unreplieds.set(noticeEh, [notice, ts]);
             }
@@ -363,12 +363,15 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     }
 
 
-    /** Return distrib_ah -> [distrib, Timestamp, recipient -> state] */
+    /**
+     * Return distributions that don't have state == AllAcceptedParcelsReceived | Deleted
+     * distrib_ah -> [distrib, Timestamp, recipient -> state]
+     */
     outbounds(): ActionIdMap<[Distribution, Timestamp, AgentIdMap<DeliveryState>]> {
-        //console.log("outbounds() allDistributions count", Object.entries(this._perspective.distributions).length);
+        console.debug("outbounds() allDistributions count", Object.entries(this._perspective.distributions).length);
         let res: ActionIdMap<[Distribution, Timestamp, AgentIdMap<DeliveryState>]> = new ActionIdMap();
         for (const [distribAh, [distrib, ts, state, deliveryStates]] of this._perspective.distributions.entries()) {
-            //console.log("outbounds() distrib state", state);
+            console.debug("outbounds() distrib state", distribAh.b64, state);
             if (DistributionState.Unsent == state
               || DistributionState.AllNoticesSent == state
               || DistributionState.AllNoticeReceived == state
