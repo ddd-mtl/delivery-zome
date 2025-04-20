@@ -10,7 +10,7 @@ use zome_delivery_types::*;
 fn publish_pending_item(input: CommitPendingItemInput) -> ExternResult<ActionHash> {
    debug!("START");
    std::panic::set_hook(Box::new(zome_panic_hook));
-   let me = agent_info()?.agent_latest_pubkey;
+   let me = agent_info()?.agent_initial_pubkey;
    /// Commit Pending Item
    let pending_item_eh = hash_entry(&input.item)?;
    let maybe_pending_item_ah = create_entry_relaxed(DeliveryEntry::PendingItem(input.item.clone()));

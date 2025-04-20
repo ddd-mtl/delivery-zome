@@ -11,7 +11,7 @@ pub fn post_commit_create_Distribution(sah: &SignedActionHashed, _eh: &EntryHash
     /// Create DeliveryNotice
     let notice = DeliveryNotice {
         distribution_ah: sah.action_address().to_owned(),
-        sender: agent_info()?.agent_latest_pubkey,
+        sender: agent_info()?.agent_initial_pubkey,
         summary: distribution.delivery_summary.clone(),
         sender_summary_signature: distribution.summary_signature.clone(),
     };

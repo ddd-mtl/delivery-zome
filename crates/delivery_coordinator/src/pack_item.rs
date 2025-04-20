@@ -16,7 +16,7 @@ fn create_PendingItem<T>(
 {
    //debug!("create_pending_item() {:?} for {}", kind, snip(&recipient));
    assert!(kind != ItemKind::AppEntryBytes);
-   let me = agent_info()?.agent_latest_pubkey;
+   let me = agent_info()?.agent_initial_pubkey;
    /// Sign content
    let author_signature = sign(me.clone(), content.clone())
       .expect("Should be able to sign with my key");
@@ -24,7 +24,7 @@ fn create_PendingItem<T>(
    let data: XSalsa20Poly1305Data = bincode::serialize(&content).unwrap().into();
    /// Encrypt
    let encrypted_data = ed_25519_x_salsa20_poly1305_encrypt(
-      agent_info()?.agent_latest_pubkey, recipient, data)
+      agent_info()?.agent_initial_pubkey, recipient, data)
      .expect("Encryption should work");
    /// Done
    let item = PendingItem {
@@ -47,7 +47,7 @@ fn create_pending_parcel(
 ) -> ExternResult<PendingItem>
 {
    debug!("create_pending_item() {:?} for {}", kind, snip(&recipient));
-   let me = agent_info()?.agent_latest_pubkey;
+   let me = agent_info()?.agent_initial_pubkey;
    /// Sign content
    let author_signature = sign(me.clone(), entry_bytes.clone())
       .expect("Should be able to sign with my key");
@@ -56,7 +56,7 @@ fn create_pending_parcel(
    trace!("create_pending_parcel() bytes: {:?}", bytes);
    let data: XSalsa20Poly1305Data = XSalsa20Poly1305Data::from(bytes);
    /// Encrypt
-   let encrypted_data = ed_25519_x_salsa20_poly1305_encrypt(agent_info()?.agent_latest_pubkey, recipient, data)?;
+   let encrypted_data = ed_25519_x_salsa20_poly1305_encrypt(agent_info()?.agent_initial_pubkey, recipient, data)?;
    /// Done
    let item = PendingItem {
       kind,

@@ -36,7 +36,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<ActionHas
    };
    debug!("delivery_summary: {:?}", delivery_summary);
    /// Sign summary
-   let summary_signature = sign(agent_info()?.agent_latest_pubkey, delivery_summary.clone())?;
+   let summary_signature = sign(agent_info()?.agent_initial_pubkey, delivery_summary.clone())?;
    /// Create Distribution
    let distribution = Distribution {
       recipients,

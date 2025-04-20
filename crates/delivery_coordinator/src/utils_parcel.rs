@@ -63,7 +63,7 @@ pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
 ///
 pub fn probe_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
     /// Get typed targets
-    let my_agent_eh = EntryHash::from(agent_info()?.agent_latest_pubkey);
+    let my_agent_eh = EntryHash::from(agent_info()?.agent_initial_pubkey);
     let mut pending_pairs = get_typed_from_links::<PendingItem>(link_input(
         my_agent_eh.clone(),
         LinkTypes::Inbox,
@@ -114,7 +114,7 @@ pub fn public_parcels_path() -> TypedPath {
 
 // ///
 // pub fn sign_parcel(parcel: &Parcel) -> ExternResult<Signature> {
-//     let me = agent_info()?.agent_latest_pubkey;
+//     let me = agent_info()?.agent_initial_pubkey;
 //     let signature = sign(me, parcel)?;
 //     Ok(signature)
 // }

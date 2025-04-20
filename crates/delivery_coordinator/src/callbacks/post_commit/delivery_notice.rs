@@ -8,7 +8,7 @@ use crate::*;
 ///
 pub fn post_commit_create_DeliveryNotice(_sah: &SignedActionHashed, eh: &EntryHash, entry: Entry) -> ExternResult<()> {
     debug!("post_commit_DeliveryNotice() {:?}", eh);
-    let me = agent_info()?.agent_latest_pubkey;
+    let me = agent_info()?.agent_initial_pubkey;
     let notice = DeliveryNotice::try_from(entry)?;
     /// Create NoticeAck and pack it
     let signature = sign(me.clone(), notice.summary.clone())?;

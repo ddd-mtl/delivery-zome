@@ -31,7 +31,7 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
    debug!("call_commit_parcel()  zome_name = {}", zome_name);
    /// call_remote
    let response = call_remote(
-      agent_info()?.agent_latest_pubkey,
+      agent_info()?.agent_initial_pubkey,
       DELIVERY_ZOME_NAME, //zome_name,
       "commit_parcel".into(),
       None,

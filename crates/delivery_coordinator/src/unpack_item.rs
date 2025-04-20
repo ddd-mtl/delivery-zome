@@ -12,7 +12,7 @@ pub fn unpack_item<T>(pending_item: PendingItem, from: AgentPubKey) -> ExternRes
    debug!("unpack_item() {:?} from {}", pending_item.kind, snip(&from));
    /// Decrypt
    let maybe_decrypted = ed_25519_x_salsa20_poly1305_decrypt(
-         agent_info()?.agent_latest_pubkey,
+         agent_info()?.agent_initial_pubkey,
          from.clone(),
          pending_item.encrypted_data,
       );
@@ -32,7 +32,7 @@ pub fn unpack_entry(pending_item: PendingItem, from: AgentPubKey) -> ExternResul
    assert!(pending_item.kind == ItemKind::AppEntryBytes);
    /// - Decrypt
    let maybe_decrypted = ed_25519_x_salsa20_poly1305_decrypt(
-            agent_info()?.agent_latest_pubkey,
+            agent_info()?.agent_initial_pubkey,
             from.clone(),
             pending_item.encrypted_data,
          );

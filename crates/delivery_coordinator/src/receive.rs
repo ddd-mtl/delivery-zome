@@ -22,7 +22,7 @@ pub fn receive_delivery_dm(dm: DeliveryMessage) -> ExternResult<DeliveryProtocol
         },
         DeliveryProtocol::ChunkResponse(chunk) => {
             commit_received_chunks(vec![(chunk.clone(), None)])?;
-            let signature = sign(agent_info()?.agent_latest_pubkey, chunk.clone())?;
+            let signature = sign(agent_info()?.agent_initial_pubkey, chunk.clone())?;
             DeliveryProtocol::Success(signature)
         },
         DeliveryProtocol::ParcelRequest(distribution_ah) => {
@@ -33,33 +33,33 @@ pub fn receive_delivery_dm(dm: DeliveryMessage) -> ExternResult<DeliveryProtocol
                 /// Sent by recipient
                 ItemKind::NoticeReply => {
                     let _ = receive_reply(dm.from, pending_item.clone())?;
-                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_initial_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
                 }
                 ItemKind::ReceptionProof => {
                     let _ = receive_reception(dm.from, pending_item.clone())?;
-                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_initial_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
                 }
                 ItemKind::NoticeAck => {
                     let _ = receive_ack(dm.from, pending_item.clone())?;
-                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_initial_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
                 }
                 /// Sent by sender
                 ItemKind::DeliveryNotice => {
                     let notice = receive_notice(dm.from, pending_item.clone())?;
-                    let signature = sign(agent_info()?.agent_latest_pubkey, notice.summary)?;
+                    let signature = sign(agent_info()?.agent_initial_pubkey, notice.summary)?;
                     DeliveryProtocol::Success(signature)
                 },
                 ItemKind::AppEntryBytes => {
                     let _ = receive_parcel(dm.from, pending_item.clone())?;
-                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_initial_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
                 },
                 ItemKind::ParcelChunk => {
                     let _ = receive_chunk(dm.from, pending_item.clone())?;
-                    let signature = sign(agent_info()?.agent_latest_pubkey, pending_item.clone())?;
+                    let signature = sign(agent_info()?.agent_initial_pubkey, pending_item.clone())?;
                     DeliveryProtocol::Success(signature)
                 },
                 //_ => panic!("ItemKind '{:?}' should not be received via DM", item.kind),

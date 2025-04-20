@@ -30,7 +30,7 @@ pub fn call_remote_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<Z
       I: Serialize + Debug,
 {
    return call_remote(
-      agent_info()?.agent_latest_pubkey,
+      agent_info()?.agent_initial_pubkey,
       ZomeName::from(DELIVERY_ZOME_NAME),
       fn_name.to_string().into(),
       None,
