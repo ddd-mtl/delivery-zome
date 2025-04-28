@@ -13,7 +13,7 @@ import {
     ReceptionProof,
     ReplyAck,
 } from "../bindings/delivery.types";
-import {Dictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap, enc64} from "@ddd-qc/lit-happ";
+import {MyDictionary, ActionId, EntryId, AgentId, EntryIdMap, ActionIdMap, AgentIdMap, enc64} from "@ddd-qc/lit-happ";
 import {AgentPubKeyB64, EntryHashB64, Timestamp} from "@holochain/client";
 
 
@@ -48,7 +48,7 @@ export class DeliveryPerspective {
     /** manifest_eh -> ParcelManifest */
     localPublicManifests: EntryIdMap<[ParcelManifest, Timestamp, AgentId]> = new EntryIdMap();
     /** data_hash -> [manifest_eh, isPrivate] */
-    localManifestByData: Dictionary<[EntryId, boolean]> = {};
+    localManifestByData: MyDictionary<[EntryId, boolean]> = {};
     // /** data_hash -> number of chunks on chain */
     // chunkCounts: Dictionary<number>,
     /** -- OUTBOUND -- */

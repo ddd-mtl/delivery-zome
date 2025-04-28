@@ -67,10 +67,10 @@ export class SecretDvm extends DnaViewModel {
   /** Update the perspective accordingly */
   mySignalHandler(signal: Signal): void {
     console.log("secretDvm received signal", signal);
-    if (!(SignalType.App in signal)) {
+    if (SignalType.App != signal.type) {
       return;
     }
-    const appSignal: AppSignal = signal.App;
+    const appSignal: AppSignal = signal.value;
      this.agentDirectoryZvm.zomeProxy.getRegisteredAgents().then((agents) => {
        this._livePeers = agents.map(a => new AgentId(a));
     })
