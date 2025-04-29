@@ -11,10 +11,12 @@
   <body style="margin:0px;background: #FAF1EA;height:100vh;">
     <secret-app></secret-app>
     <script type="module">
-      console.log("   HC_PORT:", process.env.HC_PORT);
-      console.log("ADMIN_PORT:", process.env.ADMIN_PORT);
-      import { SecretApp } from "./";
+      console.log("playground/webapp/index.html");
+      console.log("  - HC_APP_PORT    :", process.env.HC_APP_PORT);
+      console.log("  - HC_ADMIN_PORT  :", process.env.HC_ADMIN_PORT);
+      console.log("  - HAPP_BUILD_MODE:", process.env.HAPP_BUILD_MODE);
+      console.log("  - HAPP_ENV       :", process.env.HAPP_ENV);
     </script>
-
+    <script type="module" src="./src/index.ts"></script>
   </body>
 </html>

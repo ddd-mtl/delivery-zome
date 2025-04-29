@@ -8,7 +8,8 @@
   "private": true,
   "workspaces": [
     "webcomponents",
-    "playground/webapp"
+    "playground/webapp",
+    "playground/we-applet"
   ],
   "scripts": {
     "version"                : "$npm_package_config_bin/hc --version && holochain --version && lair-keystore --version",
@@ -24,17 +25,20 @@
     "build:bindings"         : "bash scripts/ts-bindings.sh",
     "build:webcomponents"    : "npm run build -w @ddd-qc/delivery",
     "build:playground"       : "npm run build -w playground/webapp",
-    "build:all"              : "npm run clean:hc & npm run build:happ && npm run build:bindings && npm run build:webcomponents && npm run build:playground",
+    "build:all"              : "npm run build:happ && npm run build:bindings",
 
-    "devtest"                : "npm run build:all && concurrently \"npm run build:watch -w webcomponents\" \"npm run build:watch -w playground/webapp\" \"npm run start:mem\"",
+    "devtest"                : "npm run clean:hc -w playground/webapp & npm run build:all && concurrently \"npm run build:watch -w webcomponents\" \"npm run start -w playground/webapp\"",
     "watch:webcomponents"    : "npm run build:watch -w webcomponents",
 
-    "start:happ:mem"         : "RUST_LOG=warn echo \"pass\" | $npm_package_config_bin/hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network mem",
-    "start:happ:holo"        : "RUST_LOG=trace WASM_LOG=trace echo \"pass\" | $npm_package_config_bin/hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network --bootstrap https://bootstrap.holo.host/ webrtc wss://signal.holo.host",
-    "start:happ:local"       : "RUST_LOG=trace WASM_LOG=trace echo \"pass\" | $npm_package_config_bin/hc s --piped -f=$ADMIN_PORT generate secret.happ --run=$HC_PORT -a hSecret network --bootstrap http://127.0.0.1:$BOOT_PORT webrtc ws://127.0.0.1:$SIGNAL_PORT",
-    "start"                  : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) HAPP_BUILD_MODE='Debug' concurrently \"npm run watch:webcomponents\" \"npm run start:happ:holo\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
-    "start:local"            : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) HAPP_BUILD_MODE='Debug' concurrently \"npm run watch:webcomponents\" \"npm run start:happ:local\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
-    "start:mem"              : "cross-env HC_PORT=$(port) ADMIN_PORT=$(port) HAPP_BUILD_MODE='Debug' concurrently \"npm run watch:webcomponents\" \"npm run start:happ:mem\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
+    "devtest:we"             : "npm run clean:hc -w playground/we-applet && npm run build:all && HAPP_BUILD_MODE=Debug concurrently \"npm run build -w we-applet\" \"npm run start:we\"",
+    "start:we"               : "npm run devtest -w playground/we-applet",
+    "dist:we   "             : "npm run dist -w we-applet && npm run package:we",
+    "package:we"             : "rm -rf secret-we_applet-ui.zip & cd playground/we-applet/dist && rm -f *.map && bestzip ../../../secret-we_applet-ui.zip * && cd ../../../ && hc web-app pack playground/webhapp.workdir -o secret-we_applet.webhapp",
+
+    "start:happ:holo"        : "RUST_LOG=trace WASM_LOG=trace echo \"pass\" | $npm_package_config_bin/hc s --piped -f=$HC_ADMIN_PORT generate secret.happ --run=$HC_APP_PORT -a hSecret network --bootstrap https://bootstrap.holo.host/ webrtc wss://signal.holo.host",
+    "start:happ:local"       : "RUST_LOG=trace WASM_LOG=trace echo \"pass\" | $npm_package_config_bin/hc s --piped -f=$HC_ADMIN_PORT generate secret.happ --run=$HC_APP_PORT -a hSecret network --bootstrap http://127.0.0.1:$BOOT_PORT webrtc ws://127.0.0.1:$SIGNAL_PORT",
+    "start"                  : "cross-env HC_APP_PORT=$(port) HC_ADMIN_PORT=$(port) HAPP_BUILD_MODE='Debug' concurrently \"npm run watch:webcomponents\" \"npm run start:happ:holo\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
+    "start:local"            : "cross-env HC_APP_PORT=$(port) HC_ADMIN_PORT=$(port) HAPP_BUILD_MODE='Debug' concurrently \"npm run watch:webcomponents\" \"npm run start:happ:local\" \"sleep 5 && npm run start:ui -w playground/webapp\"",
 
     "serve:run"              : "$npm_package_config_bin/hc run-local-services --bootstrap-port $BOOT_PORT --signal-port $SIGNAL_PORT",
     "serve"                  : "cross-env BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"npm run start:happ:local\"",
@@ -44,7 +48,6 @@
     "network"                : "concurrently-repeat \"npm run start\"",
     "network:mem"            : "concurrently-repeat \"npm run start:mem\"",
 
-    "clean:hc"               : "rm .hc*",
     "clean"                  : "bash scripts/clean.sh",
     "clean:npm"              : "bash scripts/clean-npm.sh",
     "clean:all"              : "npm run clean:hc && npm run clean && npm run clean:npm"
@@ -60,8 +63,8 @@
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@ddd-qc/cell-proxy"            : "=0.32.2",
-    "@ddd-qc/lit-happ"              : "=0.32.0",
+    "@ddd-qc/cell-proxy"            : "=0.32.3",
+    "@ddd-qc/lit-happ"              : "=0.32.1",
     "@holochain-open-dev/core-types": "0.7.0",
     "@holochain/client"             : "=0.19.0",
     "@lit/context"                  : "1.0.1",

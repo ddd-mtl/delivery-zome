@@ -1,8 +1,14 @@
 import { html } from "lit";
 import {state, customElement} from "lit/decorators.js";
 import { SecretDvm } from "./viewModels/secret.dvm";
-import {HvmDef, HappElement, Cell} from "@ddd-qc/lit-happ";
-import {DnaDefinition} from "@holochain/client";
+import {HvmDef, HappElement, Cell, BaseRoleName, CloneId, AppProxy, EntryId, DnaViewModel, HCL, DvmDef} from "@ddd-qc/lit-happ";
+// @ts-ignore
+import {AdminWebsocket, AppWebsocket, DnaDefinition, InstalledAppId, ZomeName} from "@holochain/client";
+import {ProfilesDvm} from "@ddd-qc/profiles-dvm";
+import {AppletId, AppletView, GroupProfile, WeaveServices} from "@theweave/api";
+import {ContextProvider, createContext} from "@lit/context";
+
+const weClientContext = createContext<WeaveServices>('weave_client');
 
 
 /**
@@ -12,10 +18,110 @@ import {DnaDefinition} from "@holochain/client";
 export class SecretApp extends HappElement {
 
   /** Ctor */
-  constructor() {
-    const adminUrl = process.env.ADMIN_PORT? new URL(`ws://localhost:${process.env.ADMIN_PORT}`) : undefined;
-    console.log("SecretApp.ctor()", adminUrl);
-    super(Number(process.env.HC_PORT), undefined, adminUrl);
+  // constructor() {
+  //   const adminUrl = process.env.HC_ADMIN_PORT? new URL(`ws://localhost:${process.env.HC_ADMIN_PORT}`) : undefined;
+  //   console.log("SecretApp.ctor()", adminUrl, Number(process.env.HC_APP_PORT));
+  //   super(Number(process.env.HC_APP_PORT), undefined, adminUrl);
+  // }
+
+  /** All arguments should be provided when constructed explicity */
+  // @ts-ignore
+  constructor(appWs?: AppWebsocket, private adminWs?: AdminWebsocket, readonly appId?: InstalledAppId, public _appletView?: AppletView) {
+    /** Figure out arguments for super() */
+    const appPort: number = Number(process.env.HC_APP_PORT);
+    const adminUrl = adminWs
+      ? undefined
+      : process.env.HC_ADMIN_PORT
+        ? new URL(`ws://localhost:${process.env.HC_ADMIN_PORT}`)
+        : undefined;
+    super(appWs? appWs : appPort, appId, adminUrl, 10 * 1000);
+  }
+
+
+
+  /** -- We-applet specifics -- */
+
+  private _weProfilesDvm?: ProfilesDvm;
+  protected _weProvider?: unknown; // FIXME type: ContextProvider<this.getContext()> ?
+
+  public appletId?: AppletId;
+  public groupProfiles?: GroupProfile[];
+  // protected _attachmentsProvider?: unknown;
+
+
+  /**  */
+  static async fromWe(
+    appWs: AppWebsocket,
+    adminWs: AdminWebsocket | undefined,
+    _canAuthorizeZfns: boolean,
+    appId: InstalledAppId,
+    profilesAppId: InstalledAppId,
+    profilesBaseRoleName: BaseRoleName,
+    profilesCloneId: CloneId | undefined,
+    profilesZomeName: ZomeName,
+    profilesProxy: AppProxy,
+    weServices: WeaveServices,
+    thisAppletHash: EntryId,
+    //showEntryOnly?: boolean,
+    appletView: AppletView,
+    groupProfiles: GroupProfile[],
+  ) : Promise<SecretApp> {
+    const app = new SecretApp(appWs, adminWs, appId, appletView);
+    /** Provide it as context */
+    console.log(`\t\tProviding context "${weClientContext}" | in host `, app);
+    app._weProvider = new ContextProvider(app, weClientContext, weServices);
+    app.appletId = thisAppletHash.b64;
+    app.groupProfiles = groupProfiles;
+    /** Create Profiles Dvm from provided AppProxy */
+    console.log("<example-app>.ctor()", profilesProxy);
+    await app.createWeProfilesDvm(profilesProxy, profilesAppId, profilesBaseRoleName, profilesCloneId, profilesZomeName);
+    return app;
+  }
+
+
+  /** Create a Profiles DVM out of a different happ */
+  async createWeProfilesDvm(profilesProxy: AppProxy, profilesAppId: InstalledAppId, profilesBaseRoleName: BaseRoleName,
+                            profilesCloneId: CloneId | undefined,
+                            _profilesZomeName: ZomeName): Promise<void> {
+    const profilesAppInfo = await profilesProxy.appInfo();
+    if (!profilesAppInfo) {
+      throw Promise.reject("Profiles AppInfo not found");
+    }
+    const profilesDef: DvmDef = {ctor: ProfilesDvm, baseRoleName: profilesBaseRoleName, isClonable: false};
+    const cell_infos = Object.values(profilesAppInfo.cell_info);
+    console.log("createProfilesDvm() cell_infos:", cell_infos);
+    /** Create Profiles DVM */
+      //const profilesZvmDef: ZvmDef = [ProfilesZvm, profilesZomeName];
+    const dvm: DnaViewModel = new profilesDef.ctor(this, profilesProxy, new HCL(profilesAppId, profilesBaseRoleName, profilesCloneId), false);
+    console.log("createProfilesDvm() dvm", dvm);
+    console.log("createProfilesDvm() profilesAppInfo", profilesAppInfo);
+    await this.setupWeProfilesDvm(dvm as ProfilesDvm);
+  }
+
+
+  /** */
+  async setupWeProfilesDvm(dvm: ProfilesDvm): Promise<void> {
+    this._weProfilesDvm = dvm as ProfilesDvm;
+    /** Load My profile */
+      //const maybeProfiles = await this._weProfilesDvm.profilesZvm.zomeProxy.getAgentsWithProfile();
+      //const maybeAgents = maybeProfiles.map((eh) => encodeHashToBase64(eh));
+      //console.log("maybeAgents", maybeAgents);
+    const maybeMyProfile = await this._weProfilesDvm.profilesZvm.probeProfile(dvm.profilesZvm.cell.address.agentId.b64);
+    console.log("setupWeProfilesDvm() maybeMyProfile", maybeMyProfile);
+    if (maybeMyProfile) {
+      const maybeLang = maybeMyProfile.fields['lang'];
+      if (maybeLang) {
+        console.log("Setting locale from We Profile", maybeLang);
+        //setLocale(maybeLang);
+      }
+      //this._hasWeProfile = true;
+    }
+    // else {
+    //   /** Create Guest profile */
+    //   const profile = { nickname: "guest_" + Math.floor(Math.random() * 100), fields: {}};
+    //   console.log("setupWeProfilesDvm() createMyProfile", this.filesDvm.profilesZvm.cell.agentId);
+    //   await this.filesDvm.profilesZvm.createMyProfile(profile);
+    // }
   }
 
 
@@ -42,6 +148,7 @@ export class SecretApp extends HappElement {
   /** */
   override async hvmConstructed() {
     console.log("hvmConstructed()")
+    this.appProxy.getCellProxy(this.secret.deliveryZvm.cell.address).setCanThrottle(false);
     /** Probe */
     this._cell = this.secret.cell;
     // TODO: Fix issue: zTasker entry_defs() not found. Maybe confusion with integrity zome name?

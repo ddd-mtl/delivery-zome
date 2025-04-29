@@ -1,0 +1,7 @@
+---
+manifest_version: "1"
+name: Delivery Example
+ui:
+  bundled: "../../secret-we_applet-ui.zip"
+happ_manifest:
+  bundled: "../../secret.happ"

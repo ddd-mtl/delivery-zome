@@ -1,0 +1,34 @@
+{
+  "name": "we-applet",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "tsc"         : "rm -rf out-tsc && tsc",
+    "build"       : "vite dev --clearScreen false",
+    "dist"        : "rm -rf dist && vite build",
+    "devtest"     : "cross-env HC_APP_PORT=$(port) HC_ADMIN_PORT=$(port) HAPP_BUILD_MODE='Debug' concurrently \"npm run new-sandbox\" \"npm run start:ui\"",
+    "devtest:pp"  : "npm run build && cross-env HC_APP_PORT=$(port) HC_ADMIN_PORT=$(port) HAPP_BUILD_MODE='Debug' WE_APPLET_VIEW='ParticipationProtocol' concurrently \"npm run new-sandbox\" \"sleep 7 && npm run start:ui\"",
+    "new-sandbox" : "RUST_LOG=warn WASM_LOG=debug echo \"pass\" | hc s --piped -f=$HC_ADMIN_PORT generate ../../artifacts/playground.happ --run=$HC_APP_PORT -a ExampleApplet network mem",
+    "start:ui"    : "vite dev --port $(port) --clearScreen false",
+    "clean:hc"    : "rm -rf .hc*"
+  },
+  "devDependencies": {
+    "vite": "=4.5.2",
+    "vite-plugin-checker": "=0.5.3",
+    "vite-plugin-dts": "=4.5.3",
+    "vite-plugin-top-level-await": "=1.5.0",
+    "bestzip": "2.2.0",
+    "concurrently": "5.3.0",
+    "deepmerge": "4.2.2",
+    "new-port-cli": "1.0.0",
+    "tslib": "2.4.0",
+    "typescript": "~5.2.0"
+  },
+  "dependencies": {
+    "secret-playground": "file:../webapp",
+    "@holochain-open-dev/profiles": "0.500.0",
+    "@theweave/api": "=0.5.0",
+    "@ddd-qc/we-utils": "=0.32.3",
+    "@mdi/js": "^7.2.0"
+  }
+}

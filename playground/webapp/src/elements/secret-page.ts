@@ -13,6 +13,7 @@ import {DeliveryPerspective} from "@ddd-qc/delivery";
 export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
 
   constructor() {
+    console.log("<secret-page>.ctor()")
     super(SecretDvm.DEFAULT_BASE_ROLE_NAME)
   }
 

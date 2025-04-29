@@ -61,6 +61,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     override async handleLinkPulse(pulse: LinkPulseMat, _from: AgentId): Promise<void> {
+        console.debug("DeliveryZvm.handleLinkPulse()", pulse);
         switch(pulse.link_type) {
             case DeliveryLinkType.PublicParcels: {
                 if (pulse.state == StateChangeType.Delete) {
@@ -91,6 +92,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     override async handleEntryPulse(pulse: EntryPulseMat, _from: AgentId): Promise<void> {
+        console.debug("DeliveryZvm.handleEntryPulse()", pulse);
         switch(pulse.entryType) {
             case DeliveryEntryType.PrivateManifest:
             case DeliveryEntryType.PublicManifest:

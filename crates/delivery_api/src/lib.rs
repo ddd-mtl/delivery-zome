@@ -29,6 +29,7 @@ pub fn call_remote_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<Z
    where
       I: Serialize + Debug,
 {
+   debug!("call_remote_delivery_zome() {}", fn_name);
    return call_remote(
       agent_info()?.agent_initial_pubkey,
       ZomeName::from(DELIVERY_ZOME_NAME),
