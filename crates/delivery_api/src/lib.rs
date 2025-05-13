@@ -10,6 +10,7 @@ pub fn call_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCall
    where
       I: Serialize + Debug,
 {
+   debug!("call_delivery_zome() {} | {}", fn_name, agent_info()?.agent_initial_pubkey);
    let _ = emit_system_signal(SystemSignalProtocol::SelfCallStart {zome_name: DELIVERY_ZOME_NAME.to_owned(), fn_name: fn_name.to_owned()});
    let res = call(
       CallTargetCell::Local,
@@ -20,23 +21,6 @@ pub fn call_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCall
    );
    let _ = emit_system_signal(SystemSignalProtocol::SelfCallEnd {zome_name:DELIVERY_ZOME_NAME.to_owned(), fn_name: fn_name.to_owned(), succeeded: res.is_ok()});
    res
-}
-
-
-/// Helper function for calling the delivery-zome via inter-zome call.
-/// Use when 'call' is not allowed. ex: during a post_commit()
-pub fn call_remote_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCallResponse>
-   where
-      I: Serialize + Debug,
-{
-   debug!("call_remote_delivery_zome() {} | {}", fn_name, agent_info()?.agent_initial_pubkey);
-   return call_remote(
-      agent_info()?.agent_initial_pubkey,
-      ZomeName::from(DELIVERY_ZOME_NAME),
-      fn_name.to_string().into(),
-      None,
-      payload,
-   );
 }
 
 
@@ -57,7 +41,7 @@ pub fn call_delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> E
          //debug!(" >> post_commit() called for a {}", zome_name);
          if zome_name == DELIVERY_INTERGRITY_ZOME_NAME {
             //debug!("its for zome_delivery_integrity {:?}", app_entry_def.entry_index);
-            let response = call_remote_delivery_zome(
+            let response = call_delivery_zome(
                "post_commit",
                vec![signedAction],
             )?;

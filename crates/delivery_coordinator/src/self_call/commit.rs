@@ -30,8 +30,8 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
    let zome_name = dna_info()?.zome_names[notice.summary.parcel_reference.description.zome_index().0 as usize].clone();
    debug!("call_commit_parcel()  zome_name = {}", zome_name);
    /// call_remote
-   let response = call_remote(
-      agent_info()?.agent_initial_pubkey,
+   let response = call(
+      CallTargetCell::Local,
       DELIVERY_ZOME_NAME, //zome_name,
       "commit_parcel".into(),
       None,
