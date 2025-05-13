@@ -29,7 +29,7 @@ pub fn call_remote_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<Z
    where
       I: Serialize + Debug,
 {
-   debug!("call_remote_delivery_zome() {}", fn_name);
+   debug!("call_remote_delivery_zome() {} | {}", fn_name, agent_info()?.agent_initial_pubkey);
    return call_remote(
       agent_info()?.agent_initial_pubkey,
       ZomeName::from(DELIVERY_ZOME_NAME),
@@ -42,6 +42,7 @@ pub fn call_remote_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<Z
 
 ////
 pub fn call_delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> ExternResult<()> {
+   debug!("call_delivery_post_commit() {}", agent_info()?.agent_initial_pubkey);
    let zome_names = dna_info()?.zome_names;
    /// Process each Action and look for an AppEntry from delivery_zome
    for signedAction in signedActionList {

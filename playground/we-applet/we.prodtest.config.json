@@ -39,7 +39,7 @@
       },
       "source": {
         "type": "filesystem",
-        "path": "playground-we_applet.webhapp"
+        "path": "secret-we_applet.webhapp"
       }
     }
   ]

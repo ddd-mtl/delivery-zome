@@ -6,7 +6,7 @@ import {LitElement} from "lit/development";
 
 export const devtestNames: DevTestNames = {
   installed_app_id: "ExampleApplet",
-  provisionedRoleName: "rNamedInteger",
+  provisionedRoleName: "rSecret",
 }
 
 
@@ -19,7 +19,7 @@ export async function setupExampleApplet(): Promise<LitElement> {
     //console.log(`HAPP_ENV defined by process.ENV: "${happEnv}"`);
   } catch (e:any) {
   }
-  console.log("Example we-applet setup() WE_APPLET_VIEW", WE_APPLET_VIEW);
+  console.log("Delivery Example we-applet setup() WE_APPLET_VIEW", WE_APPLET_VIEW);
   switch(WE_APPLET_VIEW) {
     //case ThreadsEntryType.ParticipationProtocol: return setupVinesEntryView();
     //case ThreadsEntryType.ParticipationProtocol: return setupThreadsBlockView();

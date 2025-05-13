@@ -8,7 +8,9 @@ use zome_utils::*;
 pub fn post_commit_create_PublicParcel(_sah: &SignedActionHashed, eh: &EntryHash, _entry: Entry) -> ExternResult<()> {
    debug!("post_commit_create_PublicParcel() create: {}", eh);
    /// Create Anchor
+   debug!("post_commit_create_PublicParcel() `{}` | `{}`", zome_info()?.name, agent_info()?.agent_initial_pubkey);
    let response = call_self("link_public_parcel", eh.clone())?;
+   debug!("post_commit_create_PublicParcel() response: {}", response);
    let _ah = decode_response::<ActionHash>(response)?;
    /// Done
    Ok(())
