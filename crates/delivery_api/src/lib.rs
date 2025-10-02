@@ -11,7 +11,7 @@ pub fn call_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCall
       I: Serialize + Debug,
 {
    debug!("call_delivery_zome() {} | {}", fn_name, agent_info()?.agent_initial_pubkey);
-   let _ = emit_system_signal(SystemSignalProtocol::SelfCallStart {zome_name: DELIVERY_ZOME_NAME.to_owned(), fn_name: fn_name.to_owned()});
+   let _ = emit_system_signal(SystemAttestation::SelfCallStart {zome_name: DELIVERY_ZOME_NAME.to_owned(), fn_name: fn_name.to_owned()});
    let res = call(
       CallTargetCell::Local,
       ZomeName::from(DELIVERY_ZOME_NAME),
@@ -19,7 +19,7 @@ pub fn call_delivery_zome<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCall
       None,
       payload,
    );
-   let _ = emit_system_signal(SystemSignalProtocol::SelfCallEnd {zome_name:DELIVERY_ZOME_NAME.to_owned(), fn_name: fn_name.to_owned(), succeeded: res.is_ok()});
+   let _ = emit_system_signal(SystemAttestation::SelfCallEnd {zome_name:DELIVERY_ZOME_NAME.to_owned(), fn_name: fn_name.to_owned(), succeeded: res.is_ok()});
    res
 }
 

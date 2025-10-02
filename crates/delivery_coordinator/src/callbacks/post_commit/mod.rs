@@ -37,7 +37,7 @@ fn post_commit(signedActionList: Vec<SignedActionHashed>) {
       error!("<< delivery_post_commit() failed: {:?}", e);
    } else {
       debug!("<< delivery_post_commit() SUCCEEDED");
-      emit_post_commit::<DeliveryEntry, LinkTypes>(filtered);
+      attest_post_commit::<DeliveryEntry, LinkTypes>(filtered);
    }
 }
 

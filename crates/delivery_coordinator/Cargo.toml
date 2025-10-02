@@ -14,6 +14,7 @@ workspace = true
 bincode = "1.3"
 
 serde.workspace = true
+holochain_serialized_bytes.workspace = true
 hdk.workspace = true
 
 zome_utils.workspace = true

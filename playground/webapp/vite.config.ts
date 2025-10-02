@@ -4,6 +4,7 @@ import dts from 'vite-plugin-dts';
 import topLevelAwait from "vite-plugin-top-level-await";
 //import { viteStaticCopy } from 'vite-plugin-static-copy'
 
+console.log("vite: process.env.UI_PORT: ", process.env.UI_PORT);
 console.log("vite: process.env.HC_APP_PORT: ", process.env.HC_APP_PORT);
 console.log("vite: process.env.HAPP_BUILD_MODE: ", process.env.HAPP_BUILD_MODE);
 const HAPP_BUILD_MODE = process.env.HAPP_BUILD_MODE? process.env.HAPP_BUILD_MODE : "Release";
@@ -40,15 +41,12 @@ export default defineConfig({
     emptyOutDir: true,
     minify: false,
     outDir: DIST_FOLDER,
-    rollupOptions: {
-      output: {
-        entryFileNames: "index.js",
-        //chunkFileNames: `assets/index-chunk.js`,
-        assetFileNames: "assets[extname]",
-      },
-    }
   },
   server: {
-    open: true // This will open the browser automatically
+    open: true,
+    watch: {
+      usePolling: true,
+      interval: 1000 // Check for changes every second
+    }
   }
 });

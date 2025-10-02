@@ -10,5 +10,5 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: ../../secret.dna
+      bundled: ../../artifacts/secret.dna
       clone_limit: 0

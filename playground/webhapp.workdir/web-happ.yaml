@@ -2,6 +2,6 @@
 manifest_version: "1"
 name: Delivery Example
 ui:
-  bundled: "../../secret-we_applet-ui.zip"
+  bundled: "../../artifacts/webapp-ui.zip"
 happ_manifest:
-  bundled: "../../secret.happ"
+  bundled: "../../artifacts/secret.happ"
