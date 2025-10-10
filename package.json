@@ -1,7 +1,8 @@
 {
   "name": "delivery-root",
   "config": {
-    "hc_version": "0.5.0",
+    "hc_version": "0.5.6",
+    "k2_version"  : "0.1.5",
     "zits_version": "1.16.7",
     "bin": "bin"
   },
@@ -14,10 +15,9 @@
   "scripts": {
     "version"                : "$npm_package_config_bin/hc --version && holochain --version && lair-keystore --version",
     "postinstall"            : "",
-    "install:submodules"     : "bash scripts/install-submodules.sh $npm_package_config_hc_version",
-    "install:rust"           : "bash submodules/hc-prebuilt/install-rust.sh",
-    "install:hc"             : "bash submodules/hc-prebuilt/install-hc-cli.sh $npm_package_config_bin $npm_package_config_hc_version",
-    "install:hash-zome"      : "bash submodules/hc-prebuilt/install-hash-zome.sh $npm_package_config_bin",
+    "install:rust"           : "bash ./node_modules/@ddd-qc/hc-prebuilt/install-rust.sh",
+    "install:hc"             : "bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh holochain $npm_package_config_bin $npm_package_config_hc_version && bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh hc $npm_package_config_bin $npm_package_config_hc_version && bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh kitsune2-bootstrap-srv $npm_package_config_bin $npm_package_config_k2_version",
+    "install:hash-zome"      : "bash ./node_modules/@ddd-qc/hc-prebuilt/download-hash-zome.sh $npm_package_config_bin",
     "install:zits"           : "cargo install zits --version $npm_package_config_zits_version",
 
     "build:wasm"             : "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
@@ -53,6 +53,7 @@
     "clean:all"              : "npm run clean:hc && npm run clean && npm run clean:npm"
   },
   "devDependencies": {
+    "@ddd-qc/hc-prebuilt": "0.506.1",
     "@theweave/cli": "0.14.4",
     "bestzip": "^2.2.0",
     "concurrently": "^6.2.1",
@@ -63,8 +64,8 @@
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@ddd-qc/cell-proxy"            : "=0.32.6",
-    "@ddd-qc/lit-happ"              : "=0.32.6",
+    "@ddd-qc/cell-proxy"            : "=0.32.8",
+    "@ddd-qc/lit-happ"              : "=0.32.8",
     "@holochain-open-dev/core-types": "0.7.0",
     "@holochain/client"             : "=0.19.0",
     "@lit/context"                  : "1.0.1",

@@ -1,0 +1,55 @@
+name: build-webhapps
+
+on:
+  workflow_call:
+
+jobs:
+  build-webhapps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # Install npm dependencies
+      - name: Install npm dependencies
+        shell: bash
+        run: |
+          npm install
+      # install rust tools
+      - name: install rust tools
+        shell: bash
+        run: |
+          npm run install:rust
+      # install hc tool
+      - name: Install hc tool
+        shell: bash
+        run: |
+          npm run install:hc
+      # Install hash-zome
+      - name: Install hash-zome
+        run: |
+          npm run install:hash-zome
+      # Build happ
+      - name: Build happ
+        shell: bash
+        run: |
+          CARGO_NET_GIT_FETCH_WITH_CLI=true npm run build:happ
+      # Localize
+      #- name: Localize
+      #  run: |
+      #    npm run extract:localize
+      #    npm run build:localize
+      # Build webcomponents
+      - name: Build webcomponents
+        run: |
+          npm run build:webcomponents
+      # Regroup artifacts
+      - name: Regroup artifacts
+        run: |
+          cp target/wasm32-unknown-unknown/release/*.wasm ./artifacts
+      # List uploaded files
+      - name: List uploaded files
+        run: ls -R
+        working-directory: ./artifacts
+      # "upload" artifacts
+      - uses: actions/upload-artifact@master
+        with:
+          path: artifacts
