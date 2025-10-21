@@ -85,7 +85,8 @@ import {EntryDefIndex} from './deps.types';
 
 import {ZomeProxy} from '@ddd-qc/lit-happ';
 import {deliveryFunctionNames} from './delivery.fn';
-import {DeliveryUnitEnum, DeliveryLinkType} from './delivery.integrity';
+import {DeliveryUnitEnum} from './delivery.integrity';
+import {DeliveryLinkType} from './delivery.integrity';
 
 /**
  *

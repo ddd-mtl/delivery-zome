@@ -19,13 +19,12 @@ import {
   DeliveryZvm,
   ParcelKindType,
   ParcelManifest,
-  ParcelReference, PublicParcelRecordMat,
+  ParcelReference, PublicParcelRecordMat, DeliveryLinkType,
 } from "@ddd-qc/delivery";
 import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
 import {SignalCb, Signal, SignalType, AppSignal} from "@holochain/client";
 import {decode} from "@msgpack/msgpack";
-import {DeliveryLinkType} from "@ddd-qc/delivery/dist/bindings/delivery.integrity";
 
 
 /** */

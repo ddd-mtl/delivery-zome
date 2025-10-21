@@ -85,7 +85,8 @@ export type EntryDefIndex = number;
 
 import {ZomeProxy} from '@ddd-qc/lit-happ';
 import {secretFunctionNames} from './secret.fn';
-import {SecretUnitEnum, SecretLinkType} from './secret.integrity';
+import {SecretUnitEnum} from './secret.integrity';
+import {SecretLinkType} from './secret.integrity';
 
 /**
  *

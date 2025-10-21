@@ -7,5 +7,5 @@ rm package-lock.json
 rm -rf webcomponents/node_modules
 rm webcomponents/package-lock.json
 # PLAYGROUND WEB-APP
-rm -rf playground/webapp/node_modules
+rm -rf /playground/webapp/node_modules
 rm playground/webapp/package-lock.json

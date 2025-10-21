@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
 import dts from 'vite-plugin-dts';
 import topLevelAwait from "vite-plugin-top-level-await";
+import path from "path";
 //import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 console.log("vite: process.env.UI_PORT: ", process.env.UI_PORT);
@@ -17,7 +18,11 @@ const DIST_FOLDER = "dist"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  resolve: {},
+  resolve: {
+    alias: {
+      '@ddd-qc/delivery': path.resolve(__dirname, '../../webcomponents/src')
+    }
+  },
   plugins: [
     checker({
       typescript: true,

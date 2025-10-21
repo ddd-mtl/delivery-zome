@@ -41,6 +41,14 @@ jobs:
       - name: Build webcomponents
         run: |
           npm run build:webcomponents
+      # Build playground
+      - name: Build playground
+        run: |
+          npm run build:playground
+      # Build playground we-applet
+      - name: Build playground we-applet
+        run: |
+          npm run build:playground
       # Regroup artifacts
       - name: Regroup artifacts
         run: |

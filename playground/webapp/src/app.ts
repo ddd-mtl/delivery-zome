@@ -7,6 +7,7 @@ import {AdminWebsocket, AppWebsocket, DnaDefinition, InstalledAppId, ZomeName} f
 import {ProfilesDvm} from "@ddd-qc/profiles-dvm";
 import {AppletId, AppletView, GroupProfile, WeaveServices} from "@theweave/api";
 import {ContextProvider, createContext} from "@lit/context";
+import {HC_ADMIN_PORT, HC_APP_PORT} from "./globals";
 
 const weClientContext = createContext<WeaveServices>('weave_client');
 
@@ -24,15 +25,16 @@ export class SecretApp extends HappElement {
   //   super(Number(process.env.HC_APP_PORT), undefined, adminUrl);
   // }
 
-  /** All arguments should be provided when constructed explicity */
+  /** All arguments should be provided when constructed explicitly */
   // @ts-ignore
   constructor(appWs?: AppWebsocket, private adminWs?: AdminWebsocket, readonly appId?: InstalledAppId, public _appletView?: AppletView) {
+    console.log("PlaygroundApp.ctor()", HC_ADMIN_PORT, HC_APP_PORT, appWs, adminWs, appId);
     /** Figure out arguments for super() */
-    const appPort: number = Number(process.env.HC_APP_PORT);
+    const appPort: number = Number(HC_APP_PORT);
     const adminUrl = adminWs
       ? undefined
-      : process.env.HC_ADMIN_PORT
-        ? new URL(`ws://localhost:${process.env.HC_ADMIN_PORT}`)
+      : HC_ADMIN_PORT
+        ? new URL(`ws://localhost:${HC_ADMIN_PORT}`)
         : undefined;
     super(appWs? appWs : appPort, appId, adminUrl, 10 * 1000);
   }
