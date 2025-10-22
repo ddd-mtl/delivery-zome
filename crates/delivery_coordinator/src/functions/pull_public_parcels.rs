@@ -26,13 +26,13 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
   std::panic::set_hook(Box::new(zome_panic_hook));
   let anchor_eh = public_parcels_path().path_entry_hash()?;
   debug!("pull_public_parcels_details() {}", anchor_eh);
-  let links = get_link_details(anchor_eh, LinkTypes::PublicParcels, None, GetOptions::network())?;
+  let links = get_links_details(LinkQuery::try_new(anchor_eh, LinkTypes::PublicParcels).unwrap(), GetStrategy::default())?;
   //debug!(" pull_public_parcels_details() get_link_details = {}", links.clone().into_inner().len());
   debug!("   links count: {}", links.clone().into_inner().len());
   let mut pulses: Vec<ZomeSignalProtocol> = Vec::new();
   for (create_sah, maybe_deletes) in links.into_inner() {
     let Action::CreateLink(create_link) = create_sah.hashed.content
-      else { panic!("get_link_details() should return a CreateLink Action") };
+      else { panic!("get_links_details() should return a CreateLink Action") };
     let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
     let Ok(Some(Details::Entry(details))) = get_details(pr_eh.clone(), GetOptions::network())
       else { continue };
@@ -48,7 +48,7 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
     pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
     if maybe_deletes.len() > 0 {
       let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
-        else { panic!("get_link_details() should return a DeleteLink Action") };
+        else { panic!("get_links_details() should return a DeleteLink Action") };
       //let second = (EntryPulse {hash: pr_eh.clone(), author: delete.author, ts: delete.timestamp, state: EntryStateChange::Deleted}, kind);
       let entry_pulse = EntryPulse::try_from_delete_record(create_sah.hashed, details.entry, ValidatedBy::Network, false)?;
       pulses.push(ZomeSignalProtocol::Entry(entry_pulse));

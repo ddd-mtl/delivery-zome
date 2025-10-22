@@ -107,9 +107,7 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
          return zome_error!("CreateLink not found.");
       }
       /// Delete
-      let input = DeleteLinkInput::new(link_ah,
-                                       ChainTopOrdering::Relaxed,
-      );
+      let input = DeleteLinkInput::new(link_ah, GetOptions::default(), ChainTopOrdering::Relaxed);
       let _hh = HDK.with(|h| {
          h.borrow()
           .delete_link(input)

@@ -1,5 +1,5 @@
 ---
-manifest_version: "1"
+manifest_version: "0"
 name: dSecret
 integrity:
   properties:
@@ -9,22 +9,22 @@ integrity:
     minParcelNameLength: 0
   zomes:
     - name: secret_integrity
-      bundled: ../../target/wasm32-unknown-unknown/release/zome_secret_integrity.wasm
+      path: ../../target/wasm32-unknown-unknown/release/zome_secret_integrity.wasm
     - name: zDeliveryIntegrity
-      bundled: ../../target/wasm32-unknown-unknown/release/zome_delivery_integrity.wasm
+      path: ../../target/wasm32-unknown-unknown/release/zome_delivery_integrity.wasm
     - name: agent_directory_integrity
-      bundled: ../../target/wasm32-unknown-unknown/release/agent_directory_integrity.wasm
+      path: ../../target/wasm32-unknown-unknown/release/agent_directory_integrity.wasm
 coordinator:
   zomes:
     - name: zSecret
-      bundled: ../../target/wasm32-unknown-unknown/release/zome_secret.wasm
+      path: ../../target/wasm32-unknown-unknown/release/zome_secret.wasm
       dependencies:
         - name: secret_integrity
     - name: zDelivery
-      bundled: ../../target/wasm32-unknown-unknown/release/delivery.wasm
+      path: ../../target/wasm32-unknown-unknown/release/delivery.wasm
       dependencies:
         - name: zDeliveryIntegrity
     - name: zAgentDirectory
-      bundled: ../../target/wasm32-unknown-unknown/release/agent_directory.wasm
+      path: ../../target/wasm32-unknown-unknown/release/agent_directory.wasm
       dependencies:
         - name: agent_directory_integrity

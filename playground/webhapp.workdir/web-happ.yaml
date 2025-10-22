@@ -1,7 +1,7 @@
 ---
-manifest_version: "1"
+manifest_version: "0"
 name: Delivery Example
 ui:
-  bundled: "../../artifacts/webapp-ui.zip"
-happ_manifest:
-  bundled: "../../artifacts/secret.happ"
+  path: "../../artifacts/webapp-ui.zip"
+happ:
+  path: "../../artifacts/secret.happ"

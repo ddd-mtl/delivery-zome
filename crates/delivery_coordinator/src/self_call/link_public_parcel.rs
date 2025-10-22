@@ -27,13 +27,13 @@ pub fn unlink_public_parcel(pp_eh: EntryHash) -> ExternResult<ActionHash> {
    path.ensure()?;
    let anchor_eh = path.path_entry_hash()?;
    debug!("unlink_public_parcel() {} | {}", pp_eh, anchor_eh);
-   let links = get_link_details(anchor_eh, LinkTypes::PublicParcels, None, GetOptions::network())?;
+   let links = get_links_details(LinkQuery::try_new(anchor_eh, LinkTypes::PublicParcels).unwrap(), GetStrategy::default())?;
    for (create_sah, maybe_deletes) in links.into_inner() {
       if !maybe_deletes.is_empty() {
          continue;
       }
       let Action::CreateLink(create) = create_sah.hashed.content
-        else { return zome_error!("get_link_details() should return a CreateLink Action")};
+        else { return zome_error!("get_links_details() should return a CreateLink Action")};
       let target = EntryHash::try_from(create.target_address).unwrap();
       if target == pp_eh {
          return delete_link_relaxed(create_sah.hashed.hash);
