@@ -1,7 +1,7 @@
 {
   "name": "delivery-root",
   "config": {
-    "hc_version": "0.6.0",
+    "hc_version": "0.6.0-dev.28",
     "k2_version": "0.2.17",
     "zits_version": "1.17.0",
     "bin": "bin"
@@ -13,12 +13,12 @@
     "playground/we-applet"
   ],
   "scripts": {
-    "postinstall"            : "mkdir -p artifacts",
-    "install:rust"           : "bash ./node_modules/@ddd-qc/hc-prebuilt/install-rust.sh",
-    "install:hc"             : "bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh holochain $npm_package_config_bin $npm_package_config_hc_version && bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh hc $npm_package_config_bin $npm_package_config_hc_version && bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh kitsune2-bootstrap-srv $npm_package_config_bin $npm_package_config_k2_version",
-    "install:hash-zome"      : "bash ./node_modules/@ddd-qc/hc-prebuilt/download-hash-zome.sh $npm_package_config_bin",
-    "install:zits"           : "cargo install zits --version $npm_package_config_zits_version",
-    "version"                : "$npm_package_config_bin/hc --version & $npm_package_config_bin/kitsune2-bootstrap-srv --version & $npm_package_config_bin/holochain --version & zits --version & lair-keystore --version & echo \"Typescript $(tsc --version)\" & echo \"Weave $(weave --version)\"",
+    "postinstall"         : "mkdir -p artifacts && mkdir -p $npm_package_config_bin",
+    "install:rust"        : "bash ./node_modules/@ddd-qc/hc-prebuilt/install-rust.sh",
+    "install:hc"          : "bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh holochain $npm_package_config_bin $npm_package_config_hc_version && bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh hc $npm_package_config_bin $npm_package_config_hc_version && bash ./node_modules/@ddd-qc/hc-prebuilt/download-hc.sh kitsune2-bootstrap-srv $npm_package_config_bin $npm_package_config_k2_version",
+    "install:hash-zome"   : "bash ./node_modules/@ddd-qc/hc-prebuilt/download-hash-zome.sh $npm_package_config_bin",
+    "install:zits"        : "cargo install zits --version $npm_package_config_zits_version",
+    "version"             : "$npm_package_config_bin/hc --version & $npm_package_config_bin/kitsune2-bootstrap-srv --version & $npm_package_config_bin/holochain --version & zits --version & lair-keystore --version & echo \"Typescript $(tsc --version)\" & echo \"Weave $(weave --version)\"",
 
     "build:wasm"          : "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
     "build:happ"          : "npm run build:wasm && bash scripts/pack-happ.sh && bash scripts/ts-bindings.sh",
