@@ -66,7 +66,7 @@ pub fn probe_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(
     let my_agent_eh = EntryHash::from(agent_info()?.agent_initial_pubkey);
     let mut pending_pairs = get_typed_from_links::<PendingItem>(link_input(
         my_agent_eh.clone(),
-        LinkTypes::Inbox,
+        LinkTypes::Inbox.try_into_filter().unwrap(),
         None,
     ))?;
     /// Filter
