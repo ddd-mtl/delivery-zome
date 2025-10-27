@@ -189,14 +189,21 @@ export class SecretApp extends HappElement {
     /* render all */
     return html`
       <cell-context .cell="${this._cell}">
+          <div style="display: flex; flex-direction: row; gap: 5px; padding: 5px;">
+          <view-cell-context></view-cell-context>          
+          <span> - <abbr title=${this.secret.cell.address.agentId.b64}>Agent</abbr>: <b>${this.secret.cell.address.agentId.short}</b></span>
+              </div>
+          <div style="display: flex; flex-direction: row;  padding: 5px;">
+          <div>
+            <input type="button" value="Secret" @click=${() => {this._pageDisplayIndex = 0; this.requestUpdate()}} >
+            <input type="button" value="Delivery" @click=${() => {this._pageDisplayIndex = 1; this.requestUpdate()}} >          
+            <input type="button" value="Agent Directory" @click=${() => {this._pageDisplayIndex = 2; this.requestUpdate()}} >
+          </div>
+              <div style="flex: 1"></div>
         <div>
-          <view-cell-context></view-cell-context>
-          <input type="button" value="Secret" @click=${() => {this._pageDisplayIndex = 0; this.requestUpdate()}} >
-          <input type="button" value="Delivery" @click=${() => {this._pageDisplayIndex = 1; this.requestUpdate()}} >          
-          <input type="button" value="Agent Directory" @click=${() => {this._pageDisplayIndex = 2; this.requestUpdate()}} >
+          <button type="button" @click=${this.refresh}>Refresh</button>
         </div>
-        <button type="button" @click=${this.refresh}>Refresh</button>
-        <span><abbr title=${this.secret.cell.address.agentId.b64}>Agent</abbr>: <b>${this.secret.cell.address.agentId.short}</b></span>
+          </div>
         <!--<dvm-inspect .dnaViewModel=${this.secret}></dvm-inspect> -->          
         <hr class="solid">      
         ${page}
