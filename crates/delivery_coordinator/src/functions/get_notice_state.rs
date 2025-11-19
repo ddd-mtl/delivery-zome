@@ -10,7 +10,7 @@ pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, Vec<
    std::panic::set_hook(Box::new(zome_panic_hook));
    //debug!("START");
    /// Make sure EntryHash is correct
-   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone())?;
+   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone(), GetStrategy::Network)?;
    /// look for reply
    let maybe_reply = query_NoticeReply(notice_eh.clone())?;
    if maybe_reply.is_none() {
@@ -29,7 +29,10 @@ pub fn get_notice_state(notice_eh: EntryHash) -> ExternResult<(NoticeState, Vec<
    }
    /// If its a manifest, see if we have it and how many chunks
    if let ParcelKind::Manifest(_) = notice.summary.parcel_reference.description.kind_info {
-      let maybe_manifest = get_typed_from_eh::<ParcelManifest>(notice.summary.parcel_reference.parcel_eh.clone());
+      let maybe_manifest = get_typed_from_eh::<ParcelManifest>(
+         notice.summary.parcel_reference.parcel_eh.clone(),
+         GetStrategy::Network,
+      );
       if maybe_manifest.is_err() {
          return Ok((NoticeState::Accepted, vec![]));
       }

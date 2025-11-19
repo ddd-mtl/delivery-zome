@@ -43,7 +43,7 @@ pub fn find_notice_with_parcel(parcel_eh: EntryHash) -> ExternResult<Vec<Deliver
 /// 100 = all chunks received
 pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
     /// Get ParcelManifest
-    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh)?;
+    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh, GetStrategy::Network)?;
     let len = manifest.chunks.len();
     let chunks_set: HashSet<EntryHash> = HashSet::from_iter(manifest.chunks);
     /// Get all Create ParcelChunk Elements with query
@@ -61,14 +61,17 @@ pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
 
 
 ///
-pub fn probe_all_inbox_items(maybe_kind: Option<ItemKind>) -> ExternResult<Vec<(PendingItem, Link)>> {
+pub fn probe_all_inbox_items(maybe_kind: Option<ItemKind>, strategy: GetStrategy) -> ExternResult<Vec<(PendingItem, Link)>> {
     /// Get typed targets
     let my_agent_eh = EntryHash::from(agent_info()?.agent_initial_pubkey);
-    let mut pending_pairs = get_typed_from_links::<PendingItem>(link_input(
+    let mut pending_pairs = get_typed_from_links::<PendingItem>(
+       link_input(
         my_agent_eh.clone(),
         LinkTypes::Inbox.try_into_filter().unwrap(),
         None,
-    ))?;
+      ),
+      strategy,
+    )?;
     /// Filter
     if maybe_kind.is_some() {
         let kind = maybe_kind.unwrap();

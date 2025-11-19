@@ -22,6 +22,7 @@ pub fn post_commit_create_PrivateManifest(_sah: &SignedActionHashed, eh: &EntryH
       let input = FetchChunkInput {
          chunk_eh,
          notice_eh: notice_eh.clone(),
+         get_local_only: true,
       };
       let response = call_self("pull_chunk", input)?;
       let output: Option<(ParcelChunk, Option<Link>)> = decode_response(response)?;

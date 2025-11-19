@@ -226,14 +226,14 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** -- Init -- */
 
     /** */
-    override async initializePerspectiveOffline(): Promise<void> {
+    override async initializePerspectiveFromLocal(): Promise<void> {
         await this.zomeProxy.queryAll();
         await this.scanProblems();
     }
 
 
     /** */
-    override async initializePerspectiveOnline(): Promise<void> {
+    override async initializePerspectiveFromNetwork(): Promise<void> {
         await this.probeDht();
     }
 
@@ -261,7 +261,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         const missingChunks = await this.zomeProxy.determineMissingChunks(notice[0].summary.parcel_reference.parcel_eh);
         const notice_eh = noticeEh.hash;
         for (const chunk_eh of missingChunks) {
-            this.zomeProxy.pullChunk({notice_eh, chunk_eh});
+            this.zomeProxy.pullChunk({notice_eh, chunk_eh, get_local_only: false});
         }
     }
 
@@ -422,8 +422,8 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** -- API -- */
 
     /** */
-    async getDeliveryState(distribAh: ActionId, recipient: AgentId): Promise<DeliveryState> {
-        return this.zomeProxy.getDeliveryState({distribution_ah: distribAh.hash, recipient: recipient.hash});
+    async getDeliveryState(distribAh: ActionId, recipient: AgentId, local_only: boolean): Promise<DeliveryState> {
+        return this.zomeProxy.getDeliveryState({distribution_ah: distribAh.hash, recipient: recipient.hash, local_only});
     }
 
 

@@ -18,12 +18,16 @@ pub struct FullDistributionState {
 pub fn get_distribution_state(distribution_ah: ActionHash) -> ExternResult<FullDistributionState> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("distribution_ah: {}", distribution_ah.clone());
-   let (_eh, distribution) = get_typed_from_ah::<Distribution>(distribution_ah.clone())?;
+   let (_eh, distribution) = get_typed_from_ah::<Distribution>(distribution_ah.clone(), GetStrategy::Network)?;
    /// Get delivery state for each recipient
    //let mut deliveries: HashMap<AgentPubKey, DeliveryState> = HashMap::new();
    let mut delivery_states: Vec<DeliveryState> = Vec::new();
    for recipient in distribution.recipients {
-      let state = get_delivery_state(GetDeliveryStateInput{ distribution_ah: distribution_ah.clone(), recipient})?;
+      let state = get_delivery_state(GetDeliveryStateInput {
+         distribution_ah: distribution_ah.clone(),
+         recipient,
+         local_only: false,
+      })?;
       delivery_states.push( state);
    }
    let distribution_state = determine_distribution_state(&delivery_states);

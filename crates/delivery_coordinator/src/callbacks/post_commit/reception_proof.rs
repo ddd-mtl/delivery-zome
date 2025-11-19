@@ -8,7 +8,7 @@ pub fn post_commit_create_ReceptionProof(_sah: &SignedActionHashed, eh: &EntryHa
    debug!("post_commit_ReceptionProof() {:?}", eh);
    let reception_proof = ReceptionProof::try_from(entry)?;
    /// Get DeliveryNotice
-   let notice: DeliveryNotice = get_typed_from_eh(reception_proof.notice_eh.clone())?;
+   let notice: DeliveryNotice = get_typed_from_eh(reception_proof.notice_eh.clone(), GetStrategy::Local)?;
    /// Create PendingItem
    let pending_item = pack_reception_proof(
       reception_proof.clone(),

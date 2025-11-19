@@ -9,7 +9,7 @@ pub fn post_commit_create_NoticeReply(_sah: &SignedActionHashed, eh: &EntryHash,
     debug!("post_commit_NoticeReply() {:?}", eh);
     let reply = NoticeReply::try_from(entry)?;
     /// Get DeliveryNotice
-    let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh.clone())?;
+    let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh.clone(), GetStrategy::Local)?;
     /// Create PendingItem from NoticeReply
     let pending_item = pack_reply(reply.clone(), notice.distribution_ah.clone(), notice.sender.clone())?;
     /// Send it to sender

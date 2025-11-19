@@ -24,7 +24,7 @@ pub fn distribute_parcel(input: DistributeParcelInput) -> ExternResult<ActionHas
       parcel_reference.description.size = match input.parcel_reference.description.kind_info.clone() {
          ParcelKind::AppEntry(_) => get_app_entry_size(input.parcel_reference.parcel_eh.clone())? as u64,
          ParcelKind::Manifest(_) => {
-            let manifest: ParcelManifest = get_typed_from_eh(input.parcel_reference.parcel_eh.clone())?;
+            let manifest: ParcelManifest = get_typed_from_eh(input.parcel_reference.parcel_eh.clone(), GetStrategy::Local)?;
             manifest.description.size
          }
       };

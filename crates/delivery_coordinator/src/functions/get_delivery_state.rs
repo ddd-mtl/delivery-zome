@@ -11,7 +11,8 @@ pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<Delivery
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("recipient: {} || distrib: {}", input.recipient, input.distribution_ah);
    /// Make sure input is correct
-   let (_eh, _distribution) = get_typed_from_ah::<Distribution>(input.distribution_ah.clone())?;
+   let strategy = if input.local_only { GetStrategy::Local } else { GetStrategy::Network };
+   let (_eh, _distribution) = get_typed_from_ah::<Distribution>(input.distribution_ah.clone(), strategy)?;
    /// Look for ReceptionAck
    let receipts = query_ReceptionAck(
       Some(input.distribution_ah.clone()),
@@ -61,12 +62,15 @@ pub fn get_delivery_state(input: GetDeliveryStateInput) -> ExternResult<Delivery
 ///
 pub fn find_PendingItem(distribution_ah: ActionHash, recipient: AgentPubKey, kind: ItemKind)
    -> ExternResult<Option<PendingItem>> {
-   let mut pairs: Vec<(PendingItem, Link)> = get_typed_from_links( link_input_full(
+   let mut pairs: Vec<(PendingItem, Link)> = get_typed_from_links(
+      link_input_full(
        AnyLinkableHash::from(distribution_ah),
       LinkTypes::Pendings.try_into_filter()?,
       Some(LinkTag::from(recipient.as_ref().to_vec())),
       None, None, None,
-   ))?;
+   ),
+   GetStrategy::Network,
+   )?;
    pairs.retain(|pair| pair.0.kind == kind);
    /// Search through results
    for pair in pairs {

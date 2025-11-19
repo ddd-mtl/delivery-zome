@@ -15,19 +15,20 @@ fn pull_chunk(input: FetchChunkInput) -> ExternResult<Option<(ParcelChunk, Optio
    trace!(" pull_chunk() {:?}", input);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get DeliveryNotice
-   let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone())?;
+   let strategy = if input.get_local_only { GetStrategy::Local } else { GetStrategy::Network };
+   let notice: DeliveryNotice = get_typed_from_eh(input.notice_eh.clone(), strategy)?;
    /// Look for Chunk
-   let maybe_chunk = pull_chunk_inner(input.chunk_eh.clone(), notice)?;
+   let maybe_chunk = pull_chunk_inner(input.chunk_eh.clone(), notice, strategy)?;
    Ok(maybe_chunk)
 }
 
 
 /// Try to retrieve the chunk entry
-fn pull_chunk_inner(chunk_eh: EntryHash, notice: DeliveryNotice) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
+fn pull_chunk_inner(chunk_eh: EntryHash, notice: DeliveryNotice, strategy: GetStrategy) -> ExternResult<Option<(ParcelChunk, Option<Link>)>> {
    /// Check Inbox first:
    /// Get all Items in inbox and see if its there
    if notice.summary.distribution_strategy.can_dht() {
-      let pending_chunk_pairs = probe_all_inbox_items(Some(ItemKind::ParcelChunk))?;
+      let pending_chunk_pairs = probe_all_inbox_items(Some(ItemKind::ParcelChunk), strategy)?;
       /// Check each Inbox link
       for (pending_chunk, link) in &pending_chunk_pairs {
          assert!(pending_chunk.kind == ItemKind::ParcelChunk);

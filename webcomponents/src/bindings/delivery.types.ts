@@ -68,7 +68,10 @@ import {
 DhtOpHashB64, DhtOpHash,
 /** DnaFile */
 // @ts-ignore
-DnaFile, DnaDef,
+DnaFile,
+/** entry */
+// @ts-ignore
+EntryDefLocation, EntryDefLocationType, AppEntryDefLocation, GetOptions, GetStrategy,
 /** entry-details */
 // @ts-ignore
 EntryDetails, RecordDetails, Details, DetailsType, EntryDhtStatus,
@@ -271,6 +274,7 @@ export interface RespondToNoticeInput {
 export interface FetchChunkInput {
   chunk_eh: EntryArray
   notice_eh: EntryArray
+  get_local_only: boolean
 }
 
 export interface GetNoticeOutput {
@@ -315,6 +319,7 @@ export interface CommitPendingItemInput {
 export interface GetDeliveryStateInput {
   distribution_ah: ActionArray
   recipient: AgentArray
+  local_only: boolean
 }
 
 export interface BroadcastInput {

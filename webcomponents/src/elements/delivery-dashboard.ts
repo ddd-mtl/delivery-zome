@@ -54,7 +54,7 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
                       return html `
                       <li style="margin-top:10px;" title=${agentId.b64}>
                           ${JSON.stringify(deliveryState)}<b> Recipient: </b> ${agentId.short}
-                          <button type="button" @click=${() => {this._zvm.getDeliveryState(distribAh, agentId)}}>refresh</button>
+                          <button type="button" @click=${() => {this._zvm.getDeliveryState(distribAh, agentId, true)}}>refresh</button>
                       </li>`
                   }
               );

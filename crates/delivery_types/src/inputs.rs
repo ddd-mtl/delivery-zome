@@ -23,6 +23,7 @@ pub struct RespondToNoticeInput {
 pub struct FetchChunkInput {
    pub chunk_eh: EntryHash,
    pub notice_eh: EntryHash,
+   pub get_local_only: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -65,6 +66,7 @@ pub struct CommitPendingItemInput {
 pub struct GetDeliveryStateInput {
    pub distribution_ah: ActionHash,
    pub recipient: AgentPubKey,
+   pub local_only: bool,
 }
 
 

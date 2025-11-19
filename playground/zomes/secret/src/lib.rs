@@ -8,24 +8,11 @@
 mod callbacks;
 mod send_secret;
 
+extern crate zome_core;
 
 //----------------------------------------------------------------------------------------
 
 use hdk::prelude::*;
-
-
-#[hdk_extern]
-fn get_zome_info(_:()) -> ExternResult<ZomeInfo> {
-   return zome_info();
-}
-
-
-#[hdk_extern]
-fn get_dna_info(_:()) -> ExternResult<DnaInfo> {
-   return dna_info();
-}
-
-//----------------------------------------------------------------------------------------
 
 use zome_utils::*;
 
@@ -81,14 +68,14 @@ pub fn create_split_secret(value: String) -> ExternResult<EntryHash> {
 #[hdk_extern]
 pub fn get_secret(eh: EntryHash) -> ExternResult<String> {
    /// Try to get Secret
-   let maybe_secret: ExternResult<Secret> = get_typed_from_eh(eh.clone());
+   let maybe_secret: ExternResult<Secret> = get_typed_from_eh(eh.clone(), GetStrategy::Network);
    if let Ok(secret) = maybe_secret {
       debug!("get_secret() - secret found");
       return Ok(secret.value);
    }
    debug!("get_secret() - Secret Entry not found, could be a ParcelManifest");
    /// Not a Secret Entry, could be a Manifest
-   let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(eh);
+   let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(eh, GetStrategy::Network);
    let Ok(manifest) = maybe_manifest
       else { return error("No entry found at given EntryHash"); };
    /// Get all chunks

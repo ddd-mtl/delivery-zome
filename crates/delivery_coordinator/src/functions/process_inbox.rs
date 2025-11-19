@@ -13,7 +13,7 @@ pub fn process_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    debug!("START");
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all inbox items
-   let pending_pairs = probe_all_inbox_items(None)?;
+   let pending_pairs = probe_all_inbox_items(None, GetStrategy::Network)?;
    debug!("pending items count: {}", pending_pairs.len());
    /// Convert Each Item
    let mut entry_map = HashMap::new();
@@ -100,11 +100,11 @@ pub fn process_inbox(_:()) -> ExternResult<Vec<ActionHash>> {
    for (_, _, reply) in replies_tuples {
       //debug!("process_inbox() reply: {:?}", reply);
       if reply.has_accepted && !received_parcel_ehs.contains(&reply.notice_eh) {
-         let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh)?;
+         let notice: DeliveryNotice = get_typed_from_eh(reply.notice_eh, GetStrategy::Network)?;
          unreceived_entries.insert(notice.summary.parcel_reference.parcel_eh.clone(), notice.clone());
          /// Get unreceived chunks
          if let ParcelKind::Manifest(_) = notice.summary.parcel_reference.description.kind_info {
-            let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(notice.summary.parcel_reference.parcel_eh);
+            let maybe_manifest: ExternResult<ParcelManifest> = get_typed_from_eh(notice.summary.parcel_reference.parcel_eh, GetStrategy::Network);
             /// Manifest might not have been received yet
             if let Ok(manifest) = maybe_manifest {
                for chunk_eh in manifest.chunks {

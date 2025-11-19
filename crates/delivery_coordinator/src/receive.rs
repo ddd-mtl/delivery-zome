@@ -126,7 +126,7 @@ pub fn receive_chunk(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
 
 /// Returns ChunkResponse or Failure
 pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> DeliveryProtocol {
-    let maybe_chunk: ExternResult<ParcelChunk> = get_typed_from_eh(chunk_eh);
+    let maybe_chunk: ExternResult<ParcelChunk> = get_typed_from_eh(chunk_eh,GetStrategy::Network);
     if let Err(err) = maybe_chunk {
         return failure_err("ParcelChunk not found", err);
     }
@@ -137,7 +137,7 @@ pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> Deli
 /// Returns ParcelResponse or Failure
 pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash) -> DeliveryProtocol {
     /// Get Distribution Entry
-    let maybe_distribution: ExternResult<(EntryHash, Distribution)> = get_typed_from_ah(distribution_ah);
+    let maybe_distribution: ExternResult<(EntryHash, Distribution)> = get_typed_from_ah(distribution_ah, GetStrategy::Network);
     if let Err(err) = maybe_distribution {
         return failure_err("Distribution not found", err);
     }

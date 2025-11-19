@@ -23,7 +23,7 @@ pub fn send_secret(input: SendSecretInput) -> ExternResult<ActionHash> {
    debug!("send_secret()  zome_name: {:?}", zome_info()?.name);
 
    /// Determine parcel type depending on Entry
-   let maybe_secret: ExternResult<Secret> = get_typed_from_eh(input.secret_eh.clone());
+   let maybe_secret: ExternResult<Secret> = get_typed_from_eh(input.secret_eh.clone(), GetStrategy::Network);
    let zome_name =ZomeName::from("secret_integrity");
    let parcel_kind_info = if let Ok(_secret) = maybe_secret {
       ParcelKind::AppEntry(EntryDefIndex::from(get_variant_index::<SecretEntry>(SecretEntryTypes::Secret)?))
