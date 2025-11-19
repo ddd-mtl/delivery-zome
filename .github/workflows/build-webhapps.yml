@@ -23,6 +23,11 @@ jobs:
         shell: bash
         run: |
           npm run install:hc
+      # install zits
+      - name: Install zits
+        shell: bash
+        run: |
+          npm run install:zits
       # Install hash-zome
       - name: Install hash-zome
         run: |
