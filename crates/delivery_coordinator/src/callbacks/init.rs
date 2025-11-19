@@ -43,6 +43,7 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
 
 
 ///
+#[allow(dead_code)]
 fn validate_properties() -> ExternResult<InitCallbackResult> {
    let maybe_properties = get_properties();
    //debug!("maybe_place_properties = {:?}", maybe_place_properties);

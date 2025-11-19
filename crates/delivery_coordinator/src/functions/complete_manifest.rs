@@ -64,6 +64,7 @@ pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(Ent
 
 
 /// Find manifest with that chunk_eh
+#[allow(dead_code)]
 pub fn find_ParcelManifest(chunk_eh: EntryHash) -> ExternResult<Option<ParcelManifest>> {
    /// Get all Create ParcelManifest Elements with query
    let query_args = ChainQueryFilter::default()
