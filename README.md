@@ -78,7 +78,7 @@ A client dna must define the following dna properties:
 To rebuild the DNA for holochain:
 1. [Install rustup](https://rustup.rs/) and the `wasm32` target with: ``rustup target add wasm32-unknown-unknown``
 1. Install [holochain and hc](https://github.com/holochain/holochain)
-1. Run ``scripts\pack-happ.sh``
+1. Run ``npm run build:happ``
 
 
 ## Testing

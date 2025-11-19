@@ -21,7 +21,7 @@
     "version"             : "$npm_package_config_bin/hc --version & $npm_package_config_bin/kitsune2-bootstrap-srv --version & $npm_package_config_bin/holochain --version & zits --version & lair-keystore --version & echo \"Typescript $(tsc --version)\" & echo \"Weave $(weave --version)\"",
 
     "build:wasm"          : "CARGO_TARGET_DIR=target RUSTFLAGS='--cfg getrandom_backend=\"custom\"' cargo build --release --target wasm32-unknown-unknown",
-    "build:happ"          : "npm run build:wasm && bash scripts/pack-happ.sh && bash scripts/ts-bindings.sh",
+    "build:happ"          : "npm run build:wasm && $npm_package_config_bin/hc dna pack --output=artifacts/secret.dna playground/workdir && $npm_package_config_bin/hc app pack --output=artifacts/secret.happ playground/workdir && bash scripts/ts-bindings.sh",
     "build:webcomponents" : "npm run build -w @ddd-qc/delivery",
     "build:playground"    : "npm run build -w playground/webapp",
     "package"             : "rm -f artifacts/webapp-ui.zip & cd playground/webapp/dist/ && bestzip ../../../artifacts/webapp-ui.zip * && cd ../../../ && hc web-app pack ./playground/webhapp.workdir -o artifacts/playground.webhapp",
