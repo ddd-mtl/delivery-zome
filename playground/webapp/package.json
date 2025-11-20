@@ -24,9 +24,9 @@
     "run-singleton-cli": "^0.0.5"
   },
   "dependencies": {
-    "@ddd-qc/agent-directory": "6.33.2",
-    "@ddd-qc/profiles-dvm": "=0.33.2",
-    "@ddd-qc/we-utils": "=0.33.2",
+    "@ddd-qc/agent-directory": "6.33.4",
+    "@ddd-qc/profiles-dvm": "=0.33.4",
+    "@ddd-qc/we-utils": "=0.33.4",
     "@ddd-qc/delivery": "file:../../webcomponents"
   }
 }

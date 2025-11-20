@@ -4,6 +4,7 @@ import { DnaElement, AgentId, EntryId } from "@ddd-qc/lit-happ";
 import {SecretDvm, SecretDvmPerspective} from "../viewModels/secret.dvm";
 import {SecretPerspective} from "../viewModels/secret.zvm";
 import {DeliveryPerspective} from "@ddd-qc/delivery";
+import {GetStrategy} from "@holochain-open-dev/core-types";
 
 
 /**
@@ -47,7 +48,7 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
     newDvm.secretZvm.subscribe(this, 'secretPerspective');
     newDvm.deliveryZvm.subscribe(this, 'deliveryPerspective');
     console.log("\t Subscribed secretZvm's roleName = ", newDvm.secretZvm.cell.name)
-    newDvm.probeAll();
+    newDvm.probeAll(GetStrategy.Local);
     this._sender = undefined;
     this._initialized = true;
   }
@@ -56,8 +57,8 @@ export class SecretPage extends DnaElement<SecretDvmPerspective, SecretDvm> {
   /** */
   async refresh(_e?: any) {
     //console.log("tasker-page.refresh() called")
-    await this._dvm.probeAll();
-    await this._dvm.probePublicMessages();
+    await this._dvm.probeAll(GetStrategy.Network);
+    await this._dvm.probePublicMessages(GetStrategy.Network);
   }
 
 

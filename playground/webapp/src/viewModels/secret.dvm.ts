@@ -25,6 +25,7 @@ import {SecretZvm} from "./secret.zvm"
 import {AgentDirectoryZvm} from "@ddd-qc/agent-directory"
 import {SignalCb, Signal, SignalType, AppSignal} from "@holochain/client";
 import {decode} from "@msgpack/msgpack";
+import {GetStrategy} from "@holochain-open-dev/core-types";
 
 
 /** */
@@ -182,7 +183,7 @@ export class SecretDvm extends DnaViewModel {
 
 
   /** */
-  async probePublicMessages(): Promise<void> {
+  async probePublicMessages(_strategy: GetStrategy): Promise<void> {
     this._perspective.publicMessages.clear();
     await this.deliveryZvm.probeDht();
     const pds: [EntryId, PublicParcelRecordMat][] = Array.from(this.deliveryZvm.perspective.publicParcels.entries());

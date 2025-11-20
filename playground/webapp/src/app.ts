@@ -1,13 +1,25 @@
-import { html } from "lit";
-import {state, customElement} from "lit/decorators.js";
-import { SecretDvm } from "./viewModels/secret.dvm";
-import {HvmDef, HappElement, Cell, BaseRoleName, CloneId, AppProxy, EntryId, DnaViewModel, HCL, DvmDef} from "@ddd-qc/lit-happ";
+import {html} from "lit";
+import {customElement, state} from "lit/decorators.js";
+import {SecretDvm} from "./viewModels/secret.dvm";
+import {
+    AppProxy,
+    BaseRoleName,
+    Cell,
+    CloneId,
+    DnaViewModel,
+    DvmDef,
+    EntryId,
+    HappElement,
+    HCL,
+    HvmDef
+} from "@ddd-qc/lit-happ";
 // @ts-ignore
 import {AdminWebsocket, AppWebsocket, DnaDefinition, InstalledAppId, ZomeName} from "@holochain/client";
 import {ProfilesDvm} from "@ddd-qc/profiles-dvm";
 import {AppletId, AppletView, GroupProfile, WeaveServices} from "@theweave/api";
 import {ContextProvider, createContext} from "@lit/context";
 import {HC_ADMIN_PORT, HC_APP_PORT} from "./globals";
+import {GetStrategy} from "@holochain-open-dev/core-types";
 
 const weClientContext = createContext<WeaveServices>('weave_client');
 
@@ -162,7 +174,7 @@ export class SecretApp extends HappElement {
   /** */
   async refresh(_e?: any) {
     console.log("secret-app.refresh() called")
-    await this.hvm.probeAll();
+    await this.hvm.probeAll(GetStrategy.Network);
   }
 
 
