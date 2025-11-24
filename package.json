@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@ddd-qc/hc-prebuilt": "0.506.1",
-    "@theweave/cli": "0.14.4",
+    "@theweave/cli": "0.15.5",
     "bestzip": "^2.2.0",
     "concurrently": "^6.2.1",
     "new-port-cli": "^1.0.0",
@@ -78,7 +78,7 @@
     "@holochain/client"             : "^0.20.0",
     "@ddd-qc/cell-proxy"            : "=0.33.4",
     "@ddd-qc/lit-happ"              : "=0.33.4",
-    "@holochain-open-dev/core-types": "=0.600.0-dev.2",
+    "@holochain-open-dev/core-types": "=0.600.0",
     "@lit/context"                  : "1.0.1",
     "lit"                           : "3.0.2"
   },
