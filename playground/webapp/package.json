@@ -26,7 +26,6 @@
   "dependencies": {
     "@ddd-qc/agent-directory": "6.33.4",
     "@ddd-qc/profiles-dvm": "=0.33.4",
-    "@ddd-qc/we-utils": "=0.33.4",
     "@ddd-qc/delivery": "file:../../webcomponents"
   }
 }

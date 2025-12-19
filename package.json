@@ -29,8 +29,8 @@
 
     "devtest"            : "npm run clean:hc & npm run build:all && npm run start:mem",
 
-    "devtest:we"         : "npm run clean:hc -w playground/we-applet && npm run build:all && HAPP_BUILD_MODE=Debug concurrently \"npm run build -w we-applet\" \"npm run start:we\"",
-    "start:we"           : "npm run devtest -w playground/we-applet",
+    "devtest:we"         : "npm run clean:hc -w playground/we-applet && npm run build:all && concurrently \"npm run build -w we-applet\" \"npm run start:we\"",
+    "start:we"           : "FORCE_COLOR=0 HAPP_BUILD_MODE='Debug' HC_APP_PORT=$(port) HC_ADMIN_PORT=$(port) npm run devtest -w playground/we-applet",
     "dist:we"            : "npm run dist -w we-applet && npm run package:we",
     "package:we"         : "rm -rf artifacts/secret-we_applet-ui.zip & cd playground/we-applet/dist && rm -f *.map && bestzip ../../../artifacts/secret-we_applet-ui.zip * && cd ../../../ && hc web-app pack playground/webhapp.workdir -o artifacts/secret-we_applet.webhapp",
     "prodtest:we"        : "BOOT_PORT=$(port) SIGNAL_PORT=$(port) concurrently \"npm run serve:run\" \"AGENT_NUM=1 npm run prodtest:we-launch\"",
@@ -75,7 +75,7 @@
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@holochain/client"             : "^0.20.0",
+    "@holochain/client"             : "=0.20.0",
     "@ddd-qc/cell-proxy"            : "=0.33.8",
     "@ddd-qc/lit-happ"              : "=0.33.9",
     "@holochain-open-dev/core-types": "=0.600.0",

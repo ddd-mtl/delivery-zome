@@ -6,9 +6,9 @@ import path from "path";
 //import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 console.log("vite: process.env.HC_APP_PORT: ", process.env.HC_APP_PORT);
+console.log("vite: process.env.HC_ADMIN_PORT: ", process.env.HC_ADMIN_PORT);
 console.log("vite: process.env.HAPP_BUILD_MODE: ", process.env.HAPP_BUILD_MODE);
 const HAPP_BUILD_MODE = process.env.HAPP_BUILD_MODE? process.env.HAPP_BUILD_MODE : "Release";
-
 
 console.log("vite: process.env.WE_APPLET_VIEW: ", process.env.WE_APPLET_VIEW);
 const WE_APPLET_VIEW = process.env.WE_APPLET_VIEW? process.env.WE_APPLET_VIEW : "main";
