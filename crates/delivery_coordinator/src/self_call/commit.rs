@@ -20,7 +20,7 @@ pub fn call_commit_parcel(entry: Entry, notice: &DeliveryNotice, maybe_link_ah: 
    };
    /// Make sure CreateLink exists
    if let Some(link_hh) = maybe_link_ah {
-      let maybe_el = get(link_hh.clone(), GetOptions::default())?;
+      let maybe_el = get(link_hh.clone(), GetOptions::local())?;
       if maybe_el.is_none() {
          return zome_error!("call_commit_parcel(): CreateLink not found.");
       }
@@ -102,12 +102,12 @@ fn commit_parcel(input: CommitParcelInput) -> ExternResult<ActionHash> {
    if let Some(link_ah) = input.maybe_link_ah {
       debug!("commit_parcel() delete_link: {:?}", link_ah);
       /// Make sure CreateLink exists
-      let maybe_el = get(link_ah.clone(), GetOptions::default())?;
+      let maybe_el = get(link_ah.clone(), GetOptions::local())?;
       if maybe_el.is_none() {
          return zome_error!("CreateLink not found.");
       }
       /// Delete
-      let input = DeleteLinkInput::new(link_ah, GetOptions::default(), ChainTopOrdering::Relaxed);
+      let input = DeleteLinkInput::new(link_ah, GetOptions::local(), ChainTopOrdering::Relaxed);
       let _hh = HDK.with(|h| {
          h.borrow()
           .delete_link(input)

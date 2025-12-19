@@ -7,7 +7,7 @@ use zome_delivery_types::{ParcelReference};
 #[hdk_extern]
 #[feature(zits_blocking)]
 pub fn unpublish_public_parcel(pp_eh: EntryHash) -> ExternResult<ActionHash> {
-   let Some(record) = get(pp_eh.clone(), GetOptions::network())? else {
+   let Some(record) = get(pp_eh.clone(), GetOptions::local())? else {
       return error("No PublicParcel found at EntryHash");
    };
    /// Make sure its the correct entry type

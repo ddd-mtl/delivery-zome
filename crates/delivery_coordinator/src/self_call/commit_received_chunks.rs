@@ -34,7 +34,7 @@ pub fn commit_received_chunks(chunks: Vec<(ParcelChunk, Option<Link>)>) -> Exter
 
       /// Delete Link
       if let Some(link) = maybe_link {
-         let _ = delete_link(link.create_link_hash,  GetOptions::network())?;
+         let _ = delete_link(link.create_link_hash,  GetOptions::local())?;
       }
    }
    /// Done

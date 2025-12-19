@@ -126,7 +126,7 @@ pub fn receive_chunk(from: AgentPubKey, item: PendingItem) -> ExternResult<()> {
 
 /// Returns ChunkResponse or Failure
 pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> DeliveryProtocol {
-    let maybe_chunk: ExternResult<ParcelChunk> = get_typed_from_eh(chunk_eh,GetStrategy::Network);
+    let maybe_chunk: ExternResult<ParcelChunk> = get_typed_from_eh(chunk_eh,GetStrategy::Local); // FIXME
     if let Err(err) = maybe_chunk {
         return failure_err("ParcelChunk not found", err);
     }
@@ -137,7 +137,7 @@ pub fn receive_dm_chunk_request(_from: AgentPubKey, chunk_eh: EntryHash) -> Deli
 /// Returns ParcelResponse or Failure
 pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash) -> DeliveryProtocol {
     /// Get Distribution Entry
-    let maybe_distribution: ExternResult<(EntryHash, Distribution)> = get_typed_from_ah(distribution_ah, GetStrategy::Network);
+    let maybe_distribution: ExternResult<(EntryHash, Distribution)> = get_typed_from_ah(distribution_ah, GetStrategy::Local); // FIXME GetStrategy
     if let Err(err) = maybe_distribution {
         return failure_err("Distribution not found", err);
     }
@@ -150,7 +150,7 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash)
     let parcel_eh = distribution.delivery_summary.parcel_reference.parcel_eh.clone();
     debug!("Looking for Parcel: {:?}", parcel_eh);
     /// Get entry
-    let maybe_maybe_element = get(parcel_eh, GetOptions::network());
+    let maybe_maybe_element = get(parcel_eh, GetOptions::local()); // FIXME GetStrategy
     if let Err(err) = maybe_maybe_element {
         return failure_err("Failed to get Parcel Element", err);
     }
@@ -160,7 +160,8 @@ pub fn receive_dm_parcel_request(from: AgentPubKey, distribution_ah: ActionHash)
     debug!("Parcel Element found: {:?}", element);
     let Some(entry) = element.entry().as_option()
         else { return failure("Parcel Entry not found in Parcel Element"); };
-    return DeliveryProtocol::ParcelResponse(entry.to_owned());
+    ///
+    DeliveryProtocol::ParcelResponse(entry.to_owned())
 }
 
 

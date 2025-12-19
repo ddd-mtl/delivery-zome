@@ -43,7 +43,7 @@ pub fn find_notice_with_parcel(parcel_eh: EntryHash) -> ExternResult<Vec<Deliver
 /// 100 = all chunks received
 pub fn count_chunks_received(manifest_eh: EntryHash) -> ExternResult<usize> {
     /// Get ParcelManifest
-    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh, GetStrategy::Network)?;
+    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh, GetStrategy::Local)?;
     let len = manifest.chunks.len();
     let chunks_set: HashSet<EntryHash> = HashSet::from_iter(manifest.chunks);
     /// Get all Create ParcelChunk Elements with query
@@ -85,7 +85,7 @@ pub fn probe_all_inbox_items(maybe_kind: Option<ItemKind>, strategy: GetStrategy
 /// Return size of an AppEntry
 pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
     /// Get Element
-    let maybe_element = get(eh, GetOptions::network())?;
+    let maybe_element = get(eh, GetOptions::local())?;
     let element = match maybe_element {
         Some(el) => el,
         None => return error("No element found at given payload address"),

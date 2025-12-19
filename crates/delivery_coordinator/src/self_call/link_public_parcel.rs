@@ -27,7 +27,7 @@ pub fn unlink_public_parcel(pp_eh: EntryHash) -> ExternResult<ActionHash> {
    path.ensure()?;
    let anchor_eh = path.path_entry_hash()?;
    debug!("unlink_public_parcel() {} | {}", pp_eh, anchor_eh);
-   let links = get_links_details(LinkQuery::try_new(anchor_eh, LinkTypes::PublicParcels).unwrap(), GetStrategy::default())?;
+   let links = get_links_details(LinkQuery::try_new(anchor_eh, LinkTypes::PublicParcels).unwrap(), GetStrategy::Local)?; // FIXME
    for (create_sah, maybe_deletes) in links.into_inner() {
       if !maybe_deletes.is_empty() {
          continue;

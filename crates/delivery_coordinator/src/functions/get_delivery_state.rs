@@ -69,7 +69,7 @@ pub fn find_PendingItem(distribution_ah: ActionHash, recipient: AgentPubKey, kin
       Some(LinkTag::from(recipient.as_ref().to_vec())),
       None, None, None,
    ),
-   GetStrategy::Network,
+   GetStrategy::Local,
    )?;
    pairs.retain(|pair| pair.0.kind == kind);
    /// Search through results

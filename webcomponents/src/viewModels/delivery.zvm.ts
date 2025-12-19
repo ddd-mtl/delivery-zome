@@ -261,7 +261,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         const missingChunks = await this.zomeProxy.determineMissingChunks(notice[0].summary.parcel_reference.parcel_eh);
         const notice_eh = noticeEh.hash;
         for (const chunk_eh of missingChunks) {
-            this.zomeProxy.pullChunk({notice_eh, chunk_eh, get_local_only: false});
+            this.zomeProxy.pullChunk({notice_eh, chunk_eh, get_local_only: true}); // FIXME: get strategy
         }
     }
 

@@ -12,7 +12,7 @@ pub fn fetch_parcel(notice_eh: EntryHash) -> ExternResult<Option<EntryHash>> {
    debug!("fetch_parcel() {:?}", notice_eh);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get DeliveryNotice
-   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone(), GetStrategy::Network)?;
+   let notice: DeliveryNotice = get_typed_from_eh(notice_eh.clone(), GetStrategy::Local)?; // FIXME
    /// Look for Parcel
    let maybe_parcel = request_parcel(notice.clone())?;
    let Some((parcel, maybe_link)) = maybe_parcel
@@ -38,7 +38,7 @@ pub fn request_parcel(notice: DeliveryNotice) -> ExternResult<Option<(Entry, Opt
    /// Request Parcel
    /// Check Inbox first
    if notice.summary.distribution_strategy.can_dht() {
-      let pending_parcel_pairs = probe_all_inbox_items(Some(ItemKind::AppEntryBytes), GetStrategy::Network)?;
+      let pending_parcel_pairs = probe_all_inbox_items(Some(ItemKind::AppEntryBytes), GetStrategy::Local)?;
       /// Check each Inbox link
       for (pending_parcel, link) in &pending_parcel_pairs {
          assert!(pending_parcel.kind == ItemKind::AppEntryBytes);

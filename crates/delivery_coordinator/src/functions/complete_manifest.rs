@@ -8,14 +8,14 @@ use crate::*;
 
 /// Check if all chunks have been committed for this parcel.
 /// Return EntryHash of Notice if Manifest is received from remote agent.
-/// Return EntryHash of ReceptionProof if it has been completly downloaded.
-/// Otherwise return missing chunks list.
+/// Return EntryHash of ReceptionProof if it has been completely downloaded.
+/// Otherwise, return missing chunks list.
 #[hdk_extern]
 pub fn complete_manifest(manifest_eh: EntryHash) -> ExternResult<Option<Vec<(EntryHash, Result<EntryHash, Vec<EntryHash>>)>>> {
    debug!("START {}", manifest_eh);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Make sure manifest exists
-   let _ = get_typed_from_eh::<ParcelManifest>(manifest_eh.clone(), GetStrategy::Network)?;
+   let _ = get_typed_from_eh::<ParcelManifest>(manifest_eh.clone(), GetStrategy::Local)?;
    /// Find notice with that manifest
    let notices = find_notice_with_parcel(manifest_eh.clone())?;
    if notices.is_empty() {

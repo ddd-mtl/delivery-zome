@@ -10,7 +10,7 @@ use zome_delivery_types::*;
 pub fn determine_missing_chunks(manifest_eh: EntryHash) -> ExternResult<Vec<EntryHash>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("START - {}",manifest_eh);
-   let manifest: ParcelManifest = get_typed_from_eh(manifest_eh, GetStrategy::Network)?;
+   let manifest: ParcelManifest = get_typed_from_eh(manifest_eh, GetStrategy::Local)?;
    debug!("manifest: {}", manifest.description.name);
    let chunks: Vec<EntryHash> = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?
       .into_iter()
