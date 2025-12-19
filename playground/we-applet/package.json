@@ -31,7 +31,7 @@
     "secret-playground": "file:../webapp",
     "@holochain-open-dev/profiles": "0.600.0-dev.2",
     "@theweave/api": "=0.6.0",
-    "@ddd-qc/we-utils": "=0.33.4",
+    "@ddd-qc/we-utils": "=0.33.9",
     "@mdi/js": "^7.2.0"
   }
 }

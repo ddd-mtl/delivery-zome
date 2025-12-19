@@ -9,7 +9,7 @@ import {
     DnaViewModel,
     DvmDef,
     EntryId,
-    HappElement,
+    HappElement, HcConnectionOptions,
     HCL,
     HvmDef
 } from "@ddd-qc/lit-happ";
@@ -48,7 +48,10 @@ export class SecretApp extends HappElement {
       : HC_ADMIN_PORT
         ? new URL(`ws://localhost:${HC_ADMIN_PORT}`)
         : undefined;
-    super(appWs? appWs : appPort, appId, adminUrl, 10 * 1000);
+      const options: HcConnectionOptions = appWs
+          ? {socket: appWs, timeout: 20 * 1000}
+          : {port: appPort!, timeout: 20 * 1000, adminUrl};
+      super(options, undefined, appId);
   }
 
 
