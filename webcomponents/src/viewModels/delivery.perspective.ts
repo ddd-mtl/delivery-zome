@@ -80,8 +80,9 @@ export class DeliveryPerspective {
     /** TODO: deep copy */
     makeSnapshot(): DeliverySnapshot {
         // FIXME
-        const manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][] = Array.from(this.localPublicManifests.values())
-          .map(([manifest, ts, author]) => [materializeParcelManifest(manifest), ts, author.b64]);
+        const entries:[ParcelManifest, Timestamp, AgentId][] = Array.from(this.localPublicManifests.values());
+        const manifests: [ParcelManifestMat, Timestamp, AgentPubKeyB64][] = entries.map(
+            ([manifest, ts, author]) => [materializeParcelManifest(manifest), ts, author.b64]);
         /** */
         return {
             manifests,

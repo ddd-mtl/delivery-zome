@@ -1,8 +1,18 @@
 import {html} from "lit";
 import {state, customElement} from "lit/decorators.js";
-import {ActionId, enc64, EntryId, ZomeElement} from "@ddd-qc/lit-happ";
+import {ActionId, AgentId, AgentIdMap, enc64, EntryId, ZomeElement} from "@ddd-qc/lit-happ";
 import {DeliveryZvm} from "../viewModels/delivery.zvm";
 import {DeliveryPerspective} from "../viewModels/delivery.perspective";
+import {
+    DeliveryNotice,
+    DeliveryState,
+    Distribution,
+    DistributionState,
+    NoticeAck, NoticeReply, NoticeState,
+    ReceptionAck, ReceptionProof,
+    ReplyAck
+} from "../bindings/delivery.types";
+import {EntryHashB64, Timestamp} from "@holochain/client";
 
 
 /**
@@ -46,12 +56,13 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
 
         /* Li */
         console.log("distributions", this.perspective.distributions);
-        const myDistribsLi = Array.from(this.perspective.distributions.entries()).map(
+        const entries: [ActionId, [Distribution, Timestamp, DistributionState, AgentIdMap<DeliveryState>]][] = Array.from(this.perspective.distributions.entries());
+        const myDistribsLi = entries.map(
             ([distribAh, [distribution, _ts, _distribState, statePerAgent]]) => {
-                //console.log("MembraneLi", MembraneLi)
-              const deliveryLi = Array.from(statePerAgent.entries()).map(
+              const states: [AgentId, DeliveryState][] = Array.from(statePerAgent.entries());
+              const deliveryLi = states.map(
                   ([agentId, deliveryState]) => {
-                      return html `
+                      return html`
                       <li style="margin-top:10px;" title=${agentId.b64}>
                           ${JSON.stringify(deliveryState)}<b> Recipient: </b> ${agentId.short}
                           <button type="button" @click=${() => {this._zvm.getDeliveryState(distribAh, agentId, true)}}>refresh</button>
@@ -71,8 +82,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const distribsLi = Array.from(this.perspective.distributions.entries()).map(
-            ([distribAh, _pair]) => {
+        const distribsLi = entries.map(
+            ([distribAh, _tuple]) => {
                 return html `
           <li style="margin-top:10px;" title=${distribAh.b64}>
               ${this.distrib2str(distribAh)}
@@ -80,9 +91,11 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const receivedNoticesLi = Array.from(this.perspective.noticeAcks.entries()).map(
+        const noticeAcks: [ActionId, AgentIdMap<[NoticeAck, Timestamp]>][] = Array.from(this.perspective.noticeAcks.entries());
+        const receivedNoticesLi = noticeAcks.map(
             ([distribAh, receiveds]) => {
-                return Array.from(receiveds.entries()).map(
+                const entries: [AgentId, [NoticeAck, Timestamp]][] = Array.from(receiveds.entries())
+                return entries.map(
                   ([recipientKey, [_received, _ts]]) => {
                     return html `
                       <li style="margin-top:10px;" title=${distribAh.b64}>
@@ -91,9 +104,11 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
                 });
             });
 
-        const receivedRepliesLi = Array.from(this.perspective.replyAcks.entries()).map(
-            ([distribAh, receiveds]) => {
-              return Array.from(receiveds.entries()).map(
+        const replyAcks: [ActionId, AgentIdMap<[ReplyAck, Timestamp]>][] = Array.from(this.perspective.replyAcks.entries());
+        const receivedRepliesLi = replyAcks.map(
+            ([distribAh, receiveds]: [ActionId, AgentIdMap<[ReplyAck, Timestamp]>]) => {
+              const entries: [AgentId, [ReplyAck, Timestamp]][] = Array.from(receiveds.entries())
+              return entries.map(
                 ([recipientKey, [received, _ts]]) => {
                   return html `
                     <li style="margin-top:10px;" title=${distribAh.b64}>
@@ -102,10 +117,11 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
                 });
             });
 
-
-        const receptionAcksLi = Array.from(this.perspective.receptionAcks.entries()).map(
-            ([distribAh, receiveds]) => {
-              return Array.from(receiveds.entries()).map(
+        const receptionAcks: [ActionId, AgentIdMap<[ReceptionAck, Timestamp]>][] = Array.from(this.perspective.receptionAcks.entries());
+        const receptionAcksLi = receptionAcks.map(
+            ([distribAh, receiveds]: [ActionId, AgentIdMap<[ReceptionAck, Timestamp]>]) => {
+                const entries: [AgentId, [ReceptionAck, Timestamp]][] = Array.from(receiveds.entries())
+                return entries.map(
                 ([recipientKey, [_receptionAck, _ts]]) => {
                   return html `
                     <li style="margin-top:10px;" title=${distribAh.b64}>
@@ -114,11 +130,11 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
           });
         });
 
-
         /* Li */
         const [unreplieds, _] = this._zvm.inbounds();
         console.log("unreplieds", unreplieds);
-        const newNoticesLi = Array.from(unreplieds.entries()).map(
+        const inbounds: [EntryId, [DeliveryNotice, Timestamp]][] = Array.from(unreplieds.entries());
+        const newNoticesLi = inbounds.map(
             ([noticeEh, [_notice, _ts]]) => {
                 let content = html`<button type="button" @click=${() => {this._zvm.zomeProxy.getNoticeState(noticeEh.hash)}}>refresh</button>
                     <button type="button" @click=${() => {this._zvm.acceptDelivery(noticeEh)}}>Accept</button>
@@ -131,7 +147,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const noticesLi = Array.from(this.perspective.notices.entries()).map(
+        const noticeEntries: [EntryId, [DeliveryNotice, Timestamp, NoticeState, Set<EntryHashB64>]][] = Array.from(this.perspective.notices.entries());
+        const noticesLi = noticeEntries.map(
             ([eh, _pair]) => {
                 return html`
           <li style="margin-top:10px;" title=${eh.b64}>
@@ -140,8 +157,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-
-        const repliesLi = Array.from(this.perspective.replies.entries()).map(
+        const repliesEntries: [EntryId, NoticeReply][] = Array.from(this.perspective.replies.entries());
+        const repliesLi = repliesEntries.map(
             ([eh, reply]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh.b64}>
@@ -150,7 +167,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const receptionsLi = Array.from(this.perspective.receptions.entries()).map(
+        const receptionEntries: [EntryId, [ReceptionProof, Timestamp]][] = Array.from(this.perspective.receptions.entries());
+        const receptionsLi = receptionEntries.map(
             ([eh, [receptionProof, _ts]]) => {
                 return html `
           <li style="margin-top:10px;" title=${eh.b64}>
@@ -159,7 +177,8 @@ export class DeliveryDashboard extends ZomeElement<DeliveryPerspective, Delivery
             }
         )
 
-        const manifestsLi = Object.entries(this.perspective.localManifestByData).map(
+        const manifestsEntries: [string, [EntryId, boolean]][] = Object.entries(this.perspective.localManifestByData);
+        const manifestsLi = manifestsEntries.map(
             ([dataHash, [manifestEh, _isPrivate]]) => {
                 if (!this.perspective.privateManifests.get(manifestEh)) {
                   return html`__privateManifest__`; // TODO

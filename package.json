@@ -71,13 +71,13 @@
     "concurrently": "^6.2.1",
     "new-port-cli": "^1.0.0",
     "run-singleton-cli": "^0.0.5",
-    "@types/libsodium-wrappers": "~0.7.13",
+    "@types/libsodium-wrappers": "~0.7.14",
     "json-parse-better-errors": "^1.0.2"
   },
   "dependencies": {
-    "@holochain/client"             : "=0.20.0",
-    "@ddd-qc/cell-proxy"            : "=0.33.8",
-    "@ddd-qc/lit-happ"              : "=0.33.9",
+    "@holochain/client"             : "=0.20.2",
+    "@ddd-qc/cell-proxy"            : "=0.34.0",
+    "@ddd-qc/lit-happ"              : "=0.34.0",
     "@holochain-open-dev/core-types": "=0.600.0",
     "@lit/context"                  : "1.0.1",
     "lit"                           : "3.0.2"

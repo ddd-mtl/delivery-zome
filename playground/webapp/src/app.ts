@@ -181,7 +181,6 @@ export class SecretApp extends HappElement {
   }
 
 
-
   /** */
   override render() {
     console.log("*** <secret-app> render()", this._loaded, this.secret.secretZvm.perspective)

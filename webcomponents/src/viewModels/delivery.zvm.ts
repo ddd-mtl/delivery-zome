@@ -271,7 +271,6 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** */
     override async probeAllInner(): Promise<void> {
         console.log("DeliveryZvm.probeAllInner()");
-        //console.trace();
         await this.zomeProxy.queryAll();
         await this.scanProblems();
         await this.probeDht(true);
@@ -380,7 +379,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
               || DistributionState.AllRepliesReceived == state
             ) {
                 //console.log("outbounds() recipients", distrib.recipients.length);
-                for (const [recipient, state] of Array.from(deliveryStates.entries())) {
+                for (const [recipient, state] of deliveryStates.entries()) {
                     //console.log("outbounds() state", deliveryStates[agentB64], agentB64);
                     if (!(DeliveryState.ParcelDelivered == state)) {
                         if (!res.get(distribAh)) {
