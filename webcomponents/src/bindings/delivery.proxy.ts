@@ -144,8 +144,8 @@ export class DeliveryProxy extends ZomeProxy {
     return this.call('get_notice_state', noticeEh);
   }
 
-  async processInbox(): Promise<ActionArray[]> {
-    return this.call('process_inbox', null);
+  async processInbox(strategy: GetStrategy): Promise<ActionArray[]> {
+    return this.call('process_inbox', strategy);
   }
 
   async publishChunks(chunks: ParcelChunk[]): Promise<EntryArray[]> {
@@ -164,12 +164,12 @@ export class DeliveryProxy extends ZomeProxy {
     return this.callZomeBlockPostCommit('PublicParcel','publish_public_parcel', manifestArg);
   }
 
-  async pullPublicParcelsDetails(): Promise<void> {
-    return this.call('pull_public_parcels_details', null);
+  async pullPublicParcelsDetails(strategy: GetStrategy): Promise<void> {
+    return this.call('pull_public_parcels_details', strategy);
   }
 
-  async fetchParcelRef(prEh: EntryArray): Promise<ParcelReference | null> {
-    return this.call('fetch_parcel_ref', prEh);
+  async fetchParcelRef(pair: [EntryArray, GetStrategy]): Promise<ParcelReference | null> {
+    return this.call('fetch_parcel_ref', pair);
   }
 
   async queryDeliveryNotice(queryField: DeliveryNoticeQueryField): Promise<[DeliveryNotice, Timestamp][]> {

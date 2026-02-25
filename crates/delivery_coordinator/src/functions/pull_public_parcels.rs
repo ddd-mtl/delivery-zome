@@ -5,7 +5,6 @@ use zome_delivery_types::*;
 use zome_delivery_integrity::*;
 use crate::*;
 
-
 // /// Get All public Parcels
 // #[hdk_extern]
 // pub fn pull_public_parcels(_:()) -> ExternResult<Vec<(EntryHash, ParcelReference, Timestamp, AgentPubKey)>> {
@@ -22,11 +21,11 @@ use crate::*;
 
 
 #[hdk_extern]
-pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
+pub fn pull_public_parcels_details(strategy: GetStrategy) -> ExternResult<()> {
   std::panic::set_hook(Box::new(zome_panic_hook));
   let anchor_eh = public_parcels_path().path_entry_hash()?;
   debug!("pull_public_parcels_details() {}", anchor_eh);
-  let links = get_links_details(LinkQuery::try_new(anchor_eh, LinkTypes::PublicParcels).unwrap(), GetStrategy::Local)?;
+  let links = get_links_details(LinkQuery::try_new(anchor_eh, LinkTypes::PublicParcels).unwrap(), strategy.clone())?;
   //debug!(" pull_public_parcels_details() get_link_details = {}", links.clone().into_inner().len());
   debug!("   links count: {}", links.clone().into_inner().len());
   let mut pulses: Vec<ZomeSignalProtocol> = Vec::new();
@@ -34,7 +33,7 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
     let Action::CreateLink(create_link) = create_sah.hashed.content
       else { panic!("get_links_details() should return a CreateLink Action") };
     let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
-    let Ok(Some(Details::Entry(details))) = get_details(pr_eh.clone(), GetOptions::local())
+    let Ok(Some(Details::Entry(details))) = get_details(pr_eh.clone(), strategy.clone().into())
       else { continue };
     let Ok(_pr) = ParcelReference::try_from(details.entry.clone())
       else { warn!("CreateLink to an entry which is not a ParcelReference"); continue };
@@ -73,8 +72,8 @@ pub fn pull_public_parcels_details(_:()) -> ExternResult<()> {
 
 
 #[hdk_extern]
-pub fn fetch_parcel_ref(pr_eh : EntryHash) -> ExternResult<Option<ParcelReference>> {
-  let wtf = get_details(pr_eh, GetOptions::local())?; // FIXME get strategy
+pub fn fetch_parcel_ref(pair : (EntryHash, GetStrategy)) -> ExternResult<Option<ParcelReference>> {
+  let wtf = get_details(pair.0, pair.1.into())?; // FIXME get strategy
   let Some(Details::Entry(details)) = wtf
     else {return Ok(None)};
   let typed = ParcelReference::try_from(details.entry)?;

@@ -1,16 +1,17 @@
 import {
     ActionId,
-    EntryId,
-    AgentId,
-    enc64,
-    AgentIdMap,
-    EntryIdMap,
     ActionIdMap,
-    ZomeViewModelWithSignals,
-    StateChangeType,
+    AgentId,
+    AgentIdMap,
+    assertIsDefined,
+    enc64,
+    EntryId,
+    EntryIdMap,
     EntryPulseMat,
-
-    LinkPulseMat, holoIdReviver, assertIsDefined,
+    holoIdReviver,
+    LinkPulseMat,
+    StateChangeType,
+    ZomeViewModelWithSignals,
 } from "@ddd-qc/lit-happ";
 import {DeliveryProxy} from "../bindings/delivery.proxy";
 import {EntryHashB64, Timestamp} from "@holochain/client";
@@ -20,20 +21,26 @@ import {
     DeliveryState,
     Distribution,
     DistributionState,
-    NoticeAck, NoticeReply,
+    NoticeAck,
+    NoticeReply,
     NoticeState,
     ParcelChunk,
     ParcelManifest,
-    ParcelReference, ReceptionAck, ReceptionProof, ReplyAck,
+    ParcelReference,
+    ReceptionAck,
+    ReceptionProof,
+    ReplyAck,
 } from "../bindings/delivery.types";
 import {
     DeliveryPerspective,
-    DeliveryPerspectiveMutable, DeliverySnapshot,
+    DeliveryPerspectiveMutable,
+    DeliverySnapshot,
     materializeParcelManifest,
     ParcelManifestMat,
 } from "./delivery.perspective";
 import {decode} from "@msgpack/msgpack";
 import {DeliveryLinkType} from "../bindings/delivery.integrity";
+import {GetStrategy} from "@holochain-open-dev/core-types";
 
 
 /**
@@ -234,7 +241,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
 
     /** */
     override async initializePerspectiveFromNetwork(): Promise<void> {
-        await this.probeDht();
+        await this.probeDht(GetStrategy.Network);
     }
 
 
@@ -273,7 +280,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
         console.log("DeliveryZvm.probeAllInner()");
         await this.zomeProxy.queryAll();
         await this.scanProblems();
-        await this.probeDht(true);
+        await this.probeDht(GetStrategy.Local, true);
         /** */
         this.notifySubscribers();
     }
@@ -283,10 +290,10 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     get probeDhtCount() {return this._probeDhtCount}
 
     /** */
-    async probeDht(denyNotify?: boolean): Promise<void> {
+    async probeDht(strategy: GetStrategy, denyNotify?: boolean): Promise<void> {
         //this._perspective.publicParcels = {};
-            await this.zomeProxy.pullPublicParcelsDetails();
-            const inbox = await this.zomeProxy.processInbox();
+            await this.zomeProxy.pullPublicParcelsDetails(strategy);
+            const inbox = await this.zomeProxy.processInbox(strategy);
             this._perspective.inbox = inbox.map((ah) => new ActionId(ah));
             this._probeDhtCount += 1;
             if (denyNotify == undefined) this.notifySubscribers();

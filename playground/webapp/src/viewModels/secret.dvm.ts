@@ -63,8 +63,16 @@ export class SecretDvm extends DnaViewModel {
 
   private _perspective: SecretDvmPerspective = {publicMessages: new EntryIdMap()};
 
+  private _livePeers: AgentId[] = [];
 
-  /** Update the perspective accordingly */
+
+    /** */
+    override get livePeers() {
+        return this._livePeers;
+    }
+
+
+    /** Update the perspective accordingly */
   mySignalHandler(signal: Signal): void {
     console.log("secretDvm received signal", signal);
     if (SignalType.App != signal.type) {
@@ -183,9 +191,9 @@ export class SecretDvm extends DnaViewModel {
 
 
   /** */
-  async probePublicMessages(_strategy: GetStrategy): Promise<void> {
+  async probePublicMessages(strategy: GetStrategy): Promise<void> {
     this._perspective.publicMessages.clear();
-    await this.deliveryZvm.probeDht();
+    await this.deliveryZvm.probeDht(strategy);
     const pds: [EntryId, PublicParcelRecordMat][] = Array.from(this.deliveryZvm.perspective.publicParcels.entries());
     console.log("probePublicMessages() PublicParcels count", pds.length);
     for (const [parcelEh, _tuple] of pds) {
