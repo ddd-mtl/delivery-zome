@@ -87,15 +87,15 @@ pub fn process_inbox(strategy: GetStrategy) -> ExternResult<Vec<ActionHash>> {
    /// Get list of entries waiting to be received
    let mut unreceived_entries = HashMap::new();
    let mut unreceived_chunks = Vec::new();
-   let tuples = get_all_typed_local::<ParcelChunk>(EntryType::App(DeliveryEntryTypes::PrivateChunk.try_into().unwrap()))?;
+   let tuples = get_all_typed_from_source_chain::<ParcelChunk>(EntryType::App(DeliveryEntryTypes::PrivateChunk.try_into().unwrap()))?;
    let mut received_chunks_ehs: Vec<EntryHash> = Vec::new();
    for (_, _, chunk) in tuples {
       let chunk_eh = hash_entry(chunk)?;
       received_chunks_ehs.push(chunk_eh);
    }
-   let tuples = get_all_typed_local::<ReceptionProof>(EntryType::App(DeliveryEntryTypes::ReceptionProof.try_into().unwrap()))?;
+   let tuples = get_all_typed_from_source_chain::<ReceptionProof>(EntryType::App(DeliveryEntryTypes::ReceptionProof.try_into().unwrap()))?;
    let received_parcel_ehs: Vec<EntryHash> = tuples.iter().map(|(_, _, x)| x.notice_eh.clone()).collect();
-   let replies_tuples = get_all_typed_local::<NoticeReply>(EntryType::App(DeliveryEntryTypes::NoticeReply.try_into().unwrap()))?;
+   let replies_tuples = get_all_typed_from_source_chain::<NoticeReply>(EntryType::App(DeliveryEntryTypes::NoticeReply.try_into().unwrap()))?;
    debug!("my_replies: {}", replies_tuples.len());
    for (_, _, reply) in replies_tuples {
       //debug!("process_inbox() reply: {:?}", reply);

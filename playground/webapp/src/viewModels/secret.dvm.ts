@@ -63,7 +63,7 @@ export class SecretDvm extends DnaViewModel {
 
   private _perspective: SecretDvmPerspective = {publicMessages: new EntryIdMap()};
 
-  private _livePeers: AgentId[] = [];
+    private _livePeers: AgentId[] = [];
 
 
     /** */

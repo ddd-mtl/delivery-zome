@@ -9,11 +9,11 @@ use zome_delivery_types::{ParcelChunk, ParcelManifest};
 #[hdk_extern]
 pub fn scan_incomplete_manifests(_: ()) -> ExternResult<Vec<EntryHash>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   let tuples = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PrivateManifest.try_into().unwrap())?;
+   let tuples = get_all_typed_from_source_chain::<ParcelManifest>(DeliveryEntryTypes::PrivateManifest.try_into().unwrap())?;
    debug!("scan_incomplete_manifests() manifests count: {}", tuples.len());
    let entry_type = DeliveryEntryTypes::PrivateChunk.try_into().unwrap();
    debug!("PrivateChunk entry_type: {:?}", entry_type);
-   let chunks: Vec<EntryHash> = get_all_typed_local::<ParcelChunk>(entry_type)?
+   let chunks: Vec<EntryHash> = get_all_typed_from_source_chain::<ParcelChunk>(entry_type)?
      .into_iter()
      .map(|(_ah, create, _typed)| create.entry_hash)
      .collect();

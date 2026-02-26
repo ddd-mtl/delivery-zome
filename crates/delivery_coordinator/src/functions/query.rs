@@ -9,7 +9,7 @@ use zome_delivery_types::*;
 // pub fn query_Distribution(_: ()) -> ExternResult<Vec<(EntryHash, Distribution)>> {
 //    std::panic::set_hook(Box::new(zome_panic_hook));
 //    /// Get all Create Distribution Elements with query
-//    let tuples = get_all_typed_local::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
+//    let tuples = get_all_typed_from_source_chain::<Distribution>(DeliveryEntryTypes::Distribution.try_into().unwrap())?;
 //    let res = tuples.into_iter().map(|(_ah, _create, distrib)| {
 //       let eh = hash_entry(distrib.clone()).unwrap();
 //       (eh, distrib)
@@ -25,7 +25,7 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
    debug!("query_DeliveryNotice() CALLED with {:?}", query_field);
 
    /// Get all Create DeliveryNotice Elements with query
-   let tuples = get_all_typed_local::<DeliveryNotice>(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap())?;
+   let tuples = get_all_typed_from_source_chain::<DeliveryNotice>(DeliveryEntryTypes::DeliveryNotice.try_into().unwrap())?;
    let len = tuples.len();
    /// Search through query result
    let mut res = Vec::new();
@@ -69,7 +69,7 @@ pub fn query_NoticeAck(field: NoticeAckQueryField) -> ExternResult<Vec<NoticeAck
    //debug!("query_NoticeAck() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create NoticeAck Elements with query
-   let tuples = get_all_typed_local::<NoticeAck>(DeliveryEntryTypes::NoticeAck.try_into().unwrap())?;
+   let tuples = get_all_typed_from_source_chain::<NoticeAck>(DeliveryEntryTypes::NoticeAck.try_into().unwrap())?;
    //debug!(" - tuples len: {:?}", tuples.len());
    debug!("*** query_NoticeAck() tuples count: {}", tuples.len());
    /// Search through query result
@@ -100,7 +100,7 @@ pub fn query_NoticeAck(field: NoticeAckQueryField) -> ExternResult<Vec<NoticeAck
 pub fn query_NoticeReply(notice_eh: EntryHash) -> ExternResult<Option<NoticeReply>> {
    //debug!("*** query_NoticeReply() CALLED with {:?}", notice_eh);
    /// Get all Create NoticeReply Elements with query
-   let tuples = get_all_typed_local::<NoticeReply>(DeliveryEntryTypes::NoticeReply.try_into().unwrap())?;
+   let tuples = get_all_typed_from_source_chain::<NoticeReply>(DeliveryEntryTypes::NoticeReply.try_into().unwrap())?;
    /// Search through query result
    for (_, _, reply) in tuples {
       if reply.notice_eh == notice_eh {
@@ -119,7 +119,7 @@ pub fn query_ReplyAck(maybe_distribution: Option<ActionHash>, maybe_recipient: O
    //std::panic::set_hook(Box::new(zome_panic_hook));
    //debug!("*** query_ReplyAck() CALLED");
    /// Get all Create Elements with query
-   let tuples = get_all_typed_local::<ReplyAck>(DeliveryEntryTypes::ReplyAck.try_into().unwrap())?;
+   let tuples = get_all_typed_from_source_chain::<ReplyAck>(DeliveryEntryTypes::ReplyAck.try_into().unwrap())?;
    let mut typeds: Vec<ReplyAck> = tuples.into_iter().map(|(_,_,x)| x).collect();
    /// Search through query result
    if let Some(distrib_ah) = maybe_distribution {
@@ -141,7 +141,7 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
    debug!("*** query_ReceptionProof() CALLED with {:?}", field);
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Get all Create ReceptionProof Elements with query
-   let tuples = get_all_typed_local::<ReceptionProof>(DeliveryEntryTypes::ReceptionProof.try_into().unwrap())?;
+   let tuples = get_all_typed_from_source_chain::<ReceptionProof>(DeliveryEntryTypes::ReceptionProof.try_into().unwrap())?;
    //debug!("*** query_ReceptionProof() tuples: {:?}", tuples.clone());
    /// Search through query result
    match field {
@@ -173,7 +173,7 @@ pub fn query_ReceptionAck(maybe_distribution: Option<ActionHash>, maybe_recipien
    //std::panic::set_hook(Box::new(zome_panic_hook));
    //debug!("*** query_ReceptionAck() CALLED");
    /// Get all Create ReceptionAck Elements with query
-   let tuples = get_all_typed_local::<ReceptionAck>(DeliveryEntryTypes::ReceptionAck.try_into().unwrap())?;
+   let tuples = get_all_typed_from_source_chain::<ReceptionAck>(DeliveryEntryTypes::ReceptionAck.try_into().unwrap())?;
    let mut receipts: Vec<ReceptionAck> = tuples.into_iter().map(|(_,_,x)| x).collect();
    //debug!("*** query_DeliveryReceipt() receipts count: {}", receipts.len());
    /// Search through query result

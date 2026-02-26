@@ -12,7 +12,7 @@ pub fn determine_missing_chunks(manifest_eh: EntryHash) -> ExternResult<Vec<Entr
    debug!("START - {}",manifest_eh);
    let manifest: ParcelManifest = get_typed_from_eh(manifest_eh, GetStrategy::Local)?;
    debug!("manifest: {}", manifest.description.name);
-   let chunks: Vec<EntryHash> = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?
+   let chunks: Vec<EntryHash> = get_all_typed_from_source_chain::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?
       .into_iter()
       .map(|tuple| tuple.1.entry_hash)
       .collect();

@@ -77,7 +77,7 @@
   "dependencies": {
     "@holochain/client"             : "=0.20.4-rc.0",
     "@ddd-qc/cell-proxy"            : "=0.34.3",
-    "@ddd-qc/lit-happ"              : "=0.34.6",
+    "@ddd-qc/lit-happ"              : "=0.34.8",
     "@holochain-open-dev/core-types": "=0.601.0",
     "@lit/context"                  : "1.1.6",
     "lit"                           : "3.3.2"

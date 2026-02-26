@@ -13,7 +13,7 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Public
    let mut public_orphans = Vec::new();
-   let manifests: Vec<ParcelManifest> = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PublicManifest.try_into().unwrap())?
+   let manifests: Vec<ParcelManifest> = get_all_typed_from_source_chain::<ParcelManifest>(DeliveryEntryTypes::PublicManifest.try_into().unwrap())?
      .into_iter()
      .map(|(_ah, _create, typed)| typed)
      .collect();
@@ -22,7 +22,7 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
       .flatten()
       .collect();
    debug!("known public chunks: {}", known_chunks.len());
-   let found_chunks = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::PublicChunk.try_into().unwrap())?;
+   let found_chunks = get_all_typed_from_source_chain::<ParcelChunk>(DeliveryEntryTypes::PublicChunk.try_into().unwrap())?;
    debug!("found public chunks: {}", found_chunks.len());
    for (_ah, create, _chunk) in found_chunks {
       let index = known_chunks.iter().position(|x| *x == create.entry_hash);
@@ -33,7 +33,7 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
 
    /// Private
    let mut private_orphans = Vec::new();
-   let manifests: Vec<ParcelManifest> = get_all_typed_local::<ParcelManifest>(DeliveryEntryTypes::PrivateManifest.try_into().unwrap())?
+   let manifests: Vec<ParcelManifest> = get_all_typed_from_source_chain::<ParcelManifest>(DeliveryEntryTypes::PrivateManifest.try_into().unwrap())?
      .into_iter()
      .map(|(_ah, _create, typed)| typed)
      .collect();
@@ -42,7 +42,7 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
                                                    .flatten()
                                                    .collect();
    debug!("known private chunks: {}", known_chunks.len());
-   let found_chunks = get_all_typed_local::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?;
+   let found_chunks = get_all_typed_from_source_chain::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?;
    debug!("found private chunks: {}", found_chunks.len());
    for (_ah, create, _chunk) in found_chunks {
       let index = known_chunks.iter().position(|x| *x == create.entry_hash);
