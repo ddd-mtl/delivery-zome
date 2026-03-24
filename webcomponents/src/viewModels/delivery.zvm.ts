@@ -111,7 +111,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
             case DeliveryEntryType.PrivateChunk:
             case DeliveryEntryType.PublicChunk:
                 const chunk = decode(pulse.bytes) as ParcelChunk;
-                console.debug("Received Chunk", pulse.visibility, pulse.eh);
+                console.debug("Received Chunk", pulse.visibility, pulse.eh.b64);
                 /** Update notice state if Chunk is not from us */
                 const manifestPair = this._perspective.localManifestByData[chunk.data_hash];
                 if (manifestPair) {
@@ -122,7 +122,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
                         noticeTuple[3].delete(pulse.eh.b64);
                         this._perspective.notices.set(noticeEh, noticeTuple);
                         if (this.isMainView && noticeTuple[3].size == 0) {
-                            this.zomeProxy.completeManifest(manifestEh.hash);
+                            /*await*/ this.zomeProxy.completeManifest(manifestEh.hash);
                         } else {
                             // Ask for next chunk?
                         }
@@ -278,7 +278,7 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** */
     override async probeAllInner(): Promise<void> {
         console.log("DeliveryZvm.probeAllInner()");
-        await this.zomeProxy.queryAll();
+        //await this.zomeProxy.queryAll();
         await this.scanProblems();
         await this.probeDht(GetStrategy.Local, true);
         /** */
@@ -292,11 +292,11 @@ export class DeliveryZvm extends ZomeViewModelWithSignals {
     /** */
     async probeDht(strategy: GetStrategy, denyNotify?: boolean): Promise<void> {
         //this._perspective.publicParcels = {};
-            await this.zomeProxy.pullPublicParcelsDetails(strategy);
-            const inbox = await this.zomeProxy.processInbox(strategy);
-            this._perspective.inbox = inbox.map((ah) => new ActionId(ah));
-            this._probeDhtCount += 1;
-            if (denyNotify == undefined) this.notifySubscribers();
+        await this.zomeProxy.pullPublicParcelsDetails(strategy);
+        const inbox = await this.zomeProxy.processInbox(strategy);
+        this._perspective.inbox = inbox.map((ah) => new ActionId(ah));
+        this._probeDhtCount += 1;
+        if (denyNotify == undefined) this.notifySubscribers();
     }
 
 
