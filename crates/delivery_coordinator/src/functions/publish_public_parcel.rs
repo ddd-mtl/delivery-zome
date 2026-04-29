@@ -7,7 +7,7 @@ use crate::determine_parcel_size;
 
 ///
 #[hdk_extern]
-#[feature(zits_blocking = "PublicParcel")]
+#[feature(zits_blocking_PublicParcel)]
 pub fn publish_public_parcel(manifest_arg: ParcelManifest) -> ExternResult<EntryHash> {
    debug!(" START - {}", manifest_arg.description.name);
    std::panic::set_hook(Box::new(zome_panic_hook));
