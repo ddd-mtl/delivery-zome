@@ -1,12 +1,13 @@
 
 mod validate_app_entry;
 mod validate;
+mod genesis_self_check;
 
-
+///-------------------------------------------------------------------------------------------------
+/// Entry types
 ///-------------------------------------------------------------------------------------------------
 
 use hdi::prelude::*;
-
 use zome_delivery_types::*;
 
 
@@ -51,9 +52,6 @@ pub enum DeliveryEntry {
    #[entry_type(required_validations = 1, visibility = "public")]
    PublicParcel(ParcelReference),
 }
-
-
-
 
 
 // pub fn entry2Kind(entry: Entry, entry_type: DeliveryEntryTypes) -> ExternResult<DeliveryEntryKind> {

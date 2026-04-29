@@ -26,7 +26,25 @@ pub fn get_properties() -> ExternResult<DeliveryProperties> {
 }
 
 
-// /// Helper for crate use
-// pub fn get_dna_properties() -> DeliveryProperties {
-//    return get_properties().unwrap();
-// }
+
+impl DeliveryProperties {
+   pub fn validate(&self) -> ExternResult<ValidateCallbackResult> {
+      if self.max_parcel_name_length == 0 {
+         return Ok(ValidateCallbackResult::Invalid("DNA Property \"max_parcel_name_length\" must be > 0".to_string()));
+      }
+      if self.max_parcel_name_length < self.min_parcel_name_length as u32 {
+         return Ok(ValidateCallbackResult::Invalid("DNA Property \"max_parcel_name_length\" must be bigger than \"min_parcel_name_length\"".to_string()));
+      }
+      if self.max_chunk_size == 0 {
+         return Ok(ValidateCallbackResult::Invalid("DNA Property \"max_chunk_size\" must be > 0".to_string()));
+      }
+      if self.max_parcel_size == 0 {
+         return Ok(ValidateCallbackResult::Invalid("DNA Property \"max_parcel_size\" must be > 0".to_string()));
+      }
+      if self.max_parcel_size < self.max_chunk_size as u64 {
+         return Ok(ValidateCallbackResult::Invalid("DNA Property \"max_parcel_size\" must be bigger than \"max_chunk_size\"".to_string()));
+      }
+      ///
+      Ok(ValidateCallbackResult::Valid)
+   }
+}
