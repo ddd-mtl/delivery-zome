@@ -4,12 +4,17 @@ use hdi::prelude::*;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, SerializedBytes)]
 #[serde(rename_all = "camelCase")]
 pub struct DeliveryProperties {
-   pub max_chunk_size: u32,
    pub max_parcel_size: u64,
+   pub max_chunk_size: u32,
    pub max_parcel_name_length: u32,
    pub min_parcel_name_length: u16,
 }
 
+impl DeliveryProperties {
+   pub fn new(max_chunk_size: u32, max_parcel_size: u64, min_parcel_name_length: u16, max_parcel_name_length: u32) -> Self {
+      Self { max_chunk_size, max_parcel_size, max_parcel_name_length, min_parcel_name_length }
+   }
+}
 
 /// Return the DNA properties
 pub fn get_properties() -> ExternResult<DeliveryProperties> {
@@ -46,5 +51,43 @@ impl DeliveryProperties {
       }
       ///
       Ok(ValidateCallbackResult::Valid)
+   }
+}
+
+
+#[cfg(test)]
+mod tests {
+   use super::*;
+
+   fn assert_invalid(properties: DeliveryProperties) {
+      let result = properties.validate().expect("validation should not fail");
+      match result {
+         ValidateCallbackResult::Invalid(_message) => (),
+         other => panic!("expected invalid validation result, got {:?}", other),
+      }
+   }
+
+   fn assert_valid(properties: DeliveryProperties) {
+      let result = properties.validate().expect("validation should not fail");
+      match result {
+         ValidateCallbackResult::Valid => (),
+         other => panic!("expected valid validation result, got {:?}", other),
+      }
+   }
+
+   #[test]
+   fn valid_properties() {
+      assert_valid(DeliveryProperties::new(1024, 1024 * 1024, 2, 10));
+      assert_valid(DeliveryProperties::new(1024, 1024, 2, 10));
+      assert_valid(DeliveryProperties::new(1024, 1024 * 1024, 10, 10));
+   }
+
+   #[test]
+   fn invalid_properties() {
+      assert_invalid(DeliveryProperties::new(0, 1024 * 1024, 2, 10));
+      assert_invalid(DeliveryProperties::new(1024, 0, 2, 10));
+      assert_invalid(DeliveryProperties::new(1024, 1024 * 1024, 2, 0));
+      assert_invalid(DeliveryProperties::new(1024, 1024 * 1024, 10, 2));
+      assert_invalid(DeliveryProperties::new(1024 * 1024, 1024, 10, 2));
    }
 }

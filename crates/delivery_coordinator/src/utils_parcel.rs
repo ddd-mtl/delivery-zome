@@ -111,7 +111,7 @@ pub fn get_app_entry_size(eh: EntryHash) -> ExternResult<usize> {
 
 ///
 pub fn public_parcels_path() -> TypedPath {
-    Path::from("public-parcels").typed(LinkTypes::PublicParcels).unwrap()
+    Path::from("public-parcels").typed(LinkTypes::PublicParcels).unwrap().with_strategy(GetStrategy::Local)
 }
 
 

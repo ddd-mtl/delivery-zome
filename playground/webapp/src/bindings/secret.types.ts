@@ -335,13 +335,13 @@ export interface PublicParcelRecord {
   description: ParcelDescription
   creation_ts: Timestamp
   author: AgentArray
-  deleteInfo?: [Timestamp, AgentArray]
+  delete_info?: [Timestamp, AgentArray]
 }
 
 /** Dna properties */
 export interface DeliveryProperties {
-  maxChunkSize: number
   maxParcelSize: number
+  maxChunkSize: number
   maxParcelNameLength: number
   minParcelNameLength: number
 }

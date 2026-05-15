@@ -86,5 +86,5 @@ pub struct PublicParcelRecord {
    pub description: ParcelDescription,
    pub creation_ts: Timestamp,
    pub author: AgentPubKey,
-   pub deleteInfo: Option<(Timestamp, AgentPubKey)>,
+   pub delete_info: Option<(Timestamp, AgentPubKey)>,
 }

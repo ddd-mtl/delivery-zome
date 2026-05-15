@@ -26,7 +26,8 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    debug!("*** zDelivery.init() callback START");
    /// Set Global Anchors
-   Path::from(DIRECTORY_PATH).typed(LinkTypes::Members)?.ensure()?;
+   Path::from(DIRECTORY_PATH).typed(LinkTypes::Members)?.with_strategy(GetStrategy::Local)
+      .ensure()?;
    /// Setup initial capabilities
    init_caps()?;
 

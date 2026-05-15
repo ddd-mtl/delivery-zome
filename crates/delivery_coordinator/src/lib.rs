@@ -21,15 +21,7 @@ pub use pack_item::*;
 //pub use callbacks::*;
 pub use self_call::*;
 
-///-------------------------------------------------------------------------------------------------
-use hdk::prelude::*;
 
-#[hdk_extern]
-fn get_zome_info(_: ()) -> ExternResult<ZomeInfo> {
-   return zome_info();
-}
+extern crate zome_core;
+pub use zome_core::*;
 
-#[hdk_extern]
-fn get_dna_info(_: ()) -> ExternResult<DnaInfo> {
-   return dna_info();
-}

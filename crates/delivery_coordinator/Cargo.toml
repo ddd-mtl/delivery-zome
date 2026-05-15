@@ -19,6 +19,6 @@ hdk.workspace = true
 
 zome_utils.workspace = true
 zome_signals.workspace = true
-
+zome_core.workspace = true
 zome_delivery_types = { path = "../delivery_types" }
 zome_delivery_integrity = { path = "../delivery_integrity" }

@@ -186,7 +186,7 @@ export function materializePublicParcelRecord(ppr: PublicParcelRecord): PublicPa
         description: ppr.description,
         creationTs: ppr.creation_ts,
         author: new AgentId(ppr.author),
-        deleteInfo: ppr.deleteInfo? [ppr.deleteInfo[0], new AgentId(ppr.deleteInfo[1])] : undefined,
+        deleteInfo: ppr.delete_info? [ppr.delete_info[0], new AgentId(ppr.delete_info[1])] : undefined,
     } as PublicParcelRecordMat;
 }
 

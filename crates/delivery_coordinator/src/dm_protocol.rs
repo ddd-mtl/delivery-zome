@@ -1,6 +1,5 @@
 use std::fmt;
 use hdk::prelude::*;
-//use zome_delivery_integrity::*;
 use zome_delivery_types::*;
 
 
@@ -15,7 +14,7 @@ pub struct DeliveryMessage {
 ///
 pub fn failure(reason: &str) -> DeliveryProtocol {
     warn!(reason);
-    return DeliveryProtocol::Failure(reason.to_string());
+    DeliveryProtocol::Failure(reason.to_string())
 }
 
 
@@ -23,7 +22,7 @@ pub fn failure(reason: &str) -> DeliveryProtocol {
 pub fn failure_err(reason: &str, err: WasmError) -> DeliveryProtocol {
     let msg = format!("{}: {:?}", reason, err);
     warn!("{}", msg);
-    return DeliveryProtocol::Failure(msg);
+    DeliveryProtocol::Failure(msg)
 }
 
 
