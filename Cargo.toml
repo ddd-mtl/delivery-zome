@@ -31,14 +31,11 @@ holochain_serialized_bytes = "=0.0.57"
 hdi = { version = "=0.8.0", default-features = false, features = ["trace"] }
 hdk = { version = "=0.7.0", default-features = false }
 
-# zdk 0.7 line. Local sibling checkouts until ddd-mtl/zdk main-0.7 is pushed;
-# swap these three back to the git form below once the branch is published.
-#zome_utils = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.7" }
-#zome_signals = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.7" }
-#zome_core = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.7" }
-zome_utils = { path = "../zdk/crates/zome_utils" }
-zome_signals = { path = "../zdk/crates/zome_signals" }
-zome_core = { path = "../zdk/zomes/zome_core" }
+# zdk 0.7 line, rev-pinned (never a branch: a branch makes the build
+# non-reproducible and therefore the DNA hash non-reproducible).
+zome_utils = { git = "https://github.com/ddd-mtl/zdk", rev = "1aff80f11db0d7373b76a3ffbd4af65f363f0816" }
+zome_signals = { git = "https://github.com/ddd-mtl/zdk", rev = "1aff80f11db0d7373b76a3ffbd4af65f363f0816" }
+zome_core = { git = "https://github.com/ddd-mtl/zdk", rev = "1aff80f11db0d7373b76a3ffbd4af65f363f0816" }
 
 [profile.dev]
 lto = false
