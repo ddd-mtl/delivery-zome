@@ -49,10 +49,10 @@ fn delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> ExternResu
    let zome_names = dna_info().unwrap().zome_names;
    /// Process each Action
    for sah in signedActionList.clone() {
-      match sah.action() {
+      match &sah.action().data {
          /// NewEntryAction
-         Action::Update(_) |
-         Action::Create(_) => {
+         ActionData::Update(_) |
+         ActionData::Create(_) => {
             let Some(EntryType::App(app_entry_def)) = sah.action().entry_type()
               else { return zome_error!("Create action malformed: {:?}", sah.action()); };
             /// Bail if from other zome
@@ -64,7 +64,7 @@ fn delivery_post_commit(signedActionList: Vec<SignedActionHashed>) -> ExternResu
             let _ = post_commit_new_app_entry(&sah, variant)?;
          },
          /// DeleteAction
-         Action::Delete(delete) => {
+         ActionData::Delete(delete) => {
             let Ok(new_sah) = must_get_action(delete.deletes_address.clone())
               else { return zome_error!("Deleted action not found."); };
             let Some(EntryType::App(app_entry_def)) = new_sah.action().entry_type()
@@ -90,16 +90,16 @@ fn filter_action_from_this_zome(signedActionList: Vec<SignedActionHashed>) -> Ex
    let mut res = Vec::new();
    /// Process each Action
    for sah in signedActionList.clone() {
-      let zome_index = match sah.action() {
+      let zome_index = match &sah.action().data {
          /// NewEntryAction
-         Action::Update(_) |
-         Action::Create(_) => {
+         ActionData::Update(_) |
+         ActionData::Create(_) => {
             let Some(EntryType::App(app_entry_def)) = sah.action().entry_type()
               else { return zome_error!("Create action malformed."); };
             app_entry_def.zome_index
          },
          /// DeleteAction
-         Action::Delete(delete) => {
+         ActionData::Delete(delete) => {
             let Ok(new_sah) = must_get_action(delete.deletes_address.clone())
               else { return zome_error!("Deleted action not found."); };
             let Some(EntryType::App(app_entry_def)) = new_sah.action().entry_type()
@@ -107,12 +107,12 @@ fn filter_action_from_this_zome(signedActionList: Vec<SignedActionHashed>) -> Ex
             app_entry_def.zome_index
          },
          ///
-         Action::CreateLink(create_link) => create_link.zome_index,
+         ActionData::CreateLink(create_link) => create_link.zome_index,
          ///
-         Action::DeleteLink(delete_link) => {
+         ActionData::DeleteLink(delete_link) => {
             let Ok(Some(record)) = get(delete_link.link_add_address.clone(), GetOptions::local())
               else { return zome_error!("Failed to get CreateLink action."); };
-            let Action::CreateLink(create_link) = record.action()
+            let ActionData::CreateLink(create_link) = &record.action().data
               else { return zome_error!("Record should be a CreateLink."); };
             create_link.zome_index
          },
@@ -160,7 +160,7 @@ fn post_commit_new_app_entry(sah: &SignedActionHashed, variant: DeliveryEntryTyp
 
 
 ///
-fn post_commit_delete_app_entry(delete: Delete, variant: DeliveryEntryTypes) -> ExternResult<()> {
+fn post_commit_delete_app_entry(delete: DeleteData, variant: DeliveryEntryTypes) -> ExternResult<()> {
    if let DeliveryEntryTypes::PublicParcel = variant {
       debug!("post_commit_delete_PublicParcel() delete: {}", delete.deletes_entry_address.clone());
       let response = call_self("unlink_public_parcel", delete.deletes_entry_address.clone())?;

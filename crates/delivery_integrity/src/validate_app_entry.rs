@@ -5,7 +5,7 @@ use crate::*;
 
 
 /// Call trait ZomeEntry::validate()
-pub(crate) fn validate_app_entry(_creation_action: EntryCreationAction, entry_index: EntryDefIndex, entry: Entry)
+pub(crate) fn validate_app_entry(_creation_action: Action, entry_index: EntryDefIndex, entry: Entry)
     -> ExternResult<ValidateCallbackResult>
 {
     let variant = entry_index_to_variant(entry_index)?;

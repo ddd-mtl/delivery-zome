@@ -15,14 +15,14 @@ pub fn scan_incomplete_manifests(_: ()) -> ExternResult<Vec<EntryHash>> {
    debug!("PrivateChunk entry_type: {:?}", entry_type);
    let chunks: Vec<EntryHash> = get_all_typed_from_source_chain::<ParcelChunk>(entry_type)?
      .into_iter()
-     .map(|(_ah, create, _typed)| create.entry_hash)
+     .map(|(_ah, create, _typed)| create.entry_hash().unwrap().to_owned())
      .collect();
    debug!("scan_incomplete_manifests() chunks count: {}", chunks.len());
    let mut incomplete_manifests = Vec::new();
    for (_ah, create, manifest)  in tuples {
       for chunk_eh in manifest.chunks.clone() {
          if !chunks.contains(&chunk_eh) {
-            incomplete_manifests.push(create.entry_hash);
+            incomplete_manifests.push(create.entry_hash().unwrap().to_owned());
             break;
          }
       }

@@ -32,7 +32,7 @@ pub fn unlink_public_parcel(pp_eh: EntryHash) -> ExternResult<ActionHash> {
       if !maybe_deletes.is_empty() {
          continue;
       }
-      let Action::CreateLink(create) = create_sah.hashed.content
+      let ActionData::CreateLink(create) = create_sah.hashed.content.data.clone()
         else { return zome_error!("get_links_details() should return a CreateLink Action")};
       let target = EntryHash::try_from(create.target_address).unwrap();
       if target == pp_eh {

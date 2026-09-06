@@ -25,9 +25,9 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
    let found_chunks = get_all_typed_from_source_chain::<ParcelChunk>(DeliveryEntryTypes::PublicChunk.try_into().unwrap())?;
    debug!("found public chunks: {}", found_chunks.len());
    for (_ah, create, _chunk) in found_chunks {
-      let index = known_chunks.iter().position(|x| *x == create.entry_hash);
+      let index = known_chunks.iter().position(|x| Some(x) == create.entry_hash());
       if index.is_none() {
-         public_orphans.push(create.entry_hash.to_owned());
+         public_orphans.push(create.entry_hash().unwrap().to_owned());
       }
    }
 
@@ -45,9 +45,9 @@ fn scan_orphan_chunks(_ : ()) -> ExternResult<(Vec<EntryHash>, Vec<EntryHash>)> 
    let found_chunks = get_all_typed_from_source_chain::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?;
    debug!("found private chunks: {}", found_chunks.len());
    for (_ah, create, _chunk) in found_chunks {
-      let index = known_chunks.iter().position(|x| *x == create.entry_hash);
+      let index = known_chunks.iter().position(|x| Some(x) == create.entry_hash());
       if index.is_none() {
-         private_orphans.push(create.entry_hash.to_owned());
+         private_orphans.push(create.entry_hash().unwrap().to_owned());
       }
    }
    debug!("orphans: {} {}", public_orphans.len(), private_orphans.len());

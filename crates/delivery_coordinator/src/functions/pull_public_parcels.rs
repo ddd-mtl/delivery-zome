@@ -30,7 +30,8 @@ pub fn pull_public_parcels_details(strategy: GetStrategy) -> ExternResult<()> {
   debug!("   links count: {}", links.clone().into_inner().len());
   let mut pulses: Vec<ZomeSignalProtocol> = Vec::new();
   for (create_sah, maybe_deletes) in links.into_inner() {
-    let Action::CreateLink(create_link) = create_sah.hashed.content
+    let create_link_action = create_sah.hashed.content.clone();
+    let ActionData::CreateLink(create_link) = &create_link_action.data
       else { panic!("get_links_details() should return a CreateLink Action") };
     let pr_eh = EntryHash::try_from(create_link.target_address.clone()).unwrap();
     let Ok(Some(Details::Entry(details))) = get_details(pr_eh.clone(), strategy.clone().into())
@@ -39,7 +40,7 @@ pub fn pull_public_parcels_details(strategy: GetStrategy) -> ExternResult<()> {
       else { warn!("CreateLink to an entry which is not a ParcelReference"); continue };
     assert!(!details.actions.is_empty());
     let create_sah = details.actions[0].clone();
-    let create_record = Record::new(create_sah.clone(), Some(details.entry.clone()));
+    let create_record = Record::new(create_sah.clone(), RecordEntry::Present(details.entry.clone()));
     //let pr_eh = create_sah.action().entry_address();
     //let pr_eh = AnyDhtHash::try_from(hash_entry(pr.clone())?).unwrap();
     let entry_pulse = EntryPulse::try_from_new_record(create_record.clone(), ValidatedBy::Network, false)?;
@@ -47,7 +48,8 @@ pub fn pull_public_parcels_details(strategy: GetStrategy) -> ExternResult<()> {
     pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
     // Set Pulse state to Delete if any delete link found
     if maybe_deletes.len() > 0 {
-      let Action::DeleteLink(delete) = maybe_deletes[0].clone().hashed.content
+      let delete_link_action = maybe_deletes[0].clone().hashed.content;
+      let ActionData::DeleteLink(_delete) = &delete_link_action.data
         else { panic!("get_links_details() should return a DeleteLink Action") };
       if details.deletes.is_empty() {
          debug!("get_links_details() Missing delete record for {}", pr_eh);
@@ -59,7 +61,7 @@ pub fn pull_public_parcels_details(strategy: GetStrategy) -> ExternResult<()> {
          ValidatedBy::Network,
          false)?;
       pulses.push(ZomeSignalProtocol::Entry(entry_pulse));
-      let link_pulse = LinkPulse { link: link_from_delete(&delete, &create_link), state: StateChange::Delete(false), validation: ValidatedBy::Network };
+      let link_pulse = LinkPulse { link: link_from_delete(&delete_link_action, &create_link_action)?, state: StateChange::Delete(false), validation: ValidatedBy::Network };
       pulses.push(ZomeSignalProtocol::Link(link_pulse));
     }
   }

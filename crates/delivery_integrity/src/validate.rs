@@ -6,25 +6,26 @@ use crate::validate_app_entry::validate_app_entry;
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
    //debug!("*** DeliveryIntegrityZome.validate() op = {:?}", op);
    match op {
-      Op::StoreRecord ( _ ) => Ok(ValidateCallbackResult::Valid),
-      Op::StoreEntry(storeEntry) => {
-         let creation_action = storeEntry.action.hashed.into_inner().0;
-         return validate_entry(creation_action.clone(), storeEntry.entry, Some(creation_action.entry_type()));
+      Op::CreateRecord ( _ ) => Ok(ValidateCallbackResult::Valid),
+      Op::CreateEntry(createEntry) => {
+         let creation_action = createEntry.action.hashed.into_inner().0;
+         let maybe_entry_type = creation_action.entry_type().cloned();
+         return validate_entry(creation_action, createEntry.entry, maybe_entry_type.as_ref());
       },
-      Op::RegisterCreateLink(_reg_create_link) => {
+      Op::CreateLink(_reg_create_link) => {
          // FIXME return validate_create_link(reg_create_link.create_link);
          Ok(ValidateCallbackResult::Valid)
       },
-      Op::RegisterDeleteLink (_)=> Ok(ValidateCallbackResult::Valid),
-      Op::RegisterUpdate { .. } => Ok(ValidateCallbackResult::Valid),
-      Op::RegisterDelete { .. } => Ok(ValidateCallbackResult::Valid),
-      Op::RegisterAgentActivity { .. } => Ok(ValidateCallbackResult::Valid),
+      Op::DeleteLink (_)=> Ok(ValidateCallbackResult::Valid),
+      Op::Update { .. } => Ok(ValidateCallbackResult::Valid),
+      Op::Delete { .. } => Ok(ValidateCallbackResult::Valid),
+      Op::AgentActivity { .. } => Ok(ValidateCallbackResult::Valid),
    }
 }
 
 
 ///
-pub fn validate_entry(creation_action: EntryCreationAction, entry: Entry, maybe_entry_type: Option<&EntryType>) -> ExternResult<ValidateCallbackResult> {
+pub fn validate_entry(creation_action: Action, entry: Entry, maybe_entry_type: Option<&EntryType>) -> ExternResult<ValidateCallbackResult> {
    /// Determine where to dispatch according to base
    let result = match entry.clone() {
       Entry::CounterSign(_data, _bytes) => Ok(ValidateCallbackResult::Invalid("CounterSign not allowed".into())),

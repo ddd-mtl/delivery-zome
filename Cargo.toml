@@ -28,12 +28,17 @@ ill_formed_attribute_input = "allow"
 [workspace.dependencies]
 serde = { version = "=1.0.228", default-features = false }
 holochain_serialized_bytes = "=0.0.57"
-hdi = { version = "=0.7.1", default-features = false }
-hdk = { version = "=0.6.1", default-features = false }
+hdi = { version = "=0.8.0", default-features = false, features = ["trace"] }
+hdk = { version = "=0.7.0", default-features = false }
 
-zome_utils = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.6" }
-zome_signals = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.6" }
-zome_core = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.6" }
+# zdk 0.7 line. Local sibling checkouts until ddd-mtl/zdk main-0.7 is pushed;
+# swap these three back to the git form below once the branch is published.
+#zome_utils = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.7" }
+#zome_signals = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.7" }
+#zome_core = { git = "https://github.com/ddd-mtl/zdk", branch = "main-0.7" }
+zome_utils = { path = "../zdk/crates/zome_utils" }
+zome_signals = { path = "../zdk/crates/zome_signals" }
+zome_core = { path = "../zdk/zomes/zome_core" }
 
 [profile.dev]
 lto = false

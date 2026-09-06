@@ -33,21 +33,21 @@ pub fn query_DeliveryNotice(query_field: DeliveryNoticeQueryField) -> ExternResu
       DeliveryNoticeQueryField::Sender(sender) => {
          for (_ah, create, notice) in tuples {
             if notice.sender == sender {
-               res.push((notice.clone(), create.timestamp));
+               res.push((notice.clone(), create.timestamp()));
             }
          }
       },
       DeliveryNoticeQueryField::Parcel(parcel_eh) => {
          for (_ah, create, notice) in tuples {
             if notice.summary.parcel_reference.parcel_eh == parcel_eh {
-               res.push((notice.clone(), create.timestamp));
+               res.push((notice.clone(), create.timestamp()));
             }
          }
       },
       DeliveryNoticeQueryField::Distribution(distrib_ah) => {
          for (_ah, create, notice) in tuples {
             if notice.distribution_ah == distrib_ah {
-               res.push((notice.clone(), create.timestamp));
+               res.push((notice.clone(), create.timestamp()));
             }
          }
          if res.len() > 1 {
@@ -148,7 +148,7 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
       ReceptionProofQueryField::Notice(eh) => {
          for (_ah, create, reception) in tuples {
             if reception.notice_eh == eh {
-               return Ok(Some((create.entry_hash, create.timestamp, reception)));
+               return Ok(Some((create.entry_hash().unwrap().to_owned(), create.timestamp(), reception)));
             }
          }
       },
@@ -156,7 +156,7 @@ pub fn query_ReceptionProof(field: ReceptionProofQueryField) -> ExternResult<Opt
          for (_ah, create, reception) in tuples {
             //debug!("*** query_ReceptionProof() Parcel  receipt.parcel_eh {:?}", receipt.parcel_eh);
             if reception.parcel_eh == eh {
-               return Ok(Some((create.entry_hash, create.timestamp, reception)));
+               return Ok(Some((create.entry_hash().unwrap().to_owned(), create.timestamp(), reception)));
             }
          }
       },

@@ -14,7 +14,7 @@ pub fn determine_missing_chunks(manifest_eh: EntryHash) -> ExternResult<Vec<Entr
    debug!("manifest: {}", manifest.description.name);
    let chunks: Vec<EntryHash> = get_all_typed_from_source_chain::<ParcelChunk>(DeliveryEntryTypes::PrivateChunk.try_into().unwrap())?
       .into_iter()
-      .map(|tuple| tuple.1.entry_hash)
+      .map(|tuple| tuple.1.entry_hash().unwrap().to_owned())
       .collect();
    /// Find chunks
    let mut missing_chunks = Vec::new();
